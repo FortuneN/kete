@@ -17,10 +17,7 @@ services:
         condition: service_healthy
 
   qpid:
-    container_name: qpid
-    build:
-      context: ..
-      dockerfile: amqp-1-qpid/qpid/Dockerfile
+    image: ghcr.io/fortunen/kete/quick-start-qpid
     ports:
       - 5672:5672
       - 8180:8080

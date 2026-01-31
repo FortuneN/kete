@@ -180,7 +180,6 @@ Write-StepHeader 2 "Package Versioned JAR"
 $stepStart = Get-Date
 Write-Task "Building JAR with version $($script:Version) imprinted..."
 
-# Build JAR with version number baked into MANIFEST.MF
 mvn package -DskipTests "-Drevision=$($script:Version)" -q 2>&1 | Out-Null
 $buildSuccess = $LASTEXITCODE -eq 0
 
@@ -201,64 +200,88 @@ $script:Results["2. Package JAR"] = $jarSuccess
 # Step 3: Build and Push Docker Images
 # =============================================================================
 
+$script:QuickStartImages = @(
+
+    # Core images (multi-stage builds requiring repo root context)
+
+    @{ Name = "quick-start-keycloak"; Dockerfile = "quick-starts/quick-start-keycloak/Dockerfile"; Context = "." }
+    @{ Name = "quick-start-curl"; Dockerfile = "quick-starts/quick-start-curl/Dockerfile"; Context = "." }
+
+    # AMQP 0.9.1 images
+
+    @{ Name = "quick-start-rabbitmq"; Dockerfile = "quick-starts/amqp-0.9.1-rabbitmq/rabbitmq/Dockerfile"; Context = "quick-starts/amqp-0.9.1-rabbitmq/rabbitmq" }
+    @{ Name = "quick-start-lavinmq"; Dockerfile = "quick-starts/amqp-0.9.1-lavinmq/lavinmq/Dockerfile"; Context = "quick-starts/amqp-0.9.1-lavinmq/lavinmq" }
+
+    # AMQP 1.0 images
+
+    @{ Name = "quick-start-activemq"; Dockerfile = "quick-starts/amqp-1-activemq/activemq/Dockerfile"; Context = "quick-starts/amqp-1-activemq/activemq" }
+    @{ Name = "quick-start-qpid"; Dockerfile = "quick-starts/amqp-1-qpid/qpid/Dockerfile"; Context = "quick-starts/amqp-1-qpid/qpid" }
+
+    # Kafka images
+
+    @{ Name = "quick-start-kafka"; Dockerfile = "quick-starts/kafka-apache/kafka/Dockerfile"; Context = "quick-starts/kafka-apache/kafka" }
+    @{ Name = "quick-start-kafka-ui"; Dockerfile = "quick-starts/kafka-apache/kafka-ui/Dockerfile"; Context = "quick-starts/kafka-apache/kafka-ui" }
+    @{ Name = "quick-start-redpanda"; Dockerfile = "quick-starts/kafka-redpanda/redpanda/Dockerfile"; Context = "quick-starts/kafka-redpanda/redpanda" }
+    @{ Name = "quick-start-redpanda-console"; Dockerfile = "quick-starts/kafka-redpanda/redpanda-console/Dockerfile"; Context = "quick-starts/kafka-redpanda/redpanda-console" }
+
+    # MQTT images
+
+    @{ Name = "quick-start-emqx"; Dockerfile = "quick-starts/mqtt-3-emqx/emqx/Dockerfile"; Context = "quick-starts/mqtt-3-emqx/emqx" }
+    @{ Name = "quick-start-mosquitto"; Dockerfile = "quick-starts/mqtt-3-mosquitto/mosquitto/Dockerfile"; Context = "quick-starts/mqtt-3-mosquitto/mosquitto" }
+    @{ Name = "quick-start-hivemq"; Dockerfile = "quick-starts/mqtt-5-hivemq/hivemq/Dockerfile"; Context = "quick-starts/mqtt-5-hivemq/hivemq" }
+
+    # HTTP images
+
+    @{ Name = "quick-start-http-echo"; Dockerfile = "quick-starts/http-webhook/http-echo/Dockerfile"; Context = "quick-starts/http-webhook/http-echo" }
+)
+
+function Build-And-Push-Image {
+
+    param(
+        [string]$Name,
+        [string]$Dockerfile,
+        [string]$Context
+    )
+
+    $versionedImage = "$script:Registry/${Name}:$($script:Version)"
+    $latestImage = "$script:Registry/${Name}:latest"
+
+    Write-Task "Building $Name..."
+    docker build -q -t $versionedImage -t $latestImage -f $Dockerfile $Context 2>&1 | Out-Null
+    $buildSuccess = $LASTEXITCODE -eq 0
+
+    if ($buildSuccess) {
+        Write-Task "Pushing $versionedImage"
+        docker push $versionedImage 2>&1 | Out-Null
+        $push1 = $LASTEXITCODE -eq 0
+
+        Write-Task "Pushing $latestImage"
+        docker push $latestImage 2>&1 | Out-Null
+        $push2 = $LASTEXITCODE -eq 0
+
+        $success = $push1 -and $push2
+        Write-TaskResult "$Name [:$($script:Version) + :latest]" $success
+        return $success
+    } else {
+        Write-TaskResult "$Name build failed" $false
+        return $false
+    }
+}
+
 Write-StepHeader 3 "Build and Push Docker Images"
 
 if (-not (Test-PreviousStepsPassed)) {
     Write-TaskSkipped "Docker operations" "previous step failed"
-    $script:Results["3. Push: quick-start-keycloak"] = $false
-    $script:Results["3. Push: quick-start-curl"] = $false
+    foreach ($image in $script:QuickStartImages) {
+        $script:Results["3. Push: $($image.Name)"] = $false
+    }
 } else {
     $stepStart = Get-Date
 
-    # quick-start-keycloak
-    $versionedImage = "$script:Registry/quick-start-keycloak:$($script:Version)"
-    $latestImage = "$script:Registry/quick-start-keycloak:latest"
-
-    Write-Task "Building $versionedImage"
-    docker build -q -t $versionedImage -t $latestImage -f quick-starts/quick-start-keycloak/Dockerfile . 2>&1 | Out-Null
-    $buildSuccess = $LASTEXITCODE -eq 0
-
-    if ($buildSuccess) {
-        Write-Task "Pushing $versionedImage"
-        docker push $versionedImage 2>&1 | Out-Null
-        $push1 = $LASTEXITCODE -eq 0
-
-        Write-Task "Pushing $latestImage"
-        docker push $latestImage 2>&1 | Out-Null
-        $push2 = $LASTEXITCODE -eq 0
-
-        $keycloakSuccess = $push1 -and $push2
-        Write-TaskResult "quick-start-keycloak [:$($script:Version) + :latest]" $keycloakSuccess
-    } else {
-        $keycloakSuccess = $false
-        Write-TaskResult "quick-start-keycloak build failed" $false
+    foreach ($image in $script:QuickStartImages) {
+        $success = Build-And-Push-Image -Name $image.Name -Dockerfile $image.Dockerfile -Context $image.Context
+        $script:Results["3. Push: $($image.Name)"] = $success
     }
-    $script:Results["3. Push: quick-start-keycloak"] = $keycloakSuccess
-
-    # quick-start-curl
-    $versionedImage = "$script:Registry/quick-start-curl:$($script:Version)"
-    $latestImage = "$script:Registry/quick-start-curl:latest"
-
-    Write-Task "Building $versionedImage"
-    docker build -q -t $versionedImage -t $latestImage -f quick-starts/quick-start-curl/Dockerfile . 2>&1 | Out-Null
-    $buildSuccess = $LASTEXITCODE -eq 0
-
-    if ($buildSuccess) {
-        Write-Task "Pushing $versionedImage"
-        docker push $versionedImage 2>&1 | Out-Null
-        $push1 = $LASTEXITCODE -eq 0
-
-        Write-Task "Pushing $latestImage"
-        docker push $latestImage 2>&1 | Out-Null
-        $push2 = $LASTEXITCODE -eq 0
-
-        $curlSuccess = $push1 -and $push2
-        Write-TaskResult "quick-start-curl [:$($script:Version) + :latest]" $curlSuccess
-    } else {
-        $curlSuccess = $false
-        Write-TaskResult "quick-start-curl build failed" $false
-    }
-    $script:Results["3. Push: quick-start-curl"] = $curlSuccess
 
     $duration = Format-Duration((Get-Date) - $stepStart)
     Write-Host ""
@@ -288,8 +311,6 @@ if (-not (Test-PreviousStepsPassed)) {
         Write-TaskResult "Documentation build failed" $false
         $script:Results["4. Deploy Docs"] = $false
     }
-
-    # Note: site/ directory is kept for GitHub Actions to upload to Pages
 
     $duration = Format-Duration((Get-Date) - $stepStart)
     Write-Host ""
@@ -388,10 +409,13 @@ if ($failedCount -eq 0) {
     Write-Host "  Release Artifact:" -ForegroundColor White
     Write-Host "    kete.jar (v$($script:Version))" -ForegroundColor Cyan
     Write-Host ""
-    Write-Host "  Also Published:" -ForegroundColor DarkGray
-    Write-Host "    Docker:  $script:Registry/quick-start-keycloak:$($script:Version)" -ForegroundColor DarkGray
-    Write-Host "    Docker:  $script:Registry/quick-start-curl:$($script:Version)" -ForegroundColor DarkGray
-    Write-Host "    Docs:    https://fortunen.github.io/kete/" -ForegroundColor DarkGray
+    Write-Host "  Docker Images Published:" -ForegroundColor DarkGray
+    foreach ($image in $script:QuickStartImages) {
+        Write-Host "    $script:Registry/$($image.Name):$($script:Version)" -ForegroundColor DarkGray
+    }
+    Write-Host ""
+    Write-Host "  Documentation:" -ForegroundColor DarkGray
+    Write-Host "    https://fortunen.github.io/kete/" -ForegroundColor DarkGray
     Write-Host ""
     Write-Host "  GitHub Release:" -ForegroundColor White
     Write-Host "    https://github.com/FortuneN/kete/releases/tag/v$($script:Version)" -ForegroundColor Gray
