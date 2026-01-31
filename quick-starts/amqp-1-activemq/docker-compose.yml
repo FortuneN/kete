@@ -1,0 +1,31 @@
+services:
+
+  activemq:
+    image: ghcr.io/fortunen/kete/quick-start-activemq
+    ports:
+      - 5672:5672
+      - 8161:8161
+    environment:
+      ARTEMIS_USER: admin
+      ARTEMIS_PASSWORD: admin
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8161/console"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  keycloak:
+    image: ghcr.io/fortunen/kete/quick-start-keycloak
+    command: start-dev
+    ports:
+      - 8080:8080
+    environment:
+      kete.routes.quick-start.destination.kind: amqp-1
+      kete.routes.quick-start.destination.host: activemq
+      kete.routes.quick-start.destination.port: 5672
+      kete.routes.quick-start.destination.username: admin
+      kete.routes.quick-start.destination.password: admin
+      kete.routes.quick-start.destination.destination-name: keycloak-events
+    depends_on:
+      activemq:
+        condition: service_healthy

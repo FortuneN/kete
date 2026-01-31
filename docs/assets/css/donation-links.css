@@ -1,0 +1,63 @@
+/* ============================================
+   Support/Donate icons - styled nicely in footer
+   ============================================ */
+
+/* Style sponsor/donate icons with heart color on hover */
+.md-social__link[href*="sponsors"],
+.md-social__link[href*="paypal"],
+.md-social__link[href*="buymeacoffee"],
+.md-social__link[href*="ko-fi"],
+.md-social__link[href*="liberapay"] {
+  transition: color 0.2s, transform 0.2s;
+}
+
+.md-social__link[href*="sponsors"]:hover,
+.md-social__link[href*="paypal"]:hover,
+.md-social__link[href*="buymeacoffee"]:hover,
+.md-social__link[href*="ko-fi"]:hover,
+.md-social__link[href*="liberapay"]:hover {
+  color: #ff6b6b !important;
+  transform: scale(1.2);
+}
+
+/* Make social icons bigger */
+.md-social__link svg {
+	width: 1rem;
+	height: 1rem;
+}
+
+/* ============================================
+   Support/Donate icons - top right
+   ============================================ */
+
+.header-support-icons {
+	display: flex;
+	align-items: center;
+	gap: 0.9rem;
+	margin-left: auto;
+	padding-right: 0.8rem;
+}
+
+.header-support-icons a {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	opacity: 0.85;
+	transition: opacity 0.2s, transform 0.2s;
+}
+
+.header-support-icons a:hover {
+	transform: scale(1.2);
+}
+
+.header-support-icons svg {
+	width: 1rem;
+	height: 1rem;
+}
+
+/* On mobile, hide to avoid crowding */
+@media screen and (max-width: 76.1875em) {
+	.header-support-icons {
+		display: none;
+	}
+}

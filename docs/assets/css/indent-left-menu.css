@@ -1,0 +1,14 @@
+/* Bold section titles in navigation */
+.md-nav__item--nested > .md-nav__link {
+    font-weight: 700;
+}
+
+/* Add spacing to sub-items*/
+.md-nav__item.md-nav__item--section.md-nav__item--nested > nav {
+    padding-left: 0.4rem;
+}
+
+/* Bold top-level tab items */
+.md-tabs__link {
+    font-weight: 600;
+}

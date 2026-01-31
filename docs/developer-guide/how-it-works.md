@@ -1,0 +1,153 @@
+# How KETE Works
+
+Visual guide to KETE's event processing. For detailed technical information, see [Architecture](architecture.md).
+
+---
+
+## The Big Picture
+
+KETE plugs into Keycloak's Event Listener SPI. When something happens in Keycloak (login, user created, etc.), Keycloak fires an event. KETE catches that event and routes it to configured destinations.
+
+```mermaid
+flowchart LR
+    KC[" Keycloak"] -->|event| KETE[" KETE"]
+    KETE -->|route 1| D1["Kafka"]
+    KETE -->|route 2| D2["HTTP"]
+    KETE -->|route 3| D3["RabbitMQ"]
+```
+
+---
+
+## Event Processing Flow
+
+### User Events (LOGIN, LOGOUT, etc.)
+
+```mermaid
+flowchart TD
+    A["User action in Keycloak"] --> B["Keycloak generates Event"]
+    B --> C["KETE Provider.onEvent()"]
+    C --> D["Queue in EventListenerTransaction"]
+    D --> E{"Transaction commits?"}
+    E -->|Yes| F["Process event"]
+    E -->|No| G["Discard event"]
+    F --> H["For each route"]
+    H --> I{"Realm matches?"}
+    I -->|No| J["Skip route"]
+    I -->|Yes| K{"Event type matches?"}
+    K -->|No| J
+    K -->|Yes| L["Serialize event"]
+    L --> M["Send to destination"]
+```
+
+### Admin Events (CREATE:USER, UPDATE:REALM, etc.)
+
+Same flow but uses `onEvent(AdminEvent, boolean)` and event type is `OPERATION:RESOURCE`.
+
+---
+
+## Component Lifecycle
+
+```mermaid
+flowchart TD
+    subgraph Startup
+        A["Keycloak starts"] --> B["ProviderFactory.init()"]
+        B --> C["ProviderFactory.postInit()"]
+        C --> D["Scan for @Component classes"]
+        D --> E["Parse configuration"]
+        E --> F["Initialize routes"]
+        F --> G["Initialize destinations"]
+        G --> H["Register event listener"]
+    end
+    
+    subgraph Runtime
+        I["Event received"] --> J["Provider created"]
+        J --> K["Event processed"]
+        K --> L["Provider discarded"]
+    end
+    
+    subgraph Shutdown
+        M["Keycloak stops"] --> N["ProviderFactory.close()"]
+        N --> O["Close all destinations"]
+        O --> P["Shutdown executor"]
+    end
+    
+    Startup --> Runtime
+    Runtime --> Shutdown
+```
+
+---
+
+## Route Matching
+
+Each route has realm matchers and event matchers:
+
+```mermaid
+flowchart LR
+    E["Event"] --> R{"Realm<br/>matches?"}
+    R -->|No| X["Skip"]
+    R -->|Yes| M{"Event type<br/>matches?"}
+    M -->|No| X
+    M -->|Yes| S["Serialize"]
+    S --> D["Send to destination"]
+```
+
+### Match Modes
+
+- **ANY** (default): Accept if ANY matcher matches (OR)
+- **ALL**: Accept only if ALL matchers match (AND)
+
+---
+
+## Destination Pooling
+
+All destinations use Apache Commons Pool2:
+
+```mermaid
+flowchart LR
+    subgraph Pool["Destination Pool"]
+        C1["Client 1"]
+        C2["Client 2"]
+        C3["Client 3"]
+    end
+    
+    T1["Thread 1"] --> B1["Borrow"] --> C1
+    C1 --> R1["Return"] --> Pool
+    
+    T2["Thread 2"] --> B2["Borrow"] --> C2
+    C2 --> R2["Return"] --> Pool
+```
+
+Pool sizes are configurable per route:
+- `min-pool-size`: Default 5
+- `max-pool-size`: Default 20
+
+---
+
+## Key Design Decisions
+
+| Decision | Rationale |
+|----------|-----------|
+| **Transaction-aware** | Events only published after Keycloak transaction commits |
+| **Virtual threads** | Parallel destination delivery without blocking |
+| **Destination pooling** | Predictable resource usage, virtual thread compatibility |
+| **Matcher caching** | O(1) lookup after first match per event type |
+| **Serializer singletons** | One instance shared across routes |
+
+---
+
+## Error Handling
+
+| Error Type | Behavior |
+|------------|----------|
+| Destination connection failure | Logged, route skipped |
+| Serialization error | Logged, affects all routes using that serializer |
+| Matcher evaluation error | Treated as "reject" |
+| Message send failure | Retry if configured, otherwise logged |
+
+---
+
+## See Also
+
+- [Architecture](architecture.md) — Detailed technical design
+- [Configuration](configuration.md) — All configuration options
+- [Transaction Support](transaction-support.md) — Transaction handling details

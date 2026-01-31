@@ -1,0 +1,2 @@
+## Shaded SCRAM-SHA-512 SASL mechanism for kete
+class=io.github.fortunen.kete.shaded.qpid.jms.sasl.ScramSHA512MechanismFactory

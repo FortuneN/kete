@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="g" x1="64" y1="64" x2="448" y2="448" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#A7F3FF"/>
+      <stop offset="1" stop-color="#2B6BFF"/>
+    </linearGradient>
+    <linearGradient id="g2" x1="96" y1="96" x2="416" y2="416" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#7FE7FF"/>
+      <stop offset="1" stop-color="#1E4ED8"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Hexagon frame -->
+  <polygon points="256,40 436,144 436,368 256,472 76,368 76,144"
+           fill="none" stroke="url(#g)" stroke-width="24" stroke-linejoin="round"/>
+
+  <!-- Stylized K / fan-out arrows (all emanate from the same joint) -->
+  <g fill="url(#g2)">
+    <!-- vertical stem with arrowheads (up & down) -->
+    <path d="M170 128
+             L170 110 L140 140 L170 170 L170 154
+             L170 358
+             L170 342 L140 372 L170 402 L170 384
+             L170 128 Z" />
+
+    <!-- upper diagonal arm (arrow at tip) -->
+    <path d="M190 256
+             L356 144
+             L348 136 L388 136 L372 168 L366 158
+             L214 262 Z"/>
+
+    <!-- lower diagonal arm (arrow at tip) -->
+    <path d="M190 256
+             L356 368
+             L366 354 L372 344 L388 376 L348 376 L356 368
+             L214 250 Z"/>
+
+    <!-- small middle fan-out (short arrow) -->
+    <path d="M210 256
+             L332 256
+             L320 244 L356 256 L320 268 Z"/>
+  </g>
+</svg>

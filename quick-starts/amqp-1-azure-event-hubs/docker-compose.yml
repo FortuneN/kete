@@ -1,0 +1,20 @@
+# Azure Event Hubs (AMQP 1.0)
+# See GUIDE.md for setup instructions
+
+services:
+
+  keycloak:
+    image: ghcr.io/fortunen/kete/quick-start-keycloak
+    command: start-dev
+    ports:
+      - 8080:8080
+    environment:
+      # Azure Event Hubs configuration
+      # Replace these values or use a .env file
+      kete.routes.quick-start.destination.kind: amqp-1
+      kete.routes.quick-start.destination.host: ${EVENTHUB_NAMESPACE:-<YOUR-NAMESPACE>}.servicebus.windows.net
+      kete.routes.quick-start.destination.port: 5671
+      kete.routes.quick-start.destination.tls.enabled: true
+      kete.routes.quick-start.destination.username: ${EVENTHUB_SAS_KEY_NAME:-<YOUR-SAS-KEY-NAME>}
+      kete.routes.quick-start.destination.password: ${EVENTHUB_SAS_KEY:-<YOUR-SAS-KEY>}
+      kete.routes.quick-start.destination.destination-name: keycloak-events

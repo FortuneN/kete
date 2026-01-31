@@ -1,0 +1,21 @@
+# Azure Event Grid (HTTP Webhook)
+# See GUIDE.md for setup instructions
+
+services:
+
+  keycloak:
+    image: ghcr.io/fortunen/kete/quick-start-keycloak
+    command: start-dev
+    ports:
+      - 8080:8080
+    environment:
+      # Azure Event Grid configuration
+      # Replace these values or use a .env file
+      kete.routes.quick-start.destination.kind: http
+      kete.routes.quick-start.destination.url: ${EVENTGRID_ENDPOINT:-<YOUR-EVENT-GRID-TOPIC-ENDPOINT>}
+      kete.routes.quick-start.destination.headers.aeg-sas-key: ${EVENTGRID_KEY:-<YOUR-ACCESS-KEY>}
+
+      # Retry configuration for reliability
+      kete.routes.quick-start.retry.enabled: "true"
+      kete.routes.quick-start.retry.max-attempts: 5
+      kete.routes.quick-start.retry.wait-duration: PT2S

@@ -1,0 +1,27 @@
+services:
+
+  mosquitto:
+    image: ghcr.io/fortunen/kete/quick-start-mosquitto
+    ports:
+      - 1883:1883
+    volumes:
+      - ./mosquitto.conf:/mosquitto/config/mosquitto.conf
+    healthcheck:
+      test: ["CMD", "mosquitto_sub", "-t", "$$SYS/#", "-C", "1", "-i", "healthcheck", "-W", "3"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  keycloak:
+    image: ghcr.io/fortunen/kete/quick-start-keycloak
+    command: start-dev
+    ports:
+      - 8080:8080
+    environment:
+      kete.routes.quick-start.destination.kind: mqtt-3
+      kete.routes.quick-start.destination.host: mosquitto
+      kete.routes.quick-start.destination.port: 1883
+      kete.routes.quick-start.destination.topic: keycloak-events
+    depends_on:
+      mosquitto:
+        condition: service_healthy

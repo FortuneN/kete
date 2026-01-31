@@ -1,0 +1,19 @@
+# Confluent Cloud (Kafka)
+# See GUIDE.md for setup instructions
+
+services:
+
+  keycloak:
+    image: ghcr.io/fortunen/kete/quick-start-keycloak
+    command: start-dev
+    ports:
+      - 8080:8080
+    environment:
+      # Confluent Cloud configuration
+      # Replace these values or use a .env file
+      kete.routes.quick-start.destination.kind: kafka
+      kete.routes.quick-start.destination.bootstrap.servers: ${CONFLUENT_BOOTSTRAP_SERVER:-<YOUR-CLUSTER>.confluent.cloud:9092}
+      kete.routes.quick-start.destination.topic: keycloak-events
+      kete.routes.quick-start.destination.security.protocol: SASL_SSL
+      kete.routes.quick-start.destination.sasl.mechanism: PLAIN
+      kete.routes.quick-start.destination.sasl.jaas.config: org.apache.kafka.common.security.plain.PlainLoginModule required username="${CONFLUENT_API_KEY:-<YOUR-API-KEY>}" password="${CONFLUENT_API_SECRET:-<YOUR-API-SECRET>}";

@@ -1,0 +1,20 @@
+# Azure Event Hubs with Kafka Protocol
+# See GUIDE.md for setup instructions
+
+services:
+
+  keycloak:
+    image: ghcr.io/fortunen/kete/quick-start-keycloak
+    command: start-dev
+    ports:
+      - 8080:8080
+    environment:
+      # Azure Event Hubs (Kafka) configuration
+      # Replace these values or use a .env file
+      kete.routes.quick-start.destination.kind: kafka
+      kete.routes.quick-start.destination.bootstrap-servers: ${EVENTHUB_NAMESPACE:-<YOUR-NAMESPACE>}.servicebus.windows.net:9093
+      kete.routes.quick-start.destination.topic: keycloak-events
+      kete.routes.quick-start.destination.security-protocol: SASL_SSL
+      kete.routes.quick-start.destination.sasl-mechanism: PLAIN
+      kete.routes.quick-start.destination.sasl-username: $$ConnectionString
+      kete.routes.quick-start.destination.sasl-password: ${EVENTHUB_CONNECTION_STRING:-<YOUR-CONNECTION-STRING>}

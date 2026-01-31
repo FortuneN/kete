@@ -1,0 +1,31 @@
+services:
+
+  activemq:
+    image: apache/activemq-classic:6.1.6
+    ports:
+      - 61613:61613
+      - 8161:8161
+    environment:
+      ACTIVEMQ_USERNAME: admin
+      ACTIVEMQ_PASSWORD: admin
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8161/admin/ -u admin:admin || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  keycloak:
+    image: ghcr.io/fortunen/kete/quick-start-keycloak
+    command: start-dev
+    ports:
+      - 8080:8080
+    environment:
+      kete.routes.quick-start.destination.kind: stomp
+      kete.routes.quick-start.destination.host: activemq
+      kete.routes.quick-start.destination.port: 61613
+      kete.routes.quick-start.destination.destination: /queue/keycloak-events
+      kete.routes.quick-start.destination.username: admin
+      kete.routes.quick-start.destination.password: admin
+    depends_on:
+      activemq:
+        condition: service_healthy

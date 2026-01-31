@@ -1,0 +1,2 @@
+## Shaded GSSAPI SASL mechanism for kete
+class=io.github.fortunen.kete.shaded.qpid.jms.sasl.GssapiMechanismFactory

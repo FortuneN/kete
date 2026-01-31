@@ -1,0 +1,467 @@
+package io.github.fortunen.kete.unittests.oauthmaterial;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
+import io.github.fortunen.kete.OAuthMaterial;
+import io.github.fortunen.kete.OAuthMaterial.OAuthMode;
+import java.util.HashMap;
+import org.apache.commons.configuration2.MapConfiguration;
+import org.junit.jupiter.api.Test;
+
+class withConfigurationTests {
+
+	@Test
+	void shouldThrowWhenConfigurationIsNull() {
+
+		// act & assert
+
+		assertThatThrownBy(() -> OAuthMaterial.builder().withConfiguration(null))
+			.isInstanceOf(IllegalStateException.class)
+			.hasMessage("configuration is required");
+	}
+
+	@Test
+	void shouldBuildWithEmptyConfiguration() {
+
+		// arrange
+
+		var config = new MapConfiguration(new HashMap<>());
+
+		// act
+
+		var oauth = OAuthMaterial.builder()
+			.withConfiguration(config)
+			.build();
+
+		// assert
+
+		assertThat(oauth.isEnabled())
+			.as("Should be disabled by default")
+			.isFalse();
+	}
+
+	@Test
+	void shouldBuildExternalModeWithAllFields() {
+
+		// arrange
+
+		var map = new HashMap<String, Object>();
+		map.put("enabled", "true");
+		map.put("mode", "external");
+		map.put("token-url", "http://localhost/token");
+		map.put("client-id", "my-client");
+		map.put("client-secret", "my-secret");
+		map.put("scope", "openid profile");
+		var config = new MapConfiguration(map);
+
+		// act
+
+		var oauth = OAuthMaterial.builder()
+			.withConfiguration(config)
+			.build();
+
+		// assert
+
+		assertThat(oauth.isEnabled()).isTrue();
+		assertThat(oauth.getMode()).isEqualTo(OAuthMode.EXTERNAL);
+		assertThat(oauth.getTokenUri().toString()).isEqualTo("http://localhost/token");
+		assertThat(oauth.getClientId().getValue()).isEqualTo("my-client");
+		assertThat(oauth.getClientSecret().getValue()).isEqualTo("my-secret");
+		assertThat(oauth.getScope()).isNotNull();
+		assertThat(oauth.getScope().contains("openid")).isTrue();
+		assertThat(oauth.getScope().contains("profile")).isTrue();
+		assertThat(oauth.isInternalMode()).isFalse();
+	}
+
+	@Test
+	void shouldDefaultToExternalMode() {
+
+		// arrange
+
+		var map = new HashMap<String, Object>();
+		map.put("enabled", "true");
+		map.put("token-url", "http://localhost/token");
+		map.put("client-id", "my-client");
+		map.put("client-secret", "my-secret");
+		var config = new MapConfiguration(map);
+
+		// act
+
+		var oauth = OAuthMaterial.builder()
+			.withConfiguration(config)
+			.build();
+
+		// assert
+
+		assertThat(oauth.getMode()).isEqualTo(OAuthMode.EXTERNAL);
+	}
+
+	@Test
+	void shouldThrowWhenExternalModeTokenUrlMissing() {
+
+		// arrange
+
+		var map = new HashMap<String, Object>();
+		map.put("enabled", "true");
+		map.put("mode", "external");
+		map.put("client-id", "my-client");
+		map.put("client-secret", "my-secret");
+		var config = new MapConfiguration(map);
+
+		// act & assert
+
+		assertThatThrownBy(() -> OAuthMaterial.builder().withConfiguration(config))
+			.isInstanceOf(IllegalStateException.class)
+			.hasMessage("token-url is required when mode is EXTERNAL");
+	}
+
+	@Test
+	void shouldThrowWhenExternalModeClientIdMissing() {
+
+		// arrange
+
+		var map = new HashMap<String, Object>();
+		map.put("enabled", "true");
+		map.put("mode", "external");
+		map.put("token-url", "http://localhost/token");
+		map.put("client-secret", "my-secret");
+		var config = new MapConfiguration(map);
+
+		// act & assert
+
+		assertThatThrownBy(() -> OAuthMaterial.builder().withConfiguration(config))
+			.isInstanceOf(IllegalStateException.class)
+			.hasMessage("client-id is required when mode is EXTERNAL");
+	}
+
+	@Test
+	void shouldThrowWhenExternalModeClientSecretMissing() {
+
+		// arrange
+
+		var map = new HashMap<String, Object>();
+		map.put("enabled", "true");
+		map.put("mode", "external");
+		map.put("token-url", "http://localhost/token");
+		map.put("client-id", "my-client");
+		var config = new MapConfiguration(map);
+
+		// act & assert
+
+		assertThatThrownBy(() -> OAuthMaterial.builder().withConfiguration(config))
+			.isInstanceOf(IllegalStateException.class)
+			.hasMessage("client-secret is required when mode is EXTERNAL");
+	}
+
+	@Test
+	void shouldBuildInternalModewithKeycloakRealm() {
+
+		// arrange
+
+		var map = new HashMap<String, Object>();
+		map.put("enabled", "true");
+		map.put("mode", "internal");
+		var config = new MapConfiguration(map);
+
+		// act
+
+		var oauth = OAuthMaterial.builder()
+			.withKeycloakRealm("my-realm")
+			.withConfiguration(config)
+			.build();
+
+		// assert
+
+		assertThat(oauth.isEnabled()).isTrue();
+		assertThat(oauth.getMode()).isEqualTo(OAuthMode.INTERNAL);
+		assertThat(oauth.isInternalMode()).isTrue();
+		assertThat(oauth.getRealm()).isEqualTo("my-realm");
+		assertThat(oauth.getTokenUri().toString()).isEqualTo("http://localhost:8080/realms/my-realm/protocol/openid-connect/token");
+		assertThat(oauth.getClientId().getValue()).isEqualTo("kete-oauth-client");
+		assertThat(oauth.getAutoRegisteredClientId()).isEqualTo("kete-oauth-client");
+		assertThat(oauth.isAutoGeneratedSecret()).isTrue();
+		assertThat(oauth.getAutoRegisteredClientSecret()).isNotBlank();
+	}
+
+	@Test
+	void shouldBuildInternalModeWithOAuthRealm() {
+
+		// arrange
+
+		var map = new HashMap<String, Object>();
+		map.put("enabled", "true");
+		map.put("mode", "internal");
+		map.put("realm", "oauth-realm");
+		var config = new MapConfiguration(map);
+
+		// act
+
+		var oauth = OAuthMaterial.builder()
+			.withKeycloakRealm("route-realm")
+			.withConfiguration(config)
+			.build();
+
+		// assert
+
+		assertThat(oauth.getRealm()).isEqualTo("oauth-realm");
+		assertThat(oauth.getTokenUri().toString()).contains("oauth-realm");
+	}
+
+	@Test
+	void shouldBuildInternalModeWithCustomClientId() {
+
+		// arrange
+
+		var map = new HashMap<String, Object>();
+		map.put("enabled", "true");
+		map.put("mode", "internal");
+		map.put("client-id", "custom-client");
+		var config = new MapConfiguration(map);
+
+		// act
+
+		var oauth = OAuthMaterial.builder()
+			.withKeycloakRealm("my-realm")
+			.withConfiguration(config)
+			.build();
+
+		// assert
+
+		assertThat(oauth.getClientId().getValue()).isEqualTo("custom-client");
+		assertThat(oauth.getAutoRegisteredClientId()).isEqualTo("custom-client");
+	}
+
+	@Test
+	void shouldBuildInternalModeWithProvidedSecret() {
+
+		// arrange
+
+		var map = new HashMap<String, Object>();
+		map.put("enabled", "true");
+		map.put("mode", "internal");
+		map.put("client-secret", "provided-secret");
+		var config = new MapConfiguration(map);
+
+		// act
+
+		var oauth = OAuthMaterial.builder()
+			.withKeycloakRealm("my-realm")
+			.withConfiguration(config)
+			.build();
+
+		// assert
+
+		assertThat(oauth.getClientSecret().getValue()).isEqualTo("provided-secret");
+		assertThat(oauth.isAutoGeneratedSecret()).isFalse();
+	}
+
+	@Test
+	void shouldBuildInternalModeWithCustomTokenUrl() {
+
+		// arrange
+
+		var map = new HashMap<String, Object>();
+		map.put("enabled", "true");
+		map.put("mode", "internal");
+		map.put("token-url", "http://custom:9000/token");
+		var config = new MapConfiguration(map);
+
+		// act
+
+		var oauth = OAuthMaterial.builder()
+			.withKeycloakRealm("my-realm")
+			.withConfiguration(config)
+			.build();
+
+		// assert
+
+		assertThat(oauth.getTokenUri().toString()).isEqualTo("http://custom:9000/token");
+	}
+
+	@Test
+	void shouldThrowWhenInternalModeRealmMissing() {
+
+		// arrange
+
+		var map = new HashMap<String, Object>();
+		map.put("enabled", "true");
+		map.put("mode", "internal");
+		var config = new MapConfiguration(map);
+
+		// act & assert
+
+		assertThatThrownBy(() -> OAuthMaterial.builder().withConfiguration(config))
+			.isInstanceOf(IllegalStateException.class)
+			.hasMessage("realm is required for INTERNAL mode (either in OAuth config or route config)");
+	}
+
+	@Test
+	void shouldRequireClientRegistrationForAutoGeneratedSecret() {
+
+		// arrange
+
+		var map = new HashMap<String, Object>();
+		map.put("enabled", "true");
+		map.put("mode", "internal");
+		var config = new MapConfiguration(map);
+
+		// act
+
+		var oauth = OAuthMaterial.builder()
+			.withKeycloakRealm("my-realm")
+			.withConfiguration(config)
+			.build();
+
+		// assert
+
+		assertThat(oauth.requiresClientRegistration()).isTrue();
+	}
+
+	@Test
+	void shouldNotRequireClientRegistrationForProvidedSecret() {
+
+		// arrange
+
+		var map = new HashMap<String, Object>();
+		map.put("enabled", "true");
+		map.put("mode", "internal");
+		map.put("client-secret", "provided-secret");
+		var config = new MapConfiguration(map);
+
+		// act
+
+		var oauth = OAuthMaterial.builder()
+			.withKeycloakRealm("my-realm")
+			.withConfiguration(config)
+			.build();
+
+		// assert
+
+		assertThat(oauth.requiresClientRegistration()).isFalse();
+	}
+
+	@Test
+	void shouldNotRequireClientRegistrationForExternalMode() {
+
+		// arrange
+
+		var map = new HashMap<String, Object>();
+		map.put("enabled", "true");
+		map.put("mode", "external");
+		map.put("token-url", "http://localhost/token");
+		map.put("client-id", "my-client");
+		map.put("client-secret", "my-secret");
+		var config = new MapConfiguration(map);
+
+		// act
+
+		var oauth = OAuthMaterial.builder()
+			.withConfiguration(config)
+			.build();
+
+		// assert
+
+		assertThat(oauth.requiresClientRegistration()).isFalse();
+	}
+
+	@Test
+	void shouldMarkClientRegistered() {
+
+		// arrange
+
+		var map = new HashMap<String, Object>();
+		map.put("enabled", "true");
+		map.put("mode", "internal");
+		var config = new MapConfiguration(map);
+
+		var oauth = OAuthMaterial.builder()
+			.withKeycloakRealm("my-realm")
+			.withConfiguration(config)
+			.build();
+
+		// act
+
+		assertThat(oauth.requiresClientRegistration()).isTrue();
+		oauth.markClientRegistered();
+
+		// assert
+
+		assertThat(oauth.isClientRegistered()).isTrue();
+		assertThat(oauth.requiresClientRegistration()).isFalse();
+	}
+
+	@Test
+	void shouldTrimValues() {
+
+		// arrange
+
+		var map = new HashMap<String, Object>();
+		map.put("enabled", "true");
+		map.put("mode", "  external  ");
+		map.put("token-url", "  http://localhost/token  ");
+		map.put("client-id", "  my-client  ");
+		map.put("client-secret", "  my-secret  ");
+		map.put("scope", "  openid  ");
+		var config = new MapConfiguration(map);
+
+		// act
+
+		var oauth = OAuthMaterial.builder()
+			.withConfiguration(config)
+			.build();
+
+		// assert
+
+		assertThat(oauth.getTokenUri().toString()).isEqualTo("http://localhost/token");
+		assertThat(oauth.getClientId().getValue()).isEqualTo("my-client");
+		assertThat(oauth.getClientSecret().getValue()).isEqualTo("my-secret");
+	}
+
+	@Test
+	void shouldIgnoreBlankScope() {
+
+		// arrange
+
+		var map = new HashMap<String, Object>();
+		map.put("enabled", "true");
+		map.put("mode", "external");
+		map.put("token-url", "http://localhost/token");
+		map.put("client-id", "my-client");
+		map.put("client-secret", "my-secret");
+		map.put("scope", "   ");
+		var config = new MapConfiguration(map);
+
+		// act
+
+		var oauth = OAuthMaterial.builder()
+			.withConfiguration(config)
+			.build();
+
+		// assert
+
+		assertThat(oauth.getScope()).isNull();
+	}
+
+	@Test
+	void shouldReturnNullAccessTokenWhenDisabled() {
+
+		// arrange
+
+		var map = new HashMap<String, Object>();
+		map.put("enabled", "false");
+		var config = new MapConfiguration(map);
+
+		var oauth = OAuthMaterial.builder()
+			.withConfiguration(config)
+			.build();
+
+		// act
+
+		var token = oauth.getAccessToken();
+
+		// assert
+
+		assertThat(token).isNull();
+	}
+}

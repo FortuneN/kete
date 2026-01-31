@@ -1,0 +1,750 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <version>0.0.0</version>
+    <artifactId>kete</artifactId>
+	<modelVersion>4.0.0</modelVersion>
+    <groupId>io.github.fortunen</groupId>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.keycloak</groupId>
+				<artifactId>keycloak-parent</artifactId>
+				<version>25.0.6</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<dependency>
+				<groupId>com.fasterxml.jackson</groupId>
+				<artifactId>jackson-bom</artifactId>
+				<version>2.19.2</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
+	<dependencies>
+
+		<!-- provided : by keycloak -->
+
+		<dependency>
+			<groupId>org.keycloak</groupId>
+			<artifactId>keycloak-core</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.keycloak</groupId>
+			<artifactId>keycloak-server-spi</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.keycloak</groupId>
+			<artifactId>keycloak-services</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>io.micrometer</groupId>
+			<artifactId>micrometer-core</artifactId>
+			<scope>provided</scope>
+		</dependency>
+
+		<!-- custom : core -->
+
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.dataformat</groupId>
+			<artifactId>jackson-dataformat-xml</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.dataformat</groupId>
+			<artifactId>jackson-dataformat-yaml</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.dataformat</groupId>
+			<artifactId>jackson-dataformat-csv</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.dataformat</groupId>
+			<artifactId>jackson-dataformat-toml</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.dataformat</groupId>
+			<artifactId>jackson-dataformat-smile</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.dataformat</groupId>
+			<artifactId>jackson-dataformat-cbor</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.dataformat</groupId>
+			<artifactId>jackson-dataformat-properties</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.kafka</groupId>
+			<artifactId>kafka-clients</artifactId>
+			<version>4.1.1</version>
+		</dependency>
+		<dependency>
+			<groupId>com.rabbitmq</groupId>
+			<artifactId>amqp-client</artifactId>
+			<version>5.25.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<version>1.18.42</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+			<version>3.20.0</version>
+		</dependency>
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>2.21.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-text</artifactId>
+			<version>1.15.0</version>
+		</dependency>
+		<dependency>
+			<groupId>com.hrakaroo</groupId>
+			<artifactId>glob</artifactId>
+			<version>0.9.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-configuration2</artifactId>
+			<version>2.13.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.reflections</groupId>
+			<artifactId>reflections</artifactId>
+			<version>0.10.2</version>
+		</dependency>
+		<dependency>
+			<groupId>io.github.resilience4j</groupId>
+			<artifactId>resilience4j-retry</artifactId>
+			<version>2.3.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-pool2</artifactId>
+			<version>2.13.1</version>
+		</dependency>
+		<dependency>
+			<groupId>com.nimbusds</groupId>
+			<artifactId>oauth2-oidc-sdk</artifactId>
+			<version>11.26</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.paho</groupId>
+			<artifactId>org.eclipse.paho.client.mqttv3</artifactId>
+			<version>1.2.5</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.paho</groupId>
+			<artifactId>org.eclipse.paho.mqttv5.client</artifactId>
+			<version>1.2.5</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.qpid</groupId>
+			<artifactId>qpid-jms-client</artifactId>
+			<version>2.9.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.java-websocket</groupId>
+			<artifactId>Java-WebSocket</artifactId>
+			<version>1.6.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.messaginghub</groupId>
+			<artifactId>pooled-jms</artifactId>
+			<version>3.2.2</version>
+		</dependency>
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+			<version>33.5.0-jre</version>
+		</dependency>
+		<dependency>
+			<groupId>com.squareup.okhttp3</groupId>
+			<artifactId>okhttp-tls</artifactId>
+			<version>4.12.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.bouncycastle</groupId>
+			<artifactId>bcprov-jdk18on</artifactId>
+			<version>1.80</version>
+		</dependency>
+		<dependency>
+			<groupId>org.bouncycastle</groupId>
+			<artifactId>bcpkix-jdk18on</artifactId>
+			<version>1.80</version>
+		</dependency>
+
+		<!-- custom : test -->
+
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-api</artifactId>
+			<version>5.12.2</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.assertj</groupId>
+			<artifactId>assertj-core</artifactId>
+			<version>3.27.7</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-engine</artifactId>
+			<version>5.12.2</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.junit.platform</groupId>
+			<artifactId>junit-platform-engine</artifactId>
+			<version>1.12.2</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.junit.platform</groupId>
+			<artifactId>junit-platform-commons</artifactId>
+			<version>1.12.2</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-core</artifactId>
+			<version>5.21.0</version>
+			<scope>test</scope>
+		</dependency>
+		<!-- SLF4J JUL provider - shaded along with slf4j-api so kete can log inside Keycloak -->
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-jdk14</artifactId>
+			<version>2.0.6</version>
+		</dependency>
+		<dependency>
+			<groupId>net.bytebuddy</groupId>
+			<artifactId>byte-buddy</artifactId>
+			<version>1.15.11</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>net.bytebuddy</groupId>
+			<artifactId>byte-buddy-agent</artifactId>
+			<version>1.15.11</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-simple</artifactId>
+			<version>2.0.6</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-junit-jupiter</artifactId>
+			<version>5.21.0</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.squareup.okhttp3</groupId>
+			<artifactId>mockwebserver</artifactId>
+			<version>4.12.0</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.testcontainers</groupId>
+			<artifactId>testcontainers</artifactId>
+			<version>1.21.4</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.testcontainers</groupId>
+			<artifactId>kafka</artifactId>
+			<version>1.21.4</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.testcontainers</groupId>
+			<artifactId>rabbitmq</artifactId>
+			<version>1.21.4</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.testcontainers</groupId>
+			<artifactId>hivemq</artifactId>
+			<version>1.21.4</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.testcontainers</groupId>
+			<artifactId>mockserver</artifactId>
+			<version>1.21.4</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.mock-server</groupId>
+			<artifactId>mockserver-client-java</artifactId>
+			<version>5.15.0</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.github.dasniko</groupId>
+			<artifactId>testcontainers-keycloak</artifactId>
+			<version>3.7.0</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.keycloak</groupId>
+			<artifactId>keycloak-admin-client</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.maven.shared</groupId>
+			<artifactId>maven-invoker</artifactId>
+			<version>3.3.0</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.awaitility</groupId>
+			<artifactId>awaitility</artifactId>
+			<version>4.2.2</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.activemq</groupId>
+			<artifactId>activemq-stomp</artifactId>
+			<version>6.1.6</version>
+		</dependency>
+
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.13.0</version>
+				<configuration>
+					<release>21</release>
+					<annotationProcessorPaths>
+						<path>
+							<groupId>org.projectlombok</groupId>
+							<artifactId>lombok</artifactId>
+							<version>1.18.42</version>
+						</path>
+					</annotationProcessorPaths>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-enforcer-plugin</artifactId>
+				<version>3.6.2</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>enforce</goal>
+						</goals>
+						<configuration>
+							<rules>
+								<requireMavenVersion>
+									<version>3.9.0</version>
+								</requireMavenVersion>
+								<requireJavaVersion>
+									<version>[21,)</version>
+									<message>Java 21 or higher is required. Current version: ${java.version}</message>
+								</requireJavaVersion>
+							</rules>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>3.5.4</version>
+				<configuration>
+					<argLine>@{argLine} -XX:+EnableDynamicAgentLoading -Dnet.bytebuddy.experimental=true</argLine>
+					<systemPropertyVariables>
+						<keycloak.version>${keycloak.version}</keycloak.version>
+					</systemPropertyVariables>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>0.8.13</version>
+				<executions>
+					<execution>
+						<id>prepare-agent</id>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>report</id>
+						<phase>test</phase>
+						<goals>
+							<goal>report</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-shade-plugin</artifactId>
+				<version>3.6.1</version>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>shade</goal>
+						</goals>
+						<configuration>
+							<finalName>kete</finalName>
+							<shadedArtifactAttached>false</shadedArtifactAttached>
+							<dependencyReducedPomLocation>${project.build.directory}/dependency-reduced-pom.xml</dependencyReducedPomLocation>
+							<filters>
+								<filter>
+									<artifact>*:*</artifact>
+									<excludes>
+										<exclude>module-info.class</exclude>
+										<exclude>META-INF/versions/*/module-info.class</exclude>
+										<exclude>META-INF/*.SF</exclude>
+										<exclude>META-INF/*.DSA</exclude>
+										<exclude>META-INF/*.RSA</exclude>
+										<exclude>META-INF/maven/**</exclude>
+										<exclude>META-INF/MANIFEST.MF</exclude>
+										<exclude>about.html</exclude>
+										<exclude>bundle.properties</exclude>
+										<exclude>COPYRIGHT.txt</exclude>
+										<exclude>LICENSE.txt</exclude>
+										<exclude>META-INF/DEPENDENCIES</exclude>
+									</excludes>
+								</filter>
+							</filters>
+							<!--
+							=============================================================================
+							CRITICAL: DEPENDENCY SHADING RELOCATIONS
+							=============================================================================
+
+							WHY WE NEED THIS:
+							Keycloak bundles many libraries internally (Jackson, Netty, Guava, SLF4J,
+							Apache Commons, etc.) and different Keycloak versions use different library
+							versions. Without shading, we get runtime conflicts:
+
+							  WITHOUT SHADING → NoSuchMethodError, ClassNotFoundException, version conflicts
+							  WITH SHADING    → Extension works across Keycloak 25.x, 26.x+ without recompilation
+
+							CRITICAL OVERLAPS WITH KEYCLOAK:
+							- Jackson Core/Annotations: Keycloak provides 2.17.0, we need jackson-core
+							- SLF4J: Keycloak provides this transitively, many of our deps require it
+							- Netty: Keycloak may bundle 4.1.127, qpid-jms brings 4.1.108
+							- Guava: Potential conflicts with Keycloak's bundled version
+							- Kotlin stdlib: From OkHttp dependencies, potential conflicts
+
+							RULE:
+							Every dependency without <scope>provided</scope> or <scope>test</scope>
+							MUST be relocated to avoid classpath conflicts when loaded into Keycloak.
+
+							All packages relocated under: io.github.fortunen.kete.shaded.*
+							=============================================================================
+							-->
+							<relocations>
+								<!-- Jackson (Keycloak bundles jackson-databind, we must shade all jackson packages) -->
+								<relocation>
+									<pattern>com.fasterxml.jackson.core</pattern>
+									<shadedPattern>io.github.fortunen.kete.shaded.jackson.core</shadedPattern>
+								</relocation>
+								<relocation>
+									<pattern>com.fasterxml.jackson.annotation</pattern>
+									<shadedPattern>io.github.fortunen.kete.shaded.jackson.annotation</shadedPattern>
+								</relocation>
+								<relocation>
+									<pattern>com.fasterxml.jackson.databind</pattern>
+									<shadedPattern>io.github.fortunen.kete.shaded.jackson.databind</shadedPattern>
+								</relocation>
+								<!-- Jackson dataformats -->
+								<relocation>
+									<pattern>com.fasterxml.jackson.dataformat.xml</pattern>
+									<shadedPattern>io.github.fortunen.kete.shaded.jackson.dataformat.xml</shadedPattern>
+								</relocation>
+								<relocation>
+									<pattern>com.fasterxml.jackson.dataformat.yaml</pattern>
+									<shadedPattern>io.github.fortunen.kete.shaded.jackson.dataformat.yaml</shadedPattern>
+								</relocation>
+								<relocation>
+									<pattern>com.fasterxml.jackson.dataformat.csv</pattern>
+									<shadedPattern>io.github.fortunen.kete.shaded.jackson.dataformat.csv</shadedPattern>
+								</relocation>
+								<relocation>
+									<pattern>com.fasterxml.jackson.dataformat.toml</pattern>
+									<shadedPattern>io.github.fortunen.kete.shaded.jackson.dataformat.toml</shadedPattern>
+								</relocation>
+								<relocation>
+									<pattern>com.fasterxml.jackson.dataformat.smile</pattern>
+									<shadedPattern>io.github.fortunen.kete.shaded.jackson.dataformat.smile</shadedPattern>
+								</relocation>
+								<relocation>
+									<pattern>com.fasterxml.jackson.dataformat.cbor</pattern>
+									<shadedPattern>io.github.fortunen.kete.shaded.jackson.dataformat.cbor</shadedPattern>
+								</relocation>
+								<relocation>
+									<pattern>com.fasterxml.jackson.dataformat.javaprop</pattern>
+									<shadedPattern>io.github.fortunen.kete.shaded.jackson.dataformat.javaprop</shadedPattern>
+								</relocation>
+								<!-- Kafka -->
+								<relocation>
+									<pattern>org.apache.kafka</pattern>
+									<shadedPattern>io.github.fortunen.kete.shaded.kafka</shadedPattern>
+								</relocation>
+								<!-- SLF4J (Keycloak provides this, but many of our deps require it) -->
+								<relocation>
+									<pattern>org.slf4j</pattern>
+									<shadedPattern>io.github.fortunen.kete.shaded.slf4j</shadedPattern>
+								</relocation>
+								<!-- Netty (Keycloak bundles netty, qpid-jms brings 4.1.108, Keycloak may use different version) -->
+								<relocation>
+									<pattern>io.netty</pattern>
+									<shadedPattern>io.github.fortunen.kete.shaded.netty</shadedPattern>
+								</relocation>
+								<!-- Kotlin stdlib (okhttp brings this, conflicts possible) -->
+								<relocation>
+									<pattern>kotlin</pattern>
+									<shadedPattern>io.github.fortunen.kete.shaded.kotlin</shadedPattern>
+								</relocation>
+								<relocation>
+									<pattern>org.jetbrains.kotlin</pattern>
+									<shadedPattern>io.github.fortunen.kete.shaded.jetbrains.kotlin</shadedPattern>
+								</relocation>
+								<!-- RabbitMQ AMQP client -->
+								<relocation>
+									<pattern>com.rabbitmq</pattern>
+									<shadedPattern>io.github.fortunen.kete.shaded.rabbitmq</shadedPattern>
+								</relocation>
+								<!-- Apache Commons -->
+								<relocation>
+									<pattern>org.apache.commons.lang3</pattern>
+									<shadedPattern>io.github.fortunen.kete.shaded.commons.lang3</shadedPattern>
+								</relocation>
+								<relocation>
+									<pattern>org.apache.commons.io</pattern>
+									<shadedPattern>io.github.fortunen.kete.shaded.commons.io</shadedPattern>
+								</relocation>
+								<relocation>
+									<pattern>org.apache.commons.text</pattern>
+									<shadedPattern>io.github.fortunen.kete.shaded.commons.text</shadedPattern>
+								</relocation>
+								<relocation>
+									<pattern>org.apache.commons.configuration2</pattern>
+									<shadedPattern>io.github.fortunen.kete.shaded.commons.configuration2</shadedPattern>
+								</relocation>
+								<relocation>
+									<pattern>org.apache.commons.pool2</pattern>
+									<shadedPattern>io.github.fortunen.kete.shaded.commons.pool2</shadedPattern>
+								</relocation>
+								<!-- Glob matcher -->
+								<relocation>
+									<pattern>com.hrakaroo.glob</pattern>
+									<shadedPattern>io.github.fortunen.kete.shaded.glob</shadedPattern>
+								</relocation>
+								<!-- Reflections -->
+								<relocation>
+									<pattern>org.reflections</pattern>
+									<shadedPattern>io.github.fortunen.kete.shaded.reflections</shadedPattern>
+								</relocation>
+								<!-- Resilience4j -->
+								<relocation>
+									<pattern>io.github.resilience4j</pattern>
+									<shadedPattern>io.github.fortunen.kete.shaded.resilience4j</shadedPattern>
+								</relocation>
+								<!-- Nimbus OAuth SDK -->
+								<relocation>
+									<pattern>com.nimbusds</pattern>
+									<shadedPattern>io.github.fortunen.kete.shaded.nimbusds</shadedPattern>
+								</relocation>
+								<!-- Eclipse Paho MQTT -->
+								<relocation>
+									<pattern>org.eclipse.paho.client.mqttv3</pattern>
+									<shadedPattern>io.github.fortunen.kete.shaded.paho.mqttv3</shadedPattern>
+								</relocation>
+								<relocation>
+									<pattern>org.eclipse.paho.mqttv5</pattern>
+									<shadedPattern>io.github.fortunen.kete.shaded.paho.mqttv5</shadedPattern>
+								</relocation>
+								<!-- Apache Qpid JMS (AMQP 1.0) -->
+								<relocation>
+									<pattern>org.apache.qpid</pattern>
+									<shadedPattern>io.github.fortunen.kete.shaded.qpid</shadedPattern>
+								</relocation>
+								<!-- Java-WebSocket -->
+								<relocation>
+									<pattern>org.java_websocket</pattern>
+									<shadedPattern>io.github.fortunen.kete.shaded.java_websocket</shadedPattern>
+								</relocation>
+								<!-- Pooled JMS -->
+								<relocation>
+									<pattern>org.messaginghub.pooled</pattern>
+									<shadedPattern>io.github.fortunen.kete.shaded.pooled.jms</shadedPattern>
+								</relocation>
+								<!-- Guava -->
+								<relocation>
+									<pattern>com.google.common</pattern>
+									<shadedPattern>io.github.fortunen.kete.shaded.guava</shadedPattern>
+								</relocation>
+								<relocation>
+									<pattern>com.google.thirdparty.publicsuffix</pattern>
+									<shadedPattern>io.github.fortunen.kete.shaded.guava.publicsuffix</shadedPattern>
+								</relocation>
+								<!-- OkHttp TLS -->
+								<relocation>
+									<pattern>okhttp3</pattern>
+									<shadedPattern>io.github.fortunen.kete.shaded.okhttp3</shadedPattern>
+								</relocation>
+								<relocation>
+									<pattern>okio</pattern>
+									<shadedPattern>io.github.fortunen.kete.shaded.okio</shadedPattern>
+								</relocation>
+								<!-- Bouncy Castle -->
+								<relocation>
+									<pattern>org.bouncycastle</pattern>
+									<shadedPattern>io.github.fortunen.kete.shaded.bouncycastle</shadedPattern>
+								</relocation>
+								<!-- ActiveMQ STOMP -->
+								<relocation>
+									<pattern>org.apache.activemq</pattern>
+									<shadedPattern>io.github.fortunen.kete.shaded.activemq</shadedPattern>
+								</relocation>
+								<!-- Transitive dependencies -->
+								<!-- Woodstox (jackson-dataformat-xml transitive) -->
+								<relocation>
+									<pattern>org.codehaus.stax2</pattern>
+									<shadedPattern>io.github.fortunen.kete.shaded.stax2</shadedPattern>
+								</relocation>
+								<relocation>
+									<pattern>com.ctc.wstx</pattern>
+									<shadedPattern>io.github.fortunen.kete.shaded.woodstox</shadedPattern>
+								</relocation>
+								<!-- SnakeYAML (jackson-dataformat-yaml transitive) -->
+								<relocation>
+									<pattern>org.yaml.snakeyaml</pattern>
+									<shadedPattern>io.github.fortunen.kete.shaded.snakeyaml</shadedPattern>
+								</relocation>
+								<!-- Kafka compression libraries -->
+								<relocation>
+									<pattern>com.github.luben.zstd</pattern>
+									<shadedPattern>io.github.fortunen.kete.shaded.zstd</shadedPattern>
+								</relocation>
+								<relocation>
+									<pattern>org.lz4</pattern>
+									<shadedPattern>io.github.fortunen.kete.shaded.lz4</shadedPattern>
+								</relocation>
+								<relocation>
+									<pattern>org.xerial.snappy</pattern>
+									<shadedPattern>io.github.fortunen.kete.shaded.snappy</shadedPattern>
+								</relocation>
+								<!-- Commons Logging (commons-configuration2 transitive) -->
+								<relocation>
+									<pattern>org.apache.commons.logging</pattern>
+									<shadedPattern>io.github.fortunen.kete.shaded.commons.logging</shadedPattern>
+								</relocation>
+								<!-- Javassist (reflections transitive) -->
+								<relocation>
+									<pattern>javassist</pattern>
+									<shadedPattern>io.github.fortunen.kete.shaded.javassist</shadedPattern>
+								</relocation>
+								<!-- JSR305 annotations (reflections transitive) -->
+								<relocation>
+									<pattern>javax.annotation</pattern>
+									<shadedPattern>io.github.fortunen.kete.shaded.javax.annotation</shadedPattern>
+								</relocation>
+								<!-- JSON Smart (oauth2-oidc-sdk transitive) -->
+								<relocation>
+									<pattern>net.minidev</pattern>
+									<shadedPattern>io.github.fortunen.kete.shaded.minidev</shadedPattern>
+								</relocation>
+								<!-- ASM (accessors-smart transitive) -->
+								<relocation>
+									<pattern>org.objectweb.asm</pattern>
+									<shadedPattern>io.github.fortunen.kete.shaded.asm</shadedPattern>
+								</relocation>
+								<!-- JCIP annotations -->
+								<relocation>
+									<pattern>net.jcip</pattern>
+									<shadedPattern>io.github.fortunen.kete.shaded.jcip</shadedPattern>
+								</relocation>
+								<!-- Jakarta JMS API (qpid-jms transitive) -->
+								<relocation>
+									<pattern>jakarta.jms</pattern>
+									<shadedPattern>io.github.fortunen.kete.shaded.jakarta.jms</shadedPattern>
+								</relocation>
+								<!-- Guava helper artifacts -->
+								<relocation>
+									<pattern>com.google.errorprone</pattern>
+									<shadedPattern>io.github.fortunen.kete.shaded.errorprone</shadedPattern>
+								</relocation>
+								<relocation>
+									<pattern>com.google.j2objc</pattern>
+									<shadedPattern>io.github.fortunen.kete.shaded.j2objc</shadedPattern>
+								</relocation>
+								<relocation>
+									<pattern>org.jspecify</pattern>
+									<shadedPattern>io.github.fortunen.kete.shaded.jspecify</shadedPattern>
+								</relocation>
+								<!-- JetBrains annotations -->
+								<relocation>
+									<pattern>org.intellij.lang.annotations</pattern>
+									<shadedPattern>io.github.fortunen.kete.shaded.intellij.annotations</shadedPattern>
+								</relocation>
+								<relocation>
+									<pattern>org.jetbrains.annotations</pattern>
+									<shadedPattern>io.github.fortunen.kete.shaded.jetbrains.annotations</shadedPattern>
+								</relocation>
+								<!-- Proton-J (qpid transitive) -->
+								<relocation>
+									<pattern>org.apache.qpid.proton</pattern>
+									<shadedPattern>io.github.fortunen.kete.shaded.proton</shadedPattern>
+								</relocation>
+								<!-- Failureaccess (guava transitive) -->
+								<relocation>
+									<pattern>com.google.common.util.concurrent.internal</pattern>
+									<shadedPattern>io.github.fortunen.kete.shaded.guava.failureaccess</shadedPattern>
+								</relocation>
+							</relocations>
+							<transformers>
+								<transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+								<transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+									<manifestEntries>
+										<Implementation-Title>${project.artifactId}</Implementation-Title>
+										<Implementation-Version>${project.version}</Implementation-Version>
+									</manifestEntries>
+								</transformer>
+								<transformer implementation="org.apache.maven.plugins.shade.resource.ApacheLicenseResourceTransformer"/>
+								<transformer implementation="org.apache.maven.plugins.shade.resource.ApacheNoticeResourceTransformer">
+									<addHeader>false</addHeader>
+								</transformer>
+							</transformers>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+
+</project>

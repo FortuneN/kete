@@ -1,0 +1,19 @@
+services:
+
+  websocket-echo:
+    image: jmalloc/echo-server:0.3.6
+    ports:
+      - 8090:8080
+    environment:
+      PORT: 8080
+
+  keycloak:
+    image: ghcr.io/fortunen/kete/quick-start-keycloak
+    command: start-dev
+    ports:
+      - 8080:8080
+    environment:
+      kete.routes.quick-start.destination.kind: websocket
+      kete.routes.quick-start.destination.url: ws://websocket-echo:8080/.ws
+    depends_on:
+      - websocket-echo

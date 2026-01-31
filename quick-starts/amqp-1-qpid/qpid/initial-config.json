@@ -1,0 +1,51 @@
+{
+  "name": "default",
+  "modelVersion": "9.0",
+  "authenticationproviders": [
+    {
+      "name": "plain",
+      "type": "Plain",
+      "secureOnlyMechanisms": [],
+      "users": [
+        {
+          "name": "guest",
+          "type": "managed",
+          "password": "guest"
+        }
+      ]
+    }
+  ],
+  "ports": [
+    {
+      "name": "AMQP",
+      "type": "AMQP",
+      "port": "${qpid.amqp_port}",
+      "authenticationProvider": "plain",
+      "virtualhostaliases": [
+        {
+          "name": "defaultAlias",
+          "type": "defaultAlias"
+        },
+        {
+          "name": "hostNameAlias",
+          "type": "hostnameAlias"
+        }
+      ]
+    },
+    {
+      "name": "HTTP",
+      "type": "HTTP",
+      "port": "${qpid.http_port}",
+      "authenticationProvider": "plain",
+      "protocols": ["HTTP"]
+    }
+  ],
+  "virtualhostnodes": [
+    {
+      "name": "default",
+      "type": "JSON",
+      "defaultVirtualHostNode": true,
+      "virtualHostInitialConfiguration": "{\"type\":\"BDB\",\"queues\":[{\"name\":\"keycloak-events\",\"type\":\"standard\"}]}"
+    }
+  ]
+}

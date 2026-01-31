@@ -1,0 +1,2 @@
+## Shaded SSL transport for kete
+class=io.github.fortunen.kete.shaded.qpid.jms.transports.netty.NettySslTransportFactory

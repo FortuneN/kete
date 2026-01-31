@@ -1,0 +1,16 @@
+{
+    "java.test.config": [
+        {
+            "testKind": "junit",
+            "sourcePaths": [
+                "src/tests/java"
+            ],
+            "vmArgs": [
+                "-XX:+EnableDynamicAgentLoading",
+                "-Djava.util.logging.manager=org.jboss.logmanager.LogManager"
+            ]
+        }
+    ],
+    "java.configuration.updateBuildConfiguration": "interactive",
+    "java.compile.nullAnalysis.mode": "automatic"
+}

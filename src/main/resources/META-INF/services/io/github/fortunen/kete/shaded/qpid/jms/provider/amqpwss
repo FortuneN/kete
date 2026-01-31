@@ -1,0 +1,4 @@
+## Shaded AMQPWSS provider for kete
+class=io.github.fortunen.kete.shaded.qpid.jms.provider.amqp.AmqpProviderFactory
+transportScheme=wss
+providerScheme=amqpwss

@@ -1,0 +1,2 @@
+## Shaded CRAM-MD5 SASL mechanism for kete
+class=io.github.fortunen.kete.shaded.qpid.jms.sasl.CramMD5MechanismFactory

@@ -1,0 +1,39 @@
+services:
+
+  lavinmq:
+    image: ghcr.io/fortunen/kete/quick-start-lavinmq
+    ports:
+      - 5672:5672
+      - 15672:15672
+    healthcheck:
+      test: ["CMD", "lavinmqctl", "status"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  lavinmq-init:
+    image: ghcr.io/fortunen/kete/quick-start-curl
+    depends_on:
+      lavinmq:
+        condition: service_healthy
+    entrypoint: >
+      sh -c '
+        curl -s -u guest:guest -X PUT http://lavinmq:15672/api/queues/%2f/keycloak-events -H "content-type: application/json" -d "{\"durable\":true}" &&
+        curl -s -u guest:guest -X POST http://lavinmq:15672/api/bindings/%2f/e/amq.direct/q/keycloak-events -H "content-type: application/json" -d "{\"routing_key\":\"keycloak-events\"}"
+      '
+
+  keycloak:
+    image: ghcr.io/fortunen/kete/quick-start-keycloak
+    command: start-dev
+    ports:
+      - 8080:8080
+    environment:
+      kete.routes.quick-start.destination.kind: amqp-0.9.1
+      kete.routes.quick-start.destination.host: lavinmq
+      kete.routes.quick-start.destination.username: guest
+      kete.routes.quick-start.destination.password: guest
+      kete.routes.quick-start.destination.exchange: amq.direct
+      kete.routes.quick-start.destination.routing-key: keycloak-events
+    depends_on:
+      lavinmq-init:
+        condition: service_completed_successfully

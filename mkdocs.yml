@@ -1,0 +1,156 @@
+site_name: KETE
+site_description: Keycloak Event Listener that forwards events to various destinations
+site_url: https://fortunen.github.io/kete
+repo_url: https://github.com/FortuneN/kete
+repo_name: FortuneN/kete
+
+extra_css:
+  - assets/css/indent-left-menu.css
+  - assets/css/donation-links.css
+
+extra_javascript:
+  - assets/js/hide-home-left-menu.js
+  - assets/js/open-external-links-in-new-tabs.js
+  - assets/js/donation-links-top-right.js
+
+extra:
+  social:
+    - icon: fontawesome/solid/star
+      link: https://github.com/FortuneN/kete
+      name: Give the project a star
+    - icon: fontawesome/brands/paypal
+      link: https://paypal.me/FortuneNgwenya
+      name: Donate via PayPal
+    - icon: fontawesome/brands/github
+      link: https://github.com/sponsors/FortuneN
+      name: Sponsor on GitHub
+    - icon: simple/buymeacoffee
+      link: https://www.buymeacoffee.com/FortuneN
+      name: Buy Me a Coffee
+    - icon: simple/kofi
+      link: https://ko-fi.com/FortuneN
+      name: Support on Ko-fi
+    - icon: simple/liberapay
+      link: https://liberapay.com/FortuneN
+      name: Donate via Liberapay
+
+theme:
+  name: material
+  logo: logo.png
+  favicon: favicon.ico
+  palette:
+    - scheme: default
+      primary: grey
+      accent: grey
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: grey
+      accent: grey
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - content.code.annotate
+
+plugins:
+  - search
+  - include-markdown
+
+markdown_extensions:
+  - meta
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - admonition
+  - pymdownx.details
+  - tables
+  - toc:
+      permalink: true
+
+nav:
+  - Home: index.md
+  - User Guide:
+    - Overview: user-guide/overview.md
+    - Enabling & Disabling: user-guide/enabling-disabling.md
+    - Configuration: user-guide/configuration.md
+    - Routes: user-guide/routes.md
+    - Retry: user-guide/retry.md
+    - Event Types: user-guide/event-types.md
+    - Observability: user-guide/observability.md
+    - Matchers:
+      - Overview: user-guide/matchers/overview.md
+      - Glob: user-guide/matchers/glob.md
+      - List: user-guide/matchers/list.md
+      - Regex: user-guide/matchers/regex.md
+      - SQL: user-guide/matchers/sql.md
+    - Serializers:
+      - Overview: user-guide/serializers/overview.md
+      - JSON: user-guide/serializers/json.md
+      - YAML: user-guide/serializers/yaml.md
+      - XML: user-guide/serializers/xml.md
+      - CSV: user-guide/serializers/csv.md
+      - TOML: user-guide/serializers/toml.md
+      - Properties: user-guide/serializers/properties.md
+      - CBOR: user-guide/serializers/cbor.md
+      - Smile: user-guide/serializers/smile.md
+    - Destinations:
+      - Overview: user-guide/destinations/overview.md
+      - Kafka: user-guide/destinations/kafka.md
+      - AMQP 0.9.1: user-guide/destinations/amqp-0.9.1.md
+      - AMQP 1: user-guide/destinations/amqp-1.md
+      - MQTT 3: user-guide/destinations/mqtt-3.md
+      - MQTT 5: user-guide/destinations/mqtt-5.md
+      - HTTP: user-guide/destinations/http.md
+      - WebSocket: user-guide/destinations/websocket.md
+      - STOMP: user-guide/destinations/stomp.md
+    - Certificate Loaders:
+      - Overview: user-guide/certificate-loaders/overview.md
+      - PEM File Path: user-guide/certificate-loaders/pem-file-path.md
+      - PEM File Base64: user-guide/certificate-loaders/pem-file-base64.md
+      - PEM File Text: user-guide/certificate-loaders/pem-file-text.md
+      - PKCS12 File Path: user-guide/certificate-loaders/pkcs12-file-path.md
+      - PKCS12 File Base64: user-guide/certificate-loaders/pkcs12-file-base64.md
+      - PKCS7 File Path: user-guide/certificate-loaders/pkcs7-file-path.md
+      - PKCS7 File Base64: user-guide/certificate-loaders/pkcs7-file-base64.md
+      - DER File Path: user-guide/certificate-loaders/der-file-path.md
+      - DER File Base64: user-guide/certificate-loaders/der-file-base64.md
+      - JKS File Path: user-guide/certificate-loaders/jks-file-path.md
+      - JKS File Base64: user-guide/certificate-loaders/jks-file-base64.md
+    - Deployments:
+      - Overview: user-guide/deployments/overview.md
+      - Docker: user-guide/deployments/docker.md
+      - Docker Compose: user-guide/deployments/docker-compose.md
+      - Kubernetes: user-guide/deployments/kubernetes.md
+      - Bare Metal: user-guide/deployments/bare-metal.md
+  - Developer Guide:
+    - Overview: developer-guide/overview.md
+    - How It Works: developer-guide/how-it-works.md
+    - Architecture: developer-guide/architecture.md
+    - Configuration: developer-guide/configuration.md
+    - Libraries: developer-guide/libraries.md
+    - Extending: developer-guide/extending.md
+    - Component Scopes: developer-guide/component-scopes.md
+    - Certificate Loaders: developer-guide/certificate-loaders.md
+    - OAuth: developer-guide/oauth.md
+    - Transaction Support: developer-guide/transaction-support.md
+    - Contributing: developer-guide/development.md
+    - Test Patterns: developer-guide/test-patterns-and-conventions.md
+    - Future Enhancements: developer-guide/future-enhancements.md
