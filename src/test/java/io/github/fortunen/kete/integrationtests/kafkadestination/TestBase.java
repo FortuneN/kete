@@ -19,11 +19,11 @@ import org.apache.kafka.common.serialization.ByteArrayDeserializer;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.testcontainers.containers.BindMode;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.output.OutputFrame;
 import org.testcontainers.images.builder.Transferable;
 import org.testcontainers.kafka.KafkaContainer;
+import org.testcontainers.utility.MountableFile;
 
 import com.github.dockerjava.api.command.InspectContainerResponse;
 
@@ -335,11 +335,11 @@ public class TestBase {
 
 			// Mount the keystore, truststore, and password files
 			// Use serverKeyStoreFilePath for the container (server-side TLS) - it contains only the server key
-			this.withFileSystemBind(tls.getServerKeyStoreFilePath(), "/etc/kafka/secrets/keystore.jks", BindMode.READ_ONLY);
-			this.withFileSystemBind(tls.getTrustStoreFilePath(), "/etc/kafka/secrets/truststore.jks", BindMode.READ_ONLY);
-			this.withFileSystemBind(keyPasswordFile.toAbsolutePath().toString(), "/etc/kafka/secrets/key-password", BindMode.READ_ONLY);
-			this.withFileSystemBind(keystorePasswordFile.toAbsolutePath().toString(), "/etc/kafka/secrets/keystore-password", BindMode.READ_ONLY);
-			this.withFileSystemBind(truststorePasswordFile.toAbsolutePath().toString(), "/etc/kafka/secrets/truststore-password", BindMode.READ_ONLY);
+			this.withCopyFileToContainer(MountableFile.forHostPath(tls.getServerKeyStoreFilePath(), 0644), "/etc/kafka/secrets/keystore.jks");
+			this.withCopyFileToContainer(MountableFile.forHostPath(tls.getTrustStoreFilePath(), 0644), "/etc/kafka/secrets/truststore.jks");
+			this.withCopyFileToContainer(MountableFile.forHostPath(keyPasswordFile.toAbsolutePath().toString(), 0644), "/etc/kafka/secrets/key-password");
+			this.withCopyFileToContainer(MountableFile.forHostPath(keystorePasswordFile.toAbsolutePath().toString(), 0644), "/etc/kafka/secrets/keystore-password");
+			this.withCopyFileToContainer(MountableFile.forHostPath(truststorePasswordFile.toAbsolutePath().toString(), 0644), "/etc/kafka/secrets/truststore-password");
 
 			// SSL configuration using FILENAME and CREDENTIALS pattern expected by apache/kafka image
 			this.withEnv("KAFKA_SSL_KEYSTORE_FILENAME", "keystore.jks");
@@ -434,7 +434,7 @@ public class TestBase {
 			Files.writeString(jaasConfigFile, jaasConfig);
 
 			this.withExposedPorts(KAFKA_PLAINTEXT_PORT, KAFKA_SASL_PORT);
-			this.withFileSystemBind(jaasConfigFile.toAbsolutePath().toString(), "/etc/kafka/kafka_server_jaas.conf", BindMode.READ_ONLY);
+			this.withCopyFileToContainer(MountableFile.forHostPath(jaasConfigFile.toAbsolutePath().toString(), 0644), "/etc/kafka/kafka_server_jaas.conf");
 
 			// SASL configuration
 			this.withEnv("KAFKA_OPTS", "-Djava.security.auth.login.config=/etc/kafka/kafka_server_jaas.conf");
