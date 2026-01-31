@@ -269,10 +269,10 @@ if (-not (Test-PreviousStepsPassed)) {
 # Step 4: Deploy Documentation Site
 # =============================================================================
 
-Write-StepHeader 4 "Deploy Documentation Site"
+Write-StepHeader 4 "Build Documentation Site"
 
 if (-not (Test-PreviousStepsPassed)) {
-    Write-TaskSkipped "Documentation deployment" "previous step failed"
+    Write-TaskSkipped "Documentation build" "previous step failed"
     $script:Results["4. Deploy Docs"] = $false
 } else {
     $stepStart = Get-Date
@@ -282,17 +282,14 @@ if (-not (Test-PreviousStepsPassed)) {
     $buildSuccess = $LASTEXITCODE -eq 0
 
     if ($buildSuccess) {
-        Write-Task "Deploying to GitHub Pages..."
-        python -m mkdocs gh-deploy --force 2>&1 | Out-Null
-        $deploySuccess = $LASTEXITCODE -eq 0
-        Write-TaskResult "Documentation deployed to GitHub Pages" $deploySuccess
-        $script:Results["4. Deploy Docs"] = $deploySuccess
+        Write-TaskResult "Documentation site built successfully" $true
+        $script:Results["4. Deploy Docs"] = $true
     } else {
         Write-TaskResult "Documentation build failed" $false
         $script:Results["4. Deploy Docs"] = $false
     }
 
-    if (Test-Path "site") { Remove-Item -Recurse -Force "site" }
+    # Note: site/ directory is kept for GitHub Actions to upload to Pages
 
     $duration = Format-Duration((Get-Date) - $stepStart)
     Write-Host ""
