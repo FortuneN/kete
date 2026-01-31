@@ -20,7 +20,7 @@ ENV PATH="${QPID_HOME}/bin:${PATH}"
 RUN mkdir -p ${QPID_WORK}
 
 # Copy initial configuration
-COPY amqp-1-qpid/qpid/initial-config.json ${QPID_HOME}/etc/initial-config.json
+COPY initial-config.json ${QPID_HOME}/etc/initial-config.json
 
 # Expose AMQP and HTTP management ports
 EXPOSE 5672 8080
