@@ -358,7 +358,7 @@ public class TestBase {
 			this.withEnv("KAFKA_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM", "");
 
 			// Increase startup timeout for CI environments
-			this.withStartupTimeout(Duration.ofMinutes(4));
+			this.withStartupTimeout(Duration.ofMinutes(10));
 
 			// Log output for debugging
 			this.withLogConsumer((OutputFrame outputFrame) -> System.out.print("[KAFKA] " + outputFrame.getUtf8String()));

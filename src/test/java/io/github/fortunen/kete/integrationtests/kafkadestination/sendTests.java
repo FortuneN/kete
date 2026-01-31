@@ -57,7 +57,6 @@ public class sendTests extends TestBase {
 	}
 
 	@Test
-	@DisabledIfEnvironmentVariable(named = "CI", matches = "true", disabledReason = "TLS container startup too slow on GitHub runners")
 	public void shouldSend_Tls() throws Exception {
 
 		// arrange
@@ -113,7 +112,6 @@ public class sendTests extends TestBase {
 	}
 
 	@Test
-	@DisabledIfEnvironmentVariable(named = "CI", matches = "true", disabledReason = "TLS container startup too slow on GitHub runners")
 	public void shouldSend_mTls() throws Exception {
 
 		// arrange
