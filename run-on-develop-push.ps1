@@ -151,10 +151,10 @@ Write-TaskResult "Test execution complete" $testsPassed $duration
 $script:Results["Tests"] = $testsPassed
 
 # =============================================================================
-# Step 2: Build and Push Docker Images
+# Step 2: Build Docker Images (validation only, no push)
 # =============================================================================
 
-Write-StepHeader 2 "Build and Push Docker Images (:$script:Tag)"
+Write-StepHeader 2 "Build Docker Images (validation only)"
 
 $stepStart = Get-Date
 
@@ -163,38 +163,20 @@ $imageName = "$script:Registry/quick-start-keycloak:$script:Tag"
 Write-Task "Building $imageName"
 docker build -q -t $imageName -f quick-starts/quick-start-keycloak/Dockerfile . 2>&1 | Out-Null
 $buildSuccess = $LASTEXITCODE -eq 0
-
-if ($buildSuccess) {
-    Write-Task "Pushing $imageName"
-    docker push $imageName 2>&1 | Out-Null
-    $pushSuccess = $LASTEXITCODE -eq 0
-    Write-TaskResult "quick-start-keycloak:$script:Tag" $pushSuccess
-    $script:Results["Push: quick-start-keycloak"] = $pushSuccess
-} else {
-    Write-TaskResult "quick-start-keycloak build failed" $false
-    $script:Results["Push: quick-start-keycloak"] = $false
-}
+Write-TaskResult "quick-start-keycloak" $buildSuccess
+$script:Results["Docker: quick-start-keycloak"] = $buildSuccess
 
 # quick-start-curl
 $imageName = "$script:Registry/quick-start-curl:$script:Tag"
 Write-Task "Building $imageName"
 docker build -q -t $imageName -f quick-starts/quick-start-curl/Dockerfile . 2>&1 | Out-Null
 $buildSuccess = $LASTEXITCODE -eq 0
-
-if ($buildSuccess) {
-    Write-Task "Pushing $imageName"
-    docker push $imageName 2>&1 | Out-Null
-    $pushSuccess = $LASTEXITCODE -eq 0
-    Write-TaskResult "quick-start-curl:$script:Tag" $pushSuccess
-    $script:Results["Push: quick-start-curl"] = $pushSuccess
-} else {
-    Write-TaskResult "quick-start-curl build failed" $false
-    $script:Results["Push: quick-start-curl"] = $false
-}
+Write-TaskResult "quick-start-curl" $buildSuccess
+$script:Results["Docker: quick-start-curl"] = $buildSuccess
 
 $duration = Format-Duration((Get-Date) - $stepStart)
 Write-Host ""
-Write-Host "    Docker operations completed in $duration" -ForegroundColor DarkGray
+Write-Host "    Docker build completed in $duration" -ForegroundColor DarkGray
 
 # =============================================================================
 # Step 3: Build Documentation (Validation Only)
