@@ -95,8 +95,8 @@ function Format-Duration {
 function Write-SummaryTable {
     param([hashtable]$Results)
 
-    $passed = ($Results.Values | Where-Object { $_ -eq $true }).Count
-    $failed = ($Results.Values | Where-Object { $_ -eq $false }).Count
+    $passed = @($Results.Values | Where-Object { $_ -eq $true }).Count
+    $failed = @($Results.Values | Where-Object { $_ -eq $false }).Count
 
     Write-Host ""
     Write-Host "  ┌────────────────────────────────────────────┬──────────┐" -ForegroundColor DarkGray
@@ -126,7 +126,7 @@ function Write-SummaryTable {
 }
 
 function Test-PreviousStepsPassed {
-    return ($script:Results.Values | Where-Object { $_ -eq $false }).Count -eq 0
+    return @($script:Results.Values | Where-Object { $_ -eq $false }).Count -eq 0
 }
 
 # -----------------------------------------------------------------------------
@@ -372,7 +372,7 @@ https://fortunen.github.io/kete/
 # =============================================================================
 
 $totalDuration = Format-Duration((Get-Date) - $script:StartTime)
-$failedCount = ($script:Results.Values | Where-Object { $_ -eq $false }).Count
+$failedCount = @($script:Results.Values | Where-Object { $_ -eq $false }).Count
 
 Write-Host ""
 Write-Host ""

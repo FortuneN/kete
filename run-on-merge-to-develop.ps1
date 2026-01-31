@@ -90,8 +90,8 @@ function Format-Duration {
 function Write-SummaryTable {
     param([hashtable]$Results)
 
-    $passed = ($Results.Values | Where-Object { $_ -eq $true }).Count
-    $failed = ($Results.Values | Where-Object { $_ -eq $false }).Count
+    $passed = @($Results.Values | Where-Object { $_ -eq $true }).Count
+    $failed = @($Results.Values | Where-Object { $_ -eq $false }).Count
 
     Write-Host ""
     Write-Host "  ┌────────────────────────────────────────────┬──────────┐" -ForegroundColor DarkGray
@@ -222,7 +222,7 @@ if ($docsSuccess -and (Test-Path "site")) {
 # =============================================================================
 
 $totalDuration = Format-Duration((Get-Date) - $script:StartTime)
-$failedCount = ($script:Results.Values | Where-Object { $_ -eq $false }).Count
+$failedCount = @($script:Results.Values | Where-Object { $_ -eq $false }).Count
 
 Write-Host ""
 Write-Host ""

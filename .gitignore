@@ -203,3 +203,5 @@ README.html
 dependency-reduced-pom.xml
 target/
 site/
+.github/appmod
+.github/java-upgrade
