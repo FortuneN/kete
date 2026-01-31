@@ -118,9 +118,9 @@ public class TestBase {
 		Files.writeString(configFile.toPath(), configContent);
 
 		var rabbitContainer = new RabbitMQContainer("rabbitmq:3.13-management")
-			.withCopyFileToContainer(MountableFile.forHostPath(tls.getServerPrivateKeyPkcs1PemFilePath()), "/etc/rabbitmq/rabbitmq_key.pem")
-			.withCopyFileToContainer(MountableFile.forHostPath(tls.getServerCertificatePemFilePath()), "/etc/rabbitmq/rabbitmq_cert.pem")
-			.withCopyFileToContainer(MountableFile.forHostPath(tls.getCaCertificatePemFilePath()), "/etc/rabbitmq/ca_cert.pem")
+			.withCopyFileToContainer(MountableFile.forHostPath(tls.getServerPrivateKeyPkcs1PemFilePath(), 0644), "/etc/rabbitmq/rabbitmq_key.pem")
+			.withCopyFileToContainer(MountableFile.forHostPath(tls.getServerCertificatePemFilePath(), 0644), "/etc/rabbitmq/rabbitmq_cert.pem")
+			.withCopyFileToContainer(MountableFile.forHostPath(tls.getCaCertificatePemFilePath(), 0644), "/etc/rabbitmq/ca_cert.pem")
 			.withRabbitMQConfig(MountableFile.forHostPath(configFile.getAbsolutePath()))
 			.withExposedPorts(AMQP_TLS_PORT)
 			.withStartupTimeout(Duration.ofMinutes(10))

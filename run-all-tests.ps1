@@ -18,7 +18,7 @@ Write-Host ("=" * 80) -ForegroundColor DarkGray
 Write-Host ""
 
 $unitStart = Get-Date
-mvn test -Dtest="io.github.fortunen.kete.unittests.**" -q
+mvn test -Dtest="io.github.fortunen.kete.unittests.**" -Dsurefire.skipAfterFailureCount=1 -q
 $unitExit = $LASTEXITCODE
 $unitDuration = (Get-Date) - $unitStart
 
@@ -45,7 +45,7 @@ Write-Host ("=" * 80) -ForegroundColor DarkGray
 Write-Host ""
 
 $destStart = Get-Date
-mvn test -Dtest="io.github.fortunen.kete.integrationtests.**" -q
+mvn test -Dtest="io.github.fortunen.kete.integrationtests.**" -Dsurefire.skipAfterFailureCount=1 -q
 $destExit = $LASTEXITCODE
 $destDuration = (Get-Date) - $destStart
 
@@ -72,7 +72,7 @@ Write-Host ("=" * 80) -ForegroundColor DarkGray
 Write-Host ""
 
 $e2eStart = Get-Date
-mvn test -Dtest="io.github.fortunen.kete.endtoendtests.**" -q
+mvn test -Dtest="io.github.fortunen.kete.endtoendtests.**" -Dsurefire.skipAfterFailureCount=1 -q
 $e2eExit = $LASTEXITCODE
 $e2eDuration = (Get-Date) - $e2eStart
 

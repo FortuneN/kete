@@ -11,7 +11,6 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.commons.configuration2.MapConfiguration;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 
 import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.DeliverCallback;

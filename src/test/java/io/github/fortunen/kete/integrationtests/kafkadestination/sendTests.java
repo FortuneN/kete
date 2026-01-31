@@ -9,7 +9,6 @@ import java.util.HashMap;
 import org.apache.commons.configuration2.MapConfiguration;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 
 import io.github.fortunen.kete.TlsMaterial;
 
