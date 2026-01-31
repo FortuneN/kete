@@ -1,6 +1,6 @@
 # =============================================================================
 #
-#   KETE │ Release to Main
+#   KETE │ Release Push
 #
 #   Creates a production release:
 #     • All tests (unit, integration, end-to-end)
@@ -11,7 +11,7 @@
 #
 #   Version format: yyyy.MM.dd.HH.mm (e.g., 2026.01.31.18.45)
 #
-#   Usage: .\run-on-merge-to-main.ps1
+#   Usage: .\run-on-release-push.ps1
 #
 # =============================================================================
 
@@ -133,7 +133,7 @@ function Test-PreviousStepsPassed {
 # Main Script
 # -----------------------------------------------------------------------------
 
-Write-Banner "KETE │ Release to Main" "Creating production release v$($script:Version)" "Green"
+Write-Banner "KETE │ Release Push" "Creating production release v$($script:Version)" "Green"
 
 Write-Host ""
 Write-Host "  ┌─────────────────────────────────────────────────────────────────────────┐" -ForegroundColor DarkGreen
@@ -143,7 +143,7 @@ Write-Host "  │                                                               
 Write-Host "  └─────────────────────────────────────────────────────────────────────────┘" -ForegroundColor DarkGreen
 Write-Host ""
 Write-Host "  Started:  $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')" -ForegroundColor DarkGray
-Write-Host "  Branch:   main" -ForegroundColor DarkGray
+Write-Host "  Branch:   release" -ForegroundColor DarkGray
 Write-Host "  Commit:   $(git rev-parse --short HEAD 2>$null)" -ForegroundColor DarkGray
 
 # =============================================================================
@@ -345,7 +345,7 @@ if (-not (Test-PreviousStepsPassed)) {
 ### 🚀 Quick Start
 
 ``````bash
-curl -sSL https://raw.githubusercontent.com/FortuneN/kete/main/quick-starts/http-webhook/docker-compose.yml | docker compose -f - up
+curl -sSL https://raw.githubusercontent.com/FortuneN/kete/release/quick-starts/http-webhook/docker-compose.yml | docker compose -f - up
 ``````
 
 ### 📚 Documentation

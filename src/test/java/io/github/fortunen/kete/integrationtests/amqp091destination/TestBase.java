@@ -123,6 +123,7 @@ public class TestBase {
 			.withCopyFileToContainer(MountableFile.forHostPath(tls.getCaCertificatePemFilePath()), "/etc/rabbitmq/ca_cert.pem")
 			.withRabbitMQConfig(MountableFile.forHostPath(configFile.getAbsolutePath()))
 			.withExposedPorts(AMQP_TLS_PORT)
+			.withStartupTimeout(Duration.ofMinutes(2))
 			.withLogConsumer(outputFrame -> System.out.println("[RABBITMQ] " + outputFrame.getUtf8String()));
 
 		container = rabbitContainer;
@@ -155,7 +156,7 @@ public class TestBase {
 	}
 
 	private void waitForRabbitMqReady() throws Exception {
-		await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).until(() -> {
+		await().atMost(Duration.ofMinutes(2)).pollInterval(Duration.ofSeconds(2)).until(() -> {
 			try {
 
 				var factory = new ConnectionFactory();

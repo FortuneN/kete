@@ -2,7 +2,7 @@ name: Release
 
 on:
   push:
-    branches: [main]
+    branches: [release]
   workflow_dispatch:
 
 permissions:
@@ -53,7 +53,7 @@ jobs:
       - name: Run Release Pipeline
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: pwsh -File ./run-on-merge-to-main.ps1
+        run: pwsh -File ./run-on-release-push.ps1
 
       - name: Setup Pages
         uses: actions/configure-pages@v4

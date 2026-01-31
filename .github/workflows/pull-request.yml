@@ -1,13 +1,13 @@
-name: PR Validation
+name: Pull Request
 
 on:
   pull_request:
-    branches: [develop, main]
+    branches: [develop, release]
   workflow_dispatch:
 
 jobs:
-  validate:
-    name: Validate PR
+  pull-request:
+    name: Pull Request
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -28,5 +28,5 @@ jobs:
       - name: Install MkDocs
         run: pip install mkdocs-material mkdocs-include-markdown-plugin
 
-      - name: Run PR Validation
-        run: pwsh -File ./run-on-pr.ps1
+      - name: Run Script
+        run: pwsh -File ./run-on-pull-request-push.ps1

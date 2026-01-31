@@ -176,14 +176,14 @@ public class TestBase {
 	}
 
 	private void waitForKafkaReady() throws Exception {
-		await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).until(() -> {
+		await().atMost(Duration.ofMinutes(2)).pollInterval(Duration.ofSeconds(2)).until(() -> {
 			try {
 				var props = new Properties();
 				props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, getBootstrapServers());
 				props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
 				props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, ByteArrayDeserializer.class.getName());
 				try (var consumer = new org.apache.kafka.clients.consumer.KafkaConsumer<String, byte[]>(props)) {
-					consumer.listTopics(Duration.ofSeconds(5));
+					consumer.listTopics(Duration.ofSeconds(10));
 					return true;
 				}
 			} catch (Exception e) {
@@ -193,7 +193,7 @@ public class TestBase {
 	}
 
 	private void waitForKafkaReadyWithSasl(String username, String password) throws Exception {
-		await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).until(() -> {
+		await().atMost(Duration.ofMinutes(2)).pollInterval(Duration.ofSeconds(2)).until(() -> {
 			try {
 				var props = new Properties();
 				props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, getSaslBootstrapServers());
@@ -203,7 +203,7 @@ public class TestBase {
 				props.put("sasl.mechanism", "PLAIN");
 				props.put("sasl.jaas.config", String.format("org.apache.kafka.common.security.plain.PlainLoginModule required username=\"%s\" password=\"%s\";", username, password));
 				try (var consumer = new org.apache.kafka.clients.consumer.KafkaConsumer<String, byte[]>(props)) {
-					consumer.listTopics(Duration.ofSeconds(5));
+					consumer.listTopics(Duration.ofSeconds(10));
 					return true;
 				}
 			} catch (Exception e) {
@@ -356,6 +356,9 @@ public class TestBase {
 			// but the server certificate's CN/SAN may not match the dynamic port-mapped addresses.
 			// The SERVER still enforces TLS/mTLS - this only affects client-side hostname verification.
 			this.withEnv("KAFKA_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM", "");
+
+			// Increase startup timeout for CI environments
+			this.withStartupTimeout(Duration.ofMinutes(2));
 
 			// Log output for debugging
 			this.withLogConsumer((OutputFrame outputFrame) -> System.out.print("[KAFKA] " + outputFrame.getUtf8String()));

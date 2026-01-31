@@ -40,4 +40,4 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Run Develop Pipeline
-        run: pwsh -File ./run-on-merge-to-develop.ps1
+        run: pwsh -File ./run-on-develop-push.ps1

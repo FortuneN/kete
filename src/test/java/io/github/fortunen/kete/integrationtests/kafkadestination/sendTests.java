@@ -45,7 +45,7 @@ public class sendTests extends TestBase {
 		// assert
 
 		try (var consumer = createConsumer("test-topic")) {
-			var records = consumer.poll(Duration.ofSeconds(10));
+			var records = consumer.poll(Duration.ofSeconds(20));
 			assertThat(records.count()).isEqualTo(1);
 
 			var record = records.iterator().next();
@@ -100,7 +100,7 @@ public class sendTests extends TestBase {
 		// assert
 
 		try (var consumer = createSslConsumer("test-topic", tls)) {
-			var records = consumer.poll(Duration.ofSeconds(10));
+			var records = consumer.poll(Duration.ofSeconds(20));
 			assertThat(records.count()).isEqualTo(1);
 
 			var record = records.iterator().next();
@@ -159,7 +159,7 @@ public class sendTests extends TestBase {
 		// assert
 
 		try (var consumer = createSslConsumer("test-topic", tls)) {
-			var records = consumer.poll(Duration.ofSeconds(10));
+			var records = consumer.poll(Duration.ofSeconds(20));
 			assertThat(records.count()).isEqualTo(1);
 
 			var record = records.iterator().next();

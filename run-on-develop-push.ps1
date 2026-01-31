@@ -210,7 +210,7 @@ $docsSuccess = $LASTEXITCODE -eq 0
 $duration = Format-Duration((Get-Date) - $stepStart)
 
 Write-TaskResult "Documentation validation" $docsSuccess $duration
-Write-TaskSkipped "Documentation deployment" "deploy on main branch only"
+Write-TaskSkipped "Documentation deployment" "deploy on release branch only"
 $script:Results["Docs: Validation"] = $docsSuccess
 
 if ($docsSuccess -and (Test-Path "site")) {
