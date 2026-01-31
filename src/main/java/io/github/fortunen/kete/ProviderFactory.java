@@ -95,7 +95,7 @@ public class ProviderFactory implements EventListenerProviderFactory, ProviderEv
 
 		if (ValidationUtils.isNull(configuration)) {
 
-			log.info("{} disabled", Constants.ID);
+			log.info("{} ({}) disabled", Constants.ID, Constants.VERSION);
 
 			for (var realm : realms) {
 
@@ -109,7 +109,7 @@ public class ProviderFactory implements EventListenerProviderFactory, ProviderEv
 			return;
 		}
 
-		log.info("{} initializing", Constants.ID);
+		log.info("{} ({}) initializing", Constants.ID, Constants.VERSION);
 
 		// metrics
 
