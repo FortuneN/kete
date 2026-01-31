@@ -289,7 +289,7 @@ function Build-And-Push-Image {
 
         $success = $push1 -and $push2
         Write-TaskResult "$Name [:$($script:Version) + :latest]" $success
-        return $
+        return $true;
 
     } else {
 
