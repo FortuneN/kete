@@ -8,7 +8,7 @@ Write-Host "  END-TO-END TESTS" -ForegroundColor Cyan
 Write-Host ("=" * 80) -ForegroundColor DarkGray
 Write-Host ""
 
-mvn clean test -Dtest="io.github.fortunen.kete.endtoendtests.**" -q
+mvn clean test -Dtest="io.github.fortunen.kete.endtoendtests.**" -Dsurefire.skipAfterFailureCount=1 -q
 $exitCode = $LASTEXITCODE
 
 $duration = (Get-Date) - $start
