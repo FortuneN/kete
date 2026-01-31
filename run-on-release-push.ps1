@@ -35,21 +35,28 @@ $script:JarName = "kete.jar"
 # -----------------------------------------------------------------------------
 
 function Write-Banner {
+
     param([string]$Title, [string]$Subtitle = "", [string]$Color = "Cyan")
+
     $width = 80
+
     Write-Host ""
     Write-Host ("═" * $width) -ForegroundColor $Color
     Write-Host ""
     Write-Host "  $Title" -ForegroundColor $Color
+
     if ($Subtitle) {
         Write-Host "  $Subtitle" -ForegroundColor DarkGray
     }
+
     Write-Host ""
     Write-Host ("═" * $width) -ForegroundColor $Color
 }
 
 function Write-StepHeader {
+
     param([int]$Number, [string]$Name)
+
     Write-Host ""
     Write-Host ""
     Write-Host "  ┌──────────────────────────────────────────────────────────────────────────┐" -ForegroundColor DarkCyan
@@ -60,31 +67,41 @@ function Write-StepHeader {
 }
 
 function Write-Task {
+
     param([string]$Message)
+
     Write-Host "    ► " -NoNewline -ForegroundColor DarkGray
     Write-Host $Message -ForegroundColor Gray
 }
 
 function Write-TaskResult {
+
     param([string]$Message, [bool]$Success, [string]$Duration = "")
+
     $icon = if ($Success) { "✓" } else { "✗" }
     $color = if ($Success) { "Green" } else { "Red" }
     $suffix = if ($Duration) { " [$Duration]" } else { "" }
+
     Write-Host "    $icon " -NoNewline -ForegroundColor $color
     Write-Host "$Message" -NoNewline -ForegroundColor White
     Write-Host $suffix -ForegroundColor DarkGray
 }
 
 function Write-TaskSkipped {
+
     param([string]$Message, [string]$Reason = "")
+
     $suffix = if ($Reason) { " ($Reason)" } else { "" }
+
     Write-Host "    ○ " -NoNewline -ForegroundColor Yellow
     Write-Host "$Message" -NoNewline -ForegroundColor Gray
     Write-Host $suffix -ForegroundColor DarkGray
 }
 
 function Format-Duration {
+
     param([TimeSpan]$Duration)
+
     if ($Duration.TotalMinutes -ge 1) {
         return "$([math]::Round($Duration.TotalMinutes, 1)) min"
     } else {
@@ -93,6 +110,7 @@ function Format-Duration {
 }
 
 function Write-SummaryTable {
+
     param([hashtable]$Results)
 
     $passed = @($Results.Values | Where-Object { $_ -eq $true }).Count
@@ -104,10 +122,12 @@ function Write-SummaryTable {
     Write-Host "  ├────────────────────────────────────────────┼──────────┤" -ForegroundColor DarkGray
 
     foreach ($key in $Results.Keys | Sort-Object) {
+
         $success = $Results[$key]
         $icon = if ($success) { "  ✓  " } else { "  ✗  " }
         $color = if ($success) { "Green" } else { "Red" }
         $paddedKey = ("  " + $key).PadRight(44)
+
         Write-Host "$paddedKey│" -NoNewline -ForegroundColor DarkGray
         Write-Host $icon -NoNewline -ForegroundColor $color
         Write-Host "    │" -ForegroundColor DarkGray
@@ -118,6 +138,7 @@ function Write-SummaryTable {
     Write-Host "  Results: " -NoNewline -ForegroundColor Gray
     Write-Host "$passed passed" -NoNewline -ForegroundColor Green
     Write-Host ", " -NoNewline -ForegroundColor Gray
+
     if ($failed -gt 0) {
         Write-Host "$failed failed" -ForegroundColor Red
     } else {
@@ -184,13 +205,19 @@ mvn package -DskipTests "-Drevision=$($script:Version)" -q 2>&1 | Out-Null
 $buildSuccess = $LASTEXITCODE -eq 0
 
 if ($buildSuccess -and (Test-Path "target/kete.jar")) {
+
     $jarSuccess = $true
     $jarSize = [math]::Round((Get-Item "target/kete.jar").Length / 1MB, 2)
+
     Write-TaskResult "kete.jar ($jarSize MB)" $jarSuccess
     Write-Task "Version $($script:Version) imprinted in META-INF/MANIFEST.MF"
+
 } else {
+
     $jarSuccess = $false
+
     Write-TaskResult "Failed to create JAR" $false
+
 }
 
 $duration = Format-Duration((Get-Date) - $stepStart)
@@ -251,6 +278,7 @@ function Build-And-Push-Image {
     $buildSuccess = $LASTEXITCODE -eq 0
 
     if ($buildSuccess) {
+
         Write-Task "Pushing $versionedImage"
         docker push $versionedImage 2>&1 | Out-Null
         $push1 = $LASTEXITCODE -eq 0
@@ -261,21 +289,28 @@ function Build-And-Push-Image {
 
         $success = $push1 -and $push2
         Write-TaskResult "$Name [:$($script:Version) + :latest]" $success
-        return $success
+        return $
+
     } else {
+
         Write-TaskResult "$Name build failed" $false
         return $false
+
     }
 }
 
 Write-StepHeader 3 "Build and Push Docker Images"
 
 if (-not (Test-PreviousStepsPassed)) {
+
     Write-TaskSkipped "Docker operations" "previous step failed"
+
     foreach ($image in $script:QuickStartImages) {
         $script:Results["3. Push: $($image.Name)"] = $false
     }
+
 } else {
+
     $stepStart = Get-Date
 
     foreach ($image in $script:QuickStartImages) {
@@ -284,6 +319,7 @@ if (-not (Test-PreviousStepsPassed)) {
     }
 
     $duration = Format-Duration((Get-Date) - $stepStart)
+
     Write-Host ""
     Write-Host "    Docker operations completed in $duration" -ForegroundColor DarkGray
 }
@@ -324,14 +360,16 @@ if (-not (Test-PreviousStepsPassed)) {
 Write-StepHeader 5 "Create Git Tag and GitHub Release"
 
 if (-not (Test-PreviousStepsPassed)) {
+
     Write-TaskSkipped "Release creation" "previous step failed"
     $script:Results["5. Git Tag"] = $false
     $script:Results["5. GitHub Release"] = $false
+
 } else {
+
     $stepStart = Get-Date
     $tagName = "v$($script:Version)"
 
-    # Create and push tag
     Write-Task "Creating Git tag $tagName..."
     git tag -a $tagName -m "Release $tagName" 2>&1 | Out-Null
     $tagCreated = $LASTEXITCODE -eq 0
@@ -347,7 +385,6 @@ if (-not (Test-PreviousStepsPassed)) {
         $script:Results["5. Git Tag"] = $false
     }
 
-    # Create GitHub Release
     if ($script:Results["5. Git Tag"]) {
         Write-Task "Creating GitHub Release..."
 
@@ -406,13 +443,16 @@ Write-Host "  ──────────────────────
 Write-Host ""
 
 if ($failedCount -eq 0) {
+
     Write-Host "  Release Artifact:" -ForegroundColor White
     Write-Host "    kete.jar (v$($script:Version))" -ForegroundColor Cyan
     Write-Host ""
     Write-Host "  Docker Images Published:" -ForegroundColor DarkGray
+
     foreach ($image in $script:QuickStartImages) {
         Write-Host "    $script:Registry/$($image.Name):$($script:Version)" -ForegroundColor DarkGray
     }
+
     Write-Host ""
     Write-Host "  Documentation:" -ForegroundColor DarkGray
     Write-Host "    https://fortunen.github.io/kete/" -ForegroundColor DarkGray
@@ -426,7 +466,9 @@ if ($failedCount -eq 0) {
     Write-Host "  ║   ✓  RELEASE v$($script:Version) PUBLISHED SUCCESSFULLY                   ║" -ForegroundColor Green
     Write-Host "  ║                                                                      ║" -ForegroundColor Green
     Write-Host "  ╚══════════════════════════════════════════════════════════════════════╝" -ForegroundColor Green
+
 } else {
+
     Write-Host "  ╔══════════════════════════════════════════════════════════════════════╗" -ForegroundColor Red
     Write-Host "  ║                                                                      ║" -ForegroundColor Red
     Write-Host "  ║   ✗  RELEASE FAILED                                                  ║" -ForegroundColor Red
@@ -434,6 +476,7 @@ if ($failedCount -eq 0) {
     Write-Host "  ║   $failedCount step(s) failed. Release was not completed.                   ║" -ForegroundColor Red
     Write-Host "  ║                                                                      ║" -ForegroundColor Red
     Write-Host "  ╚══════════════════════════════════════════════════════════════════════╝" -ForegroundColor Red
+
 }
 
 Write-Host ""
