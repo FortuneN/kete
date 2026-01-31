@@ -123,7 +123,7 @@ public class TestBase {
 			.withCopyFileToContainer(MountableFile.forHostPath(tls.getCaCertificatePemFilePath()), "/etc/rabbitmq/ca_cert.pem")
 			.withRabbitMQConfig(MountableFile.forHostPath(configFile.getAbsolutePath()))
 			.withExposedPorts(AMQP_TLS_PORT)
-			.withStartupTimeout(Duration.ofMinutes(2))
+			.withStartupTimeout(Duration.ofMinutes(4))
 			.withLogConsumer(outputFrame -> System.out.println("[RABBITMQ] " + outputFrame.getUtf8String()));
 
 		container = rabbitContainer;
