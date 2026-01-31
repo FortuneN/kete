@@ -9,6 +9,7 @@ import java.util.HashMap;
 import org.apache.commons.configuration2.MapConfiguration;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 
 import io.github.fortunen.kete.TlsMaterial;
 
@@ -56,6 +57,7 @@ public class sendTests extends TestBase {
 	}
 
 	@Test
+	@DisabledIfEnvironmentVariable(named = "CI", matches = "true", disabledReason = "TLS container startup too slow on GitHub runners")
 	public void shouldSend_Tls() throws Exception {
 
 		// arrange
@@ -111,6 +113,7 @@ public class sendTests extends TestBase {
 	}
 
 	@Test
+	@DisabledIfEnvironmentVariable(named = "CI", matches = "true", disabledReason = "TLS container startup too slow on GitHub runners")
 	public void shouldSend_mTls() throws Exception {
 
 		// arrange

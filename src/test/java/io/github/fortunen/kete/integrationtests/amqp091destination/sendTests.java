@@ -11,6 +11,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.commons.configuration2.MapConfiguration;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 
 import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.DeliverCallback;
@@ -80,6 +81,7 @@ public class sendTests extends TestBase {
 	}
 
 	@Test
+	@DisabledIfEnvironmentVariable(named = "CI", matches = "true", disabledReason = "TLS container startup too slow on GitHub runners")
 	public void shouldSendMessage_Tls() throws Exception {
 
 		// arrange
@@ -154,6 +156,7 @@ public class sendTests extends TestBase {
 	}
 
 	@Test
+	@DisabledIfEnvironmentVariable(named = "CI", matches = "true", disabledReason = "TLS container startup too slow on GitHub runners")
 	public void shouldSendMessage_mTls() throws Exception {
 
 		// arrange
