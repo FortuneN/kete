@@ -7,4 +7,5 @@ public class Configuration {
 
 	private Route[] routes = new Route[0];
 	private boolean metricsEnabled = false;
+	private boolean supportTheProject = true;
 }

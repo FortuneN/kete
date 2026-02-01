@@ -19,6 +19,7 @@ public final class ConfigurationUtils {
 	public static final String LOGGING = "logging";
 	public static final String ENABLED = "enabled";
 	public static final String METRICS = "metrics";
+	public static final String SUPPORT_THE_PROJECT_MESSAGE = "support-the-project-message";
 
 	public static MapConfiguration getSubSet(MapConfiguration configuration, String prefix) {
 
@@ -94,6 +95,10 @@ public final class ConfigurationUtils {
 
 		var metricsSubset = ConfigurationUtils.getSubSet(configValues, METRICS);
 		config.setMetricsEnabled(metricsSubset.getBoolean(ENABLED, false));
+
+		// support-the-project-message
+
+		config.setSupportTheProject(configValues.getBoolean(SUPPORT_THE_PROJECT_MESSAGE, true));
 
 		// routes
 

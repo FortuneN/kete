@@ -92,9 +92,6 @@ class WebSocketDestinationE2ETests extends EndToEndTestBase {
 		}
 	}
 
-	/**
-	 * Simple WebSocket server that captures all incoming messages
-	 */
 	private static class TestWebSocketServer extends WebSocketServer {
 		private final LinkedBlockingQueue<String> messages;
 

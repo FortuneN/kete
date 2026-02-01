@@ -6,7 +6,6 @@ import java.security.KeyStore;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
-import java.util.Base64;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Properties;
@@ -21,6 +20,7 @@ import javax.net.ssl.X509TrustManager;
 import org.apache.commons.configuration2.MapConfiguration;
 import org.apache.commons.lang3.StringUtils;
 
+import io.github.fortunen.kete.utils.Base64Utils;
 import io.github.fortunen.kete.utils.CertificateUtils;
 import io.github.fortunen.kete.utils.ConfigurationUtils;
 import io.github.fortunen.kete.utils.FileUtils;
@@ -355,7 +355,7 @@ public class TlsMaterial {
 
 			try (var stream = new ByteArrayOutputStream()) {
 				material.trustStore.store(stream, ValidationUtils.isNotNull(material.trustStorePassword) ? material.trustStorePassword.toCharArray() : null);
-				material.trustStoreBase64 = Base64.getMimeEncoder().encodeToString(stream.toByteArray());
+				material.trustStoreBase64 = Base64Utils.encode(stream.toByteArray());
 			}
 
 			if (writeFiles) {
@@ -379,7 +379,7 @@ public class TlsMaterial {
 
 			try (var keyStoreStream = new ByteArrayOutputStream()) {
 				material.keyStore.store(keyStoreStream, ValidationUtils.isNotNull(material.keyStorePassword) ? material.keyStorePassword.toCharArray() : null);
-				material.keyStoreBase64 = Base64.getMimeEncoder().encodeToString(keyStoreStream.toByteArray());
+				material.keyStoreBase64 = Base64Utils.encode(keyStoreStream.toByteArray());
 			}
 
 			if (writeFiles && material.keyStore.size() > 0) {
