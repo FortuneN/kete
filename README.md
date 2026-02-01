@@ -112,44 +112,6 @@ docker compose up -d
 
 [Browse →](https://github.com/FortuneN/kete/tree/release/quick-starts)
 
-## Installation
-
-### Option 1: Pre-built Docker Image (Recommended)
-
-Use the ready-to-go Keycloak image with KETE pre-installed:
-
-```bash
-docker pull ghcr.io/fortunen/kete/quick-start-keycloak:latest
-```
-
-### Option 2: Manual Installation
-
-1. **Download** the latest `kete.jar` from [Releases](https://github.com/FortuneN/kete/releases/latest)
-
-2. **Copy** to Keycloak's providers directory:
-   ```bash
-   cp kete.jar /opt/keycloak/providers/
-   ```
-
-3. **Rebuild** Keycloak (required for provider discovery):
-   ```bash
-   /opt/keycloak/bin/kc.sh build
-   ```
-
-4. **Configure** routes via environment variables or CLI arguments:
-   ```bash
-   /opt/keycloak/bin/kc.sh start \
-     --spi-events-listener-kete-routes-my-route-destination-kind=kafka \
-     --spi-events-listener-kete-routes-my-route-destination-bootstrap-servers=kafka:9092 \
-     --spi-events-listener-kete-routes-my-route-destination-topic=keycloak-events
-   ```
-
-5. **Enable** the event listener in Keycloak Admin Console:
-   - Go to **Realm Settings** → **Events** → **Event listeners**
-   - Add **kete** to the list
-
-For detailed configuration options, see the [User Guide](https://fortunen.github.io/kete/user-guide/configuration).
-
 ## Releases
 
 [See releases →](https://github.com/FortuneN/kete/releases)
