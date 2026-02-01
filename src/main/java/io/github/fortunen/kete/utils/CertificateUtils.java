@@ -31,8 +31,6 @@ public final class CertificateUtils {
 
 	public static final String X509_TYPE = "X.509";
 
-	public static final Base64.Decoder BASE64_DECODER = Base64.getMimeDecoder();
-
 	private static final JcaPEMKeyConverter PEM_KEY_CONVERTER = new JcaPEMKeyConverter();
 
 	private CertificateUtils() {}

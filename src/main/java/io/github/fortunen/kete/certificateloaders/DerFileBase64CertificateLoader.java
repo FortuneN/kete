@@ -4,6 +4,7 @@ import java.security.KeyStore;
 
 import io.github.fortunen.kete.CertificateLoader;
 import io.github.fortunen.kete.Component;
+import io.github.fortunen.kete.utils.Base64Utils;
 import io.github.fortunen.kete.utils.CertificateUtils;
 import io.github.fortunen.kete.utils.ValidationUtils;
 import lombok.Data;
@@ -36,7 +37,7 @@ public class DerFileBase64CertificateLoader extends CertificateLoader {
 
 		ValidationUtils.requireNonNull(keyStore, "keyStore is required");
 
-		var derBytes = CertificateUtils.BASE64_DECODER.decode(base64);
+		var derBytes = Base64Utils.decode(base64);
 		var certificate = CertificateUtils.parseDerCertificate(derBytes);
 
 		keyStore.load(null, passwordChars);

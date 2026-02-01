@@ -5,7 +5,7 @@ import java.security.KeyStore;
 
 import io.github.fortunen.kete.CertificateLoader;
 import io.github.fortunen.kete.Component;
-import io.github.fortunen.kete.utils.CertificateUtils;
+import io.github.fortunen.kete.utils.Base64Utils;
 import io.github.fortunen.kete.utils.ValidationUtils;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -35,7 +35,7 @@ public class JksFileBase64CertificateLoader extends CertificateLoader {
 
 		ValidationUtils.requireNonNull(keyStore, "keyStore is required");
 
-		var jksBytes = CertificateUtils.BASE64_DECODER.decode(base64);
+		var jksBytes = Base64Utils.decode(base64);
 
 		try (var stream = new ByteArrayInputStream(jksBytes)) {
 			keyStore.load(stream, passwordChars);

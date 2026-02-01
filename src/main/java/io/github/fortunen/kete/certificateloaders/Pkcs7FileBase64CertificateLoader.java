@@ -5,6 +5,7 @@ import java.security.KeyStore;
 
 import io.github.fortunen.kete.CertificateLoader;
 import io.github.fortunen.kete.Component;
+import io.github.fortunen.kete.utils.Base64Utils;
 import io.github.fortunen.kete.utils.CertificateUtils;
 import io.github.fortunen.kete.utils.ValidationUtils;
 import lombok.Data;
@@ -35,7 +36,7 @@ public class Pkcs7FileBase64CertificateLoader extends CertificateLoader {
 
 		ValidationUtils.requireNonNull(keyStore, "keyStore is required");
 
-		var pkcs7Bytes = CertificateUtils.BASE64_DECODER.decode(base64);
+		var pkcs7Bytes = Base64Utils.decode(base64);
 
 		keyStore.load(null, passwordChars);
 

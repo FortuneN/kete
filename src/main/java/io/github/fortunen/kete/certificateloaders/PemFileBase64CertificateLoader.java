@@ -5,6 +5,7 @@ import java.security.cert.Certificate;
 
 import io.github.fortunen.kete.CertificateLoader;
 import io.github.fortunen.kete.Component;
+import io.github.fortunen.kete.utils.Base64Utils;
 import io.github.fortunen.kete.utils.CertificateUtils;
 import io.github.fortunen.kete.utils.ValidationUtils;
 import lombok.Data;
@@ -37,7 +38,7 @@ public class PemFileBase64CertificateLoader extends CertificateLoader {
 
 		ValidationUtils.requireNonNull(keyStore, "keyStore is required");
 
-		var pemContent = new String(CertificateUtils.BASE64_DECODER.decode(base64));
+		var pemContent = new String(Base64Utils.decode(base64));
 		var certificates = CertificateUtils.parsePemCertificates(pemContent);
 		var privateKey = CertificateUtils.parsePemPrivateKey(pemContent);
 

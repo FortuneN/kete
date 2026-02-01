@@ -160,6 +160,10 @@ public class ProviderFactory implements EventListenerProviderFactory, ProviderEv
 
 		log.info("{} initialized", Constants.ID);
 
+		if (configuration.isSupportTheProject()) {
+			logSupportMessage();
+		}
+
 		MetricsUtils.recordActiveRoutes(serializersWithRoutesMap.values().stream().mapToInt(List::size).sum());
 
 		// listeners
@@ -319,5 +323,29 @@ public class ProviderFactory implements EventListenerProviderFactory, ProviderEv
 		if (ValidationUtils.isNotNull(configuration)) {
 			log.info("{} closed", Constants.ID);
 		}
+	}
+
+	public void logSupportMessage() {
+
+		var message = String.join("\n",
+			"",
+			"╔══════════════════════════════════════════════════════════════════════════════════╗",
+			"║ Thank you for using KETE. Please consider supporting the project (optional)      ║",
+			"╠══════════════════════════════════════════════════════════════════════════════════╣",
+			"║ Platform          │ Type                 │ Link                                  ║",
+			"╟───────────────────┼──────────────────────┼───────────────────────────────────────╢",
+			"║ GitHub (Stars)    │ Free                 │ https://github.com/FortuneN/kete      ║",
+			"║ GitHub (Sponsors) │ One-time / Recurring │ https://github.com/sponsors/FortuneN  ║",
+			"║ PayPal            │ One-time / Recurring │ https://paypal.me/FortuneNgwenya      ║",
+			"║ Buy Me a Coffee   │ One-time / Recurring │ https://buymeacoffee.com/FortuneN     ║",
+			"║ Ko-fi             │ One-time / Recurring │ https://ko-fi.com/FortuneN            ║",
+			"║ Liberapay         │ Recurring            │ https://liberapay.com/FortuneN        ║",
+			"╠══════════════════════════════════════════════════════════════════════════════════╣",
+			"║ To disable this message (recommended) : kete.support-the-project-message = false ║",
+			"╚══════════════════════════════════════════════════════════════════════════════════╝",
+			""
+		);
+
+		log.info(message);
 	}
 }
