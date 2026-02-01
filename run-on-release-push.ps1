@@ -387,27 +387,7 @@ if (-not (Test-PreviousStepsPassed)) {
 
     if ($script:Results["5. Git Tag"]) {
         Write-Task "Creating GitHub Release..."
-
-        $releaseNotes = @"
-## KETE Release $tagName
-
-### 📦 Artifact
-
-``kete.jar`` - Keycloak Event Transmitter Extension
-
-> Version $($script:Version) is imprinted in META-INF/MANIFEST.MF
-
-### 🚀 Quick Start
-
-``````bash
-curl -sSL https://raw.githubusercontent.com/FortuneN/kete/release/quick-starts/http-webhook/docker-compose.yml | docker compose -f - up
-``````
-
-### 📚 Documentation
-
-https://fortunen.github.io/kete/
-"@
-
+        $releaseNotes = ""
         gh release create $tagName --title "$tagName" --notes $releaseNotes "target/$script:JarName" 2>&1 | Out-Null
         $releaseCreated = $LASTEXITCODE -eq 0
         Write-TaskResult "GitHub Release $tagName" $releaseCreated
