@@ -2,17 +2,17 @@
   <img src="https://raw.githubusercontent.com/FortuneN/kete/release/logo/png/kete-hexagon-128.png" alt="KETE Logo" width="128" height="128">
 </p>
 
-<h1 align="center">KETE</h1>
+<h1 align="center"><strong>KETE</strong></h1>
 
 <p align="center">
-  <strong>Keycloak Events To Everywhere</strong><br>
+  Keycloak Events To Everywhere<br>
   A flexible, high-performance Keycloak extension that streams matched events to various destinations, in various formats.
 </p>
 
 <p align="center">
   <a href="https://github.com/FortuneN/kete/actions/workflows/release.yml"><img src="https://github.com/FortuneN/kete/actions/workflows/release.yml/badge.svg" alt="Build Status"></a>
-  <a href="https://github.com/FortuneN/kete/releases/latest"><img src="https://img.shields.io/github/v/release/FortuneN/kete?label=release" alt="Latest Release"></a>
-  <a href="https://www.apache.org/licenses/LICENSE-2.0"><img src="https://img.shields.io/badge/license-Apache%202.0-blue" alt="Apache 2.0 License"></a>
+  <a href="https://github.com/FortuneN/kete/releases/latest"><img src="https://img.shields.io/github/v/release/FortuneN/kete?label=Release" alt="Latest Release"></a>
+  <a href="https://www.apache.org/licenses/LICENSE-2.0"><img src="https://img.shields.io/badge/License-Apache%202.0-blue" alt="Apache 2.0 License"></a>
 </p>
 
 <p align="center">
