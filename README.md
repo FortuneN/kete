@@ -159,7 +159,7 @@ docker compose up -d
 | [AssertJ](https://assertj.github.io/doc/) | Fluent assertions for tests |
 | [Testcontainers](https://testcontainers.com/) | Docker-based integration testing |
 
-## Please consider supporting the project (Optional)
+## Please consider supporting the project
 
 | Platform | Type | Link |
 |----------|------|------|
