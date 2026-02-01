@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="logo/png/kete-hexagon-256.png" alt="KETE Logo" width="128" height="128">
+  <img src="https://raw.githubusercontent.com/FortuneN/kete/release/logo/png/kete-hexagon-256.png" alt="KETE Logo" width="128" height="128">
 </p>
 
 <h1 align="center">KETE</h1>
