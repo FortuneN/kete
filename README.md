@@ -12,6 +12,7 @@
 <p align="center">
   <a href="https://github.com/FortuneN/kete/actions/workflows/develop.yml"><img src="https://github.com/FortuneN/kete/actions/workflows/develop.yml/badge.svg" alt="Build Status"></a>
   <a href="https://github.com/FortuneN/kete/releases/latest"><img src="https://img.shields.io/github/v/release/FortuneN/kete?label=release" alt="Latest Release"></a>
+  <a href="https://www.apache.org/licenses/LICENSE-2.0"><img src="https://img.shields.io/badge/license-Apache%202.0-blue" alt="Apache 2.0 License"></a>
 </p>
 
 <p align="center">
