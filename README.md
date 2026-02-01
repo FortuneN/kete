@@ -8,7 +8,7 @@
 
 <p align="center">
   Keycloak Events To Everywhere<br>
-  A flexible, high-performance Keycloak extension that streams matched events to various destinations, in various formats.
+  A flexible, high-performance Keycloak extension that streams matched events to various destinations, in various formats
 </p>
 
 <p align="center">
