@@ -1,6 +1,29 @@
-# **KETE**
+<p align="center">
+  <img src="logo/png/kete-hexagon-256.png" alt="KETE Logo" width="128" height="128">
+</p>
 
-> **K**eycloak **E**vents **T**o **E**verywhere is a flexible, high-performance Keycloak extension that streams matched events to various destinations, in various formats.
+<h1 align="center">KETE</h1>
+
+<p align="center">
+  <strong>Keycloak Events To Everywhere</strong><br>
+  A flexible, high-performance Keycloak extension that streams matched events to various destinations, in various formats.
+</p>
+
+<p align="center">
+  <a href="https://github.com/FortuneN/kete/actions/workflows/develop.yml"><img src="https://github.com/FortuneN/kete/actions/workflows/develop.yml/badge.svg" alt="Build Status"></a>
+  <a href="https://github.com/FortuneN/kete/releases/latest"><img src="https://img.shields.io/github/v/release/FortuneN/kete?label=release" alt="Latest Release"></a>
+  <a href="https://github.com/FortuneN/kete/blob/develop/LICENSE"><img src="https://img.shields.io/github/license/FortuneN/kete" alt="License"></a>
+  <a href="https://github.com/FortuneN/kete/pkgs/container/kete%2Fquick-start-keycloak"><img src="https://img.shields.io/badge/docker-ghcr.io-blue?logo=docker" alt="Docker"></a>
+</p>
+
+<p align="center">
+  <a href="https://fortunen.github.io/kete/user-guide/overview">User Guide</a> •
+  <a href="https://fortunen.github.io/kete/developer-guide/overview">Developer Guide</a> •
+  <a href="https://github.com/FortuneN/kete/releases">Releases</a> •
+  <a href="https://github.com/FortuneN/kete/tree/release/quick-starts">Quick Starts</a>
+</p>
+
+---
 
 ## Use Cases
 
@@ -88,6 +111,44 @@ docker compose up -d
 ## Other Quick Starts
 
 [Browse →](https://github.com/FortuneN/kete/tree/release/quick-starts)
+
+## Installation
+
+### Option 1: Pre-built Docker Image (Recommended)
+
+Use the ready-to-go Keycloak image with KETE pre-installed:
+
+```bash
+docker pull ghcr.io/fortunen/kete/quick-start-keycloak:latest
+```
+
+### Option 2: Manual Installation
+
+1. **Download** the latest `kete.jar` from [Releases](https://github.com/FortuneN/kete/releases/latest)
+
+2. **Copy** to Keycloak's providers directory:
+   ```bash
+   cp kete.jar /opt/keycloak/providers/
+   ```
+
+3. **Rebuild** Keycloak (required for provider discovery):
+   ```bash
+   /opt/keycloak/bin/kc.sh build
+   ```
+
+4. **Configure** routes via environment variables or CLI arguments:
+   ```bash
+   /opt/keycloak/bin/kc.sh start \
+     --spi-events-listener-kete-routes-my-route-destination-kind=kafka \
+     --spi-events-listener-kete-routes-my-route-destination-bootstrap-servers=kafka:9092 \
+     --spi-events-listener-kete-routes-my-route-destination-topic=keycloak-events
+   ```
+
+5. **Enable** the event listener in Keycloak Admin Console:
+   - Go to **Realm Settings** → **Events** → **Event listeners**
+   - Add **kete** to the list
+
+For detailed configuration options, see the [User Guide](https://fortunen.github.io/kete/user-guide/configuration).
 
 ## Releases
 
