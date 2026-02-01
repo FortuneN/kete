@@ -2,7 +2,9 @@
   <img src="https://raw.githubusercontent.com/FortuneN/kete/release/logo/png/kete-hexagon-128.png" alt="KETE Logo" width="128" height="128">
 </p>
 
-<h1 align="center"><strong>KETE</strong></h1>
+<h1 align="center">
+  <strong>KETE</strong>
+</h1>
 
 <p align="center">
   Keycloak Events To Everywhere<br>
