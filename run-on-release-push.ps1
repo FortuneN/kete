@@ -154,7 +154,7 @@ function Test-PreviousStepsPassed {
 # Main Script
 # -----------------------------------------------------------------------------
 
-Write-Banner "KETE │ Release Push" "Creating production release v$($script:Version)" "Green"
+Write-Banner "KETE │ Release Push" "Creating production release $($script:Version)" "Green"
 
 Write-Host ""
 Write-Host "  ┌─────────────────────────────────────────────────────────────────────────┐" -ForegroundColor DarkGreen
@@ -368,7 +368,7 @@ if (-not (Test-PreviousStepsPassed)) {
 } else {
 
     $stepStart = Get-Date
-    $tagName = "v$($script:Version)"
+    $tagName = "$($script:Version)"
 
     Write-Task "Creating Git tag $tagName..."
     git tag -a $tagName -m "Release $tagName" 2>&1 | Out-Null
@@ -413,7 +413,7 @@ Write-Host ""
 Write-Host ""
 Write-Host ("═" * 80) -ForegroundColor Green
 Write-Host ""
-Write-Host "  RELEASE SUMMARY │ v$($script:Version)" -ForegroundColor Green
+Write-Host "  RELEASE SUMMARY │ $($script:Version)" -ForegroundColor Green
 Write-Host ""
 Write-Host ("═" * 80) -ForegroundColor Green
 
@@ -425,7 +425,7 @@ Write-Host ""
 if ($failedCount -eq 0) {
 
     Write-Host "  Release Artifact:" -ForegroundColor White
-    Write-Host "    kete.jar (v$($script:Version))" -ForegroundColor Cyan
+    Write-Host "    kete.jar ($($script:Version))" -ForegroundColor Cyan
     Write-Host ""
     Write-Host "  Docker Images Published:" -ForegroundColor DarkGray
 
@@ -438,12 +438,12 @@ if ($failedCount -eq 0) {
     Write-Host "    https://fortunen.github.io/kete/" -ForegroundColor DarkGray
     Write-Host ""
     Write-Host "  GitHub Release:" -ForegroundColor White
-    Write-Host "    https://github.com/FortuneN/kete/releases/tag/v$($script:Version)" -ForegroundColor Gray
+    Write-Host "    https://github.com/FortuneN/kete/releases/tag/$($script:Version)" -ForegroundColor Gray
     Write-Host ""
     Write-Host ""
     Write-Host "  ╔══════════════════════════════════════════════════════════════════════╗" -ForegroundColor Green
     Write-Host "  ║                                                                      ║" -ForegroundColor Green
-    Write-Host "  ║   ✓  RELEASE v$($script:Version) PUBLISHED SUCCESSFULLY                   ║" -ForegroundColor Green
+    Write-Host "  ║   ✓  RELEASE $($script:Version) PUBLISHED SUCCESSFULLY                    ║" -ForegroundColor Green
     Write-Host "  ║                                                                      ║" -ForegroundColor Green
     Write-Host "  ╚══════════════════════════════════════════════════════════════════════╝" -ForegroundColor Green
 
