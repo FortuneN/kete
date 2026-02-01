@@ -13,7 +13,6 @@
   <a href="https://github.com/FortuneN/kete/actions/workflows/develop.yml"><img src="https://github.com/FortuneN/kete/actions/workflows/develop.yml/badge.svg" alt="Build Status"></a>
   <a href="https://github.com/FortuneN/kete/releases/latest"><img src="https://img.shields.io/github/v/release/FortuneN/kete?label=release" alt="Latest Release"></a>
   <a href="https://github.com/FortuneN/kete/blob/develop/LICENSE"><img src="https://img.shields.io/github/license/FortuneN/kete" alt="License"></a>
-  <a href="https://github.com/FortuneN/kete/pkgs/container/kete%2Fquick-start-keycloak"><img src="https://img.shields.io/badge/docker-ghcr.io-blue?logo=docker" alt="Docker"></a>
 </p>
 
 <p align="center">
