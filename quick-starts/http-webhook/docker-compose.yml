@@ -19,7 +19,7 @@ services:
       - 8080:8080
     environment:
       kete.routes.quick-start.destination.kind: http
-      kete.routes.quick-start.destination.url: http://webhook:8080/keycloak-events
+      kete.routes.quick-start.destination.url: http://webhook:8090/keycloak-events
       kete.routes.quick-start.destination.method: POST
     depends_on:
       webhook:

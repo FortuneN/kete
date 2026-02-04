@@ -1,0 +1,33 @@
+services:
+
+  emqx:
+    image: ghcr.io/fortunen/kete/quick-start-emqx
+    ports:
+      - 1883:1883
+      - 8083:8083
+      - 8084:8084
+      - 18083:18083
+      - 61613:61613
+    environment:
+      EMQX_GATEWAY__STOMP__LISTENERS__TCP__DEFAULT__BIND: 61613
+      EMQX_GATEWAY__STOMP__ENABLE: true
+    healthcheck:
+      test: ["CMD", "emqx", "ctl", "status"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 10s
+
+  keycloak:
+    image: ghcr.io/fortunen/kete/quick-start-keycloak
+    command: start-dev
+    ports:
+      - 8080:8080
+    environment:
+      kete.routes.quick-start.destination.kind: stomp
+      kete.routes.quick-start.destination.host: emqx
+      kete.routes.quick-start.destination.port: 61613
+      kete.routes.quick-start.destination.destination: /topic/keycloak-events
+    depends_on:
+      emqx:
+        condition: service_healthy

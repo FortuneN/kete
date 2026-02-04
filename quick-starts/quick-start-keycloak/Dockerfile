@@ -6,6 +6,7 @@ FROM maven:3.9.9-eclipse-temurin-21-noble AS maven-build
 
 WORKDIR /src
 COPY pom.xml .
+RUN mvn clean
 RUN mvn -q -DskipTests dependency:go-offline
 COPY . .
 RUN mvn -B -DskipTests package

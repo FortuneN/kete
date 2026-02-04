@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/FortuneN/kete/release/logo/png/kete-hexagon-128.png" alt="KETE Logo" width="128" height="128">
+  <img src="https://raw.githubusercontent.com/FortuneN/kete/release/logo/png/kete-hexagon-128.png" alt="KETE Logo" width="128" height="128" />
 </p>
 
 <h1 align="center">
@@ -12,9 +12,15 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/FortuneN/kete/actions/workflows/release.yml"><img src="https://github.com/FortuneN/kete/actions/workflows/release.yml/badge.svg" alt="Build Status"></a>
-  <a href="https://github.com/FortuneN/kete/releases/latest"><img src="https://img.shields.io/github/v/release/FortuneN/kete?label=Release" alt="Latest Release"></a>
-  <a href="https://www.apache.org/licenses/LICENSE-2.0"><img src="https://img.shields.io/badge/License-Apache%202.0-blue" alt="Apache 2.0 License"></a>
+  <a href="https://github.com/FortuneN/kete/actions/workflows/release.yml">
+    <img src="https://github.com/FortuneN/kete/actions/workflows/release.yml/badge.svg" alt="Build Status"  >
+  </a>
+  <a href="https://github.com/FortuneN/kete/releases/latest">
+    <img src="https://img.shields.io/github/v/release/FortuneN/kete?label=Release" alt="Latest Release" />
+  </a>
+  <a href="https://www.apache.org/licenses/LICENSE-2.0">
+    <img src="https://img.shields.io/badge/License-Apache%202.0-blue" alt="Apache 2.0 License" />
+  </a>
 </p>
 
 <p align="center">
@@ -46,6 +52,8 @@
 | **AMQP 0-9-1** | RabbitMQ, LavinMQ, ... |
 | **MQTT 3.1.1** | Mosquitto, EMQX, HiveMQ, ... |
 | **MQTT 5.0** | Mosquitto, EMQX, HiveMQ, Azure Event Grid, ... |
+| **Redis** | Redis, ElastiCache, Azure Cache for Redis (Pub/Sub & Streams), ... |
+| **NATS** | NATS Server, JetStream, Synadia Cloud, ... |
 | **HTTP** | Webhooks, REST APIs, Azure Event Grid, ... |
 | **STOMP** | ActiveMQ, ... |
 | **WebSocket** | WebSocket Applications/Servers, ... |
@@ -146,6 +154,8 @@ docker compose up -d
 | [Pooled JMS](https://github.com/messaginghub/pooled-jms) | JMS connection pooling |
 | [Java-WebSocket](https://github.com/TooTallNate/Java-WebSocket) | WebSocket client library |
 | [OkHttp](https://square.github.io/okhttp/) | HTTP client with TLS support |
+| [Lettuce](https://lettuce.io/) | Redis client for Pub/Sub and Streams |
+| [NATS Java Client](https://github.com/nats-io/nats.java) | NATS and JetStream messaging |
 | [Nimbus OAuth SDK](https://connect2id.com/products/nimbus-oauth-openid-connect-sdk) | OAuth 2.0 client credentials |
 | [Resilience4j](https://resilience4j.readme.io/) | Retry patterns with exponential backoff |
 | [Jackson](https://github.com/FasterXML/jackson) | JSON, XML, YAML, CSV, CBOR, TOML, Smile, Properties |

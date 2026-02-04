@@ -59,14 +59,15 @@ public class KafkaDestination extends Destination<KafkaDestinationConfig> {
 
 		// headers
 
-		if (config.isMessageHeadersEnabled()) {
+		var headers = producerRecord.headers();
 
-			var headers = producerRecord.headers();
-
-			headers.add(Constants.MESSAGE_HEADER_EVENT_KIND, message.kindBytes());
-			headers.add(Constants.MESSAGE_HEADER_EVENT_TYPE, message.eventTypeBytes());
-			headers.add(Constants.MESSAGE_HEADER_CONTENT_TYPE, message.contentTypeBytes());
+		for (var entry : config.getCustomHeadersBytesEntrySet()) {
+			headers.add(entry.getKey(), entry.getValue());
 		}
+
+		headers.add(Constants.MESSAGE_HEADER_EVENT_KIND, message.kindBytes());
+		headers.add(Constants.MESSAGE_HEADER_EVENT_TYPE, message.eventTypeBytes());
+		headers.add(Constants.MESSAGE_HEADER_CONTENT_TYPE, message.contentTypeBytes());
 
 		// send
 

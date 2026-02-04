@@ -1,12 +1,14 @@
 services:
 
   emqx:
-    image: ghcr.io/fortunen/kete/quick-start-emqx
+    image: emqx/emqx:latest
     ports:
       - 1883:1883
       - 18083:18083
     environment:
       EMQX_ALLOW_ANONYMOUS: "true"
+      EMQX_AUTHORIZATION__NO_MATCH: allow
+      EMQX_AUTHORIZATION__SOURCES: "[]"
     healthcheck:
       test: ["CMD", "emqx_ctl", "status"]
       interval: 5s

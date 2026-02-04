@@ -58,14 +58,14 @@ public class tryParseDurationTests {
 		assertThat(ValidationUtils.tryParseDuration("P1D")).hasValue(Duration.ofDays(1));
 	}
 
-	// Digits only (milliseconds)
+	// Digits only (seconds)
 
 	@Test
-	public void shouldParseDigitsAsMilliseconds() {
+	public void shouldParseDigitsAsSeconds() {
 
 		// act & assert
 
-		assertThat(ValidationUtils.tryParseDuration("1500")).hasValue(Duration.ofMillis(1500));
+		assertThat(ValidationUtils.tryParseDuration("1500")).hasValue(Duration.ofSeconds(1500));
 	}
 
 	@Test

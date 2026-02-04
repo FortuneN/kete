@@ -38,7 +38,12 @@ class Mqtt5DestinationE2ETests extends EndToEndTestBase {
 
 		// arrange
 
-		mosquitto = new GenericContainer<>(DockerImageName.parse("eclipse-mosquitto:2.0")).withNetwork(createNetwork()).withNetworkAliases("mosquitto").withExposedPorts(MQTT_PORT).withCommand("mosquitto", "-c", "/mosquitto-no-auth.conf").withCopyToContainer(org.testcontainers.images.builder.Transferable.of("listener 1883\nallow_anonymous true\n"), "/mosquitto-no-auth.conf");
+		// Create temp file for mosquitto config
+		var tempConfigPath = java.nio.file.Files.createTempFile("mosquitto-", ".conf");
+		java.nio.file.Files.writeString(tempConfigPath, "listener 1883\nallow_anonymous true\n");
+		tempConfigPath.toFile().deleteOnExit();
+
+		mosquitto = new GenericContainer<>(DockerImageName.parse("eclipse-mosquitto:2.0")).withNetwork(createNetwork()).withNetworkAliases("mosquitto").withExposedPorts(MQTT_PORT).withCommand("mosquitto", "-c", "/mosquitto-no-auth.conf").withFileSystemBind(tempConfigPath.toString(), "/mosquitto-no-auth.conf", org.testcontainers.containers.BindMode.READ_ONLY);
 		mosquitto.start();
 		waitForMqttReady(mosquitto, MQTT_PORT);
 

@@ -14,9 +14,16 @@ Stream Keycloak events to MQTT 5 brokers.
 | System | Notes |
 |--------|-------|
 | **HiveMQ** | Full MQTT 5 support, enterprise features |
+| **HiveMQ Cloud** | Managed HiveMQ service |
 | **EMQX** | High-performance, full MQTT 5 |
+| **EMQX Cloud** | Managed EMQX service |
+| **NanoMQ** | Ultra-lightweight, full MQTT 5 |
 | **Eclipse Mosquitto 2.0+** | Open-source, MQTT 5 since v2.0 |
 | **VerneMQ** | Distributed, full MQTT 5 |
+| **RabbitMQ** | Via `rabbitmq_mqtt` plugin (3.13+) |
+| **ActiveMQ Artemis** | Multi-protocol broker (v2.28+) |
+| **Azure Event Grid** | MQTT Broker feature, full MQTT 5 |
+| **Solace PubSub+** | Native MQTT 5 support |
 
 Not all brokers support MQTT 5. Azure IoT Hub and older Mosquitto versions only support MQTT 3. For broader compatibility, see [mqtt-3](mqtt-3.md).
 
@@ -135,13 +142,24 @@ Available variables: `${realmLowerCase}`, `${realmUpperCase}`, `${eventTypeLower
 | `retained` | `false` | Retain message on broker | `true` |
 | `client-id-prefix` | `kete-` | Client ID prefix (UUID appended) | `keycloak-` |
 | `clean-session` | `true` | Clean start (MQTT 5 term) | `false` |
-| `connection-timeout` | `10` | Connection timeout in seconds | `60` |
-| `keep-alive-interval` | `60` | Keep-alive ping interval in seconds | `120` |
+| `connection-timeout-seconds` | `10` | Connection timeout in seconds | `60` |
+| `keep-alive-interval-seconds` | `60` | Keep-alive ping interval in seconds | `120` |
 | `username` | `""` | MQTT username | `admin` |
 | `password` | `""` | MQTT password | `secret123` |
-| `message-headers-enabled` | `true` | Include event metadata as user properties | `false` |
-| `min-pool-size` | `5` | Minimum connections in pool | `10` |
-| `max-pool-size` | `20` | Maximum connections in pool | `50` |
+| `pool.min-idle` | `1` | Minimum idle connections in pool | `5` |
+| `pool.max-idle` | `10` | Maximum idle connections in pool | `20` |
+| `pool.max-total` | `20` | Maximum total connections in pool | `50` |
+
+### Custom Headers (User Properties)
+
+MQTT 5 supports custom headers via User Properties:
+
+```bash
+kete.routes.mqtt.destination.headers.X-Source=keycloak
+kete.routes.mqtt.destination.headers.X-Environment=production
+```
+
+These are included as MQTT 5 User Properties in the message.
 
 ### TLS Properties
 

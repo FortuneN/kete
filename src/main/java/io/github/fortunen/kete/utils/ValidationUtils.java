@@ -948,19 +948,19 @@ public final class ValidationUtils {
 				return Optional.of(Duration.parse(value));
 			}
 
-			// milliseconds (digits only), e.g. "1500"
+// seconds (digits only), e.g. "1500"
 
-			var allDigits = true;
+		var allDigits = true;
 
-			for (var i = 0; i < lower.length(); i++) {
-				if (!Character.isDigit(lower.charAt(i))) {
-					allDigits = false;
-					break;
-				}
+		for (var i = 0; i < lower.length(); i++) {
+			if (!Character.isDigit(lower.charAt(i))) {
+				allDigits = false;
+				break;
 			}
+		}
 
-			if (allDigits) {
-				return Optional.of(Duration.ofMillis(Long.parseLong(lower)));
+		if (allDigits) {
+			return Optional.of(Duration.ofSeconds(Long.parseLong(lower)));
 			}
 
 			// nanoseconds, e.g. "10ns"

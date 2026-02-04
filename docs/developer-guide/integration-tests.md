@@ -7,6 +7,8 @@
 - [Debugging Integration Tests](#debugging-integration-tests)
 - [Test Categories](#test-categories)
 - [Writing New Integration Tests](#writing-new-integration-tests)
+- [Container File Mounting Best Practices](#container-file-mounting-best-practices)
+- [Troubleshooting](#troubleshooting)
 
 
 
@@ -158,6 +160,28 @@ class MyIntegrationTests {
 }
 ```
 
+### Mounting Configuration Files
+
+**CRITICAL**: When tests require custom configuration files for containers (broker configs, certificates, etc.), **ALWAYS use `withFileSystemBind()` with `BindMode.READ_ONLY`**. NEVER use `withCopyToContainer()`.
+
+```java
+// Step 1: Create temp directory
+var tempDir = Files.createTempDirectory("test-config-");
+tempDir.toFile().deleteOnExit();
+
+// Step 2: Prepare configuration files
+var configPath = tempDir.resolve("broker.xml");
+Files.writeString(configPath, brokerXmlContent);
+configPath.toFile().deleteOnExit();
+
+// Step 3: Mount with READ_ONLY
+@Container
+static GenericContainer<?> broker = new GenericContainer<>(imageName)
+    .withFileSystemBind(configPath.toString(), "/etc/broker.xml", BindMode.READ_ONLY);
+```
+
+See [Container File Mounting Best Practices](#container-file-mounting-best-practices) for complete details.
+
 ### Key Configuration Environment Variables
 
 | Variable | Description | Example |
@@ -188,6 +212,180 @@ static RabbitMQContainer rabbitmq = new RabbitMQContainer(DockerImageName.parse(
 
 
 
+## Container File Mounting Best Practices
+
+### Why Mount Instead of Copy?
+
+**ALWAYS use `withFileSystemBind()` for mounting files into containers. NEVER use `withCopyToContainer()`.**
+
+| Aspect | File Mounting (`withFileSystemBind`) | File Copying (`withCopyToContainer`) |
+|--------|--------------------------------------|--------------------------------------|
+| **Security** | Supports `READ_ONLY` mode, preventing container writes to host | No read-only option, container can modify host files |
+| **Transparency** | Files remain on host filesystem, easy to inspect | Files copied into container image layer |
+| **Cleanup** | Automatic with `deleteOnExit()` | Requires manual cleanup or layer management |
+| **Performance** | Direct filesystem access | Requires image layer creation |
+| **Best Practice** |  **RECOMMENDED** |  **DEPRECATED in this codebase** |
+
+### Standard Mounting Pattern
+
+Use this pattern consistently across all TestBase classes:
+
+```java
+// Step 1: Create temporary directory
+var tempDir = Files.createTempDirectory("container-config-");
+tempDir.toFile().deleteOnExit();
+
+// Step 2: Create/copy files to temp directory
+var configPath = tempDir.resolve("config.xml");
+Files.writeString(configPath, configContent);
+configPath.toFile().deleteOnExit();
+
+var keystorePath = tempDir.resolve("keystore.jks");
+Files.copy(Path.of(sourceKeystorePath), keystorePath);
+keystorePath.toFile().deleteOnExit();
+
+// Step 3: Mount files with READ_ONLY mode
+container = new GenericContainer<>(imageName)
+    .withFileSystemBind(configPath.toString(), "/container/path/config.xml", BindMode.READ_ONLY)
+    .withFileSystemBind(keystorePath.toString(), "/container/path/keystore.jks", BindMode.READ_ONLY);
+```
+
+### Complete Example: AMQP1 with TLS
+
+From `io.github.fortunen.kete.integrationtests.amqp1destination.TestBase`:
+
+```java
+private void startActiveMqArtemisWithTls(TlsMaterial tls, boolean requireClientAuth) throws Exception {
+    
+    // Create broker configuration XML
+    var brokerXml = createArtemisBrokerXml(
+        tls.getKeyStorePassword(),
+        tls.getTrustStorePassword(),
+        requireClientAuth
+    );
+
+    // Create temp directory for all config files
+    var tempDir = Files.createTempDirectory("artemis-tls-");
+    tempDir.toFile().deleteOnExit();
+
+    // Write broker.xml configuration
+    var brokerXmlPath = tempDir.resolve("broker.xml");
+    Files.writeString(brokerXmlPath, brokerXml);
+    brokerXmlPath.toFile().deleteOnExit();
+
+    // Copy keystore and truststore to temp directory
+    var keyStorePath = tempDir.resolve("keystore.jks");
+    Files.copy(Path.of(tls.getServerKeyStoreFilePath()), keyStorePath);
+    keyStorePath.toFile().deleteOnExit();
+
+    var trustStorePath = tempDir.resolve("truststore.jks");
+    Files.copy(Path.of(tls.getTrustStoreFilePath()), trustStorePath);
+    trustStorePath.toFile().deleteOnExit();
+
+    // Mount all files with READ_ONLY mode
+    container = new GenericContainer<>(DockerImageName.parse("apache/activemq-artemis:2.40.0-alpine"))
+        .withEnv("ARTEMIS_USER", DEFAULT_USERNAME)
+        .withEnv("ARTEMIS_PASSWORD", DEFAULT_PASSWORD)
+        .withEnv("ANONYMOUS_LOGIN", "true")
+        .withFileSystemBind(brokerXmlPath.toString(), 
+            "/var/lib/artemis-instance/etc-override/broker.xml", 
+            BindMode.READ_ONLY)
+        .withFileSystemBind(keyStorePath.toString(), 
+            "/var/lib/artemis-instance/etc-override/keystore.jks", 
+            BindMode.READ_ONLY)
+        .withFileSystemBind(trustStorePath.toString(), 
+            "/var/lib/artemis-instance/etc-override/truststore.jks", 
+            BindMode.READ_ONLY)
+        .withExposedPorts(AMQP_PORT, AMQPS_PORT, 8161)
+        .waitingFor(Wait.forLogMessage(".*AMQ221007.*", 1))
+        .withStartupTimeout(Duration.ofMinutes(10));
+
+    container.start();
+}
+```
+
+### Inline Temporary File Pattern
+
+For simple single-file configurations in E2E tests:
+
+```java
+// Create temp file for mosquitto config
+var tempConfigPath = Files.createTempFile("mosquitto-", ".conf");
+Files.writeString(tempConfigPath, "listener 1883\nallow_anonymous true\n");
+tempConfigPath.toFile().deleteOnExit();
+
+mosquitto = new GenericContainer<>(DockerImageName.parse("eclipse-mosquitto:2.0"))
+    .withNetwork(createNetwork())
+    .withNetworkAliases("mosquitto")
+    .withExposedPorts(MQTT_PORT)
+    .withCommand("mosquitto", "-c", "/mosquitto-no-auth.conf")
+    .withFileSystemBind(tempConfigPath.toString(), 
+        "/mosquitto-no-auth.conf", 
+        BindMode.READ_ONLY);
+```
+
+### Key Implementation Details
+
+1. **Always use `BindMode.READ_ONLY`**: Prevents containers from modifying host files
+2. **Call `deleteOnExit()` on both directory and files**: Ensures cleanup after JVM shutdown
+3. **Use absolute paths**: `toString()` converts `Path` to absolute string path
+4. **Group related files in one temp directory**: Easier management and cleanup
+5. **Mount early in container builder chain**: Before `withExposedPorts()`, `withCommand()`, etc.
+
+### Pattern Variations by Use Case
+
+#### Multiple Configuration Files (STOMP, AMQP1, WebSocket)
+```java
+var tempDir = Files.createTempDirectory("prefix-");
+tempDir.toFile().deleteOnExit();
+
+var file1 = tempDir.resolve("config.xml");
+var file2 = tempDir.resolve("keystore.jks");
+var file3 = tempDir.resolve("truststore.jks");
+
+// Write/copy files...
+// Mount all with withFileSystemBind()
+```
+
+#### Single Config File (MQTT E2E)
+```java
+var tempConfigPath = Files.createTempFile("mosquitto-", ".conf");
+Files.writeString(tempConfigPath, configContent);
+tempConfigPath.toFile().deleteOnExit();
+
+container.withFileSystemBind(tempConfigPath.toString(), "/path", BindMode.READ_ONLY);
+```
+
+#### Dynamic Configuration from TLS Material (Pulsar, AMQP1, STOMP)
+```java
+var brokerConfig = createBrokerConfig(
+    tls.getKeyStorePassword(),
+    tls.getTrustStorePassword(),
+    requireClientAuth
+);
+Files.writeString(hostBrokerConf, brokerConfig);
+```
+
+### Common Pitfalls to Avoid
+
+|  Don't | ✅ Do |
+|--------|-------|
+| `withCopyToContainer(Transferable, "/path")` | `withFileSystemBind(hostPath, "/path", BindMode.READ_ONLY)` |
+| Skip `deleteOnExit()` calls | Always call `deleteOnExit()` on files and directories |
+| Use relative paths | Always use absolute paths (`.toString()` on `Path`) |
+| Mount without `BindMode` parameter | Always specify `BindMode.READ_ONLY` |
+| Create files in random locations | Use `Files.createTempDirectory()` for organization |
+
+### Why This Matters
+
+- **Security**: READ_ONLY mounts prevent containers from tampering with host files
+- **Reliability**: Consistent pattern across all test classes reduces bugs
+- **Cross-platform**: Works identically on Windows, Linux, macOS
+- **Testcontainers Best Practice**: Aligned with Testcontainers recommended patterns
+- **Code Review**: Easy to verify correct implementation
+
+
+
 ## Troubleshooting
 
 ### Container Fails to Start
@@ -196,7 +394,7 @@ static RabbitMQContainer rabbitmq = new RabbitMQContainer(DockerImageName.parse(
 - Check for port conflicts
 - Increase container startup timeout:
   ```java
-  keycloak.withStartupTimeout(Duration.ofMinutes(5));
+  keycloak.withStartupTimeout(Duration.ofMinutes(10));
   ```
 
 ### Provider Not Loading
@@ -214,8 +412,16 @@ static RabbitMQContainer rabbitmq = new RabbitMQContainer(DockerImageName.parse(
 - Check destination container is reachable (network aliases)
 - Enable debug logging in the provider
 
+### File Mounting Issues
+
+- **File not found in container**: Verify absolute path is used (`.toString()` on Path)
+- **Permission denied**: Check file permissions on host, ensure READ_ONLY is appropriate
+- **Container can't read file**: Ensure file exists before `container.start()`
+- **Temp files persist**: Verify `deleteOnExit()` called on both files and directories
+
 
 
 ## Related Documentation
 
 - [Testing Reference](testing.md)
+- [Test Patterns and Conventions](test-patterns-and-conventions.md)

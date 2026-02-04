@@ -14,12 +14,14 @@ Stream Keycloak events to AMQP 1 brokers.
 | System | Notes |
 |--------|-------|
 | **Apache ActiveMQ Artemis** | Primary target, full JMS 2.0 support |
+| **RabbitMQ 4.0+** | Native AMQP 1.0 support (no plugin required) |
 | **Azure Service Bus** | Auto-enables TLS when hostname contains `servicebus` |
 | **Azure Event Hubs** | Via AMQP 1.0 |
 | **Apache Qpid** | Full AMQP 1.0 support |
 | **Amazon MQ for ActiveMQ** | Classic and Artemis flavors |
+| **Solace PubSub+** | Native AMQP 1.0 support |
 
-This destination uses AMQP 1.0 (OASIS standard). For RabbitMQ or LavinMQ, see the [AMQP 0-9-1 destination](amqp-0.9.1.md) (`kind=amqp-0.9.1`).
+This destination uses AMQP 1.0 (OASIS standard). For RabbitMQ 3.x or LavinMQ, see the [AMQP 0-9-1 destination](amqp-0.9.1.md) (`kind=amqp-0.9.1`).
 
 
 
@@ -110,14 +112,25 @@ Available variables: `${realmLowerCase}`, `${realmUpperCase}`, `${eventTypeLower
 | `password` | `""` | AMQP password | `secret123` |
 | `delivery-mode` | `persistent` | Message durability: `persistent` or `non-persistent` | `persistent` |
 | `priority` | `4` | Message priority (0-9) | `7` |
-| `time-to-live` | `0` | Message TTL in milliseconds (0 = never expires) | `60000` |
-| `idle-timeout` | `60000` | Connection idle timeout in milliseconds for keep-alive (0 = disabled) | `30000` |
-| `message-headers-enabled` | `true` | Include event metadata as JMS properties | `false` |
-| `min-pool-size` | `5` | Minimum connections in pool | `10` |
-| `max-pool-size` | `20` | Maximum connections in pool | `50` |
+| `time-to-live-seconds` | `0` | Message TTL in seconds (0 = never expires) | `60` |
+| `idle-timeout-seconds` | `60` | Connection idle timeout in seconds for keep-alive (0 = disabled) | `30` |
+| `pool.min-idle` | `1` | Minimum idle connections in pool | `5` |
+| `pool.max-idle` | `10` | Maximum idle connections in pool | `20` |
+| `pool.max-total` | `20` | Maximum total connections in pool | `50` |
 | `tls.*` | - | TLS/SSL configuration | See [TLS & mTLS](overview.md#tls-mtls) |
 
 **Note**: Retry configuration (`retry.enabled`, `retry.max-attempts`, `retry.wait-duration`) is configured at the route level. See [Routes - Retry](../routes.md#retry) for details.
+
+### Custom Headers
+
+Custom headers can be added to AMQP 1.0 messages:
+
+```bash
+kete.routes.amqp.destination.headers.X-Source=keycloak
+kete.routes.amqp.destination.headers.X-Environment=production
+```
+
+Headers are included in the JMS message properties.
 
 
 
@@ -237,7 +250,7 @@ kete.routes.priority-events.destination.port=5672
 kete.routes.priority-events.destination.destination-name=keycloak.high-priority
 kete.routes.priority-events.destination.delivery-mode=persistent
 kete.routes.priority-events.destination.priority=9
-kete.routes.priority-events.destination.time-to-live=300000
+kete.routes.priority-events.destination.time-to-live-seconds=300
 ```
 
 ### Example 5: Non-Persistent High-Throughput
@@ -281,7 +294,7 @@ kete.routes.amqp.destination.delivery-mode=non-persistent
 ```bash
 # High priority, expires in 5 minutes
 kete.routes.amqp.destination.priority=9
-kete.routes.amqp.destination.time-to-live=300000
+kete.routes.amqp.destination.time-to-live-seconds=300
 ```
 
 

@@ -48,18 +48,20 @@ public class Amqp091Destination extends Destination<Amqp091DestinationConfig> {
 
 		// headers
 
-		if (config.isMessageHeadersEnabled()) {
+		builder.contentType(message.contentType());
 
-			var headers = new HashMap<String, Object>();
+		var headers = new HashMap<String, Object>();
 
-			builder.contentType(message.contentType());
-			headers.put(Constants.MESSAGE_HEADER_EVENT_TYPE, message.eventType());
-			headers.put(Constants.MESSAGE_HEADER_EVENT_KIND, message.kind());
-
-			builder.headers(headers);
+		for (var entry : config.getCustomHeadersEntrySet()) {
+			headers.put(entry.getKey(), entry.getValue());
 		}
 
-		// delivery mode
+		headers.put(Constants.MESSAGE_HEADER_EVENT_KIND, message.kind());
+		headers.put(Constants.MESSAGE_HEADER_EVENT_TYPE, message.eventType());
+
+		builder.headers(headers);
+
+		// deliveryMode
 
 		builder.deliveryMode(config.getDeliveryMode());
 
@@ -67,10 +69,10 @@ public class Amqp091Destination extends Destination<Amqp091DestinationConfig> {
 
 		builder.priority(config.getPriority());
 
-		// time-to-live (expiration)
+		// timeToLiveSeconds
 
-		if (config.isHasTimeToLive() && config.getTimeToLive() > 0) {
-			builder.expiration(String.valueOf(config.getTimeToLive()));
+		if (config.isHasTimeToLiveSeconds() && config.getTimeToLiveSeconds() > 0) {
+			builder.expiration(String.valueOf(config.getTimeToLiveSeconds() * 1000));
 		}
 
 		// publish

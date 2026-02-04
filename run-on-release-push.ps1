@@ -159,7 +159,7 @@ Write-Banner "KETE │ Release Push" "Creating production release $($script:Vers
 Write-Host ""
 Write-Host "  ┌─────────────────────────────────────────────────────────────────────────┐" -ForegroundColor DarkGreen
 Write-Host "  │                                                                         │" -ForegroundColor DarkGreen
-Write-Host "  │   VERSION:  $($script:Version)                                              │" -ForegroundColor DarkGreen
+Write-Host "  │   VERSION:  $($script:Version)                                          │" -ForegroundColor DarkGreen
 Write-Host "  │                                                                         │" -ForegroundColor DarkGreen
 Write-Host "  └─────────────────────────────────────────────────────────────────────────┘" -ForegroundColor DarkGreen
 Write-Host ""
@@ -239,7 +239,7 @@ $script:QuickStartImages = @(
     @{ Name = "quick-start-rabbitmq"; Dockerfile = "quick-starts/amqp-0.9.1-rabbitmq/rabbitmq/Dockerfile"; Context = "quick-starts/amqp-0.9.1-rabbitmq/rabbitmq" }
     @{ Name = "quick-start-lavinmq"; Dockerfile = "quick-starts/amqp-0.9.1-lavinmq/lavinmq/Dockerfile"; Context = "quick-starts/amqp-0.9.1-lavinmq/lavinmq" }
 
-    # AMQP 1.0 images
+    # AMQP 1.0 images (Note: amqp-1-rabbitmq reuses quick-start-rabbitmq with plugin enabled via command)
 
     @{ Name = "quick-start-activemq"; Dockerfile = "quick-starts/amqp-1-activemq/activemq/Dockerfile"; Context = "quick-starts/amqp-1-activemq/activemq" }
     @{ Name = "quick-start-qpid"; Dockerfile = "quick-starts/amqp-1-qpid/qpid/Dockerfile"; Context = "quick-starts/amqp-1-qpid/qpid" }
@@ -260,6 +260,12 @@ $script:QuickStartImages = @(
     # HTTP images
 
     @{ Name = "quick-start-http-echo"; Dockerfile = "quick-starts/http-webhook/http-echo/Dockerfile"; Context = "quick-starts/http-webhook/http-echo" }
+
+    # Redis images
+
+    @{ Name = "quick-start-redis"; Dockerfile = "quick-starts/redis-pubsub-redis/redis/Dockerfile"; Context = "quick-starts/redis-pubsub-redis/redis" }
+    @{ Name = "quick-start-dragonfly"; Dockerfile = "quick-starts/redis-pubsub-dragonfly/dragonfly/Dockerfile"; Context = "quick-starts/redis-pubsub-dragonfly/dragonfly" }
+    @{ Name = "quick-start-keydb"; Dockerfile = "quick-starts/redis-pubsub-keydb/keydb/Dockerfile"; Context = "quick-starts/redis-pubsub-keydb/keydb" }
 )
 
 function Build-And-Push-Image {
@@ -443,7 +449,7 @@ if ($failedCount -eq 0) {
     Write-Host ""
     Write-Host "  ╔══════════════════════════════════════════════════════════════════════╗" -ForegroundColor Green
     Write-Host "  ║                                                                      ║" -ForegroundColor Green
-    Write-Host "  ║   ✓  RELEASE $($script:Version) PUBLISHED SUCCESSFULLY                    ║" -ForegroundColor Green
+    Write-Host "  ║   ✓  RELEASE $($script:Version) PUBLISHED SUCCESSFULLY               ║" -ForegroundColor Green
     Write-Host "  ║                                                                      ║" -ForegroundColor Green
     Write-Host "  ╚══════════════════════════════════════════════════════════════════════╝" -ForegroundColor Green
 
@@ -453,7 +459,7 @@ if ($failedCount -eq 0) {
     Write-Host "  ║                                                                      ║" -ForegroundColor Red
     Write-Host "  ║   ✗  RELEASE FAILED                                                  ║" -ForegroundColor Red
     Write-Host "  ║                                                                      ║" -ForegroundColor Red
-    Write-Host "  ║   $failedCount step(s) failed. Release was not completed.                   ║" -ForegroundColor Red
+    Write-Host "  ║   $failedCount step(s) failed. Release was not completed.            ║" -ForegroundColor Red
     Write-Host "  ║                                                                      ║" -ForegroundColor Red
     Write-Host "  ╚══════════════════════════════════════════════════════════════════════╝" -ForegroundColor Red
 

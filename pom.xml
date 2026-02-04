@@ -95,6 +95,11 @@
 			<version>4.1.1</version>
 		</dependency>
 		<dependency>
+			<groupId>org.apache.pulsar</groupId>
+			<artifactId>pulsar-client</artifactId>
+			<version>3.3.3</version>
+		</dependency>
+		<dependency>
 			<groupId>com.rabbitmq</groupId>
 			<artifactId>amqp-client</artifactId>
 			<version>5.25.0</version>
@@ -193,6 +198,16 @@
 			<groupId>org.bouncycastle</groupId>
 			<artifactId>bcpkix-jdk18on</artifactId>
 			<version>1.80</version>
+		</dependency>
+		<dependency>
+			<groupId>io.lettuce</groupId>
+			<artifactId>lettuce-core</artifactId>
+			<version>6.5.3.RELEASE</version>
+		</dependency>
+		<dependency>
+			<groupId>io.nats</groupId>
+			<artifactId>jnats</artifactId>
+			<version>2.20.5</version>
 		</dependency>
 
 		<!-- custom : test -->
@@ -689,6 +704,16 @@
 								<relocation>
 									<pattern>net.jcip</pattern>
 									<shadedPattern>io.github.fortunen.kete.shaded.jcip</shadedPattern>
+								</relocation>
+								<!-- Lettuce Redis client -->
+								<relocation>
+									<pattern>io.lettuce</pattern>
+									<shadedPattern>io.github.fortunen.kete.shaded.lettuce</shadedPattern>
+								</relocation>
+								<!-- NATS client -->
+								<relocation>
+									<pattern>io.nats</pattern>
+									<shadedPattern>io.github.fortunen.kete.shaded.nats</shadedPattern>
 								</relocation>
 								<!-- Jakarta JMS API (qpid-jms transitive) -->
 								<relocation>

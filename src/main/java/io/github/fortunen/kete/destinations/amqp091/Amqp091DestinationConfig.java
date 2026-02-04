@@ -32,45 +32,44 @@ public class Amqp091DestinationConfig extends DestinationConfig {
 	public static final int DEFAULT_PRIORITY = 4;
 	public static final String PRIORITY = "priority";
 
-	public static final long DEFAULT_TIME_TO_LIVE = 0L;
-	public static final String TIME_TO_LIVE = "time-to-live";
+	public static final long DEFAULT_TIME_TO_LIVE_SECONDS = 0L;
 	public static final String DELIVERY_MODE = "delivery-mode";
+	public static final String TIME_TO_LIVE_SECONDS = "time-to-live-seconds";
 
-	public static final int DEFAULT_HANDSHAKE_TIMEOUT_MS = 10000;
-	public static final int DEFAULT_CONNECTION_TIMEOUT_MS = 10000;
-	public static final int DEFAULT_CHANNEL_RPC_TIMEOUT_MS = 10000;
-	public static final String HANDSHAKE_TIMEOUT = "handshake-timeout";
-	public static final String CONNECTION_TIMEOUT = "connection-timeout";
-	public static final String CHANNEL_RPC_TIMEOUT = "channel-rpc-timeout";
+	public static final int DEFAULT_HANDSHAKE_TIMEOUT_SECONDS = 10;
+	public static final int DEFAULT_CONNECTION_TIMEOUT_SECONDS = 10;
+	public static final int DEFAULT_CHANNEL_RPC_TIMEOUT_SECONDS = 10;
+	public static final String HANDSHAKE_TIMEOUT_SECONDS = "handshake-timeout-seconds";
+	public static final String CONNECTION_TIMEOUT_SECONDS = "connection-timeout-seconds";
+	public static final String CHANNEL_RPC_TIMEOUT_SECONDS = "channel-rpc-timeout-seconds";
 
 	public static final int DEFAULT_REQUESTED_HEARTBEAT_SECONDS = 30;
-	public static final int DEFAULT_NETWORK_RECOVERY_INTERVAL_MS = 5000;
-	public static final String REQUESTED_HEARTBEAT = "requested-heartbeat";
-	public static final String NETWORK_RECOVERY_INTERVAL = "network-recovery-interval";
+	public static final int DEFAULT_NETWORK_RECOVERY_INTERVAL_SECONDS = 5;
 	public static final String TOPOLOGY_RECOVERY_ENABLED = "topology-recovery-enabled";
 	public static final String AUTOMATIC_RECOVERY_ENABLED = "automatic-recovery-enabled";
+	public static final String REQUESTED_HEARTBEAT_SECONDS = "requested-heartbeat-seconds";
+	public static final String NETWORK_RECOVERY_INTERVAL_SECONDS = "network-recovery-interval-seconds";
 
 	private int port;
 	private String host;
 	private int priority;
-	private long timeToLive;
-	private int deliveryMode;
 	private String username;
 	private String password;
 	private String exchange;
+	private int deliveryMode;
 	private String routingKey;
 	private String virtualHost;
 	private boolean hasPriority;
-	private boolean hasTimeToLive;
+	private long timeToLiveSeconds;
 	private String deliveryModeString;
-	private int handshakeTimeout;
-	private int connectionTimeout;
-	private int channelRpcTimeout;
-	private int requestedHeartbeat;
-	private int networkRecoveryInterval;
-	private boolean messageHeadersEnabled;
+	private int handshakeTimeoutSeconds;
+	private boolean hasTimeToLiveSeconds;
+	private int connectionTimeoutSeconds;
+	private int channelRpcTimeoutSeconds;
+	private int requestedHeartbeatSeconds;
 	private boolean topologyRecoveryEnabled;
 	private boolean automaticRecoveryEnabled;
+	private int networkRecoveryIntervalSeconds;
 	private ConnectionFactory connectionFactory;
 
 	@Override
@@ -87,7 +86,7 @@ public class Amqp091DestinationConfig extends DestinationConfig {
 
 		exchange = ValidationUtils.requireNonBlank(configuration.getString(EXCHANGE, "").trim(), EXCHANGE + " is required");
 
-		// routing key
+		// routingKey
 
 		routingKey = configuration.getString(ROUTING_KEY, "").trim();
 
@@ -99,7 +98,7 @@ public class Amqp091DestinationConfig extends DestinationConfig {
 
 		password = configuration.getString(PASSWORD, "").trim();
 
-		// virtual host (RabbitMQ default)
+		// virtualHost
 
 		virtualHost = configuration.getString(VIRTUAL_HOST, DEFAULT_VIRTUAL_HOST).trim();
 
@@ -111,16 +110,16 @@ public class Amqp091DestinationConfig extends DestinationConfig {
 
 		// timeouts
 
-		handshakeTimeout = ValidationUtils.requireNonNegative(configuration.getInt(HANDSHAKE_TIMEOUT, DEFAULT_HANDSHAKE_TIMEOUT_MS), HANDSHAKE_TIMEOUT + " must be non-negative");
-		connectionTimeout = ValidationUtils.requireNonNegative(configuration.getInt(CONNECTION_TIMEOUT, DEFAULT_CONNECTION_TIMEOUT_MS), CONNECTION_TIMEOUT + " must be non-negative");
-		channelRpcTimeout = ValidationUtils.requireNonNegative(configuration.getInt(CHANNEL_RPC_TIMEOUT, DEFAULT_CHANNEL_RPC_TIMEOUT_MS), CHANNEL_RPC_TIMEOUT + " must be non-negative");
+		handshakeTimeoutSeconds = ValidationUtils.requireNonNegative(configuration.getInt(HANDSHAKE_TIMEOUT_SECONDS, DEFAULT_HANDSHAKE_TIMEOUT_SECONDS), HANDSHAKE_TIMEOUT_SECONDS + " must be non-negative");
+		connectionTimeoutSeconds = ValidationUtils.requireNonNegative(configuration.getInt(CONNECTION_TIMEOUT_SECONDS, DEFAULT_CONNECTION_TIMEOUT_SECONDS), CONNECTION_TIMEOUT_SECONDS + " must be non-negative");
+		channelRpcTimeoutSeconds = ValidationUtils.requireNonNegative(configuration.getInt(CHANNEL_RPC_TIMEOUT_SECONDS, DEFAULT_CHANNEL_RPC_TIMEOUT_SECONDS), CHANNEL_RPC_TIMEOUT_SECONDS + " must be non-negative");
 
-		// heartbeat / recovery (RabbitMQ-friendly defaults)
+		// heartbeat
 
 		automaticRecoveryEnabled = configuration.getBoolean(AUTOMATIC_RECOVERY_ENABLED, true);
 		topologyRecoveryEnabled = configuration.getBoolean(TOPOLOGY_RECOVERY_ENABLED, automaticRecoveryEnabled);
-		requestedHeartbeat = ValidationUtils.requireNonNegative(configuration.getInt(REQUESTED_HEARTBEAT, DEFAULT_REQUESTED_HEARTBEAT_SECONDS), REQUESTED_HEARTBEAT + " must be non-negative");
-		networkRecoveryInterval = ValidationUtils.requirePositive(configuration.getInt(NETWORK_RECOVERY_INTERVAL, DEFAULT_NETWORK_RECOVERY_INTERVAL_MS), NETWORK_RECOVERY_INTERVAL + " must be positive");
+		requestedHeartbeatSeconds = ValidationUtils.requireNonNegative(configuration.getInt(REQUESTED_HEARTBEAT_SECONDS, DEFAULT_REQUESTED_HEARTBEAT_SECONDS), REQUESTED_HEARTBEAT_SECONDS + " must be non-negative");
+		networkRecoveryIntervalSeconds = ValidationUtils.requirePositive(configuration.getInt(NETWORK_RECOVERY_INTERVAL_SECONDS, DEFAULT_NETWORK_RECOVERY_INTERVAL_SECONDS), NETWORK_RECOVERY_INTERVAL_SECONDS + " must be positive");
 
 		// priority (optional)
 
@@ -144,34 +143,30 @@ public class Amqp091DestinationConfig extends DestinationConfig {
 
 		deliveryMode = deliveryModeString.equals("persistent") ? 2 : 1;
 
-		// timeToLive
+		// timeToLiveSeconds
 
-		if (configuration.containsKey(TIME_TO_LIVE)) {
-			timeToLive = ValidationUtils.requireNonNegative(configuration.getLong(TIME_TO_LIVE, DEFAULT_TIME_TO_LIVE), TIME_TO_LIVE + " must be non-negative");
-			hasTimeToLive = true;
+		if (configuration.containsKey(TIME_TO_LIVE_SECONDS)) {
+			timeToLiveSeconds = ValidationUtils.requireNonNegative(configuration.getLong(TIME_TO_LIVE_SECONDS, DEFAULT_TIME_TO_LIVE_SECONDS), TIME_TO_LIVE_SECONDS + " must be non-negative");
+			hasTimeToLiveSeconds = true;
 		} else {
-			timeToLive = DEFAULT_TIME_TO_LIVE;
+			timeToLiveSeconds = DEFAULT_TIME_TO_LIVE_SECONDS;
 		}
 
-		// messageHeadersEnabled
-
-		messageHeadersEnabled = configuration.getBoolean(MESSAGE_HEADERS_ENABLED, true);
-
-		// connection factory
+		// connectionFactory
 
 		connectionFactory = new ConnectionFactory();
 
 		connectionFactory.setHost(host);
 		connectionFactory.setPort(port);
 
-		connectionFactory.setHandshakeTimeout(handshakeTimeout);
-		connectionFactory.setConnectionTimeout(connectionTimeout);
-		connectionFactory.setChannelRpcTimeout(channelRpcTimeout);
-		connectionFactory.setRequestedHeartbeat(requestedHeartbeat);
+		connectionFactory.setRequestedHeartbeat(requestedHeartbeatSeconds);
+		connectionFactory.setHandshakeTimeout(handshakeTimeoutSeconds * 1000);
+		connectionFactory.setConnectionTimeout(connectionTimeoutSeconds * 1000);
+		connectionFactory.setChannelRpcTimeout(channelRpcTimeoutSeconds * 1000);
 
-		connectionFactory.setNetworkRecoveryInterval(networkRecoveryInterval);
 		connectionFactory.setTopologyRecoveryEnabled(topologyRecoveryEnabled);
 		connectionFactory.setAutomaticRecoveryEnabled(automaticRecoveryEnabled);
+		connectionFactory.setNetworkRecoveryInterval(networkRecoveryIntervalSeconds * 1000);
 
 		if (ValidationUtils.isNotBlank(username)) {
 			connectionFactory.setUsername(username);

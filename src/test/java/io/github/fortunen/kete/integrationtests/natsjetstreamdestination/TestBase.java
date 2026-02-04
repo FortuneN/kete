@@ -1,0 +1,302 @@
+package io.github.fortunen.kete.integrationtests.natsjetstreamdestination;
+
+import static org.awaitility.Awaitility.await;
+
+import java.time.Duration;
+import java.util.concurrent.CopyOnWriteArrayList;
+
+import org.apache.commons.configuration2.MapConfiguration;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.testcontainers.containers.BindMode;
+import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.utility.DockerImageName;
+
+import io.github.fortunen.kete.Constants;
+import io.github.fortunen.kete.EventMessage;
+import io.github.fortunen.kete.TlsMaterial;
+import io.github.fortunen.kete.destinations.natsjetstream.NatsJetStreamDestination;
+import io.github.fortunen.kete.destinations.natsjetstream.NatsJetStreamDestinationConfig;
+import io.nats.client.Connection;
+import io.nats.client.JetStreamManagement;
+import io.nats.client.Nats;
+import io.nats.client.Options;
+import io.nats.client.api.StorageType;
+import io.nats.client.api.StreamConfiguration;
+
+@SuppressWarnings("resource")
+public class TestBase {
+
+	protected static final byte[] EMPTY_BYTES = new byte[0];
+	protected static final int NATS_PORT = 4222;
+	protected static final int NATS_MONITORING_PORT = 8222;
+	protected static final String STREAM_NAME = "TEST_STREAM";
+
+	protected GenericContainer<?> container;
+	protected NatsJetStreamDestination destination;
+	protected NatsJetStreamDestinationConfig config;
+	protected TlsMaterial currentTls;
+
+	@BeforeEach
+	void setUp() {
+		destination = new NatsJetStreamDestination();
+		config = new NatsJetStreamDestinationConfig();
+	}
+
+	protected void configureDestination(MapConfiguration mapConfig) {
+		config.setConfiguration(mapConfig);
+		config.initialize();
+		destination.setConfig(config);
+	}
+
+	protected GenericContainer<?> startNatsJetStream() throws Exception {
+
+		cleanUpContainer();
+
+		container = new GenericContainer<>(DockerImageName.parse("nats:2.10-alpine"))
+			.withExposedPorts(NATS_PORT, NATS_MONITORING_PORT)
+			.withCommand("--jetstream", "--http_port", "8222");
+		container.start();
+
+		waitForNatsReady();
+		createStream(null);
+
+		return container;
+	}
+
+	protected GenericContainer<?> startWithServerOnlyTLS(TlsMaterial tls) throws Exception {
+		return startNatsJetStreamWithTls(tls, false);
+	}
+
+	protected GenericContainer<?> startWithClientAndServerTLS(TlsMaterial tls) throws Exception {
+		return startNatsJetStreamWithTls(tls, true);
+	}
+
+	@SuppressWarnings("resource")
+	private GenericContainer<?> startNatsJetStreamWithTls(TlsMaterial tls, boolean requireClientCert) throws Exception {
+
+		if (tls == null) {
+			throw new IllegalArgumentException("TLS material cannot be null");
+		}
+
+		if (!tls.isEnabled()) {
+			throw new IllegalArgumentException("TLS must be enabled");
+		}
+
+		if (tls.getServerCertificatePemFilePath() == null) {
+			throw new IllegalStateException("Server certificate PEM file path is null - ensure TLS material is built with withWriteFiles(true)");
+		}
+
+		if (tls.getServerPrivateKeyPemFilePath() == null) {
+			throw new IllegalStateException("Server private key PEM file path is null - ensure TLS material is built with withWriteFiles(true)");
+		}
+
+		if (tls.getCaCertificatePemFilePath() == null) {
+			throw new IllegalStateException("CA certificate PEM file path is null - ensure TLS material is built with withWriteFiles(true)");
+		}
+
+		cleanUpContainer();
+		currentTls = tls;
+
+		var tlsVerifyOption = requireClientCert ? "true" : "false";
+
+		container = new GenericContainer<>(DockerImageName.parse("nats:2.10-alpine"))
+			.withExposedPorts(NATS_PORT, NATS_MONITORING_PORT)
+			.withFileSystemBind(tls.getServerCertificatePemFilePath(), "/certs/server.crt", BindMode.READ_ONLY)
+			.withFileSystemBind(tls.getServerPrivateKeyPemFilePath(), "/certs/server.key", BindMode.READ_ONLY)
+			.withFileSystemBind(tls.getCaCertificatePemFilePath(), "/certs/ca.crt", BindMode.READ_ONLY)
+			.withCommand(
+				"--jetstream",
+				"--http_port", "8222",
+				"--tls",
+				"--tlscert=/certs/server.crt",
+				"--tlskey=/certs/server.key",
+				"--tlsverify=" + tlsVerifyOption,
+				"--tlscacert=/certs/ca.crt"
+			)
+			.withStartupTimeout(java.time.Duration.ofMinutes(10));
+
+		container.start();
+
+		waitForNatsReady();
+		createStream(tls);
+
+		return container;
+	}
+
+	protected String getHost() {
+		return container.getHost();
+	}
+
+	protected int getPort() {
+		return container.getMappedPort(NATS_PORT);
+	}
+
+	protected String getNatsUrl() {
+		return "nats://" + getHost() + ":" + getPort();
+	}
+
+	protected String getNatsTlsUrl() {
+		return "tls://" + getHost() + ":" + getPort();
+	}
+
+	private void waitForNatsReady() throws Exception {
+		await().atMost(Duration.ofMinutes(10)).pollInterval(Duration.ofSeconds(1)).until(() -> {
+			try {
+				var url = "http://" + container.getHost() + ":" + container.getMappedPort(NATS_MONITORING_PORT) + "/varz";
+				var connection = new java.net.URL(url).openConnection();
+				connection.setConnectTimeout(1000);
+				connection.setReadTimeout(1000);
+				connection.connect();
+				var responseCode = ((java.net.HttpURLConnection) connection).getResponseCode();
+				return responseCode == 200;
+			} catch (Exception e) {
+				return false;
+			}
+		});
+	}
+
+	private void createStream(TlsMaterial tls) throws Exception {
+
+		var optionsBuilder = new Options.Builder()
+			.server(tls != null && tls.isEnabled() ? getNatsTlsUrl() : getNatsUrl());
+
+		if (tls != null && tls.isEnabled()) {
+			optionsBuilder.sslContext(tls.getServerKeyStoreSSLContext());
+		}
+
+		var options = optionsBuilder.build();
+
+		try (var connection = Nats.connect(options)) {
+
+			var jsm = connection.jetStreamManagement();
+
+			var streamConfig = StreamConfiguration.builder()
+				.name(STREAM_NAME)
+				.subjects("test.>")
+				.storageType(StorageType.Memory)
+				.build();
+
+			jsm.addStream(streamConfig);
+		}
+	}
+
+	protected void cleanUpContainer() {
+
+		if (container != null) {
+			try {
+				container.stop();
+			} catch (Exception exception) {
+				// ignore
+			}
+		}
+
+		container = null;
+	}
+
+	@AfterEach
+	protected void cleanUp() {
+
+		if (destination != null) {
+			try {
+				destination.close();
+			} catch (Exception exception) {
+				// ignore
+			}
+		}
+
+		destination = null;
+
+		cleanUpContainer();
+	}
+
+	protected static EventMessage createMessage(
+		String eventId,
+		String realm,
+		boolean isAdminEvent,
+		String eventType,
+		String contentType,
+		byte[] eventBody,
+		String resourceType,
+		String operationType
+	) {
+		return new EventMessage(
+			realm != null ? realm : "",
+			eventId != null ? eventId : "",
+			eventBody != null ? eventBody : EMPTY_BYTES,
+			eventType != null ? eventType : "",
+			contentType != null ? contentType : "",
+			resourceType != null ? resourceType : "",
+			isAdminEvent ? Constants.ADMIN_EVENT : Constants.EVENT,
+			operationType != null ? operationType : "",
+			"SUCCESS"
+		);
+	}
+
+	protected static class MessageCollector {
+
+		private final CopyOnWriteArrayList<String> messages = new CopyOnWriteArrayList<>();
+
+		public void onMessage(io.nats.client.Message msg) {
+			messages.add(new String(msg.getData()));
+		}
+
+		public java.util.List<String> getMessages() {
+			return messages;
+		}
+	}
+
+	protected AutoCloseable createSubscriber(String subject, MessageCollector collector) throws Exception {
+		return createSubscriber(subject, collector, null);
+	}
+
+	protected AutoCloseable createSubscriberWithTls(String subject, MessageCollector collector, TlsMaterial tls) throws Exception {
+		return createSubscriber(subject, collector, tls);
+	}
+
+	private AutoCloseable createSubscriber(String subject, MessageCollector collector, TlsMaterial tls) throws Exception {
+
+		var optionsBuilder = new Options.Builder()
+			.server(tls != null && tls.isEnabled() ? getNatsTlsUrl() : getNatsUrl());
+
+		if (tls != null && tls.isEnabled()) {
+			optionsBuilder.sslContext(tls.getServerKeyStoreSSLContext());
+		}
+
+		var options = optionsBuilder.build();
+		var connection = Nats.connect(options);
+
+		var jetStream = connection.jetStream();
+
+		var pushSubscribeOptions = io.nats.client.PushSubscribeOptions.builder()
+			.stream(STREAM_NAME)
+			.build();
+
+		var subscription = jetStream.subscribe(subject, pushSubscribeOptions);
+
+		// Start consuming messages in background
+		var thread = new Thread(() -> {
+			try {
+				while (!Thread.currentThread().isInterrupted()) {
+					var msg = subscription.nextMessage(Duration.ofSeconds(1));
+					if (msg != null) {
+						collector.onMessage(msg);
+						msg.ack();
+					}
+				}
+			} catch (Exception ignored) {
+			}
+		});
+		thread.start();
+
+		return () -> {
+			try {
+				thread.interrupt();
+				thread.join(1000);
+				subscription.unsubscribe();
+				connection.close();
+			} catch (Exception ignored) {
+			}
+		};
+	}
+}

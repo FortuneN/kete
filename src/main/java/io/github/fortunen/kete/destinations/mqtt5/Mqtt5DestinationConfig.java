@@ -40,10 +40,13 @@ public class Mqtt5DestinationConfig extends DestinationConfig {
 	public static final int DEFAULT_QOS = 1;
 	public static final String RETAINED = "retained";
 
-	public static final int DEFAULT_CONNECTION_TIMEOUT = 10;
-	public static final int DEFAULT_KEEP_ALIVE_INTERVAL = 60;
-	public static final String CONNECTION_TIMEOUT = "connection-timeout";
-	public static final String KEEP_ALIVE_INTERVAL = "keep-alive-interval";
+	public static final int DEFAULT_CONNECTION_TIMEOUT_SECONDS = 10;
+	public static final int DEFAULT_KEEP_ALIVE_INTERVAL_SECONDS = 60;
+	public static final String CONNECTION_TIMEOUT_SECONDS = "connection-timeout-seconds";
+	public static final String KEEP_ALIVE_INTERVAL_SECONDS = "keep-alive-interval-seconds";
+
+	public static final int DEFAULT_MAX_INFLIGHT = 65535;
+	public static final String MAX_INFLIGHT = "max-inflight";
 
 	private int qos;
 	private int port;
@@ -53,13 +56,13 @@ public class Mqtt5DestinationConfig extends DestinationConfig {
 	private String scheme;
 	private String username;
 	private String password;
+	private int maxInflight;
 	private boolean retained;
 	private boolean cleanSession;
 	private String transportType;
-	private int keepAliveInterval;
-	private int connectionTimeout;
 	private String clientIdPrefix;
-	private boolean messageHeadersEnabled;
+	private int keepAliveIntervalSeconds;
+	private int connectionTimeoutSeconds;
 	private MqttConnectionOptions connectOptions;
 	private AtomicInteger clientIdCounter = new AtomicInteger(0);
 
@@ -107,10 +110,6 @@ public class Mqtt5DestinationConfig extends DestinationConfig {
 
 		retained = configuration.getBoolean(RETAINED, false);
 
-		// messageHeadersEnabled
-
-		messageHeadersEnabled = configuration.getBoolean(MESSAGE_HEADERS_ENABLED, true);
-
 		// clientIdPrefix
 
 		clientIdPrefix = configuration.getString(CLIENT_ID_PREFIX, "").trim();
@@ -123,13 +122,17 @@ public class Mqtt5DestinationConfig extends DestinationConfig {
 
 		cleanSession = configuration.getBoolean(CLEAN_SESSION, true);
 
-		// connectionTimeout
+		// connectionTimeoutSeconds
 
-		connectionTimeout = configuration.getInt(CONNECTION_TIMEOUT, DEFAULT_CONNECTION_TIMEOUT);
+		connectionTimeoutSeconds = configuration.getInt(CONNECTION_TIMEOUT_SECONDS, DEFAULT_CONNECTION_TIMEOUT_SECONDS);
 
-		// keepAliveInterval
+		// keepAliveIntervalSeconds
 
-		keepAliveInterval = configuration.getInt(KEEP_ALIVE_INTERVAL, DEFAULT_KEEP_ALIVE_INTERVAL);
+		keepAliveIntervalSeconds = configuration.getInt(KEEP_ALIVE_INTERVAL_SECONDS, DEFAULT_KEEP_ALIVE_INTERVAL_SECONDS);
+
+		// maxInflight
+
+		maxInflight = configuration.getInt(MAX_INFLIGHT, DEFAULT_MAX_INFLIGHT);
 
 		// username
 
@@ -143,8 +146,9 @@ public class Mqtt5DestinationConfig extends DestinationConfig {
 
 		connectOptions = new MqttConnectionOptions();
 		connectOptions.setCleanStart(cleanSession);
-		connectOptions.setConnectionTimeout(connectionTimeout);
-		connectOptions.setKeepAliveInterval(keepAliveInterval);
+		connectOptions.setReceiveMaximum(maxInflight);
+		connectOptions.setConnectionTimeout(connectionTimeoutSeconds);
+		connectOptions.setKeepAliveInterval(keepAliveIntervalSeconds);
 		connectOptions.setAutomaticReconnect(true);
 
 		if (ValidationUtils.isNotBlank(username)) {

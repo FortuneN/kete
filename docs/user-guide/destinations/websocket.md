@@ -13,12 +13,22 @@ Stream Keycloak events to WebSocket servers.
 
 | System | Notes |
 |--------|-------|
+| **Eclipse Mosquitto** | MQTT over WebSocket (port 9001) |
+| **HiveMQ** | MQTT over WebSocket |
+| **EMQX** | MQTT over WebSocket (port 8083/8084) |
+| **VerneMQ** | MQTT over WebSocket |
+| **RabbitMQ** | Via `rabbitmq_web_stomp` or `rabbitmq_web_mqtt` plugins |
+| **Azure Web PubSub** | Managed WebSocket service |
+| **Azure Event Grid** | WebSocket support for MQTT |
 | **Any WebSocket server** | Standard RFC 6455 compatible |
 | **Custom backends** | Node.js, Python, Go, Java WebSocket servers |
 | **Real-time dashboards** | Live event monitoring applications |
 | **Browser applications** | Via WebSocket-to-browser bridges |
 | **API Gateways** | Kong, AWS API Gateway WebSocket APIs |
 | **Serverless** | AWS API Gateway WebSocket, Azure Web PubSub |
+
+!!! note "WebSocket vs Native Protocol"
+    Many message brokers support WebSocket as a **transport layer** for their native protocol (e.g., MQTT over WebSocket, STOMP over WebSocket). KETE's WebSocket destination sends raw messages directly to WebSocket endpoints, which is ideal for custom backends and dashboards. For broker integrations, consider using the native protocol destination (e.g., `mqtt-3`, `stomp`) with the broker's WebSocket port.
 
 
 
@@ -75,9 +85,32 @@ Stream Keycloak events to WebSocket servers.
 | Property | Description | Example |
 |----------|-------------|---------|
 | `destination.kind` | Must be `websocket` | `websocket` |
-| `destination.url` | Full WebSocket URL | `ws://server:8080/path` |
+| `destination.url` | Full WebSocket URL (supports templating) | `ws://server:8080/events/${realmLowerCase}` |
 
-Alternatively, use individual properties:
+### Dynamic URLs (Templating)
+
+The `url` property supports template variables:
+
+```bash
+# Dynamic URL per realm
+kete.routes.ws.destination.url=ws://websocket-server.example.com:8080/events/${realmLowerCase}
+
+# Dynamic URL with event type
+kete.routes.ws.destination.url=ws://websocket-server.example.com/${kindLowerCase}/${eventTypeLowerCase}
+```
+
+Available variables: `${realmLowerCase}`, `${realmUpperCase}`, `${eventTypeLowerCase}`, `${eventTypeUpperCase}`, `${kindLowerCase}`, `${kindUpperCase}`, `${resourceTypeLowerCase}`, `${resourceTypeUpperCase}`, `${operationTypeLowerCase}`, `${operationTypeUpperCase}`, `${resultLowerCase}`, `${resultUpperCase}`
+
+When using `destination.url`:
+
+- The **scheme** must be `ws://` or `wss://`
+- **TLS is auto-enabled** when the scheme is `wss://`
+- The **host**, **port**, and **path** are extracted from the URL
+- The **path and query string** can include template variables for dynamic routing
+
+If both `url` and individual properties are specified, `url` takes precedence.
+
+### Alternative: Individual Properties
 
 | Property | Description | Example |
 |----------|-------------|---------|
@@ -90,10 +123,11 @@ Alternatively, use individual properties:
 | `destination.port` | `80` (WS) / `443` (WSS) | WebSocket server port | `8080` |
 | `destination.path` | `/` | URL path | `/events` |
 | `destination.binary-mode` | `false` | Send as binary frames (not text) | `true` |
-| `destination.connection-timeout` | `10` | Connection timeout in seconds | `30` |
-| `destination.connection-lost-timeout` | `60` | Heartbeat timeout in seconds (0 = disabled). Uses WebSocket ping/pong to detect dead connections. | `30` |
-| `destination.min-pool-size` | `5` | Minimum connections in pool | `10` |
-| `destination.max-pool-size` | `20` | Maximum connections in pool | `50` |
+| `destination.connection-timeout-seconds` | `10` | Connection timeout in seconds | `30` |
+| `destination.connection-lost-timeout-seconds` | `60` | Heartbeat timeout in seconds (0 = disabled). Uses WebSocket ping/pong to detect dead connections. | `30` |
+| `destination.pool.min-idle` | `1` | Minimum idle connections in pool | `5` |
+| `destination.pool.max-idle` | `10` | Maximum idle connections in pool | `20` |
+| `destination.pool.max-total` | `20` | Maximum total connections in pool | `50` |
 
 ### Custom Headers
 
@@ -113,18 +147,6 @@ See [TLS & mTLS](overview.md#tls-mtls) for full details on TLS options.
 | `destination.tls.enabled` | `false` | Enable WSS (auto-enabled when using `wss://` URL) |
 | `destination.tls.key-store.*` | - | Client certificate for mTLS |
 | `destination.tls.trust-store.*` | - | CA certificates |
-
-
-
-## URL Configuration
-
-When using `destination.url`:
-
-- The **scheme** must be `ws://` or `wss://`
-- **TLS is auto-enabled** when the scheme is `wss://`
-- The **host**, **port**, and **path** are extracted from the URL
-
-If both `url` and individual properties are specified, `url` takes precedence.
 
 
 

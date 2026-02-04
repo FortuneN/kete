@@ -6,6 +6,9 @@ Where events are delivered.
 
 Every route needs exactly one destination. Destinations connect to message brokers, APIs, and other systems.
 
+!!! tip "Which broker supports which destination?"
+    See the [Destination Support Matrix](support-matrix.md) for a comprehensive cross-reference of all supported brokers and destinations.
+
 ## Common Features
 
 All destinations support:
@@ -21,35 +24,80 @@ KETE maintains a pool of destination instances for each route. Destination pooli
 
 ### Pool Configuration
 
+KETE uses [Apache Commons Pool 2](https://commons.apache.org/proper/commons-pool/) for destination pooling. All properties are under the `destination.pool.*` prefix.
+
+#### Core Properties
+
 | Property | Default | Description |
 |----------|---------|-------------|
-| `destination.min-pool-size` | `5` | Minimum number of idle connections in the pool |
-| `destination.max-pool-size` | `20` | Maximum number of connections in the pool |
+| `destination.pool.min-idle` | `1` | Minimum number of idle connections maintained in the pool |
+| `destination.pool.max-idle` | `10` | Maximum number of idle connections allowed in the pool |
+| `destination.pool.max-total` | `20` | Maximum total connections (active + idle) allowed in the pool |
+| `destination.pool.max-wait-seconds` | `30` | Maximum seconds to wait when borrowing from an exhausted pool |
+| `destination.pool.block-when-exhausted` | `true` | Whether to block when the pool is exhausted (if false, throws exception) |
+
+#### Advanced Properties
+
+| Property | Default | Description |
+|----------|---------|-------------|
+| `destination.pool.lifo` | `true` | Last In First Out - uses recently returned connections first (stack behavior) |
+| `destination.pool.fairness` | `false` | Whether to ensure fairness when threads wait for connections (adds overhead) |
+| `destination.pool.test-on-create` | `false` | Validate connections when created |
+| `destination.pool.test-on-borrow` | `false` | Validate connections before use (recommended for production) |
+| `destination.pool.test-on-return` | `false` | Validate connections when returned to pool |
+| `destination.pool.test-while-idle` | `false` | Validate idle connections proactively (recommended with eviction enabled) |
+| `destination.pool.time-between-eviction-runs-seconds` | `-1` | Seconds between eviction runs (-1 disables, recommended: 60 for 1 minute) |
+| `destination.pool.min-evictable-idle-time-seconds` | `1800` | Minimum idle time in seconds before connection eligible for eviction (30 minutes) |
+| `destination.pool.soft-min-evictable-idle-time-seconds` | `-1` | Soft minimum idle time in seconds (only evicts if min-idle exceeded, -1 disables) |
+| `destination.pool.num-tests-per-eviction-run` | `3` | Number of connections to test during each eviction run |
 
 ### Example
 
 ```bash
-# Configure pool sizes for high-volume route
+# Basic pool configuration for high-volume route
 kete.routes.high-volume.destination.kind=kafka
 kete.routes.high-volume.destination.bootstrap.servers=kafka:9092
 kete.routes.high-volume.destination.topic=keycloak-events
-kete.routes.high-volume.destination.min-pool-size=10
-kete.routes.high-volume.destination.max-pool-size=50
+kete.routes.high-volume.destination.pool.min-idle=10
+kete.routes.high-volume.destination.pool.max-idle=25
+kete.routes.high-volume.destination.pool.max-total=50
+
+# Production-ready configuration with validation and eviction
+kete.routes.production.destination.kind=amqp-0.9.1
+kete.routes.production.destination.host=rabbitmq.prod
+kete.routes.production.destination.exchange=events
+kete.routes.production.destination.pool.min-idle=5
+kete.routes.production.destination.pool.max-idle=15
+kete.routes.production.destination.pool.max-total=30
+kete.routes.production.destination.pool.test-on-borrow=true
+kete.routes.production.destination.pool.test-while-idle=true
+kete.routes.production.destination.pool.time-between-eviction-runs-seconds=60
 ```
 
 ### Tuning Guidelines
 
 | Scenario | Recommendation |
 |----------|----------------|
-| **Low volume** (< 10 events/sec) | Default values (`5` / `20`) are sufficient |
-| **Medium volume** (10-100 events/sec) | Consider `min-pool-size=10`, `max-pool-size=30` |
-| **High volume** (> 100 events/sec) | Consider `min-pool-size=20`, `max-pool-size=100` |
-| **Fixed pool size** | Set both to the same value (e.g., `min-pool-size=15`, `max-pool-size=15`) |
+| **Low volume** (< 10 events/sec) | Default values are sufficient (`min-idle=5`, `max-idle=10`, `max-total=20`) |
+| **Medium volume** (10-100 events/sec) | `min-idle=10`, `max-idle=20`, `max-total=30` |
+| **High volume** (> 100 events/sec) | `min-idle=20`, `max-idle=50`, `max-total=100` |
+| **Fixed pool size** | Set `min-idle=max-idle=max-total` (e.g., all to `15`) |
+| **Production environments** | Enable `test-on-borrow=true` and `test-while-idle=true` with `time-between-eviction-runs-seconds=60` |
+| **Unstable networks** | Enable validation (`test-on-borrow=true`) to detect broken connections before use |
+
+!!! tip "Performance vs. Reliability"
+    **Default configuration favors performance** with validation disabled. For production:
+    
+    - Enable `test-on-borrow=true` (~1-5ms latency per borrow, but prevents broken connections)
+    - Enable `test-while-idle=true` + set `time-between-eviction-runs-seconds=60` (proactive health checks)
+    - Reduce `max-idle` to match `max-total` more closely (avoid holding excess idle connections)
 
 !!! note "Validation Rules"
-    - `min-pool-size` must be greater than 0
-    - `max-pool-size` must be greater than 0
-    - `max-pool-size` must be greater than or equal to `min-pool-size`
+    - `pool.min-idle` must be greater than 0
+    - `pool.max-idle` must be greater than 0
+    - `pool.max-total` must be greater than 0
+    - `pool.max-total` must be greater than or equal to `pool.min-idle`
+    - `pool.max-wait-seconds` must be greater than 0
 
 ## Template Variables
 
@@ -106,7 +154,7 @@ kete.routes.events.destination.url=https://api.example.com/${realmLowerCase}/eve
 
 ## Message Headers
 
-Most destinations send event metadata as headers alongside the message body. This is controlled by the `message-headers-enabled` property (default: `true`).
+Most destinations send event metadata as headers alongside the message body.
 
 ### Standard Headers
 
@@ -129,19 +177,11 @@ Header names are **all lowercase with no dashes or underscores** for maximum com
 | [AMQP 1](amqp-1.md) | ✅ | `contenttype` JMS property | All three as JMS String properties |
 | [MQTT 5](mqtt-5.md) | ✅ | Native MQTT `contentType` | `eventtype` and `eventkind` as User Properties |
 | [MQTT 3](mqtt-3.md) | ❌ | Not supported | Protocol limitation |
+| [Redis Streams](redis-streams.md) | ✅ | `contenttype` field | All three as stream entry fields |
+| [Redis Pub/Sub](redis-pubsub.md) | ❌ | Not supported | Protocol limitation |
 | [HTTP](http.md) | ✅ | `contenttype` header | All three as HTTP headers |
 | [WebSocket](websocket.md) | ❌ | Not supported | Headers sent via handshake only |
 | [STOMP](stomp.md) | ✅ | Native `content-type` header | `eventtype` and `eventkind` as STOMP headers |
-
-### Disabling Headers
-
-To disable headers for a destination:
-
-```bash
-kete.routes.myroute.destination.message-headers-enabled=false
-```
-
-When disabled, only the message body is sent - no metadata headers are included.
 
 ## TLS & mTLS
 
@@ -205,6 +245,10 @@ For detailed information about each loader and their properties, see **[Certific
 | **[amqp-1](amqp-1.md)** | AMQP 1 | ActiveMQ Artemis, Azure Service Bus, Azure Event Hubs, Qpid |
 | **[mqtt-3](mqtt-3.md)** | MQTT 3 | Mosquitto, HiveMQ, AWS IoT, Azure IoT Hub |
 | **[mqtt-5](mqtt-5.md)** | MQTT 5 | HiveMQ, EMQX, Mosquitto 2.0+ |
+| **[redis-pubsub](redis-pubsub.md)** | Redis RESP | Redis, ElastiCache, Azure Cache for Redis |
+| **[redis-streams](redis-streams.md)** | Redis RESP | Redis 5.0+, ElastiCache, Azure Cache for Redis |
+| **[nats](nats.md)** | NATS Protocol | NATS Server, Synadia Cloud |
+| **[nats-jetstream](nats-jetstream.md)** | NATS JetStream | NATS Server, Synadia Cloud |
 | **[http](http.md)** | HTTP/HTTPS | Webhooks, REST APIs, any HTTP endpoint |
 | **[websocket](websocket.md)** | WebSocket | Real-time servers, custom backends, dashboards |
 | **[stomp](stomp.md)** | STOMP 1.2 | ActiveMQ Classic, Amazon MQ, RabbitMQ, Artemis |
@@ -217,12 +261,16 @@ KETE works with major cloud messaging services through protocol compatibility:
 |---------------|-----------------|---------------|
 | **Azure Event Hubs** | `kafka` or `amqp-1` | [Kafka](kafka.md) / [AMQP 1](amqp-1.md) |
 | **Azure Service Bus** | `amqp-1` | [AMQP 1](amqp-1.md) |
+| **Azure Cache for Redis** | `redis-pubsub` or `redis-streams` | [Redis Pub/Sub](redis-pubsub.md) / [Redis Streams](redis-streams.md) |
+| **Amazon ElastiCache** | `redis-pubsub` or `redis-streams` | [Redis Pub/Sub](redis-pubsub.md) / [Redis Streams](redis-streams.md) |
 | **Amazon MSK** | `kafka` | [Kafka](kafka.md) |
 | **Amazon MQ (Artemis)** | `amqp-1` | [AMQP 1](amqp-1.md) |
 | **Amazon MQ (ActiveMQ)** | `stomp` | [STOMP](stomp.md) |
 | **Confluent Cloud** | `kafka` | [Kafka](kafka.md) |
 | **AWS IoT Core** | `mqtt-3` / `mqtt-5` | [MQTT 3](mqtt-3.md) / [MQTT 5](mqtt-5.md) |
 | **Azure IoT Hub** | `mqtt-3` / `mqtt-5` | [MQTT 3](mqtt-3.md) / [MQTT 5](mqtt-5.md) |
+| **Google Cloud Memorystore** | `redis-pubsub` or `redis-streams` | [Redis Pub/Sub](redis-pubsub.md) / [Redis Streams](redis-streams.md) |
+| **Upstash** | `redis-pubsub` or `redis-streams` | [Redis Pub/Sub](redis-pubsub.md) / [Redis Streams](redis-streams.md) |
 
 !!! tip "No SDK Required"
     Azure Event Hubs, Azure Service Bus, Amazon MSK, and Amazon MQ all work through standard protocols—no cloud-specific SDKs needed.

@@ -1,0 +1,35 @@
+services:
+
+  rabbitmq:
+    image: rabbitmq:4-management-alpine
+    ports:
+      - 5672:5672
+      - 15672:15672
+      - 1883:1883
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    command: >
+      bash -c "rabbitmq-plugins enable --offline rabbitmq_mqtt &&
+               rabbitmq-server"
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  keycloak:
+    image: ghcr.io/fortunen/kete/quick-start-keycloak
+    command: start-dev
+    ports:
+      - 8080:8080
+    environment:
+      kete.routes.quick-start.destination.kind: mqtt-5
+      kete.routes.quick-start.destination.host: rabbitmq
+      kete.routes.quick-start.destination.port: 1883
+      kete.routes.quick-start.destination.topic: keycloak-events
+      kete.routes.quick-start.destination.username: guest
+      kete.routes.quick-start.destination.password: guest
+    depends_on:
+      rabbitmq:
+        condition: service_healthy

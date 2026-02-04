@@ -1,0 +1,29 @@
+services:
+
+  hivemq:
+    image: hivemq/hivemq-ce:latest
+    ports:
+      - 1883:1883
+      - 8888:8000  # HiveMQ WebSocket (remapped)
+    healthcheck:
+      test: ["CMD-SHELL", "timeout 1 bash -c '</dev/tcp/localhost/1883' || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 10s
+
+  keycloak:
+    image: ghcr.io/fortunen/kete/quick-start-keycloak
+    command: start-dev
+    ports:
+      - 8080:8080
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+      kete.routes.quick-start.destination.kind: mqtt-3
+      kete.routes.quick-start.destination.host: hivemq
+      kete.routes.quick-start.destination.port: 1883
+      kete.routes.quick-start.destination.topic: keycloak-events
+    depends_on:
+      hivemq:
+        condition: service_healthy

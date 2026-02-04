@@ -32,8 +32,8 @@ public class StompDestination extends Destination<StompDestinationConfig> {
 		connection = new StompConnection();
 
 		var socket = config.getSocketFactory().createSocket(config.getHost(), config.getPort());
-		socket.setSoTimeout(config.getReadTimeoutMillis());
-		connection.open(socket);
+
+		socket.setSoTimeout(config.getReadTimeoutSeconds() * 1000);	connection.open(socket);
 
 		var connectHeaders = new HashMap<String, String>();
 
@@ -51,7 +51,7 @@ public class StompDestination extends Destination<StompDestinationConfig> {
 			connectHeaders.put("host", config.getVirtualHost());
 		}
 
-		connectHeaders.put("heart-beat", config.getHeartBeatOutgoing() + "," + config.getHeartBeatIncoming());
+		connectHeaders.put("heart-beat", config.getHeartBeatHeader());
 
 		connection.connect(connectHeaders);
 	}
@@ -62,17 +62,18 @@ public class StompDestination extends Destination<StompDestinationConfig> {
 
 		ValidationUtils.requireNonNull(message, "message is required");
 
-		var actualDestination = TemplateUtils.substitute(config.getDestination(), message);
 		var body = message.eventBody();
-
 		var headers = new HashMap<String, String>();
+		var actualDestination = TemplateUtils.substitute(config.getDestination(), message);
+
+		for (var entry : config.getCustomHeadersEntrySet()) {
+			headers.put(entry.getKey(), entry.getValue());
+		}
+
 		headers.put("content-type", message.contentType());
 		headers.put("content-length", String.valueOf(body.length));
-
-		if (config.isMessageHeadersEnabled()) {
-			headers.put(Constants.MESSAGE_HEADER_EVENT_TYPE, message.eventType());
-			headers.put(Constants.MESSAGE_HEADER_EVENT_KIND, message.kind());
-		}
+		headers.put(Constants.MESSAGE_HEADER_EVENT_KIND, message.kind());
+		headers.put(Constants.MESSAGE_HEADER_EVENT_TYPE, message.eventType());
 
 		if (config.isReceiptEnabled()) {
 			headers.put("receipt", message.eventId());

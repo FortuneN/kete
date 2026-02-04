@@ -16,15 +16,15 @@ STOMP (Simple Text Oriented Messaging Protocol) is supported by many enterprise 
 | System | STOMP Port | Notes |
 |--------|:----------:|-------|
 | **ActiveMQ Classic** | 61613 | Native support, widely deployed |
-| **ActiveMQ Artemis** | 61613 | Native support |
-| **RabbitMQ** | 61613 | Via STOMP plugin |
+| **ActiveMQ Artemis** | 61613/61616 | Native support (61616 is multi-protocol) |
+| **RabbitMQ** | 61613 | Via `rabbitmq_stomp` plugin |
+| **EMQX** | 61613 | Via STOMP gateway |
 | **Amazon MQ** | 61614 | Managed ActiveMQ |
 | **Apache Apollo** | 61613 | Native support |
 | **HornetQ** | 61613 | Legacy, native support |
 | **Solace PubSub+** | 61613 | Native support |
 | **TIBCO EMS** | 61613 | Native support |
 | **OpenMQ** | 61613 | Native support |
-| **LavinMQ** | 61613 | Native support |
 
 !!! tip "When to Use STOMP"
     STOMP is particularly useful for **ActiveMQ Classic**, which doesn't support AMQP 1.0 natively.
@@ -115,6 +115,17 @@ kete.routes.stomp.destination.destination=/topic/keycloak/${eventTypeLowerCase}
 
 Available variables: `${realmLowerCase}`, `${realmUpperCase}`, `${eventTypeLowerCase}`, `${eventTypeUpperCase}`, `${kindLowerCase}`, `${kindUpperCase}`, `${resourceTypeLowerCase}`, `${resourceTypeUpperCase}`, `${operationTypeLowerCase}`, `${operationTypeUpperCase}`, `${resultLowerCase}`, `${resultUpperCase}`
 
+### Custom Headers
+
+Custom headers can be added to STOMP messages:
+
+```bash
+kete.routes.stomp.destination.headers.X-Source=keycloak
+kete.routes.stomp.destination.headers.X-Environment=production
+```
+
+Headers are included in the STOMP message headers.
+
 ### Optional Properties
 
 | Property | Default | Description | Example |
@@ -124,12 +135,12 @@ Available variables: `${realmLowerCase}`, `${realmUpperCase}`, `${eventTypeLower
 | `destination.password` | `""` | STOMP login passcode | `secret` |
 | `destination.virtual-host` | Same as `host` | Virtual host for STOMP CONNECT | `/` |
 | `destination.receipt-enabled` | `false` | Wait for broker receipt acknowledgment | `true` |
-| `destination.heart-beat-outgoing` | `30000` | Outgoing heart-beat interval (ms), 0=disabled | `10000` |
-| `destination.heart-beat-incoming` | `30000` | Incoming heart-beat interval (ms), 0=disabled | `10000` |
-| `destination.read-timeout-millis` | `30000` | Socket read timeout in milliseconds | `60000` |
-| `destination.message-headers-enabled` | `true` | Include event metadata as STOMP headers | `false` |
-| `destination.min-pool-size` | `5` | Minimum connections in pool | `10` |
-| `destination.max-pool-size` | `20` | Maximum connections in pool | `50` |
+| `destination.heart-beat-outgoing-seconds` | `30` | Outgoing heart-beat interval in seconds, 0=disabled | `10` |
+| `destination.heart-beat-incoming-seconds` | `30` | Incoming heart-beat interval in seconds, 0=disabled | `10` |
+| `destination.read-timeout-seconds` | `30` | Socket read timeout in seconds | `60` |
+| `destination.pool.min-idle` | `1` | Minimum idle connections in pool | `5` |
+| `destination.pool.max-idle` | `10` | Maximum idle connections in pool | `20` |
+| `destination.pool.max-total` | `20` | Maximum total connections in pool | `50` |
 
 ### TLS Properties
 
@@ -157,7 +168,7 @@ STOMP destinations follow broker-specific conventions:
 
 ## Message Headers
 
-When `message-headers-enabled=true` (default), the following STOMP headers are included:
+The following STOMP headers are always included with each message:
 
 | Header | Description |
 |--------|-------------|
@@ -212,6 +223,6 @@ kete.routes.secure-stomp.destination.tls.trust-store.path=/certs/ca.pem
 kete.routes.heartbeat.destination.kind=stomp
 kete.routes.heartbeat.destination.host=activemq.example.com
 kete.routes.heartbeat.destination.destination=/queue/keycloak-events
-kete.routes.heartbeat.destination.heart-beat-outgoing=10000
-kete.routes.heartbeat.destination.heart-beat-incoming=10000
+kete.routes.heartbeat.destination.heart-beat-outgoing-seconds=10
+kete.routes.heartbeat.destination.heart-beat-incoming-seconds=10
 ```

@@ -22,7 +22,6 @@ import lombok.extern.slf4j.Slf4j;
 @NoArgsConstructor(force = true)
 public class Route implements AutoCloseable {
 
-	public static final long BORROW_TIMEOUT_MS = 30_000;
 	public static final int ACCEPT_CACHE_MAX_SIZE = 1000;
 
 	private Retry retry;
@@ -57,13 +56,22 @@ public class Route implements AutoCloseable {
 
 			var poolConfig = new GenericObjectPoolConfig<Destination<?>>();
 
-			poolConfig.setMinIdle(destinationConfig.getMinPoolSize());
-			poolConfig.setMaxTotal(destinationConfig.getMaxPoolSize());
-			poolConfig.setBlockWhenExhausted(true);
-			poolConfig.setMaxWait(Duration.ofMillis(BORROW_TIMEOUT_MS));
-
-			var poolFactory = new DestinationPooledObjectFactory();
-
+			poolConfig.setLifo(destinationConfig.isPoolLifo());
+			poolConfig.setMinIdle(destinationConfig.getPoolMinIdle());
+			poolConfig.setMaxIdle(destinationConfig.getPoolMaxIdle());
+			poolConfig.setFairness(destinationConfig.isPoolFairness());
+			poolConfig.setMaxTotal(destinationConfig.getPoolMaxTotal());
+			poolConfig.setTestOnCreate(destinationConfig.isPoolTestOnCreate());
+			poolConfig.setTestOnBorrow(destinationConfig.isPoolTestOnBorrow());
+			poolConfig.setTestOnReturn(destinationConfig.isPoolTestOnReturn());
+			poolConfig.setTestWhileIdle(destinationConfig.isPoolTestWhileIdle());
+			poolConfig.setBlockWhenExhausted(destinationConfig.isPoolBlockWhenExhausted());
+		poolConfig.setMaxWait(Duration.ofSeconds(destinationConfig.getPoolMaxWaitSeconds()));
+		poolConfig.setNumTestsPerEvictionRun(destinationConfig.getPoolNumTestsPerEvictionRun());
+		poolConfig.setMinEvictableIdleDuration(Duration.ofSeconds(destinationConfig.getPoolMinEvictableIdleTimeSeconds()));
+		poolConfig.setTimeBetweenEvictionRuns(Duration.ofSeconds(destinationConfig.getPoolTimeBetweenEvictionRunsSeconds()));
+		poolConfig.setSoftMinEvictableIdleDuration(Duration.ofSeconds(destinationConfig.getPoolSoftMinEvictableIdleTimeSeconds()));
+		var poolFactory = new DestinationPooledObjectFactory();
 			poolFactory.setDestinationConfig(destinationConfig);
 
 			destinationPool = new GenericObjectPool<>(poolFactory, poolConfig);

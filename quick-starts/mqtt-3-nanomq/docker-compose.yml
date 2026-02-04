@@ -1,0 +1,25 @@
+services:
+
+  nanomq:
+    image: emqx/nanomq:0.22-full
+    ports:
+      - 1883:1883
+      - 8083:8083
+    healthcheck:
+      test: ["CMD-SHELL", "pidof nanomq"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  keycloak:
+    image: ghcr.io/fortunen/kete/quick-start-keycloak
+    command: start-dev
+    ports:
+      - 8080:8080
+    environment:
+      kete.routes.quick-start.destination.kind: mqtt-3
+      kete.routes.quick-start.destination.server-uri: tcp://nanomq:1883
+      kete.routes.quick-start.destination.topic: keycloak-events
+    depends_on:
+      nanomq:
+        condition: service_healthy

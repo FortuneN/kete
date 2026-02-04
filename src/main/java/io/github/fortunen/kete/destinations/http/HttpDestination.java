@@ -7,6 +7,8 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
+import java.util.Map;
+import java.util.Set;
 
 import io.github.fortunen.kete.Component;
 import io.github.fortunen.kete.Constants;
@@ -31,6 +33,7 @@ public class HttpDestination extends Destination<HttpDestinationConfig> {
 	public static final String MESSAGE_HEADER_EVENT_KIND = "x-" + Constants.MESSAGE_HEADER_EVENT_KIND;
 
 	private HttpClient httpClient;
+	private Set<Map.Entry<String, String>> customHeaders;
 
 	@Override
 	@SneakyThrows
@@ -38,16 +41,18 @@ public class HttpDestination extends Destination<HttpDestinationConfig> {
 
 		ValidationUtils.requireNonNull(config, "config is required");
 
-		var clientBuilder = HttpClient.newBuilder()
-			.connectTimeout(Duration.ofSeconds(config.getTimeoutSeconds()));
+		// customHeaders
 
-		if (config.getSslContext() != null) {
-			clientBuilder.sslContext(config.getSslContext());
-		}
+		customHeaders = config.getCustomHeadersEntrySet().stream()
+			.filter(entry -> {
+				var key = entry.getKey();
+				return !MESSAGE_HEADER_CONTENT_TYPE.equalsIgnoreCase(key) && !MESSAGE_HEADER_EVENT_KIND.equalsIgnoreCase(key) && !MESSAGE_HEADER_EVENT_TYPE.equalsIgnoreCase(key);
+			})
+			.collect(java.util.stream.Collectors.toSet());
 
-		httpClient = clientBuilder.build();
+		httpClient = config.getClientBuilder().build();
 
-		// test
+		// verify connection
 
 		var testRequest = HttpRequest.newBuilder()
 			.uri(URI.create(config.getScheme() + "://" + config.getHost() + ":" + config.getPort()))
@@ -79,20 +84,20 @@ public class HttpDestination extends Destination<HttpDestinationConfig> {
 			.uri(URI.create(actualUrl))
 			.timeout(Duration.ofSeconds(config.getTimeoutSeconds()));
 
-		if (config.isMessageHeadersEnabled()) {
-			requestBuilder
-				.header(MESSAGE_HEADER_CONTENT_TYPE, message.contentType())
-				.header(MESSAGE_HEADER_EVENT_TYPE, message.eventType())
-				.header(MESSAGE_HEADER_EVENT_KIND, message.kind());
-		}
-
-		if (ValidationUtils.isNotNull(config.getOauth()) && config.getOauth().isEnabled()) {
+		if (config.isOauthEnabled()) {
 			requestBuilder.header(AUTHORIZATION, config.getOauth().getAccessToken().toAuthorizationHeader());
 		}
 
-		if (ValidationUtils.isNotNull(config.getHeaders()) && !config.getHeaders().isEmpty()) {
-			config.getHeaders().forEach(requestBuilder::header);
+		// headers
+
+		for (var entry : customHeaders) {
+			requestBuilder.header(entry.getKey(), entry.getValue());
 		}
+
+		requestBuilder
+			.header(MESSAGE_HEADER_EVENT_KIND, message.kind())
+			.header(MESSAGE_HEADER_EVENT_TYPE, message.eventType())
+			.header(MESSAGE_HEADER_CONTENT_TYPE, message.contentType());
 
 		if (config.isMethodIsPost()) {
 			requestBuilder.POST(HttpRequest.BodyPublishers.ofString(body));
@@ -100,8 +105,7 @@ public class HttpDestination extends Destination<HttpDestinationConfig> {
 			requestBuilder.PUT(HttpRequest.BodyPublishers.ofString(body));
 		}
 
-		var request = requestBuilder.build();
-		var response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+		var response = httpClient.send(requestBuilder.build(), HttpResponse.BodyHandlers.ofString());
 
 		ValidationUtils.requireTrue(response.statusCode() >= 200 && response.statusCode() < 300, () -> new IOException("HTTP " + response.statusCode() + " : " + response.body()));
 	}

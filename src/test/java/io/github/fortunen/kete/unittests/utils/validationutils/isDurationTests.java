@@ -116,7 +116,7 @@ public class isDurationTests {
 	}
 
 	@Test
-	public void shouldReturnTrueForPlainNumberAsMilliseconds() {
+	public void shouldReturnTrueForPlainNumberAsSeconds() {
 
 		// act
 

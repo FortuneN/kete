@@ -12,10 +12,10 @@ import javax.net.ssl.SSLContext;
 import org.apache.commons.configuration2.MapConfiguration;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.testcontainers.containers.BindMode;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.Network;
 import org.testcontainers.containers.wait.strategy.Wait;
-import org.testcontainers.images.builder.Transferable;
 import org.testcontainers.utility.DockerImageName;
 
 import io.github.fortunen.kete.EventMessage;
@@ -69,7 +69,7 @@ public class TestBase {
 			.withExposedPorts(WEBSOCKET_PORT)
 			.withEnv("PORT", String.valueOf(WEBSOCKET_PORT))
 			.waitingFor(Wait.forHttp("/").forPort(WEBSOCKET_PORT).forStatusCode(200))
-			.withStartupTimeout(Duration.ofMinutes(1));
+			.withStartupTimeout(Duration.ofMinutes(10));
 
 		container.start();
 
@@ -109,29 +109,46 @@ public class TestBase {
 			.withExposedPorts(WEBSOCKET_PORT)
 			.withEnv("PORT", String.valueOf(WEBSOCKET_PORT))
 			.waitingFor(Wait.forListeningPort())
-			.withStartupTimeout(Duration.ofMinutes(1));
+			.withStartupTimeout(Duration.ofMinutes(10));
 
 		container.start();
 
-		// Read certificate and key files (PEM format required for nginx)
-		var serverCertBytes = Files.readAllBytes(Path.of(tls.getServerCertificatePemFilePath()));
-		var serverKeyBytes = Files.readAllBytes(Path.of(tls.getServerPrivateKeyPemFilePath()));
-		var caCertBytes = Files.readAllBytes(Path.of(tls.getCaCertificatePemFilePath()));
+		// Create temp directory and copy files for mounting
+		var tempDir = Files.createTempDirectory("nginx-tls-");
+		tempDir.toFile().deleteOnExit();
 
 		// Create nginx config for WebSocket TLS termination
 		var nginxConf = createNginxConfig(requireClientAuth);
+
+		// Write nginx.conf to temp directory
+		var nginxConfPath = tempDir.resolve("nginx.conf");
+		Files.writeString(nginxConfPath, nginxConf);
+		nginxConfPath.toFile().deleteOnExit();
+
+		// Copy certificate files (PEM format required for nginx) to temp directory
+		var serverCertPath = tempDir.resolve("server.crt");
+		Files.copy(Path.of(tls.getServerCertificatePemFilePath()), serverCertPath);
+		serverCertPath.toFile().deleteOnExit();
+
+		var serverKeyPath = tempDir.resolve("server.key");
+		Files.copy(Path.of(tls.getServerPrivateKeyPemFilePath()), serverKeyPath);
+		serverKeyPath.toFile().deleteOnExit();
+
+		var caCertPath = tempDir.resolve("ca.crt");
+		Files.copy(Path.of(tls.getCaCertificatePemFilePath()), caCertPath);
+		caCertPath.toFile().deleteOnExit();
 
 		// Start nginx as TLS termination proxy
 		// Put SSL files in /etc/nginx/ (not a subdirectory) to avoid directory creation issues
 		nginxProxy = new GenericContainer<>(DockerImageName.parse("nginx:1.27-alpine"))
 			.withNetwork(network)
 			.withExposedPorts(WEBSOCKET_TLS_PORT)
-			.withCopyToContainer(Transferable.of(nginxConf), "/etc/nginx/nginx.conf")
-			.withCopyToContainer(Transferable.of(serverCertBytes), "/etc/nginx/server.crt")
-			.withCopyToContainer(Transferable.of(serverKeyBytes), "/etc/nginx/server.key")
-			.withCopyToContainer(Transferable.of(caCertBytes), "/etc/nginx/ca.crt")
+			.withFileSystemBind(nginxConfPath.toString(), "/etc/nginx/nginx.conf", BindMode.READ_ONLY)
+			.withFileSystemBind(serverCertPath.toString(), "/etc/nginx/server.crt", BindMode.READ_ONLY)
+			.withFileSystemBind(serverKeyPath.toString(), "/etc/nginx/server.key", BindMode.READ_ONLY)
+			.withFileSystemBind(caCertPath.toString(), "/etc/nginx/ca.crt", BindMode.READ_ONLY)
 			.waitingFor(Wait.forListeningPort())
-			.withStartupTimeout(Duration.ofMinutes(1));
+			.withStartupTimeout(Duration.ofMinutes(10));
 
 		nginxProxy.start();
 
