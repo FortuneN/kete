@@ -47,17 +47,17 @@
 
 | Protocol | Examples |
 |----------|----------|
-| **Kafka** | Apache Kafka, Confluent, Redpanda, Azure Event Hubs, ... |
-| **AMQP 1.0** | RabbitMQ, ActiveMQ, Azure Service Bus, Qpid, ... |
-| **AMQP 0-9-1** | RabbitMQ, LavinMQ, ... |
-| **MQTT 3.1.1** | Mosquitto, EMQX, HiveMQ, ... |
-| **MQTT 5.0** | Mosquitto, EMQX, HiveMQ, Azure Event Grid, ... |
-| **Redis** | Redis, Valkey, Dragonfly, KeyDB, ElastiCache, Azure Cache for Redis, Upstash (Pub/Sub & Streams), ... |
-| **NATS** | NATS Server, JetStream, Synadia Cloud, ... |
-| **Pulsar** | Apache Pulsar, StreamNative Cloud, DataStax Astra Streaming, ... |
-| **HTTP** | Webhooks, REST APIs, Azure Event Grid, ... |
-| **STOMP** | ActiveMQ, Artemis, RabbitMQ, EMQX, ... |
-| **WebSocket** | WebSocket Applications/Servers, ... |
+| **Kafka** | Apache Kafka, Confluent Platform, Redpanda, Azure Event Hubs, AWS MSK, Aiven for Apache Kafka, Instaclustr, CloudKarafka |
+| **AMQP 1.0** | Apache ActiveMQ, Apache Artemis, Azure Service Bus, Azure Event Hubs, Apache Qpid, RabbitMQ, SwiftMQ, Solace PubSub+, IBM MQ |
+| **AMQP 0-9-1** | RabbitMQ, LavinMQ, Apache Qpid, CloudAMQP, Amazon MQ |
+| **MQTT 3.1.1** | Eclipse Mosquitto, EMQX, HiveMQ, VerneMQ, NanoMQ, RabbitMQ, AWS IoT Core, Azure IoT Hub |
+| **MQTT 5.0** | Eclipse Mosquitto, EMQX, HiveMQ, VerneMQ, NanoMQ, RabbitMQ, Azure Event Grid, AWS IoT Core |
+| **Redis** | Redis, Valkey, Dragonfly, KeyDB, AWS ElastiCache, Azure Cache for Redis, Upstash Redis, Google Cloud Memorystore (Pub/Sub & Streams) |
+| **NATS** | NATS Server, NATS JetStream, Synadia Cloud, NGS (NATS Global Service) |
+| **Pulsar** | Apache Pulsar, StreamNative Cloud, DataStax Astra Streaming, StreamNative Private Cloud, Clever Cloud Pulsar |
+| **HTTP** | Webhooks, REST APIs, Azure Event Grid, AWS EventBridge, Google Cloud Pub/Sub Push, Twilio, Slack, Discord, Custom HTTP Endpoints |
+| **STOMP** | Apache ActiveMQ, Apache Artemis, RabbitMQ, EMQX, HornetQ |
+| **WebSocket** | Custom WebSocket Servers, Socket.IO, SignalR, Ably, Pusher, WebSocket-based Chat Applications |
 
 ## Quick Start (5 minutes)
 
