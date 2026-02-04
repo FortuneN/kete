@@ -10,8 +10,8 @@ import org.apache.commons.configuration2.MapConfiguration;
 import org.apache.qpid.jms.JmsConnectionFactory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.testcontainers.containers.BindMode;
 import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.images.builder.Transferable;
 import org.testcontainers.utility.DockerImageName;
 
 import io.github.fortunen.kete.Constants;
@@ -144,10 +144,10 @@ public abstract class TestBase {
 			.withEnv("ARTEMIS_USER", DEFAULT_USERNAME)
 			.withEnv("ARTEMIS_PASSWORD", DEFAULT_PASSWORD)
 			.withEnv("ANONYMOUS_LOGIN", "true")
-			// Mount files from temp directory to etc-override directory for SSL configuration
-			.withFileSystemBind(brokerXmlPath.toString(), "/var/lib/artemis-instance/etc-override/broker.xml", BindMode.READ_ONLY)
-			.withFileSystemBind(keyStorePath.toString(), "/var/lib/artemis-instance/etc-override/keystore.jks", BindMode.READ_ONLY)
-			.withFileSystemBind(trustStorePath.toString(), "/var/lib/artemis-instance/etc-override/truststore.jks", BindMode.READ_ONLY)
+			// Copy files to container (in-memory)
+			.withCopyToContainer(Transferable.of(brokerXml, 0777), "/var/lib/artemis-instance/etc-override/broker.xml")
+			.withCopyToContainer(Transferable.of(Files.readAllBytes(Path.of(tls.getServerKeyStoreFilePath())), 0777), "/var/lib/artemis-instance/etc-override/keystore.jks")
+			.withCopyToContainer(Transferable.of(Files.readAllBytes(Path.of(tls.getTrustStoreFilePath())), 0777), "/var/lib/artemis-instance/etc-override/truststore.jks")
 			.withExposedPorts(AMQP_PORT, AMQPS_PORT, 8161)
 			.withLogConsumer(outputFrame -> System.out.println("[ARTEMIS] " + outputFrame.getUtf8String()));
 

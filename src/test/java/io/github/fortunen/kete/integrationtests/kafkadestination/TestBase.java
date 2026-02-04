@@ -335,13 +335,13 @@ public class TestBase {
 			// Add SSL listener configuration
 			this.withExposedPorts(KAFKA_PLAINTEXT_PORT, KAFKA_SSL_PORT);
 
-			// Mount the keystore, truststore, and password files
+			// Copy keystore, truststore, and password files to container (in-memory)
 			// Use serverKeyStoreFilePath for the container (server-side TLS) - it contains only the server key
-			this.withFileSystemBind(tls.getServerKeyStoreFilePath(), "/etc/kafka/secrets/keystore.jks", BindMode.READ_ONLY);
-			this.withFileSystemBind(tls.getTrustStoreFilePath(), "/etc/kafka/secrets/truststore.jks", BindMode.READ_ONLY);
-			this.withFileSystemBind(keyPasswordFile.toAbsolutePath().toString(), "/etc/kafka/secrets/key-password", BindMode.READ_ONLY);
-			this.withFileSystemBind(keystorePasswordFile.toAbsolutePath().toString(), "/etc/kafka/secrets/keystore-password", BindMode.READ_ONLY);
-			this.withFileSystemBind(truststorePasswordFile.toAbsolutePath().toString(), "/etc/kafka/secrets/truststore-password", BindMode.READ_ONLY);
+			this.withCopyToContainer(Transferable.of(Files.readAllBytes(Path.of(tls.getServerKeyStoreFilePath())), 0777), "/etc/kafka/secrets/keystore.jks");
+			this.withCopyToContainer(Transferable.of(Files.readAllBytes(Path.of(tls.getTrustStoreFilePath())), 0777), "/etc/kafka/secrets/truststore.jks");
+			this.withCopyToContainer(Transferable.of(Files.readAllBytes(keyPasswordFile), 0777), "/etc/kafka/secrets/key-password");
+			this.withCopyToContainer(Transferable.of(Files.readAllBytes(keystorePasswordFile), 0777), "/etc/kafka/secrets/keystore-password");
+			this.withCopyToContainer(Transferable.of(Files.readAllBytes(truststorePasswordFile), 0777), "/etc/kafka/secrets/truststore-password");
 
 			// SSL configuration using FILENAME and CREDENTIALS pattern expected by apache/kafka image
 			this.withEnv("KAFKA_SSL_KEYSTORE_FILENAME", "keystore.jks");
@@ -391,7 +391,7 @@ public class TestBase {
 			// Override KAFKA_LISTENER_SECURITY_PROTOCOL_MAP to include SSL
 			var kafkaListenerSecurityProtocolMap = "BROKER:PLAINTEXT,PLAINTEXT:PLAINTEXT,SSL:SSL,CONTROLLER:PLAINTEXT";
 
-			// Build the startup script
+			// Build the startup script and write to temp file
 			var command = "#!/bin/bash\n";
 			command += String.format("export KAFKA_LISTENERS='%s'\n", kafkaListeners);
 			command += String.format("export KAFKA_LISTENER_SECURITY_PROTOCOL_MAP='%s'\n", kafkaListenerSecurityProtocolMap);
@@ -436,7 +436,7 @@ public class TestBase {
 			Files.writeString(jaasConfigFile, jaasConfig);
 
 			this.withExposedPorts(KAFKA_PLAINTEXT_PORT, KAFKA_SASL_PORT);
-			this.withFileSystemBind(jaasConfigFile.toAbsolutePath().toString(), "/etc/kafka/kafka_server_jaas.conf", BindMode.READ_ONLY);
+			this.withCopyToContainer(Transferable.of(Files.readAllBytes(jaasConfigFile), 0777), "/etc/kafka/kafka_server_jaas.conf");
 
 			// SASL configuration
 			this.withEnv("KAFKA_OPTS", "-Djava.security.auth.login.config=/etc/kafka/kafka_server_jaas.conf");

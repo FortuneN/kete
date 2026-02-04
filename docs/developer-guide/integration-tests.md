@@ -162,22 +162,16 @@ class MyIntegrationTests {
 
 ### Mounting Configuration Files
 
-**CRITICAL**: When tests require custom configuration files for containers (broker configs, certificates, etc.), **ALWAYS use `withFileSystemBind()` with `BindMode.READ_ONLY`**. NEVER use `withCopyToContainer()`.
+**CRITICAL**: When tests require custom configuration files for containers (broker configs, certificates, etc.), **ALWAYS use in-memory `Transferable.of()` with 0777 permissions**. NEVER use `withFileSystemBind()` or `withCopyToContainer()` without permissions.
 
 ```java
-// Step 1: Create temp directory
-var tempDir = Files.createTempDirectory("test-config-");
-tempDir.toFile().deleteOnExit();
+// Step 1: Read file content into memory
+var brokerXmlBytes = Files.readAllBytes(Path.of(brokerXmlPath));
 
-// Step 2: Prepare configuration files
-var configPath = tempDir.resolve("broker.xml");
-Files.writeString(configPath, brokerXmlContent);
-configPath.toFile().deleteOnExit();
-
-// Step 3: Mount with READ_ONLY
+// Step 2: Copy to container memory with full permissions
 @Container
 static GenericContainer<?> broker = new GenericContainer<>(imageName)
-    .withFileSystemBind(configPath.toString(), "/etc/broker.xml", BindMode.READ_ONLY);
+    .withCopyToContainer(Transferable.of(brokerXmlBytes, 0777), "/etc/broker.xml");
 ```
 
 See [Container File Mounting Best Practices](#container-file-mounting-best-practices) for complete details.
@@ -214,40 +208,33 @@ static RabbitMQContainer rabbitmq = new RabbitMQContainer(DockerImageName.parse(
 
 ## Container File Mounting Best Practices
 
-### Why Mount Instead of Copy?
+### Why In-Memory Transfer with Full Permissions?
 
-**ALWAYS use `withFileSystemBind()` for mounting files into containers. NEVER use `withCopyToContainer()`.**
+**ALWAYS use `withCopyToContainer(Transferable.of(bytes, 0777))` for mounting files into containers. NEVER use `withFileSystemBind()`.**
 
-| Aspect | File Mounting (`withFileSystemBind`) | File Copying (`withCopyToContainer`) |
-|--------|--------------------------------------|--------------------------------------|
-| **Security** | Supports `READ_ONLY` mode, preventing container writes to host | No read-only option, container can modify host files |
-| **Transparency** | Files remain on host filesystem, easy to inspect | Files copied into container image layer |
-| **Cleanup** | Automatic with `deleteOnExit()` | Requires manual cleanup or layer management |
-| **Performance** | Direct filesystem access | Requires image layer creation |
-| **Best Practice** |  **RECOMMENDED** |  **DEPRECATED in this codebase** |
+| Aspect | In-Memory Transfer (`Transferable.of()`) | File System Bind (`withFileSystemBind`) |
+|--------|------------------------------------------|----------------------------------------|
+| **GitHub Actions** | ✅ Works reliably in CI/CD | ❌ Fails due to filesystem limitations |
+| **Permissions** | Full control with 0777 parameter | Unpredictable based on host OS |
+| **Cross-platform** | Identical behavior on all OS | Different behavior Windows/Linux/macOS |
+| **Performance** | Fast in-memory copy | Filesystem mount overhead |
+| **Best Practice** |  **REQUIRED in this codebase** |  **FORBIDDEN** |
 
-### Standard Mounting Pattern
+### Standard In-Memory Transfer Pattern
 
 Use this pattern consistently across all TestBase classes:
 
 ```java
-// Step 1: Create temporary directory
-var tempDir = Files.createTempDirectory("container-config-");
-tempDir.toFile().deleteOnExit();
+// Step 1: Read file content into byte array
+var configBytes = Files.readAllBytes(Path.of(sourceConfigPath));
+var keystoreBytes = Files.readAllBytes(Path.of(sourceKeystorePath));
+var truststoreBytes = Files.readAllBytes(Path.of(sourceTruststorePath));
 
-// Step 2: Create/copy files to temp directory
-var configPath = tempDir.resolve("config.xml");
-Files.writeString(configPath, configContent);
-configPath.toFile().deleteOnExit();
-
-var keystorePath = tempDir.resolve("keystore.jks");
-Files.copy(Path.of(sourceKeystorePath), keystorePath);
-keystorePath.toFile().deleteOnExit();
-
-// Step 3: Mount files with READ_ONLY mode
+// Step 2: Copy to container memory with 0777 permissions
 container = new GenericContainer<>(imageName)
-    .withFileSystemBind(configPath.toString(), "/container/path/config.xml", BindMode.READ_ONLY)
-    .withFileSystemBind(keystorePath.toString(), "/container/path/keystore.jks", BindMode.READ_ONLY);
+    .withCopyToContainer(Transferable.of(configBytes, 0777), "/container/path/config.xml")
+    .withCopyToContainer(Transferable.of(keystoreBytes, 0777), "/container/path/keystore.jks")
+    .withCopyToContainer(Transferable.of(truststoreBytes, 0777), "/container/path/truststore.jks");
 ```
 
 ### Complete Example: AMQP1 with TLS
@@ -257,45 +244,31 @@ From `io.github.fortunen.kete.integrationtests.amqp1destination.TestBase`:
 ```java
 private void startActiveMqArtemisWithTls(TlsMaterial tls, boolean requireClientAuth) throws Exception {
     
-    // Create broker configuration XML
+    // Create broker configuration XML as string
     var brokerXml = createArtemisBrokerXml(
         tls.getKeyStorePassword(),
         tls.getTrustStorePassword(),
         requireClientAuth
     );
 
-    // Create temp directory for all config files
-    var tempDir = Files.createTempDirectory("artemis-tls-");
-    tempDir.toFile().deleteOnExit();
+    // Read certificate files into memory
+    var keystoreBytes = Files.readAllBytes(Path.of(tls.getServerKeyStoreFilePath()));
+    var truststoreBytes = Files.readAllBytes(Path.of(tls.getTrustStoreFilePath()));
 
-    // Write broker.xml configuration
-    var brokerXmlPath = tempDir.resolve("broker.xml");
-    Files.writeString(brokerXmlPath, brokerXml);
-    brokerXmlPath.toFile().deleteOnExit();
-
-    // Copy keystore and truststore to temp directory
-    var keyStorePath = tempDir.resolve("keystore.jks");
-    Files.copy(Path.of(tls.getServerKeyStoreFilePath()), keyStorePath);
-    keyStorePath.toFile().deleteOnExit();
-
-    var trustStorePath = tempDir.resolve("truststore.jks");
-    Files.copy(Path.of(tls.getTrustStoreFilePath()), trustStorePath);
-    trustStorePath.toFile().deleteOnExit();
-
-    // Mount all files with READ_ONLY mode
+    // Copy all files to container memory with 0777 permissions
     container = new GenericContainer<>(DockerImageName.parse("apache/activemq-artemis:2.40.0-alpine"))
         .withEnv("ARTEMIS_USER", DEFAULT_USERNAME)
         .withEnv("ARTEMIS_PASSWORD", DEFAULT_PASSWORD)
         .withEnv("ANONYMOUS_LOGIN", "true")
-        .withFileSystemBind(brokerXmlPath.toString(), 
-            "/var/lib/artemis-instance/etc-override/broker.xml", 
-            BindMode.READ_ONLY)
-        .withFileSystemBind(keyStorePath.toString(), 
-            "/var/lib/artemis-instance/etc-override/keystore.jks", 
-            BindMode.READ_ONLY)
-        .withFileSystemBind(trustStorePath.toString(), 
-            "/var/lib/artemis-instance/etc-override/truststore.jks", 
-            BindMode.READ_ONLY)
+        .withCopyToContainer(
+            Transferable.of(brokerXml.getBytes(StandardCharsets.UTF_8), 0777),
+            "/var/lib/artemis-instance/etc-override/broker.xml")
+        .withCopyToContainer(
+            Transferable.of(keystoreBytes, 0777),
+            "/var/lib/artemis-instance/etc-override/keystore.jks")
+        .withCopyToContainer(
+            Transferable.of(truststoreBytes, 0777),
+            "/var/lib/artemis-instance/etc-override/truststore.jks")
         .withExposedPorts(AMQP_PORT, AMQPS_PORT, 8161)
         .waitingFor(Wait.forLogMessage(".*AMQ221007.*", 1))
         .withStartupTimeout(Duration.ofMinutes(10));
@@ -304,85 +277,87 @@ private void startActiveMqArtemisWithTls(TlsMaterial tls, boolean requireClientA
 }
 ```
 
-### Inline Temporary File Pattern
+### Inline Content Pattern
 
-For simple single-file configurations in E2E tests:
+For configuration generated as strings (XML, YAML, TOML, properties):
 
 ```java
-// Create temp file for mosquitto config
-var tempConfigPath = Files.createTempFile("mosquitto-", ".conf");
-Files.writeString(tempConfigPath, "listener 1883\nallow_anonymous true\n");
-tempConfigPath.toFile().deleteOnExit();
+// Create config content as string
+var mosquittoConf = """
+    listener 1883
+    allow_anonymous true
+    """;
 
 mosquitto = new GenericContainer<>(DockerImageName.parse("eclipse-mosquitto:2.0"))
     .withNetwork(createNetwork())
     .withNetworkAliases("mosquitto")
     .withExposedPorts(MQTT_PORT)
     .withCommand("mosquitto", "-c", "/mosquitto-no-auth.conf")
-    .withFileSystemBind(tempConfigPath.toString(), 
-        "/mosquitto-no-auth.conf", 
-        BindMode.READ_ONLY);
+    .withCopyToContainer(
+        Transferable.of(mosquittoConf.getBytes(StandardCharsets.UTF_8), 0777),
+        "/mosquitto-no-auth.conf");
 ```
 
 ### Key Implementation Details
 
-1. **Always use `BindMode.READ_ONLY`**: Prevents containers from modifying host files
-2. **Call `deleteOnExit()` on both directory and files**: Ensures cleanup after JVM shutdown
-3. **Use absolute paths**: `toString()` converts `Path` to absolute string path
-4. **Group related files in one temp directory**: Easier management and cleanup
-5. **Mount early in container builder chain**: Before `withExposedPorts()`, `withCommand()`, etc.
+1. **Always specify 0777 permissions**: `Transferable.of(content, 0777)` ensures maximum compatibility
+2. **Read files into memory**: Use `Files.readAllBytes(Path.of(path))` for binary files
+3. **Convert strings to bytes**: Use `.getBytes(StandardCharsets.UTF_8)` for text content
+4. **Import Transferable**: `import org.testcontainers.utility.MountableFile.Transferable;`
+5. **No cleanup needed**: In-memory content is garbage collected automatically
 
 ### Pattern Variations by Use Case
 
 #### Multiple Configuration Files (STOMP, AMQP1, WebSocket)
 ```java
-var tempDir = Files.createTempDirectory("prefix-");
-tempDir.toFile().deleteOnExit();
+var activeMqXml = createActiveMqConfig();
+var keyStoreBytes = Files.readAllBytes(Path.of(tls.getServerKeyStoreFilePath()));
+var trustStoreBytes = Files.readAllBytes(Path.of(tls.getTrustStoreFilePath()));
 
-var file1 = tempDir.resolve("config.xml");
-var file2 = tempDir.resolve("keystore.jks");
-var file3 = tempDir.resolve("truststore.jks");
-
-// Write/copy files...
-// Mount all with withFileSystemBind()
+container
+    .withCopyToContainer(Transferable.of(activeMqXml.getBytes(UTF_8), 0777), "/conf/activemq.xml")
+    .withCopyToContainer(Transferable.of(keyStoreBytes, 0777), "/conf/keystore.jks")
+    .withCopyToContainer(Transferable.of(trustStoreBytes, 0777), "/conf/truststore.jks");
 ```
 
 #### Single Config File (MQTT E2E)
 ```java
-var tempConfigPath = Files.createTempFile("mosquitto-", ".conf");
-Files.writeString(tempConfigPath, configContent);
-tempConfigPath.toFile().deleteOnExit();
+var mosquittoConf = "listener 1883\nallow_anonymous true\n";
 
-container.withFileSystemBind(tempConfigPath.toString(), "/path", BindMode.READ_ONLY);
+container.withCopyToContainer(
+    Transferable.of(mosquittoConf.getBytes(UTF_8), 0777),
+    "/mosquitto-no-auth.conf");
 ```
 
-#### Dynamic Configuration from TLS Material (Pulsar, AMQP1, STOMP)
+#### TLS Certificates (Pulsar, NATS, Redis)
 ```java
-var brokerConfig = createBrokerConfig(
-    tls.getKeyStorePassword(),
-    tls.getTrustStorePassword(),
-    requireClientAuth
-);
-Files.writeString(hostBrokerConf, brokerConfig);
+var certBytes = Files.readAllBytes(Path.of(tls.getServerCertificatePemFilePath()));
+var keyBytes = Files.readAllBytes(Path.of(tls.getServerPrivateKeyPemFilePath()));
+var caBytes = Files.readAllBytes(Path.of(tls.getCaCertificatePemFilePath()));
+
+container
+    .withCopyToContainer(Transferable.of(certBytes, 0777), "/certs/server.crt")
+    .withCopyToContainer(Transferable.of(keyBytes, 0777), "/certs/server.key")
+    .withCopyToContainer(Transferable.of(caBytes, 0777), "/certs/ca.crt");
 ```
 
 ### Common Pitfalls to Avoid
 
 |  Don't | ✅ Do |
 |--------|-------|
-| `withCopyToContainer(Transferable, "/path")` | `withFileSystemBind(hostPath, "/path", BindMode.READ_ONLY)` |
-| Skip `deleteOnExit()` calls | Always call `deleteOnExit()` on files and directories |
-| Use relative paths | Always use absolute paths (`.toString()` on `Path`) |
-| Mount without `BindMode` parameter | Always specify `BindMode.READ_ONLY` |
-| Create files in random locations | Use `Files.createTempDirectory()` for organization |
+| `withFileSystemBind(hostPath, "/path", BindMode.READ_ONLY)` | `withCopyToContainer(Transferable.of(bytes, 0777), "/path")` |
+| `Transferable.of(content)` without permissions | `Transferable.of(content, 0777)` |
+| `withCopyToContainer(Transferable.of(bytes), "/path")` | `withCopyToContainer(Transferable.of(bytes, 0777), "/path")` |
+| Create temp files on disk | Read directly into memory with `Files.readAllBytes()` |
+| Use `BindMode.READ_ONLY` | Always use 0777 permissions for maximum compatibility |
 
 ### Why This Matters
 
-- **Security**: READ_ONLY mounts prevent containers from tampering with host files
+- **GitHub Actions Compatibility**: Eliminates filesystem mounting issues in CI/CD
+- **Cross-platform**: Identical behavior on Windows, Linux, macOS
+- **Permissions**: 0777 ensures containers can read/write/execute without issues
+- **Simplicity**: No temp file cleanup needed, automatic garbage collection
 - **Reliability**: Consistent pattern across all test classes reduces bugs
-- **Cross-platform**: Works identically on Windows, Linux, macOS
-- **Testcontainers Best Practice**: Aligned with Testcontainers recommended patterns
-- **Code Review**: Easy to verify correct implementation
 
 
 
@@ -414,10 +389,10 @@ Files.writeString(hostBrokerConf, brokerConfig);
 
 ### File Mounting Issues
 
-- **File not found in container**: Verify absolute path is used (`.toString()` on Path)
-- **Permission denied**: Check file permissions on host, ensure READ_ONLY is appropriate
-- **Container can't read file**: Ensure file exists before `container.start()`
-- **Temp files persist**: Verify `deleteOnExit()` called on both files and directories
+- **File not accessible in container**: Ensure using `Transferable.of(bytes, 0777)` with full permissions
+- **Permission denied**: Always use 0777 permissions parameter
+- **GitHub Actions failures**: Never use `withFileSystemBind()`, always use `Transferable.of()`
+- **Missing permissions parameter**: Verify all `Transferable.of()` calls include `0777` as second parameter
 
 
 

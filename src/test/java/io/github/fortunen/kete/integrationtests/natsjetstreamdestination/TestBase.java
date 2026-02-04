@@ -2,14 +2,16 @@ package io.github.fortunen.kete.integrationtests.natsjetstreamdestination;
 
 import static org.awaitility.Awaitility.await;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.Duration;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.apache.commons.configuration2.MapConfiguration;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.testcontainers.containers.BindMode;
 import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.images.builder.Transferable;
 import org.testcontainers.utility.DockerImageName;
 
 import io.github.fortunen.kete.Constants;
@@ -103,9 +105,9 @@ public class TestBase {
 
 		container = new GenericContainer<>(DockerImageName.parse("nats:2.10-alpine"))
 			.withExposedPorts(NATS_PORT, NATS_MONITORING_PORT)
-			.withFileSystemBind(tls.getServerCertificatePemFilePath(), "/certs/server.crt", BindMode.READ_ONLY)
-			.withFileSystemBind(tls.getServerPrivateKeyPemFilePath(), "/certs/server.key", BindMode.READ_ONLY)
-			.withFileSystemBind(tls.getCaCertificatePemFilePath(), "/certs/ca.crt", BindMode.READ_ONLY)
+			.withCopyToContainer(Transferable.of(Files.readAllBytes(Path.of(tls.getServerCertificatePemFilePath())), 0777), "/certs/server.crt")
+			.withCopyToContainer(Transferable.of(Files.readAllBytes(Path.of(tls.getServerPrivateKeyPemFilePath())), 0777), "/certs/server.key")
+			.withCopyToContainer(Transferable.of(Files.readAllBytes(Path.of(tls.getCaCertificatePemFilePath())), 0777), "/certs/ca.crt")
 			.withCommand(
 				"--jetstream",
 				"--http_port", "8222",

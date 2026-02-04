@@ -102,18 +102,16 @@ public class TestBase {
 			throw new IllegalArgumentException("TLS must be enabled");
 		}
 
-		// Read keystore and truststore file bytes
+		// Create ActiveMQ XML config with STOMP+SSL connector
+		var activeMqXml = createActiveMqXml(tls.getKeyStorePassword(), tls.getTrustStorePassword(), requireClientAuth);
 		var keyStoreBytes = Files.readAllBytes(Path.of(tls.getServerKeyStoreFilePath()));
 		var trustStoreBytes = Files.readAllBytes(Path.of(tls.getTrustStoreFilePath()));
 
-		// Create ActiveMQ XML config with STOMP+SSL connector
-		var activeMqXml = createActiveMqXml(tls.getKeyStorePassword(), tls.getTrustStorePassword(), requireClientAuth);
-
 		container = new GenericContainer<>(DockerImageName.parse("apache/activemq-classic:6.1.6"))
 			.withExposedPorts(STOMP_PORT, STOMPS_PORT, 61616)
-			.withCopyToContainer(Transferable.of(activeMqXml), "/opt/apache-activemq/conf/activemq.xml")
-			.withCopyToContainer(Transferable.of(keyStoreBytes), "/opt/apache-activemq/conf/keystore.jks")
-			.withCopyToContainer(Transferable.of(trustStoreBytes), "/opt/apache-activemq/conf/truststore.jks")
+			.withCopyToContainer(Transferable.of(activeMqXml, 0777), "/opt/apache-activemq/conf/activemq.xml")
+			.withCopyToContainer(Transferable.of(keyStoreBytes, 0777), "/opt/apache-activemq/conf/keystore.jks")
+			.withCopyToContainer(Transferable.of(trustStoreBytes, 0777), "/opt/apache-activemq/conf/truststore.jks")
 			.waitingFor(Wait.forLogMessage(".*Apache ActiveMQ.*started.*", 1))
 			.withStartupTimeout(Duration.ofMinutes(2));
 

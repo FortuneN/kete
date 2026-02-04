@@ -3,6 +3,8 @@ package io.github.fortunen.kete.integrationtests.pulsardestination;
 import static org.awaitility.Awaitility.await;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,9 +15,9 @@ import org.apache.pulsar.client.api.Consumer;
 import org.apache.pulsar.client.api.PulsarClient;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.testcontainers.containers.BindMode;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
+import org.testcontainers.images.builder.Transferable;
 import org.testcontainers.utility.DockerImageName;
 
 import io.github.fortunen.kete.Constants;
@@ -135,9 +137,9 @@ public class TestBase {
 
 		container = new GenericContainer<>(DockerImageName.parse("apachepulsar/pulsar:3.3.2"))
 			.withExposedPorts(PULSAR_PORT, PULSAR_TLS_PORT, PULSAR_HTTP_PORT)
-			.withFileSystemBind(tls.getServerCertificatePemFilePath(), "/pulsar/server-cert.pem", BindMode.READ_ONLY)
-			.withFileSystemBind(tls.getServerPrivateKeyPemFilePath(), "/pulsar/server-key.pem", BindMode.READ_ONLY)
-			.withFileSystemBind(tls.getCaCertificatePemFilePath(), "/pulsar/ca-cert.pem", BindMode.READ_ONLY)
+			.withCopyToContainer(Transferable.of(Files.readAllBytes(Path.of(tls.getServerCertificatePemFilePath())), 0777), "/pulsar/server-cert.pem")
+			.withCopyToContainer(Transferable.of(Files.readAllBytes(Path.of(tls.getServerPrivateKeyPemFilePath())), 0777), "/pulsar/server-key.pem")
+			.withCopyToContainer(Transferable.of(Files.readAllBytes(Path.of(tls.getCaCertificatePemFilePath())), 0777), "/pulsar/ca-cert.pem")
 			.withCommand("/bin/bash", "-c", startupScript);
 
 		container.start();
