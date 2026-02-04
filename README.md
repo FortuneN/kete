@@ -141,6 +141,17 @@ docker compose up -d
 
 [Create new issue →](https://github.com/FortuneN/kete/issues/new)
 
+## Please consider supporting the project
+
+| Platform | Type | Link |
+|----------|------|------|
+| **GitHub (Stars)** | Free | [Give the project a star](https://github.com/FortuneN/kete) |
+| **GitHub (Sponsors)** | One-time / Recurring | [Sponsor on GitHub](https://github.com/sponsors/FortuneN) |
+| **PayPal** | One-time / Recurring | [Donate using PayPal](https://paypal.me/FortuneNgwenya) |
+| **Buy Me a Coffee** | One-time / Recurring | [Donate using Buy Me a Coffee](https://www.buymeacoffee.com/FortuneN) |
+| **Ko-fi** | One-time / Recurring | [Donate using Ko-fi](https://ko-fi.com/FortuneN) |
+| **Liberapay** | Recurring | [Donate using Liberapay](https://liberapay.com/FortuneN) |
+
 ## Credits
 
 | Library | Description |
@@ -149,6 +160,7 @@ docker compose up -d
 | [Lombok](https://projectlombok.org/) | Boilerplate reduction for Java |
 | [Apache Commons](https://commons.apache.org/) | Configuration2, Lang3, Text, IO, Pool2 utilities |
 | [Apache Kafka Client](https://kafka.apache.org/) | Kafka producer library |
+| [Apache Pulsar Client](https://pulsar.apache.org/) | Pulsar producer library |
 | [RabbitMQ Client](https://www.rabbitmq.com/java-client.html) | AMQP 0-9-1 client |
 | [Eclipse Paho](https://www.eclipse.org/paho/) | MQTT 3.1.1 and MQTT 5.0 clients |
 | [Apache Qpid JMS](https://qpid.apache.org/components/jms/) | AMQP 1.0 JMS client |
@@ -170,14 +182,3 @@ docker compose up -d
 | [Mockito](https://site.mockito.org/) | Mocking framework for tests |
 | [AssertJ](https://assertj.github.io/doc/) | Fluent assertions for tests |
 | [Testcontainers](https://testcontainers.com/) | Docker-based integration testing |
-
-## Please consider supporting the project
-
-| Platform | Type | Link |
-|----------|------|------|
-| **GitHub (Stars)** | Free | [Give the project a star](https://github.com/FortuneN/kete) |
-| **GitHub (Sponsors)** | One-time / Recurring | [Sponsor on GitHub](https://github.com/sponsors/FortuneN) |
-| **PayPal** | One-time / Recurring | [Donate using PayPal](https://paypal.me/FortuneNgwenya) |
-| **Buy Me a Coffee** | One-time / Recurring | [Donate using Buy Me a Coffee](https://www.buymeacoffee.com/FortuneN) |
-| **Ko-fi** | One-time / Recurring | [Donate using Ko-fi](https://ko-fi.com/FortuneN) |
-| **Liberapay** | Recurring | [Donate using Liberapay](https://liberapay.com/FortuneN) |
