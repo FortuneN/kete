@@ -45,6 +45,21 @@ STOMP (Simple Text Oriented Messaging Protocol) is supported by many enterprise 
     kete.routes.activemq.destination.password=admin
     ```
 
+=== "ActiveMQ Artemis"
+
+    ```bash
+    kete.routes.artemis.destination.kind=stomp
+    kete.routes.artemis.destination.host=artemis.example.com
+    kete.routes.artemis.destination.port=61613
+    kete.routes.artemis.destination.destination=/queue/keycloak-events
+    kete.routes.artemis.destination.username=admin
+    kete.routes.artemis.destination.password=admin
+    ```
+
+    !!! warning "Artemis Broker Configuration Required"
+        ActiveMQ Artemis requires the STOMP acceptor to be configured with `anycastPrefix` and `multicastPrefix` 
+        for `/queue/*` destinations to create ANYCAST queues instead of MULTICAST addresses. See [Artemis Configuration](#artemis-configuration) below.
+
 === "Amazon MQ"
 
     ```bash
@@ -134,7 +149,7 @@ Headers are included in the STOMP message headers.
 | `destination.username` | `""` | STOMP login username | `admin` |
 | `destination.password` | `""` | STOMP login passcode | `secret` |
 | `destination.virtual-host` | Same as `host` | Virtual host for STOMP CONNECT | `/` |
-| `destination.receipt-enabled` | `false` | Wait for broker receipt acknowledgment | `true` |
+| `destination.receipt-enabled` | `true` | Wait for broker receipt acknowledgment | `false` |
 | `destination.heart-beat-outgoing-seconds` | `30` | Outgoing heart-beat interval in seconds, 0=disabled | `10` |
 | `destination.heart-beat-incoming-seconds` | `30` | Incoming heart-beat interval in seconds, 0=disabled | `10` |
 | `destination.read-timeout-seconds` | `30` | Socket read timeout in seconds | `60` |
@@ -163,6 +178,40 @@ STOMP destinations follow broker-specific conventions:
 | ActiveMQ | `/queue/name` | `/topic/name` |
 | RabbitMQ | `/queue/name` | `/topic/name` or `/exchange/name` |
 | Artemis | `/queue/name` | `/topic/name` |
+
+
+
+## Artemis Configuration
+
+ActiveMQ Artemis requires special STOMP acceptor configuration for `/queue/*` destinations to work correctly.
+
+!!! danger "Critical: Without this configuration, messages fail"
+    By default, Artemis creates MULTICAST addresses for all STOMP destinations. This causes messages sent to 
+    `/queue/keycloak-events` to be undeliverable because no queue is bound to the MULTICAST address.
+
+Add the `anycastPrefix` and `multicastPrefix` parameters to your Artemis STOMP acceptor in `broker.xml`:
+
+```xml
+<acceptors>
+   <!-- STOMP acceptor with prefix routing -->
+   <acceptor name="stomp">
+      tcp://0.0.0.0:61613?protocols=STOMP;anycastPrefix=/queue/;multicastPrefix=/topic/
+   </acceptor>
+</acceptors>
+```
+
+This configuration tells Artemis:
+
+- Destinations starting with `/queue/` → Create **ANYCAST** addresses (point-to-point queues)
+- Destinations starting with `/topic/` → Create **MULTICAST** addresses (pub/sub topics)
+
+For a complete minimal `broker.xml` for Docker deployments, see the 
+[stomp-artemis quickstart](https://github.com/FortuneN/kete/tree/develop/quick-starts/stomp-artemis).
+
+**References:**
+
+- [Stack Overflow: STOMP sending to queue but arriving as topic on Artemis](https://stackoverflow.com/questions/68895552/stomp-sending-to-queue-but-arriving-as-topic-on-artemis)
+- [Artemis STOMP Documentation](https://activemq.apache.org/components/artemis/documentation/latest/stomp.html)
 
 
 

@@ -76,7 +76,7 @@ Apache ActiveMQ Artemis is a high-performance multi-protocol broker:
 | AMQP 1.0 | `amqp-1` | 5672 | Native support |
 | MQTT 3.1.1 | `mqtt-3` | 1883 | Native support |
 | MQTT 5 | `mqtt-5` | 1883 | Native support |
-| STOMP | `stomp` | 61613/61616 | Native support (61616 is multi-protocol) |
+| STOMP | `stomp` | 61613/61616 | Requires `anycastPrefix` config (see [STOMP docs](stomp.md#artemis-configuration)) |
 
 **Quickstarts available:** [amqp-1-activemq](../../quick-starts/amqp-1-activemq/), [stomp-activemq](../../quick-starts/stomp-activemq/), [stomp-artemis](../../quick-starts/stomp-artemis/)
 
@@ -135,7 +135,7 @@ Use `destination.kind=amqp-1`:
 
 - **Apache ActiveMQ Artemis** - Primary target
 - **RabbitMQ 4.0+** - Native AMQP 1.0 support
-- **Azure Service Bus** - Auto-TLS
+- **Azure Service Bus** - TLS required
 - **Azure Event Hubs** - Event streaming
 - **Apache Qpid** - Reference implementation
 - **Amazon MQ** - Managed ActiveMQ
