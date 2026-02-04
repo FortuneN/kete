@@ -113,7 +113,7 @@ Apache Pulsar is a cloud-native, distributed messaging and streaming platform:
 |----------|------------------|:----:|-------|
 | Pulsar | `pulsar` | 6650 | Native protocol, TLS support on 6651 |
 
-**Quickstarts available:** Coming soon
+**Quickstarts available:** [pulsar-apache](../../quick-starts/pulsar-apache/)
 
 
 
@@ -125,6 +125,8 @@ Use `destination.kind=amqp-0.9.1`:
 - **LavinMQ** - Lightweight alternative
 - **CloudAMQP** - Managed RabbitMQ
 - **Amazon MQ for RabbitMQ** - AWS managed
+
+**Quickstarts available:** [amqp-0.9.1-rabbitmq](../../quick-starts/amqp-0.9.1-rabbitmq/), [amqp-0.9.1-lavinmq](../../quick-starts/amqp-0.9.1-lavinmq/)
 
 See: [AMQP 0.9.1 Destination](amqp-0.9.1.md)
 
@@ -141,6 +143,8 @@ Use `destination.kind=amqp-1`:
 - **Amazon MQ** - Managed ActiveMQ
 - **Solace PubSub+** - Multi-protocol
 
+**Quickstarts available:** [amqp-1-activemq](../../quick-starts/amqp-1-activemq/), [amqp-1-azure-event-hubs](../../quick-starts/amqp-1-azure-event-hubs/), [amqp-1-azure-service-bus](../../quick-starts/amqp-1-azure-service-bus/), [amqp-1-azure-service-bus-emulator](../../quick-starts/amqp-1-azure-service-bus-emulator/), [amqp-1-qpid](../../quick-starts/amqp-1-qpid/), [amqp-1-rabbitmq](../../quick-starts/amqp-1-rabbitmq/)
+
 See: [AMQP 1 Destination](amqp-1.md)
 
 
@@ -152,11 +156,14 @@ Use `destination.kind=mqtt-3`:
 - **HiveMQ** - Enterprise, clustering
 - **EMQX** - High-performance
 - **VerneMQ** - Distributed
+- **NanoMQ** - Lightweight
 - **RabbitMQ** - Via plugin
 - **Azure Event Grid** - MQTT Broker feature
 - **Solace PubSub+** - Native
 - **AWS IoT Core** - Managed
 - **Azure IoT Hub** - Managed
+
+**Quickstarts available:** [mqtt-3-mosquitto](../../quick-starts/mqtt-3-mosquitto/), [mqtt-3-emqx](../../quick-starts/mqtt-3-emqx/), [mqtt-3-hivemq](../../quick-starts/mqtt-3-hivemq/), [mqtt-3-vernemq](../../quick-starts/mqtt-3-vernemq/), [mqtt-3-nanomq](../../quick-starts/mqtt-3-nanomq/), [mqtt-3-rabbitmq](../../quick-starts/mqtt-3-rabbitmq/)
 
 See: [MQTT 3 Destination](mqtt-3.md)
 
@@ -169,9 +176,12 @@ Use `destination.kind=mqtt-5`:
 - **EMQX** - Full MQTT 5
 - **Eclipse Mosquitto 2.0+** - MQTT 5 since v2.0
 - **VerneMQ** - Full MQTT 5
+- **NanoMQ** - Lightweight
 - **RabbitMQ** - Via plugin (3.13+)
 - **Azure Event Grid** - MQTT Broker
 - **Solace PubSub+** - Native
+
+**Quickstarts available:** [mqtt-5-mosquitto](../../quick-starts/mqtt-5-mosquitto/), [mqtt-5-emqx](../../quick-starts/mqtt-5-emqx/), [mqtt-5-hivemq](../../quick-starts/mqtt-5-hivemq/), [mqtt-5-vernemq](../../quick-starts/mqtt-5-vernemq/), [mqtt-5-nanomq](../../quick-starts/mqtt-5-nanomq/), [mqtt-5-rabbitmq](../../quick-starts/mqtt-5-rabbitmq/), [mqtt-5-azure-event-grid](../../quick-starts/mqtt-5-azure-event-grid/)
 
 See: [MQTT 5 Destination](mqtt-5.md)
 
@@ -188,6 +198,8 @@ Use `destination.kind=stomp`:
 - **Amazon MQ** - Managed ActiveMQ
 - **TIBCO EMS** - Native
 
+**Quickstarts available:** [stomp-activemq](../../quick-starts/stomp-activemq/), [stomp-artemis](../../quick-starts/stomp-artemis/), [stomp-rabbitmq](../../quick-starts/stomp-rabbitmq/), [stomp-emqx](../../quick-starts/stomp-emqx/)
+
 See: [STOMP Destination](stomp.md)
 
 
@@ -202,6 +214,8 @@ Use `destination.kind=kafka`:
 - **Amazon MSK** - Managed Kafka
 - **Aiven for Kafka** - Managed
 
+**Quickstarts available:** [kafka-apache](../../quick-starts/kafka-apache/), [kafka-redpanda](../../quick-starts/kafka-redpanda/), [kafka-confluent](../../quick-starts/kafka-confluent/), [kafka-azure-event-hubs](../../quick-starts/kafka-azure-event-hubs/), [kafka-azure-event-hubs-emulator](../../quick-starts/kafka-azure-event-hubs-emulator/)
+
 See: [Kafka Destination](kafka.md)
 
 
@@ -211,12 +225,17 @@ Use `destination.kind=redis-pubsub` or `destination.kind=redis-streams`:
 
 - **Redis** - Open-source, in-memory data store
 - **Redis Stack** - Redis with additional modules
+- **Valkey** - Redis fork, fully compatible
+- **Dragonfly** - Redis-compatible, multi-threaded
+- **KeyDB** - Redis-compatible, multi-threaded
 - **Amazon ElastiCache** - AWS-managed Redis
 - **Azure Cache for Redis** - Azure-managed Redis
 - **Google Cloud Memorystore** - GCP-managed Redis
 - **Upstash** - Serverless Redis
-- **Dragonfly** - Redis-compatible, multi-threaded
-- **KeyDB** - Redis-compatible, multi-threaded
+
+**Quickstarts available (Pub/Sub):** [redis-pubsub-redis](../../quick-starts/redis-pubsub-redis/), [redis-pubsub-valkey](../../quick-starts/redis-pubsub-valkey/), [redis-pubsub-dragonfly](../../quick-starts/redis-pubsub-dragonfly/), [redis-pubsub-keydb](../../quick-starts/redis-pubsub-keydb/), [redis-pubsub-azure-cache-for-redis](../../quick-starts/redis-pubsub-azure-cache-for-redis/), [redis-pubsub-upstash](../../quick-starts/redis-pubsub-upstash/)
+
+**Quickstarts available (Streams):** [redis-streams-redis](../../quick-starts/redis-streams-redis/), [redis-streams-valkey](../../quick-starts/redis-streams-valkey/), [redis-streams-dragonfly](../../quick-starts/redis-streams-dragonfly/), [redis-streams-keydb](../../quick-starts/redis-streams-keydb/), [redis-streams-azure-cache-for-redis](../../quick-starts/redis-streams-azure-cache-for-redis/), [redis-streams-upstash](../../quick-starts/redis-streams-upstash/)
 
 See: [Redis Pub/Sub Destination](redis-pubsub.md), [Redis Streams Destination](redis-streams.md)
 
@@ -228,6 +247,8 @@ Use `destination.kind=nats` or `destination.kind=nats-jetstream`:
 - **NATS Server** - Open-source messaging system
 - **Synadia Cloud** - Managed NATS service
 - **NATS Kubernetes** - Self-hosted NATS on Kubernetes
+
+**Quickstarts available:** [nats-nats-server](../../quick-starts/nats-nats-server/), [nats-jetstream-nats-server](../../quick-starts/nats-jetstream-nats-server/)
 
 See: [NATS Destination](nats.md), [NATS JetStream Destination](nats-jetstream.md)
 
@@ -308,6 +329,7 @@ All quickstarts are in the `quick-starts/` directory:
 | AMQP 1.0 | ActiveMQ | `amqp-1-activemq/` |
 | AMQP 1.0 | Azure Event Hubs | `amqp-1-azure-event-hubs/` |
 | AMQP 1.0 | Azure Service Bus | `amqp-1-azure-service-bus/` |
+| AMQP 1.0 | Azure Service Bus Emulator | `amqp-1-azure-service-bus-emulator/` |
 | AMQP 1.0 | Apache Qpid | `amqp-1-qpid/` |
 | AMQP 1.0 | RabbitMQ | `amqp-1-rabbitmq/` |
 | MQTT 3 | Mosquitto | `mqtt-3-mosquitto/` |
@@ -329,6 +351,7 @@ All quickstarts are in the `quick-starts/` directory:
 | STOMP | EMQX | `stomp-emqx/` |
 | Kafka | Apache Kafka | `kafka-apache/` |
 | Kafka | Azure Event Hubs | `kafka-azure-event-hubs/` |
+| Kafka | Azure Event Hubs Emulator | `kafka-azure-event-hubs-emulator/` |
 | Kafka | Redpanda | `kafka-redpanda/` |
 | Kafka | Confluent | `kafka-confluent/` |
 | Redis Pub/Sub | Redis | `redis-pubsub-redis/` |
@@ -345,4 +368,7 @@ All quickstarts are in the `quick-starts/` directory:
 | Redis Streams | Upstash | `redis-streams-upstash/` |
 | NATS | NATS Server | `nats-nats-server/` |
 | NATS JetStream | NATS Server | `nats-jetstream-nats-server/` |
+| Pulsar | Apache Pulsar | `pulsar-apache/` |
+| HTTP | Azure Event Grid | `http-azure-event-grid/` |
 | HTTP | Webhook | `http-webhook/` |
+| WebSocket | Echo Server | `websocket-echo/` |

@@ -1,13 +1,36 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
-    <version>${revision}</version>
+	<name>KETE</name>
     <artifactId>kete</artifactId>
+    <version>${revision}</version>
 	<modelVersion>4.0.0</modelVersion>
     <groupId>io.github.fortunen</groupId>
+  	<url>https://github.com/FortuneN/kete</url>
+  	<description>Keycloak Events To Everywhere - Stream matched events to various destinations in various formats</description>
+
+	<licenses>
+		<license>
+			<name>Apache License, Version 2.0</name>
+			<url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+		</license>
+	</licenses>
+
+	<developers>
+		<developer>
+			<name>Fortune Ngwenya</name>
+			<url>https://github.com/FortuneN</url>
+		</developer>
+	</developers>
+
+	<scm>
+		<url>https://github.com/FortuneN/kete</url>
+		<connection>scm:git:git://github.com/FortuneN/kete.git</connection>
+		<developerConnection>scm:git:ssh://github.com/FortuneN/kete.git</developerConnection>
+	</scm>
 
 	<properties>
-		<revision>0.0.0-SNAPSHOT</revision>
+		<revision>0.0.0</revision>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 
@@ -248,7 +271,6 @@
 			<version>5.21.0</version>
 			<scope>test</scope>
 		</dependency>
-		<!-- SLF4J JUL provider - shaded along with slf4j-api so kete can log inside Keycloak -->
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-jdk14</artifactId>

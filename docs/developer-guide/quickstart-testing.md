@@ -274,6 +274,6 @@ When adding a new quickstart:
 
 ## See Also
 
-- [Architecture Documentation](docs/developer-guide/architecture.md)
-- [Integration Tests](docs/developer-guide/integration-tests.md)
-- [User Guide](docs/user-guide/overview.md)
+- [Architecture Documentation](architecture.md)
+- [Integration Tests](integration-tests.md)
+- [User Guide](../user-guide/overview.md)

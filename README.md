@@ -52,15 +52,16 @@
 | **AMQP 0-9-1** | RabbitMQ, LavinMQ, ... |
 | **MQTT 3.1.1** | Mosquitto, EMQX, HiveMQ, ... |
 | **MQTT 5.0** | Mosquitto, EMQX, HiveMQ, Azure Event Grid, ... |
-| **Redis** | Redis, ElastiCache, Azure Cache for Redis (Pub/Sub & Streams), ... |
+| **Redis** | Redis, Valkey, Dragonfly, KeyDB, ElastiCache, Azure Cache for Redis, Upstash (Pub/Sub & Streams), ... |
 | **NATS** | NATS Server, JetStream, Synadia Cloud, ... |
+| **Pulsar** | Apache Pulsar, StreamNative Cloud, DataStax Astra Streaming, ... |
 | **HTTP** | Webhooks, REST APIs, Azure Event Grid, ... |
-| **STOMP** | ActiveMQ, ... |
+| **STOMP** | ActiveMQ, Artemis, RabbitMQ, EMQX, ... |
 | **WebSocket** | WebSocket Applications/Servers, ... |
 
 ## Quick Start (5 minutes)
 
-### Step 1: <a href="https://raw.githubusercontent.com/FortuneN/kete/release/quick-starts/amqp-0.9.1-rabbitmq/docker-compose.yml" download>Download</a> or create docker-compose.yml
+### Step 1: <a href="https://raw.githubusercontent.com/FortuneN/kete/develop/quick-starts/amqp-0.9.1-rabbitmq/docker-compose.yml" download>Download</a> or create docker-compose.yml
 
 ```yaml
 services:
@@ -92,6 +93,7 @@ services:
     command: start-dev
     ports:
       - 8080:8080
+      - 9000:9000
     environment:
       kete.routes.quick-start.destination.kind: amqp-0.9.1
       kete.routes.quick-start.destination.host: rabbitmq

@@ -242,16 +242,17 @@ For detailed information about each loader and their properties, see **[Certific
 |--------------------|----------|-------------------|
 | **[kafka](kafka.md)** | Kafka Protocol | Kafka, Redpanda, Confluent, Azure Event Hubs, Amazon MSK |
 | **[amqp-0.9.1](amqp-0.9.1.md)** | AMQP 0-9-1 | RabbitMQ, LavinMQ |
-| **[amqp-1](amqp-1.md)** | AMQP 1 | ActiveMQ Artemis, Azure Service Bus, Azure Event Hubs, Qpid |
-| **[mqtt-3](mqtt-3.md)** | MQTT 3 | Mosquitto, HiveMQ, AWS IoT, Azure IoT Hub |
-| **[mqtt-5](mqtt-5.md)** | MQTT 5 | HiveMQ, EMQX, Mosquitto 2.0+ |
-| **[redis-pubsub](redis-pubsub.md)** | Redis RESP | Redis, ElastiCache, Azure Cache for Redis |
-| **[redis-streams](redis-streams.md)** | Redis RESP | Redis 5.0+, ElastiCache, Azure Cache for Redis |
+| **[amqp-1](amqp-1.md)** | AMQP 1 | ActiveMQ Artemis, Azure Service Bus, Azure Event Hubs, Qpid, RabbitMQ 4.0+ |
+| **[mqtt-3](mqtt-3.md)** | MQTT 3 | Mosquitto, HiveMQ, EMQX, VerneMQ, NanoMQ, RabbitMQ, AWS IoT, Azure IoT Hub |
+| **[mqtt-5](mqtt-5.md)** | MQTT 5 | HiveMQ, EMQX, VerneMQ, NanoMQ, Mosquitto 2.0+, RabbitMQ, Azure Event Grid |
+| **[redis-pubsub](redis-pubsub.md)** | Redis RESP | Redis, Valkey, Dragonfly, KeyDB, ElastiCache, Azure Cache for Redis, Upstash |
+| **[redis-streams](redis-streams.md)** | Redis RESP | Redis 5.0+, Valkey, Dragonfly, KeyDB, ElastiCache, Azure Cache for Redis, Upstash |
 | **[nats](nats.md)** | NATS Protocol | NATS Server, Synadia Cloud |
 | **[nats-jetstream](nats-jetstream.md)** | NATS JetStream | NATS Server, Synadia Cloud |
-| **[http](http.md)** | HTTP/HTTPS | Webhooks, REST APIs, any HTTP endpoint |
+| **[pulsar](pulsar.md)** | Pulsar Protocol | Apache Pulsar, StreamNative Cloud, DataStax Astra Streaming |
+| **[http](http.md)** | HTTP/HTTPS | Webhooks, REST APIs, any HTTP endpoint, Azure Event Grid |
 | **[websocket](websocket.md)** | WebSocket | Real-time servers, custom backends, dashboards |
-| **[stomp](stomp.md)** | STOMP 1.2 | ActiveMQ Classic, Amazon MQ, RabbitMQ, Artemis |
+| **[stomp](stomp.md)** | STOMP 1.2 | ActiveMQ Classic, ActiveMQ Artemis, Amazon MQ, RabbitMQ, EMQX |
 
 ## Cloud Services Compatibility
 
@@ -261,16 +262,21 @@ KETE works with major cloud messaging services through protocol compatibility:
 |---------------|-----------------|---------------|
 | **Azure Event Hubs** | `kafka` or `amqp-1` | [Kafka](kafka.md) / [AMQP 1](amqp-1.md) |
 | **Azure Service Bus** | `amqp-1` | [AMQP 1](amqp-1.md) |
+| **Azure Event Grid** | `http` or `mqtt-5` | [HTTP](http.md) / [MQTT 5](mqtt-5.md) |
 | **Azure Cache for Redis** | `redis-pubsub` or `redis-streams` | [Redis Pub/Sub](redis-pubsub.md) / [Redis Streams](redis-streams.md) |
 | **Amazon ElastiCache** | `redis-pubsub` or `redis-streams` | [Redis Pub/Sub](redis-pubsub.md) / [Redis Streams](redis-streams.md) |
 | **Amazon MSK** | `kafka` | [Kafka](kafka.md) |
-| **Amazon MQ (Artemis)** | `amqp-1` | [AMQP 1](amqp-1.md) |
-| **Amazon MQ (ActiveMQ)** | `stomp` | [STOMP](stomp.md) |
+| **Amazon MQ (Artemis)** | `amqp-1` or `stomp` | [AMQP 1](amqp-1.md) / [STOMP](stomp.md) |
+| **Amazon MQ (ActiveMQ)** | `amqp-1` or `stomp` | [AMQP 1](amqp-1.md) / [STOMP](stomp.md) |
+| **Amazon MQ (RabbitMQ)** | `amqp-0.9.1` or `amqp-1` | [AMQP 0.9.1](amqp-0.9.1.md) / [AMQP 1](amqp-1.md) |
 | **Confluent Cloud** | `kafka` | [Kafka](kafka.md) |
-| **AWS IoT Core** | `mqtt-3` / `mqtt-5` | [MQTT 3](mqtt-3.md) / [MQTT 5](mqtt-5.md) |
-| **Azure IoT Hub** | `mqtt-3` / `mqtt-5` | [MQTT 3](mqtt-3.md) / [MQTT 5](mqtt-5.md) |
+| **AWS IoT Core** | `mqtt-3` | [MQTT 3](mqtt-3.md) |
+| **Azure IoT Hub** | `mqtt-3` | [MQTT 3](mqtt-3.md) |
 | **Google Cloud Memorystore** | `redis-pubsub` or `redis-streams` | [Redis Pub/Sub](redis-pubsub.md) / [Redis Streams](redis-streams.md) |
 | **Upstash** | `redis-pubsub` or `redis-streams` | [Redis Pub/Sub](redis-pubsub.md) / [Redis Streams](redis-streams.md) |
+| **Aiven for Kafka** | `kafka` | [Kafka](kafka.md) |
+| **StreamNative Cloud** | `pulsar` | [Pulsar](pulsar.md) |
+| **DataStax Astra Streaming** | `pulsar` | [Pulsar](pulsar.md) |
 
 !!! tip "No SDK Required"
     Azure Event Hubs, Azure Service Bus, Amazon MSK, and Amazon MQ all work through standard protocols—no cloud-specific SDKs needed.

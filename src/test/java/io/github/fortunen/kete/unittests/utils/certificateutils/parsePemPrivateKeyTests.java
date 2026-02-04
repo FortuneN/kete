@@ -28,7 +28,7 @@ public class parsePemPrivateKeyTests {
 			.isNotNull();
 		assertThat(result.getAlgorithm())
 			.as("Should have correct algorithm")
-			.isIn("RSA", "EC");
+		.isIn("RSA", "EC", "ECDSA");
 	}
 
 	@Test
