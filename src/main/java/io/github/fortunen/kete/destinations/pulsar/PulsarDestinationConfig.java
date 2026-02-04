@@ -98,6 +98,7 @@ public class PulsarDestinationConfig extends DestinationConfig {
 
 		var batchingMaxPublishDelaySeconds = ValidationUtils.requireGreaterThan(configuration.getLong(BATCHING_MAX_PUBLISH_DELAY_SECONDS, DEFAULT_BATCHING_MAX_PUBLISH_DELAY_SECONDS), 0, BATCHING_MAX_PUBLISH_DELAY_SECONDS + " must be greater than 0");
 		batchingMaxPublishDelay = batchingMaxPublishDelaySeconds * 1000;
+		batchingMaxPublishDelayUnit = TimeUnit.MILLISECONDS;
 
 		// batchingMaxMessages
 

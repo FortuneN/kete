@@ -22,7 +22,7 @@ public class initializeTests {
 		// arrange
 
 		var config = new WebSocketDestinationConfig();
-		config.setConfiguration(new MapConfiguration(Map.of()));
+		config.setConfiguration(new MapConfiguration(Map.of("kind", "websocket")));
 
 		// act
 
@@ -42,6 +42,7 @@ public class initializeTests {
 
 		var config = new WebSocketDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "websocket",
 			"host", ""
 		)));
 
@@ -63,6 +64,7 @@ public class initializeTests {
 
 		var config = new WebSocketDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "websocket",
 			"host", "   "
 		)));
 
@@ -88,6 +90,7 @@ public class initializeTests {
 
 		var config = new WebSocketDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "websocket",
 			"url", "ws://example.com:8080/events"
 		)));
 
@@ -109,6 +112,7 @@ public class initializeTests {
 
 		var config = new WebSocketDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "websocket",
 			"url", "wss://secure.example.com/events"
 		)));
 
@@ -130,6 +134,7 @@ public class initializeTests {
 
 		var config = new WebSocketDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "websocket",
 			"url", "http://example.com/events"
 		)));
 
@@ -155,6 +160,7 @@ public class initializeTests {
 
 		var config = new WebSocketDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "websocket",
 			"host", "example.com"
 		)));
 
@@ -177,6 +183,7 @@ public class initializeTests {
 
 		var config = new WebSocketDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "websocket",
 			"host", "example.com",
 			"port", "8080"
 		)));
@@ -198,6 +205,7 @@ public class initializeTests {
 
 		var config = new WebSocketDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "websocket",
 			"host", "example.com",
 			"path", "/events"
 		)));
@@ -219,6 +227,7 @@ public class initializeTests {
 
 		var config = new WebSocketDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "websocket",
 			"host", "example.com",
 			"path", "events"
 		)));
@@ -244,6 +253,7 @@ public class initializeTests {
 
 		var config = new WebSocketDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "websocket",
 			"host", "example.com",
 			"tls.enabled", "true"
 		)));
@@ -270,6 +280,7 @@ public class initializeTests {
 
 		var config = new WebSocketDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "websocket",
 			"host", "example.com"
 		)));
 
@@ -289,6 +300,7 @@ public class initializeTests {
 
 		var config = new WebSocketDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "websocket",
 			"host", "example.com",
 			"binary-mode", "true"
 		)));
@@ -313,6 +325,7 @@ public class initializeTests {
 
 		var config = new WebSocketDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "websocket",
 			"host", "example.com"
 		)));
 
@@ -332,6 +345,7 @@ public class initializeTests {
 
 		var config = new WebSocketDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "websocket",
 			"host", "example.com",
 			"connection-timeout-seconds", "30"
 		)));
@@ -352,6 +366,7 @@ public class initializeTests {
 
 		var config = new WebSocketDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "websocket",
 			"host", "example.com",
 			"connection-timeout-seconds", "0"
 		)));
@@ -374,6 +389,7 @@ public class initializeTests {
 
 		var config = new WebSocketDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "websocket",
 			"host", "example.com",
 			"connection-timeout-seconds", "-1"
 		)));
@@ -400,6 +416,7 @@ public class initializeTests {
 
 		var config = new WebSocketDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "websocket",
 			"host", "example.com"
 		)));
 
@@ -419,6 +436,7 @@ public class initializeTests {
 
 		var config = new WebSocketDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "websocket",
 			"host", "example.com",
 			"connection-lost-timeout-seconds", "30"
 		)));
@@ -439,6 +457,7 @@ public class initializeTests {
 
 		var config = new WebSocketDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "websocket",
 			"host", "example.com",
 			"connection-lost-timeout-seconds", "0"
 		)));
@@ -459,6 +478,7 @@ public class initializeTests {
 
 		var config = new WebSocketDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "websocket",
 			"host", "example.com",
 			"connection-lost-timeout-seconds", "-1"
 		)));
@@ -485,6 +505,7 @@ public class initializeTests {
 
 		var config = new WebSocketDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "websocket",
 			"host", "example.com",
 			"headers.Authorization", "Bearer token123",
 			"headers.X-Custom", "custom-value"
@@ -508,6 +529,7 @@ public class initializeTests {
 
 		var config = new WebSocketDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "websocket",
 			"host", "example.com"
 		)));
 
@@ -531,6 +553,7 @@ public class initializeTests {
 
 		var config = new WebSocketDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "websocket",
 			"host", "example.com",
 			"port", "65536"
 		)));
@@ -553,6 +576,7 @@ public class initializeTests {
 
 		var config = new WebSocketDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "websocket",
 			"host", "example.com",
 			"port", "0"
 		)));

@@ -1,7 +1,7 @@
 services:
 
   activemq:
-    image: ghcr.io/fortunen/kete/quick-start-activemq
+    image: ghcr.io/fortunen/kete/quick-start-activemq-artemis
     ports:
       - 5672:5672
       - 8161:8161
@@ -19,6 +19,7 @@ services:
     command: start-dev
     ports:
       - 8080:8080
+      - 9000:9000
     environment:
       kete.routes.quick-start.destination.kind: amqp-1
       kete.routes.quick-start.destination.host: activemq

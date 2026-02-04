@@ -1,7 +1,7 @@
 services:
 
   hivemq:
-    image: hivemq/hivemq-ce:latest
+    image: ghcr.io/fortunen/kete/quick-start-hivemq
     ports:
       - 1883:1883
       - 8888:8000  # HiveMQ WebSocket (remapped)
@@ -12,11 +12,22 @@ services:
       retries: 30
       start_period: 10s
 
+  subscriber:
+    image: ghcr.io/fortunen/kete/quick-start-mqtt-subscriber
+    environment:
+      MQTT_BROKER_HOST: hivemq
+      MQTT_BROKER_PORT: 1883
+      MQTT_TOPIC: keycloak-events
+    depends_on:
+      hivemq:
+        condition: service_healthy
+
   keycloak:
     image: ghcr.io/fortunen/kete/quick-start-keycloak
     command: start-dev
     ports:
       - 8080:8080
+      - 9000:9000
     environment:
       KC_BOOTSTRAP_ADMIN_USERNAME: admin
       KC_BOOTSTRAP_ADMIN_PASSWORD: admin
@@ -27,3 +38,5 @@ services:
     depends_on:
       hivemq:
         condition: service_healthy
+      subscriber:
+        condition: service_started

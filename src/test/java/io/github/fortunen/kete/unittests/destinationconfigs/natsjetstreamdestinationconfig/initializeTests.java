@@ -26,6 +26,7 @@ public class initializeTests {
 
 		var config = new NatsJetStreamDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "nats-jetstream",
 			"subject", "test-subject",
 			"stream", "test-stream",
 			"authentication-method", "none"
@@ -49,6 +50,7 @@ public class initializeTests {
 
 		var config = new NatsJetStreamDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "nats-jetstream",
 			"servers", "",
 			"subject", "test-subject",
 			"stream", "test-stream",
@@ -73,6 +75,7 @@ public class initializeTests {
 
 		var config = new NatsJetStreamDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "nats-jetstream",
 			"servers", "   ",
 			"subject", "test-subject",
 			"stream", "test-stream",
@@ -101,6 +104,7 @@ public class initializeTests {
 
 		var config = new NatsJetStreamDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "nats-jetstream",
 			"servers", "nats://localhost:4222",
 			"stream", "test-stream",
 			"authentication-method", "none"
@@ -124,6 +128,7 @@ public class initializeTests {
 
 		var config = new NatsJetStreamDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "nats-jetstream",
 			"servers", "nats://localhost:4222",
 			"subject", "",
 			"stream", "test-stream",
@@ -148,6 +153,7 @@ public class initializeTests {
 
 		var config = new NatsJetStreamDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "nats-jetstream",
 			"servers", "nats://localhost:4222",
 			"subject", "   ",
 			"stream", "test-stream",
@@ -176,6 +182,7 @@ public class initializeTests {
 
 		var config = new NatsJetStreamDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "nats-jetstream",
 			"servers", "nats://localhost:4222",
 			"subject", "test-subject",
 			"authentication-method", "none"
@@ -199,6 +206,7 @@ public class initializeTests {
 
 		var config = new NatsJetStreamDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "nats-jetstream",
 			"servers", "nats://localhost:4222",
 			"subject", "test-subject",
 			"stream", "",
@@ -223,6 +231,7 @@ public class initializeTests {
 
 		var config = new NatsJetStreamDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "nats-jetstream",
 			"servers", "nats://localhost:4222",
 			"subject", "test-subject",
 			"stream", "   ",
@@ -251,6 +260,7 @@ public class initializeTests {
 
 		var config = new NatsJetStreamDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "nats-jetstream",
 			"servers", "nats://localhost:4222",
 			"subject", "test-subject",
 			"stream", "test-stream",
@@ -282,6 +292,7 @@ public class initializeTests {
 
 		var config = new NatsJetStreamDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "nats-jetstream",
 			"servers", "nats://server1:4222, nats://server2:4222, nats://server3:4222",
 			"subject", "test-subject",
 			"stream", "test-stream",
@@ -304,6 +315,7 @@ public class initializeTests {
 
 		var config = new NatsJetStreamDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "nats-jetstream",
 			"servers", "  nats://localhost:4222  ",
 			"subject", "test-subject",
 			"stream", "test-stream",
@@ -326,6 +338,7 @@ public class initializeTests {
 
 		var config = new NatsJetStreamDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "nats-jetstream",
 			"servers", "nats://server1:4222,,nats://server2:4222,  ,nats://server3:4222",
 			"subject", "test-subject",
 			"stream", "test-stream",
@@ -352,6 +365,7 @@ public class initializeTests {
 
 		var config = new NatsJetStreamDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "nats-jetstream",
 			"servers", "nats://localhost:4222",
 			"subject", "test-subject",
 			"stream", "test-stream",
@@ -373,6 +387,7 @@ public class initializeTests {
 		// arrange
 
 		var map = new HashMap<String, Object>();
+		map.put("kind", "nats-jetstream");
 		map.put("servers", "nats://localhost:4222");
 		map.put("subject", "test-subject");
 		map.put("stream", "test-stream");
@@ -396,6 +411,7 @@ public class initializeTests {
 		// arrange
 
 		var map = new HashMap<String, Object>();
+		map.put("kind", "nats-jetstream");
 		map.put("servers", "nats://localhost:4222");
 		map.put("subject", "test-subject");
 		map.put("stream", "test-stream");
@@ -426,6 +442,7 @@ public class initializeTests {
 
 		var config = new NatsJetStreamDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "nats-jetstream",
 			"servers", "nats://localhost:4222",
 			"subject", "test-subject",
 			"stream", "test-stream",
@@ -447,6 +464,7 @@ public class initializeTests {
 		// arrange
 
 		var map = new HashMap<String, Object>();
+		map.put("kind", "nats-jetstream");
 		map.put("servers", "nats://localhost:4222");
 		map.put("subject", "test-subject");
 		map.put("stream", "test-stream");
@@ -470,6 +488,7 @@ public class initializeTests {
 		// arrange
 
 		var map = new HashMap<String, Object>();
+		map.put("kind", "nats-jetstream");
 		map.put("servers", "nats://localhost:4222");
 		map.put("subject", "test-subject");
 		map.put("stream", "test-stream");
@@ -500,6 +519,7 @@ public class initializeTests {
 
 		var config = new NatsJetStreamDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "nats-jetstream",
 			"servers", "nats://localhost:4222",
 			"subject", "test-subject",
 			"stream", "test-stream",
@@ -522,6 +542,7 @@ public class initializeTests {
 
 		var config = new NatsJetStreamDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "nats-jetstream",
 			"servers", "nats://localhost:4222",
 			"subject", "test-subject",
 			"stream", "test-stream",
@@ -549,6 +570,7 @@ public class initializeTests {
 
 		var config = new NatsJetStreamDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "nats-jetstream",
 			"servers", "nats://localhost:4222",
 			"subject", "test-subject",
 			"stream", "test-stream",
@@ -571,6 +593,7 @@ public class initializeTests {
 		// arrange
 
 		var map = new HashMap<String, Object>();
+		map.put("kind", "nats-jetstream");
 		map.put("servers", "nats://localhost:4222");
 		map.put("subject", "test-subject");
 		map.put("stream", "test-stream");
@@ -595,6 +618,7 @@ public class initializeTests {
 		// arrange
 
 		var map = new HashMap<String, Object>();
+		map.put("kind", "nats-jetstream");
 		map.put("servers", "nats://localhost:4222");
 		map.put("subject", "test-subject");
 		map.put("stream", "test-stream");
@@ -625,6 +649,7 @@ public class initializeTests {
 
 		var config = new NatsJetStreamDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "nats-jetstream",
 			"servers", "nats://localhost:4222",
 			"subject", "test-subject",
 			"stream", "test-stream",

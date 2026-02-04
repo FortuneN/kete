@@ -105,6 +105,7 @@ public final class RouteUtils {
 		var serializer = SerializerUtils.createSerializer(serializerConfig);
 
 		route.setSerializer(serializer);
+		route.setSerializerKind(serializerKind);
 
 		// destinationConfig
 

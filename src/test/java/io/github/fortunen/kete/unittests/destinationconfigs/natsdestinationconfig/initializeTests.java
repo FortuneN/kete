@@ -25,6 +25,7 @@ public class initializeTests {
 
 		var config = new NatsDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "nats",
 			"subject", "test-subject",
 			"authentication-method", "none"
 		)));
@@ -47,6 +48,7 @@ public class initializeTests {
 
 		var config = new NatsDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "nats",
 			"servers", "",
 			"subject", "test-subject",
 			"authentication-method", "none"
@@ -70,6 +72,7 @@ public class initializeTests {
 
 		var config = new NatsDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "nats",
 			"servers", "   ",
 			"subject", "test-subject",
 			"authentication-method", "none"
@@ -97,6 +100,7 @@ public class initializeTests {
 
 		var config = new NatsDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "nats",
 			"servers", "nats://localhost:4222",
 			"authentication-method", "none"
 		)));
@@ -119,6 +123,7 @@ public class initializeTests {
 
 		var config = new NatsDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "nats",
 			"servers", "nats://localhost:4222",
 			"subject", "",
 			"authentication-method", "none"
@@ -142,6 +147,7 @@ public class initializeTests {
 
 		var config = new NatsDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "nats",
 			"servers", "nats://localhost:4222",
 			"subject", "   ",
 			"authentication-method", "none"
@@ -169,6 +175,7 @@ public class initializeTests {
 
 		var config = new NatsDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "nats",
 			"servers", "nats://localhost:4222",
 			"subject", "test-subject",
 			"authentication-method", "none"
@@ -196,6 +203,7 @@ public class initializeTests {
 
 		var config = new NatsDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "nats",
 			"servers", "nats://server1:4222, nats://server2:4222, nats://server3:4222",
 			"subject", "test-subject",
 			"authentication-method", "none"
@@ -217,6 +225,7 @@ public class initializeTests {
 
 		var config = new NatsDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "nats",
 			"servers", "  nats://localhost:4222  ",
 			"subject", "test-subject",
 			"authentication-method", "none"
@@ -238,6 +247,7 @@ public class initializeTests {
 
 		var config = new NatsDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "nats",
 			"servers", "nats://server1:4222,,nats://server2:4222,  ,nats://server3:4222",
 			"subject", "test-subject",
 			"authentication-method", "none"
@@ -263,6 +273,7 @@ public class initializeTests {
 
 		var config = new NatsDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "nats",
 			"servers", "nats://localhost:4222",
 			"subject", "test-subject",
 			"authentication-method", "none"
@@ -283,6 +294,7 @@ public class initializeTests {
 		// arrange
 
 		var map = new HashMap<String, Object>();
+		map.put("kind", "nats");
 		map.put("servers", "nats://localhost:4222");
 		map.put("subject", "test-subject");
 		map.put("authentication-method", "none");
@@ -305,6 +317,7 @@ public class initializeTests {
 		// arrange
 
 		var map = new HashMap<String, Object>();
+		map.put("kind", "nats");
 		map.put("servers", "nats://localhost:4222");
 		map.put("subject", "test-subject");
 		map.put("authentication-method", "none");
@@ -334,6 +347,7 @@ public class initializeTests {
 
 		var config = new NatsDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "nats",
 			"servers", "nats://localhost:4222",
 			"subject", "test-subject",
 			"authentication-method", "none"
@@ -354,6 +368,7 @@ public class initializeTests {
 		// arrange
 
 		var map = new HashMap<String, Object>();
+		map.put("kind", "nats");
 		map.put("servers", "nats://localhost:4222");
 		map.put("subject", "test-subject");
 		map.put("authentication-method", "none");
@@ -376,6 +391,7 @@ public class initializeTests {
 		// arrange
 
 		var map = new HashMap<String, Object>();
+		map.put("kind", "nats");
 		map.put("servers", "nats://localhost:4222");
 		map.put("subject", "test-subject");
 		map.put("authentication-method", "none");
@@ -405,6 +421,7 @@ public class initializeTests {
 
 		var config = new NatsDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "nats",
 			"servers", "nats://localhost:4222",
 			"subject", "test-subject",
 			"authentication-method", "none"
@@ -426,6 +443,7 @@ public class initializeTests {
 
 		var config = new NatsDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "nats",
 			"servers", "nats://localhost:4222",
 			"subject", "test-subject",
 			"authentication-method", "none",
@@ -456,6 +474,7 @@ public class initializeTests {
 
 		var config = new NatsDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "nats",
 			"servers", "nats://localhost:4222",
 			"subject", "test-subject",
 			"authentication-method", "none"

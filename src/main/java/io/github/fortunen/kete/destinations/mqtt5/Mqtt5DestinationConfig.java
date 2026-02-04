@@ -45,7 +45,7 @@ public class Mqtt5DestinationConfig extends DestinationConfig {
 	public static final String CONNECTION_TIMEOUT_SECONDS = "connection-timeout-seconds";
 	public static final String KEEP_ALIVE_INTERVAL_SECONDS = "keep-alive-interval-seconds";
 
-	public static final int DEFAULT_MAX_INFLIGHT = 65535;
+	public static final int DEFAULT_MAX_INFLIGHT = 2048;
 	public static final String MAX_INFLIGHT = "max-inflight";
 
 	private int qos;

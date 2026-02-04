@@ -27,6 +27,8 @@ public class Route implements AutoCloseable {
 	private Retry retry;
 	private String name;
 	private Serializer serializer;
+	private String serializerKind;
+	private String destinationKind;
 	private DestinationConfig destinationConfig;
 	private Matcher[] realmMatchers = new Matcher[0];
 	private Matcher[] eventMatchers = new Matcher[0];
@@ -50,6 +52,10 @@ public class Route implements AutoCloseable {
 		destinationConfig.setKeycloakSession(session);
 		destinationConfig.initialize();
 
+		// destinationKind
+
+		destinationKind = destinationConfig.getDestinationKind();
+
 		// create destination pool (only if not already set - for testing)
 
 		if (ValidationUtils.isNull(destinationPool)) {
@@ -66,12 +72,14 @@ public class Route implements AutoCloseable {
 			poolConfig.setTestOnReturn(destinationConfig.isPoolTestOnReturn());
 			poolConfig.setTestWhileIdle(destinationConfig.isPoolTestWhileIdle());
 			poolConfig.setBlockWhenExhausted(destinationConfig.isPoolBlockWhenExhausted());
-		poolConfig.setMaxWait(Duration.ofSeconds(destinationConfig.getPoolMaxWaitSeconds()));
-		poolConfig.setNumTestsPerEvictionRun(destinationConfig.getPoolNumTestsPerEvictionRun());
-		poolConfig.setMinEvictableIdleDuration(Duration.ofSeconds(destinationConfig.getPoolMinEvictableIdleTimeSeconds()));
-		poolConfig.setTimeBetweenEvictionRuns(Duration.ofSeconds(destinationConfig.getPoolTimeBetweenEvictionRunsSeconds()));
-		poolConfig.setSoftMinEvictableIdleDuration(Duration.ofSeconds(destinationConfig.getPoolSoftMinEvictableIdleTimeSeconds()));
-		var poolFactory = new DestinationPooledObjectFactory();
+			poolConfig.setMaxWait(Duration.ofSeconds(destinationConfig.getPoolMaxWaitSeconds()));
+			poolConfig.setNumTestsPerEvictionRun(destinationConfig.getPoolNumTestsPerEvictionRun());
+			poolConfig.setMinEvictableIdleDuration(Duration.ofSeconds(destinationConfig.getPoolMinEvictableIdleTimeSeconds()));
+			poolConfig.setTimeBetweenEvictionRuns(Duration.ofSeconds(destinationConfig.getPoolTimeBetweenEvictionRunsSeconds()));
+			poolConfig.setSoftMinEvictableIdleDuration(Duration.ofSeconds(destinationConfig.getPoolSoftMinEvictableIdleTimeSeconds()));
+
+			var poolFactory = new DestinationPooledObjectFactory();
+
 			poolFactory.setDestinationConfig(destinationConfig);
 
 			destinationPool = new GenericObjectPool<>(poolFactory, poolConfig);

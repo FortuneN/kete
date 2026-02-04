@@ -1,8 +1,8 @@
 package io.github.fortunen.kete.integrationtests.pulsardestination;
 
+import static org.awaitility.Awaitility.await;
+
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
@@ -44,6 +44,7 @@ public class TestBase {
 	}
 
 	protected void configureDestination(MapConfiguration mapConfig) {
+		mapConfig.setProperty(Constants.KIND, "pulsar");
 		config.setConfiguration(mapConfig);
 		config.initialize();
 		destination.setConfig(config);
@@ -55,13 +56,55 @@ public class TestBase {
 
 		container = new GenericContainer<>(DockerImageName.parse("apachepulsar/pulsar:3.3.2"))
 			.withExposedPorts(PULSAR_PORT, PULSAR_HTTP_PORT)
-			.withCommand("/bin/bash", "-c", "bin/pulsar standalone --no-functions-worker -nss")
-			.waitingFor(Wait.forLogMessage(".*messaging service is ready.*", 1))
-			.withStartupTimeout(Duration.ofMinutes(10));
+			.withCommand("bin/pulsar", "standalone", "--no-functions-worker");
 
 		container.start();
+		waitForBrokerHealthy();
 
 		return container;
+	}
+
+	private void waitForBrokerHealthy() {
+
+		// Wait for broker healthcheck first
+
+		await().atMost(Duration.ofMinutes(10)).pollInterval(Duration.ofSeconds(2)).until(() -> {
+			try {
+				var result = container.execInContainer("curl", "-sf", "http://localhost:8080/admin/v2/brokers/healthcheck");
+				return result.getExitCode() == 0;
+			} catch (Exception e) {
+				return false;
+			}
+		});
+
+		// Then wait for the default namespace to be ready
+
+		await().atMost(Duration.ofMinutes(10)).pollInterval(Duration.ofSeconds(2)).until(() -> {
+			try {
+				var result = container.execInContainer("curl", "-sf", "http://localhost:8080/admin/v2/namespaces/public/default");
+				return result.getExitCode() == 0;
+			} catch (Exception e) {
+				return false;
+			}
+		});
+
+		// Wait for BookKeeper to be ready by verifying topic creation works (this is the actual readiness check)
+
+		await().atMost(Duration.ofMinutes(10)).pollInterval(Duration.ofSeconds(2)).until(() -> {
+			try {
+				var result = container.execInContainer(
+					"bin/pulsar-admin", "topics", "create", "persistent://public/default/readiness-check"
+				);
+				if (result.getExitCode() == 0) {
+					// Clean up the test topic
+					container.execInContainer("bin/pulsar-admin", "topics", "delete", "persistent://public/default/readiness-check");
+					return true;
+				}
+				return false;
+			} catch (Exception e) {
+				return false;
+			}
+		});
 	}
 
 	protected GenericContainer<?> startWithServerOnlyTLS(TlsMaterial tls) throws Exception {
@@ -86,55 +129,41 @@ public class TestBase {
 		cleanUpContainer();
 		currentTls = tls;
 
-		// Create temporary directory for mounted files
-		var tempDir = Files.createTempDirectory("pulsar-test-");
-
-		// Copy certificate files to temp directory
-		var hostKeyStore = tempDir.resolve("keystore.jks");
-		var hostTrustStore = tempDir.resolve("truststore.jks");
-		var hostBrokerConf = tempDir.resolve("broker.conf");
-
-		Files.copy(Path.of(tls.getServerKeyStoreFilePath()), hostKeyStore);
-		Files.copy(Path.of(tls.getTrustStoreFilePath()), hostTrustStore);
-
-		// Create broker.conf with TLS settings
-		var brokerConfig = createBrokerConfig(tls.getKeyStorePassword(), tls.getTrustStorePassword(), requireClientCert);
-		Files.writeString(hostBrokerConf, brokerConfig);
+		// Use a startup script that appends TLS settings to the default standalone.conf
+		// This preserves all essential standalone defaults while adding TLS configuration
+		var startupScript = createStartupScript(requireClientCert);
 
 		container = new GenericContainer<>(DockerImageName.parse("apachepulsar/pulsar:3.3.2"))
 			.withExposedPorts(PULSAR_PORT, PULSAR_TLS_PORT, PULSAR_HTTP_PORT)
-			.withFileSystemBind(hostKeyStore.toString(), "/pulsar/keystore.jks", BindMode.READ_ONLY)
-			.withFileSystemBind(hostTrustStore.toString(), "/pulsar/truststore.jks", BindMode.READ_ONLY)
-			.withFileSystemBind(hostBrokerConf.toString(), "/pulsar/conf/broker.conf", BindMode.READ_ONLY)
-			.withCommand("/bin/bash", "-c", "bin/pulsar standalone --no-functions-worker -nss --config /pulsar/conf/broker.conf")
-			.waitingFor(Wait.forLogMessage(".*messaging service is ready.*", 1))
-			.withStartupTimeout(Duration.ofMinutes(10));
+			.withFileSystemBind(tls.getServerCertificatePemFilePath(), "/pulsar/server-cert.pem", BindMode.READ_ONLY)
+			.withFileSystemBind(tls.getServerPrivateKeyPemFilePath(), "/pulsar/server-key.pem", BindMode.READ_ONLY)
+			.withFileSystemBind(tls.getCaCertificatePemFilePath(), "/pulsar/ca-cert.pem", BindMode.READ_ONLY)
+			.withCommand("/bin/bash", "-c", startupScript);
 
 		container.start();
+		waitForBrokerHealthy();
 
 		return container;
 	}
 
-	private String createBrokerConfig(String keyStorePassword, String trustStorePassword, boolean requireClientCert) {
-		var clientAuthMode = requireClientCert ? "REQUIRE" : "OPTIONAL";
+	private String createStartupScript(boolean requireClientCert) {
+		// Append TLS settings to the default standalone.conf, then start Pulsar
+		// This preserves all essential standalone defaults while adding TLS configuration
 		return """
-			# Basic Configuration
-			clusterName=standalone
-
-			# TLS Configuration
+			cat >> /pulsar/conf/standalone.conf << 'EOF'
+			# TLS Configuration (PEM-based)
 			brokerServicePortTls=%d
 			webServicePortTls=8443
 			tlsEnabled=true
-			tlsCertificateFilePath=/pulsar/keystore.jks
-			tlsKeyFilePath=/pulsar/keystore.jks
-			tlsKeyStoreType=JKS
-			tlsKeyStorePassword=%s
-			tlsTrustStoreType=JKS
-			tlsTrustStorePath=/pulsar/truststore.jks
-			tlsTrustStorePassword=%s
+			tlsCertificateFilePath=/pulsar/server-cert.pem
+			tlsKeyFilePath=/pulsar/server-key.pem
+			tlsTrustCertsFilePath=/pulsar/ca-cert.pem
 			tlsRequireTrustedClientCertOnConnect=%s
-			brokerClientTlsEnabled=true
-			""".formatted(PULSAR_TLS_PORT, keyStorePassword, trustStorePassword, clientAuthMode);
+			brokerClientTlsEnabled=false
+			functionsWorkerEnabled=false
+			EOF
+			bin/pulsar standalone --no-functions-worker
+			""".formatted(PULSAR_TLS_PORT, requireClientCert);
 	}
 
 	protected String getHost() {
@@ -161,6 +190,7 @@ public class TestBase {
 		return createSubscriber(topic, tls);
 	}
 
+	@SuppressWarnings("deprecation")
 	private Consumer<byte[]> createSubscriber(String topic, TlsMaterial tls) throws Exception {
 
 		var clientBuilder = PulsarClient.builder()
@@ -169,13 +199,11 @@ public class TestBase {
 
 		if (tls != null && tls.isEnabled()) {
 			clientBuilder.serviceUrl(getPulsarTlsUrl())
-				.tlsTrustCertsFilePath(tls.getTrustStoreFilePath())
-				.tlsTrustStorePassword(tls.getTrustStorePassword())
-				.tlsTrustStoreType("JKS")
+				.tlsTrustCertsFilePath(tls.getCaCertificatePemFilePath())
 				.enableTls(true)
 				.allowTlsInsecureConnection(false);
 
-			// Add client auth if keystore provided
+			// Add client auth if keystore provided (for mTLS)
 			if (tls.getKeyStoreFilePath() != null) {
 				clientBuilder.authentication(
 					"org.apache.pulsar.client.impl.auth.AuthenticationTls",

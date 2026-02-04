@@ -23,7 +23,7 @@ public class initializeTests {
 		// arrange
 
 		var config = new HttpDestinationConfig();
-		config.setConfiguration(new MapConfiguration(Map.of()));
+		config.setConfiguration(new MapConfiguration(Map.of("kind", "http")));
 
 		// act
 
@@ -43,6 +43,7 @@ public class initializeTests {
 
 		var config = new HttpDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "http",
 			"host", ""
 		)));
 
@@ -64,6 +65,7 @@ public class initializeTests {
 
 		var config = new HttpDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "http",
 			"host", "   "
 		)));
 
@@ -89,6 +91,7 @@ public class initializeTests {
 
 		var config = new HttpDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "http",
 			"url", "http://example.com:8080/api/events"
 		)));
 
@@ -112,6 +115,7 @@ public class initializeTests {
 
 		var config = new HttpDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "http",
 			"url", "https://secure.example.com/webhook"
 		)));
 
@@ -135,6 +139,7 @@ public class initializeTests {
 
 		var config = new HttpDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "http",
 			"url", "http://example.com/api?key=value&foo=bar"
 		)));
 
@@ -154,6 +159,7 @@ public class initializeTests {
 
 		var config = new HttpDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "http",
 			"url", "http://example.com/events"
 		)));
 
@@ -173,6 +179,7 @@ public class initializeTests {
 
 		var config = new HttpDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "http",
 			"url", "https://example.com/events"
 		)));
 
@@ -192,6 +199,7 @@ public class initializeTests {
 
 		var config = new HttpDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "http",
 			"url", "ftp://example.com/files"
 		)));
 
@@ -213,6 +221,7 @@ public class initializeTests {
 
 		var config = new HttpDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "http",
 			"url", "http:///path"
 		)));
 
@@ -234,6 +243,7 @@ public class initializeTests {
 
 		var config = new HttpDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "http",
 			"url", "http://example.com"
 		)));
 
@@ -258,6 +268,7 @@ public class initializeTests {
 
 		var config = new HttpDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "http",
 			"host", "example.com"
 		)));
 
@@ -280,6 +291,7 @@ public class initializeTests {
 
 		var config = new HttpDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "http",
 			"host", "example.com",
 			"port", "8080"
 		)));
@@ -301,6 +313,7 @@ public class initializeTests {
 
 		var config = new HttpDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "http",
 			"host", "example.com",
 			"path-and-query", "/api/events?source=keycloak"
 		)));
@@ -322,6 +335,7 @@ public class initializeTests {
 
 		var config = new HttpDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "http",
 			"host", "example.com",
 			"path-and-query", "api/events"
 		)));
@@ -342,6 +356,7 @@ public class initializeTests {
 
 		var config = new HttpDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "http",
 			"host", "example.com",
 			"tls.enabled", "true"
 		)));
@@ -368,6 +383,7 @@ public class initializeTests {
 
 		var config = new HttpDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "http",
 			"host", "example.com",
 			"port", "0"
 		)));
@@ -390,6 +406,7 @@ public class initializeTests {
 
 		var config = new HttpDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "http",
 			"host", "example.com",
 			"port", "-1"
 		)));
@@ -412,6 +429,7 @@ public class initializeTests {
 
 		var config = new HttpDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "http",
 			"host", "example.com",
 			"port", "65536"
 		)));
@@ -434,6 +452,7 @@ public class initializeTests {
 
 		var config = new HttpDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "http",
 			"host", "example.com",
 			"port", "1"
 		)));
@@ -454,6 +473,7 @@ public class initializeTests {
 
 		var config = new HttpDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "http",
 			"host", "example.com",
 			"port", "65535"
 		)));
@@ -478,6 +498,7 @@ public class initializeTests {
 
 		var config = new HttpDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "http",
 			"host", "example.com"
 		)));
 
@@ -498,6 +519,7 @@ public class initializeTests {
 
 		var config = new HttpDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "http",
 			"host", "example.com",
 			"method", "PUT"
 		)));
@@ -519,6 +541,7 @@ public class initializeTests {
 
 		var config = new HttpDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "http",
 			"host", "example.com",
 			"method", "post"
 		)));
@@ -539,6 +562,7 @@ public class initializeTests {
 
 		var config = new HttpDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "http",
 			"host", "example.com",
 			"method", "GET"
 		)));
@@ -561,6 +585,7 @@ public class initializeTests {
 
 		var config = new HttpDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "http",
 			"host", "example.com",
 			"method", "DELETE"
 		)));
@@ -587,6 +612,7 @@ public class initializeTests {
 
 		var config = new HttpDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "http",
 			"host", "example.com"
 		)));
 
@@ -606,6 +632,7 @@ public class initializeTests {
 
 		var config = new HttpDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "http",
 			"host", "example.com",
 			"timeout-seconds", "30"
 		)));
@@ -626,6 +653,7 @@ public class initializeTests {
 
 		var config = new HttpDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "http",
 			"host", "example.com",
 			"timeout-seconds", "0"
 		)));
@@ -648,6 +676,7 @@ public class initializeTests {
 
 		var config = new HttpDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "http",
 			"host", "example.com",
 			"timeout-seconds", "-1"
 		)));
@@ -670,6 +699,7 @@ public class initializeTests {
 
 		var config = new HttpDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "http",
 			"host", "example.com",
 			"timeout-seconds", "1"
 		)));
@@ -694,6 +724,7 @@ public class initializeTests {
 
 		var config = new HttpDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "http",
 			"host", "example.com",
 			"headers.X-Custom-Header", "custom-value",
 			"headers.Authorization", "Bearer token123"
@@ -715,6 +746,7 @@ public class initializeTests {
 		// arrange
 
 		var configMap = new HashMap<String, Object>();
+		configMap.put("kind", "http");
 		configMap.put("host", "example.com");
 		configMap.put("headers.Empty-Header", "");
 		configMap.put("headers.Valid-Header", "value");
@@ -739,6 +771,7 @@ public class initializeTests {
 
 		var config = new HttpDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "http",
 			"host", "example.com",
 			"headers.Trimmed", "  value with spaces  "
 		)));
@@ -763,6 +796,7 @@ public class initializeTests {
 
 		var config = new HttpDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "http",
 			"host", "example.com"
 		)));
 
@@ -782,6 +816,7 @@ public class initializeTests {
 
 		var config = new HttpDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "http",
 			"host", "example.com"
 		)));
 
@@ -800,6 +835,7 @@ public class initializeTests {
 		// arrange
 
 		var configMap = new HashMap<String, Object>();
+		configMap.put("kind", "http");
 		configMap.put("host", "example.com");
 		configMap.put("oauth.enabled", "true");
 		configMap.put("oauth.token-url", "http://localhost/token");
@@ -826,6 +862,7 @@ public class initializeTests {
 		// arrange
 
 		var configMap = new HashMap<String, Object>();
+		configMap.put("kind", "http");
 		configMap.put("host", "example.com");
 		configMap.put("oauth.enabled", "false");
 
@@ -852,6 +889,7 @@ public class initializeTests {
 
 		var config = new HttpDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "http",
 			"host", "example.com"
 		)));
 
@@ -871,6 +909,7 @@ public class initializeTests {
 
 		var config = new HttpDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "http",
 			"host", "example.com",
 			"tls.enabled", "true"
 		)));
@@ -891,6 +930,7 @@ public class initializeTests {
 
 		var config = new HttpDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "http",
 			"url", "https://example.com/events"
 		)));
 
@@ -914,6 +954,7 @@ public class initializeTests {
 
 		var config = new HttpDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "http",
 			"url", "http://from-url.com:9090/path",
 			"host", "from-host.com"
 		)));
@@ -936,6 +977,7 @@ public class initializeTests {
 
 		var config = new HttpDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "http",
 			"url", "http://example.com:9090",
 			"port", "8080"
 		)));
@@ -956,6 +998,7 @@ public class initializeTests {
 
 		var config = new HttpDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "http",
 			"url", "http://example.com/from-url",
 			"path-and-query", "/from-config"
 		)));
@@ -979,6 +1022,7 @@ public class initializeTests {
 		// arrange
 
 		var configMap = new HashMap<String, Object>();
+		configMap.put("kind", "http");
 		configMap.put("host", "api.example.com");
 		configMap.put("port", "8443");
 		configMap.put("path-and-query", "/events/keycloak?source=auth");

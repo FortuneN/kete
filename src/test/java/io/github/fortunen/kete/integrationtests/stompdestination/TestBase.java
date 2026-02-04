@@ -60,6 +60,7 @@ public class TestBase {
 	}
 
 	protected void configureDestination(MapConfiguration mapConfig) {
+		mapConfig.setProperty(io.github.fortunen.kete.Constants.KIND, "stomp");
 		config.setConfiguration(mapConfig);
 		config.initialize();
 		destination.setConfig(config);

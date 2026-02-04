@@ -709,12 +709,14 @@ public class initializePoolPropertiesTests {
 	private MapConfiguration createConfigWithoutPoolProperties() {
 
 		var config = new HashMap<String, Object>();
+		config.put("kind", "test");
 		return new MapConfiguration(config);
 	}
 
 	private MapConfiguration createConfigWithPoolProperty(String key, Object value) {
 
 		var config = new HashMap<String, Object>();
+		config.put("kind", "test");
 		config.put("pool." + key, value);
 		return new MapConfiguration(config);
 	}
@@ -722,6 +724,7 @@ public class initializePoolPropertiesTests {
 	private MapConfiguration createConfigWithPoolProperties(Map<String, Object> poolProps) {
 
 		var config = new HashMap<String, Object>();
+		config.put("kind", "test");
 		poolProps.forEach((key, value) -> config.put("pool." + key, value));
 		return new MapConfiguration(config);
 	}

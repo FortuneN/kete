@@ -87,6 +87,10 @@ public abstract class DestinationConfig {
 
 		ValidationUtils.requireNonNull(configuration, "configuration is required");
 
+		// destinationKind
+
+		destinationKind = ValidationUtils.requireNonBlank(configuration.getString(Constants.KIND, "").trim(), Constants.KIND + " is required");
+
 		// pool configuration (optional)
 
 		var poolConfig = ConfigurationUtils.getSubSet(configuration, POOL);

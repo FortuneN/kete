@@ -1,5 +1,7 @@
 package io.github.fortunen.kete.destinations.stomp;
 
+import java.util.HashMap;
+
 import javax.net.SocketFactory;
 
 import io.github.fortunen.kete.DestinationConfig;
@@ -25,27 +27,28 @@ public class StompDestinationConfig extends DestinationConfig {
 	public static final String USERNAME = "username";
 	public static final String PASSWORD = "password";
 
+	public static final boolean DEFAULT_RECEIPT_ENABLED = true;
 	public static final String RECEIPT_ENABLED = "receipt-enabled";
 
-	public static final int DEFAULT_HEART_BEAT = 30000;
-	public static final String HEART_BEAT_OUTGOING = "heart-beat-outgoing";
-	public static final String HEART_BEAT_INCOMING = "heart-beat-incoming";
+	public static final int DEFAULT_HEART_BEAT_SECONDS = 30;
+	public static final String HEART_BEAT_OUTGOING_SECONDS = "heart-beat-outgoing-seconds";
+	public static final String HEART_BEAT_INCOMING_SECONDS = "heart-beat-incoming-seconds";
 
-	public static final int DEFAULT_READ_TIMEOUT_MILLIS = 30000;
-	public static final String READ_TIMEOUT_MILLIS = "read-timeout-millis";
+	public static final int DEFAULT_READ_TIMEOUT_SECONDS = 30;
+	public static final String READ_TIMEOUT_SECONDS = "read-timeout-seconds";
 
 	private int port;
 	private String host;
-	private String destination;
-	private String virtualHost;
 	private String username;
 	private String password;
+	private String destination;
+	private String virtualHost;
 	private boolean receiptEnabled;
-	private int heartBeatOutgoing;
-	private int heartBeatIncoming;
-	private int readTimeoutMillis;
-	private boolean messageHeadersEnabled;
+	private int readTimeoutSeconds;
 	private SocketFactory socketFactory;
+	private int heartBeatOutgoingSeconds;
+	private int heartBeatIncomingSeconds;
+	private HashMap<String, String> connectHeaders;
 
 	@Override
 	@SneakyThrows
@@ -81,28 +84,48 @@ public class StompDestinationConfig extends DestinationConfig {
 
 		// receiptEnabled
 
-		receiptEnabled = configuration.getBoolean(RECEIPT_ENABLED, false);
+		receiptEnabled = configuration.getBoolean(RECEIPT_ENABLED, DEFAULT_RECEIPT_ENABLED);
 
-		// heartBeat
+		// heartBeatOutgoingSeconds
 
-		heartBeatOutgoing = configuration.getInt(HEART_BEAT_OUTGOING, DEFAULT_HEART_BEAT);
-		heartBeatIncoming = configuration.getInt(HEART_BEAT_INCOMING, DEFAULT_HEART_BEAT);
+		heartBeatOutgoingSeconds = configuration.getInt(HEART_BEAT_OUTGOING_SECONDS, DEFAULT_HEART_BEAT_SECONDS);
 
-		ValidationUtils.requireNonNegative(heartBeatOutgoing, HEART_BEAT_OUTGOING + " must be non-negative");
-		ValidationUtils.requireNonNegative(heartBeatIncoming, HEART_BEAT_INCOMING + " must be non-negative");
+		ValidationUtils.requireNonNegative(heartBeatOutgoingSeconds, HEART_BEAT_OUTGOING_SECONDS + " must be non-negative");
 
-		// readTimeoutMillis
+		// heartBeatIncomingSeconds
 
-		readTimeoutMillis = configuration.getInt(READ_TIMEOUT_MILLIS, DEFAULT_READ_TIMEOUT_MILLIS);
+		heartBeatIncomingSeconds = configuration.getInt(HEART_BEAT_INCOMING_SECONDS, DEFAULT_HEART_BEAT_SECONDS);
 
-		ValidationUtils.requireGreaterThan(readTimeoutMillis, 0, READ_TIMEOUT_MILLIS + " must be greater than 0");
+		ValidationUtils.requireNonNegative(heartBeatIncomingSeconds, HEART_BEAT_INCOMING_SECONDS + " must be non-negative");
 
-		// messageHeadersEnabled
+		// readTimeoutSeconds
 
-		messageHeadersEnabled = configuration.getBoolean(MESSAGE_HEADERS_ENABLED, true);
+		readTimeoutSeconds = configuration.getInt(READ_TIMEOUT_SECONDS, DEFAULT_READ_TIMEOUT_SECONDS);
+
+		ValidationUtils.requireGreaterThan(readTimeoutSeconds, 0, READ_TIMEOUT_SECONDS + " must be greater than 0");
 
 		// socketFactory
 
 		socketFactory = tls.isEnabled() ? tls.getKeyStoreAndTrustStoreSSLContext().getSocketFactory() : SocketFactory.getDefault();
+
+		// connectHeaders
+
+		connectHeaders = new HashMap<String, String>();
+
+		if (ValidationUtils.isNotBlank(username)) {
+			connectHeaders.put("login", username);
+		}
+
+		if (ValidationUtils.isNotBlank(password)) {
+			connectHeaders.put("passcode", password);
+		}
+
+		connectHeaders.put("accept-version", "1.1,1.2");
+
+		if (ValidationUtils.isNotBlank(virtualHost)) {
+			connectHeaders.put("host", virtualHost);
+		}
+
+		connectHeaders.put("heart-beat", (heartBeatOutgoingSeconds * 1000) + "," + (heartBeatIncomingSeconds * 1000));
 	}
 }

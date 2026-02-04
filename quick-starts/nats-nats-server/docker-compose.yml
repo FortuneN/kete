@@ -1,7 +1,16 @@
 services:
 
+  subscriber:
+    image: ghcr.io/fortunen/kete/quick-start-nats-subscriber
+    environment:
+      NATS_URL: nats://nats:4222
+      NATS_SUBJECT: keycloak.events
+    depends_on:
+      nats:
+        condition: service_healthy
+
   nats:
-    image: nats:2.10-alpine
+    image: ghcr.io/fortunen/kete/quick-start-nats
     ports:
       - 4222:4222
       - 8222:8222
@@ -17,6 +26,7 @@ services:
     command: start-dev
     ports:
       - 8080:8080
+      - 9000:9000
     environment:
       kete.routes.quick-start.destination.kind: nats
       kete.routes.quick-start.destination.servers: nats://nats:4222
@@ -25,3 +35,5 @@ services:
     depends_on:
       nats:
         condition: service_healthy
+      subscriber:
+        condition: service_started

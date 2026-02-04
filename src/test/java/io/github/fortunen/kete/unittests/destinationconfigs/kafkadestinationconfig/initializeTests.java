@@ -27,6 +27,7 @@ public class initializeTests {
 
 		var config = new KafkaDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "kafka",
 			"topic", "test-topic"
 		)));
 
@@ -48,6 +49,7 @@ public class initializeTests {
 
 		var config = new KafkaDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "kafka",
 			"bootstrap.servers", "",
 			"topic", "test-topic"
 		)));
@@ -70,6 +72,7 @@ public class initializeTests {
 
 		var config = new KafkaDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "kafka",
 			"bootstrap.servers", "   ",
 			"topic", "test-topic"
 		)));
@@ -96,6 +99,7 @@ public class initializeTests {
 
 		var config = new KafkaDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "kafka",
 			"bootstrap.servers", "localhost:9092"
 		)));
 
@@ -117,6 +121,7 @@ public class initializeTests {
 
 		var config = new KafkaDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "kafka",
 			"bootstrap.servers", "localhost:9092",
 			"topic", ""
 		)));
@@ -139,6 +144,7 @@ public class initializeTests {
 
 		var config = new KafkaDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "kafka",
 			"bootstrap.servers", "localhost:9092",
 			"topic", "   "
 		)));
@@ -165,6 +171,7 @@ public class initializeTests {
 
 		var config = new KafkaDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "kafka",
 			"bootstrap.servers", "localhost:9092",
 			"topic", "test-topic"
 		)));
@@ -187,6 +194,7 @@ public class initializeTests {
 
 		var config = new KafkaDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "kafka",
 			"bootstrap.servers", "localhost:9092",
 			"topic", "  test-topic  "
 		)));
@@ -207,6 +215,7 @@ public class initializeTests {
 
 		var config = new KafkaDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "kafka",
 			"bootstrap.servers", "localhost:9092",
 			"topic", "test-topic"
 		)));
@@ -231,6 +240,7 @@ public class initializeTests {
 
 		var config = new KafkaDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "kafka",
 			"bootstrap.servers", "localhost:9092",
 			"topic", "test-topic"
 		)));
@@ -251,6 +261,7 @@ public class initializeTests {
 
 		var config = new KafkaDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "kafka",
 			"bootstrap.servers", "localhost:9092",
 			"topic", "test-topic"
 		)));
@@ -271,6 +282,7 @@ public class initializeTests {
 
 		var config = new KafkaDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "kafka",
 			"bootstrap.servers", "localhost:9092",
 			"topic", "test-topic"
 		)));
@@ -291,6 +303,7 @@ public class initializeTests {
 
 		var config = new KafkaDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "kafka",
 			"bootstrap.servers", "localhost:9092",
 			"topic", "test-topic"
 		)));
@@ -311,6 +324,7 @@ public class initializeTests {
 
 		var config = new KafkaDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "kafka",
 			"bootstrap.servers", "localhost:9092",
 			"topic", "test-topic"
 		)));
@@ -331,6 +345,7 @@ public class initializeTests {
 
 		var config = new KafkaDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "kafka",
 			"bootstrap.servers", "localhost:9092",
 			"topic", "test-topic"
 		)));
@@ -351,6 +366,7 @@ public class initializeTests {
 
 		var config = new KafkaDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "kafka",
 			"bootstrap.servers", "localhost:9092",
 			"topic", "test-topic"
 		)));
@@ -371,6 +387,7 @@ public class initializeTests {
 
 		var config = new KafkaDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "kafka",
 			"bootstrap.servers", "localhost:9092",
 			"topic", "test-topic"
 		)));
@@ -395,6 +412,7 @@ public class initializeTests {
 
 		var config = new KafkaDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "kafka",
 			"bootstrap.servers", "localhost:9092",
 			"topic", "test-topic",
 			"acks", "1"
@@ -416,6 +434,7 @@ public class initializeTests {
 
 		var config = new KafkaDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "kafka",
 			"bootstrap.servers", "localhost:9092",
 			"topic", "test-topic",
 			"linger.ms", "100"
@@ -437,6 +456,7 @@ public class initializeTests {
 
 		var config = new KafkaDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "kafka",
 			"bootstrap.servers", "localhost:9092",
 			"topic", "test-topic",
 			"compression.type", "snappy"
@@ -458,6 +478,7 @@ public class initializeTests {
 
 		var config = new KafkaDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "kafka",
 			"bootstrap.servers", "localhost:9092",
 			"topic", "test-topic",
 			"buffer.memory", "67108864",
@@ -485,6 +506,7 @@ public class initializeTests {
 
 		var config = new KafkaDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "kafka",
 			"bootstrap.servers", "localhost:9092",
 			"topic", "test-topic"
 		)));
@@ -505,6 +527,7 @@ public class initializeTests {
 
 		var config = new KafkaDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "kafka",
 			"bootstrap.servers", "localhost:9092",
 			"topic", "test-topic",
 			"tls.enabled", "true",
@@ -531,6 +554,7 @@ public class initializeTests {
 
 		var config = new KafkaDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "kafka",
 			"bootstrap.servers", "localhost:9092",
 			"topic", "test-topic",
 			"transactional.id", "my-transactional-id"
@@ -558,6 +582,7 @@ public class initializeTests {
 
 		var config = new KafkaDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "kafka",
 			"bootstrap.servers", "broker1:9092,broker2:9092,broker3:9092",
 			"topic", "test-topic"
 		)));
@@ -581,6 +606,7 @@ public class initializeTests {
 		// arrange
 
 		var configMap = new HashMap<String, Object>();
+		configMap.put("kind", "kafka");
 		configMap.put("bootstrap.servers", "localhost:9092");
 		configMap.put("topic", "test-topic");
 		configMap.put("null-property", null);
@@ -607,6 +633,7 @@ public class initializeTests {
 		// arrange
 
 		var configMap = new HashMap<String, Object>();
+		configMap.put("kind", "kafka");
 		configMap.put("bootstrap.servers", "broker1:9092,broker2:9092");
 		configMap.put("topic", "keycloak-events");
 		configMap.put("acks", "1");
@@ -649,6 +676,7 @@ public class initializeTests {
 		// arrange
 
 		var configMap = new HashMap<String, Object>();
+		configMap.put("kind", "kafka");
 		configMap.put("bootstrap.servers", "localhost:9092");
 		configMap.put("topic", "test-topic");
 		configMap.put("headers.X-Custom-Header", "custom-value");
@@ -675,6 +703,7 @@ public class initializeTests {
 		// arrange
 
 		var configMap = new HashMap<String, Object>();
+		configMap.put("kind", "kafka");
 		configMap.put("bootstrap.servers", "localhost:9092");
 		configMap.put("topic", "test-topic");
 		configMap.put("headers.X-Header-1", "value1");
@@ -706,6 +735,7 @@ public class initializeTests {
 		// arrange
 
 		var configMap = new HashMap<String, Object>();
+		configMap.put("kind", "kafka");
 		configMap.put("bootstrap.servers", "localhost:9092");
 		configMap.put("topic", "test-topic");
 
@@ -728,6 +758,7 @@ public class initializeTests {
 		// arrange
 
 		var configMap = new HashMap<String, Object>();
+		configMap.put("kind", "kafka");
 		configMap.put("bootstrap.servers", "localhost:9092");
 		configMap.put("topic", "test-topic");
 		configMap.put("headers.X-Unicode", "héllo wörld 中文");
@@ -751,6 +782,7 @@ public class initializeTests {
 		// arrange
 
 		var configMap = new HashMap<String, Object>();
+		configMap.put("kind", "kafka");
 		configMap.put("bootstrap.servers", "localhost:9092");
 		configMap.put("topic", "test-topic");
 		configMap.put("headers.eventkind", "should-be-filtered");

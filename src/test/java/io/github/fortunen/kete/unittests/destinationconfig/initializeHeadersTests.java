@@ -49,6 +49,7 @@ public class initializeHeadersTests {
 		// arrange
 
 		var configMap = new HashMap<String, Object>();
+		configMap.put("kind", "test");
 		configMap.put("headers.  X-Padded-Key  ", "value");
 
 		var destinationConfig = createTestDestinationConfig(new MapConfiguration(configMap));
@@ -91,6 +92,7 @@ public class initializeHeadersTests {
 		// arrange
 
 		var configMap = new HashMap<String, Object>();
+		configMap.put("kind", "test");
 		configMap.put("headers.Empty-Header", "");
 		configMap.put("headers.Valid-Header", "value");
 
@@ -113,6 +115,7 @@ public class initializeHeadersTests {
 		// arrange
 
 		var configMap = new HashMap<String, Object>();
+		configMap.put("kind", "test");
 		configMap.put("headers.Blank-Header", "   ");
 		configMap.put("headers.Valid-Header", "value");
 
@@ -134,7 +137,7 @@ public class initializeHeadersTests {
 
 		// arrange
 
-		var config = new MapConfiguration(new HashMap<>());
+		var config = new MapConfiguration(Map.of("kind", "test"));
 		var destinationConfig = createTestDestinationConfig(config);
 
 		// act
@@ -184,7 +187,7 @@ public class initializeHeadersTests {
 
 		// arrange
 
-		var config = new MapConfiguration(new HashMap<>());
+		var config = new MapConfiguration(Map.of("kind", "test"));
 		var destinationConfig = createTestDestinationConfig(config);
 
 		// act
@@ -208,6 +211,7 @@ public class initializeHeadersTests {
 		// arrange
 
 		var configMap = new HashMap<String, Object>();
+		configMap.put("kind", "test");
 		configMap.put("headers." + Constants.MESSAGE_HEADER_EVENT_KIND, "should-be-ignored");
 		configMap.put("headers.X-Custom", "allowed");
 
@@ -231,6 +235,7 @@ public class initializeHeadersTests {
 		// arrange
 
 		var configMap = new HashMap<String, Object>();
+		configMap.put("kind", "test");
 		configMap.put("headers." + Constants.MESSAGE_HEADER_EVENT_TYPE, "should-be-ignored");
 		configMap.put("headers.X-Custom", "allowed");
 
@@ -254,6 +259,7 @@ public class initializeHeadersTests {
 		// arrange
 
 		var configMap = new HashMap<String, Object>();
+		configMap.put("kind", "test");
 		configMap.put("headers." + Constants.MESSAGE_HEADER_CONTENT_TYPE, "should-be-ignored");
 		configMap.put("headers.X-Custom", "allowed");
 
@@ -277,6 +283,7 @@ public class initializeHeadersTests {
 		// arrange
 
 		var configMap = new HashMap<String, Object>();
+		configMap.put("kind", "test");
 		configMap.put("headers." + Constants.MESSAGE_HEADER_EVENT_KIND, "ignored1");
 		configMap.put("headers." + Constants.MESSAGE_HEADER_EVENT_TYPE, "ignored2");
 		configMap.put("headers." + Constants.MESSAGE_HEADER_CONTENT_TYPE, "ignored3");
@@ -306,6 +313,7 @@ public class initializeHeadersTests {
 		// arrange
 
 		var configMap = new HashMap<String, Object>();
+		configMap.put("kind", "test");
 		configMap.put("headers.eventkind-custom", "allowed1");
 		configMap.put("headers.my-eventtype", "allowed2");
 		configMap.put("headers.x-contenttype", "allowed3");
@@ -331,6 +339,7 @@ public class initializeHeadersTests {
 		// arrange
 
 		var configMap = new HashMap<String, Object>();
+		configMap.put("kind", "test");
 		configMap.put("headers.EVENTKIND", "allowed1");
 		configMap.put("headers.EventType", "allowed2");
 		configMap.put("headers.ContentType", "allowed3");
@@ -357,6 +366,7 @@ public class initializeHeadersTests {
 	private MapConfiguration createConfigWithHeaders(Map<String, Object> headers) {
 
 		var config = new HashMap<String, Object>();
+		config.put("kind", "test");
 		config.putAll(headers);
 		return new MapConfiguration(config);
 	}

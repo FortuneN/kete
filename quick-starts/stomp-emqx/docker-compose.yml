@@ -1,7 +1,17 @@
 services:
 
+  subscriber:
+    image: ghcr.io/fortunen/kete/quick-start-stomp-subscriber
+    environment:
+      STOMP_HOST: emqx
+      STOMP_PORT: 61613
+      STOMP_DESTINATION: /topic/keycloak-events
+    depends_on:
+      emqx:
+        condition: service_healthy
+
   emqx:
-    image: ghcr.io/fortunen/kete/quick-start-emqx
+    image: ghcr.io/fortunen/kete/quick-start-stomp-emqx
     ports:
       - 1883:1883
       - 8083:8083
@@ -23,6 +33,7 @@ services:
     command: start-dev
     ports:
       - 8080:8080
+      - 9000:9000
     environment:
       kete.routes.quick-start.destination.kind: stomp
       kete.routes.quick-start.destination.host: emqx
@@ -31,3 +42,5 @@ services:
     depends_on:
       emqx:
         condition: service_healthy
+      subscriber:
+        condition: service_started

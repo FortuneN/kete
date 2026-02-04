@@ -1,7 +1,7 @@
 services:
 
   nats:
-    image: nats:2.10-alpine
+    image: ghcr.io/fortunen/kete/quick-start-nats
     ports:
       - 4222:4222
       - 8222:8222
@@ -13,31 +13,33 @@ services:
       retries: 30
 
   nats-setup:
-    image: natsio/nats-box:0.14.5
+    image: ghcr.io/fortunen/kete/quick-start-nats-box
     depends_on:
       nats:
         condition: service_healthy
-    entrypoint: >
-      sh -c "
-        nats -s nats://nats:4222 stream add KEYCLOAK_EVENTS \
-          --subjects 'keycloak.>' \
+    command:
+      - sh
+      - -c
+      - |
+        nats -s nats://nats:4222 stream add KEYCLOAK_EVENTS --defaults \
+          --subjects "keycloak.>" \
           --storage file \
           --replicas 1 \
           --retention limits \
           --max-age 7d \
           --max-bytes 1GB \
           --discard old \
-          --no-deny-delete \
-          --no-deny-purge &&
-        echo 'Stream KEYCLOAK_EVENTS created successfully' &&
+          --deny-delete \
+          --deny-purge &&
+        echo "Stream KEYCLOAK_EVENTS created successfully" &&
         sleep infinity
-      "
 
   keycloak:
     image: ghcr.io/fortunen/kete/quick-start-keycloak
     command: start-dev
     ports:
       - 8080:8080
+      - 9000:9000
     environment:
       kete.routes.quick-start.destination.kind: nats-jetstream
       kete.routes.quick-start.destination.servers: nats://nats:4222

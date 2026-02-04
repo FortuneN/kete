@@ -17,6 +17,7 @@ services:
     command: start-dev
     ports:
       - 8080:8080
+      - 9000:9000
     environment:
       kete.routes.quick-start.destination.kind: http
       kete.routes.quick-start.destination.url: http://webhook:8090/keycloak-events

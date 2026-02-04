@@ -43,6 +43,7 @@ public class TestBase {
 	}
 
 	protected void configureDestination(MapConfiguration mapConfig) {
+		mapConfig.setProperty(Constants.KIND, "mqtt-5");
 		config.setConfiguration(mapConfig);
 		config.initialize();
 		destination.setConfig(config);

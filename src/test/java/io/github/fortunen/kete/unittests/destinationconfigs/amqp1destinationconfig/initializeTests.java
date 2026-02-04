@@ -24,6 +24,7 @@ public class initializeTests {
 
 		var config = new Amqp1DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "amqp-1",
 			"destination-name", "test-queue"
 		)));
 
@@ -45,6 +46,7 @@ public class initializeTests {
 
 		var config = new Amqp1DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "amqp-1",
 			"host", "",
 			"destination-name", "test-queue"
 		)));
@@ -67,6 +69,7 @@ public class initializeTests {
 
 		var config = new Amqp1DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "amqp-1",
 			"host", "   ",
 			"destination-name", "test-queue"
 		)));
@@ -93,6 +96,7 @@ public class initializeTests {
 
 		var config = new Amqp1DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "amqp-1",
 			"host", "localhost"
 		)));
 
@@ -114,6 +118,7 @@ public class initializeTests {
 
 		var config = new Amqp1DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "amqp-1",
 			"host", "localhost",
 			"destination-name", ""
 		)));
@@ -136,6 +141,7 @@ public class initializeTests {
 
 		var config = new Amqp1DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "amqp-1",
 			"host", "localhost",
 			"destination-name", "   "
 		)));
@@ -162,6 +168,7 @@ public class initializeTests {
 
 		var config = new Amqp1DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "amqp-1",
 			"host", "localhost",
 			"destination-name", "test-queue"
 		)));
@@ -182,6 +189,7 @@ public class initializeTests {
 
 		var config = new Amqp1DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "amqp-1",
 			"host", "localhost",
 			"destination-name", "test-queue",
 			"tls.enabled", "true"
@@ -203,6 +211,7 @@ public class initializeTests {
 
 		var config = new Amqp1DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "amqp-1",
 			"host", "localhost",
 			"destination-name", "test-queue",
 			"transport-type", "amqp-web-sockets"
@@ -224,6 +233,7 @@ public class initializeTests {
 
 		var config = new Amqp1DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "amqp-1",
 			"host", "localhost",
 			"destination-name", "test-queue",
 			"transport-type", "amqp-web-sockets",
@@ -246,6 +256,7 @@ public class initializeTests {
 
 		var config = new Amqp1DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "amqp-1",
 			"host", "localhost",
 			"destination-name", "test-queue",
 			"port", "15672"
@@ -271,6 +282,7 @@ public class initializeTests {
 
 		var config = new Amqp1DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "amqp-1",
 			"host", "localhost",
 			"destination-name", "test-queue",
 			"port", "0"
@@ -294,6 +306,7 @@ public class initializeTests {
 
 		var config = new Amqp1DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "amqp-1",
 			"host", "localhost",
 			"destination-name", "test-queue",
 			"port", "-1"
@@ -317,6 +330,7 @@ public class initializeTests {
 
 		var config = new Amqp1DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "amqp-1",
 			"host", "localhost",
 			"destination-name", "test-queue",
 			"port", "65536"
@@ -340,6 +354,7 @@ public class initializeTests {
 
 		var config = new Amqp1DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "amqp-1",
 			"host", "localhost",
 			"destination-name", "test-queue",
 			"port", "1"
@@ -361,6 +376,7 @@ public class initializeTests {
 
 		var config = new Amqp1DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "amqp-1",
 			"host", "localhost",
 			"destination-name", "test-queue",
 			"port", "65535"
@@ -386,6 +402,7 @@ public class initializeTests {
 
 		var config = new Amqp1DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "amqp-1",
 			"host", "localhost",
 			"destination-name", "test-queue"
 		)));
@@ -406,6 +423,7 @@ public class initializeTests {
 
 		var config = new Amqp1DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "amqp-1",
 			"host", "localhost",
 			"destination-name", "test-queue",
 			"transport-type", "amqp-web-sockets"
@@ -427,6 +445,7 @@ public class initializeTests {
 
 		var config = new Amqp1DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "amqp-1",
 			"host", "localhost",
 			"destination-name", "test-queue",
 			"transport-type", "invalid"
@@ -450,6 +469,7 @@ public class initializeTests {
 
 		var config = new Amqp1DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "amqp-1",
 			"host", "localhost",
 			"destination-name", "test-queue",
 			"transport-type", "AMQP-WEB-SOCKETS"
@@ -475,6 +495,7 @@ public class initializeTests {
 
 		var config = new Amqp1DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "amqp-1",
 			"host", "localhost",
 			"destination-name", "test-queue"
 		)));
@@ -496,6 +517,7 @@ public class initializeTests {
 
 		var config = new Amqp1DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "amqp-1",
 			"host", "localhost",
 			"destination-name", "test-topic",
 			"destination-type", "topic"
@@ -518,6 +540,7 @@ public class initializeTests {
 
 		var config = new Amqp1DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "amqp-1",
 			"host", "localhost",
 			"destination-name", "test-dest",
 			"destination-type", "invalid"
@@ -541,6 +564,7 @@ public class initializeTests {
 
 		var config = new Amqp1DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "amqp-1",
 			"host", "localhost",
 			"destination-name", "test-topic",
 			"destination-type", "TOPIC"
@@ -566,6 +590,7 @@ public class initializeTests {
 
 		var config = new Amqp1DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "amqp-1",
 			"host", "localhost",
 			"destination-name", "test-queue"
 		)));
@@ -587,6 +612,7 @@ public class initializeTests {
 
 		var config = new Amqp1DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "amqp-1",
 			"host", "localhost",
 			"destination-name", "test-queue",
 			"tls.enabled", "true"
@@ -609,6 +635,7 @@ public class initializeTests {
 
 		var config = new Amqp1DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "amqp-1",
 			"host", "localhost",
 			"destination-name", "test-queue",
 			"transport-type", "amqp-web-sockets"
@@ -631,6 +658,7 @@ public class initializeTests {
 
 		var config = new Amqp1DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "amqp-1",
 			"host", "localhost",
 			"destination-name", "test-queue",
 			"transport-type", "amqp-web-sockets",
@@ -654,6 +682,7 @@ public class initializeTests {
 
 		var config = new Amqp1DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "amqp-1",
 			"host", "my-broker.example.com",
 			"destination-name", "test-queue",
 			"port", "15672"
@@ -669,57 +698,6 @@ public class initializeTests {
 	}
 
 	// =========================================================================
-	// Azure Service Bus Auto-TLS
-	// =========================================================================
-
-	@Test
-	public void shouldAutoEnableTlsForAzureServiceBus() {
-
-		// arrange
-
-		var configMap = new HashMap<String, Object>();
-		configMap.put("host", "my-namespace.servicebus.windows.net");
-		configMap.put("destination-name", "test-queue");
-
-		var config = new Amqp1DestinationConfig();
-		config.setConfiguration(new MapConfiguration(configMap));
-
-		// act
-
-		config.initialize();
-
-		// assert
-
-		assertThat(config.getTls().isEnabled()).isTrue();
-		assertThat(config.getScheme()).isEqualTo("amqps");
-		assertThat(config.getUrl()).isEqualTo("amqps://my-namespace.servicebus.windows.net:5671?amqp.idleTimeout=60000");
-	}
-
-	@Test
-	public void shouldAutoEnableTlsForAzureServiceBusWithWebSockets() {
-
-		// arrange
-
-		var configMap = new HashMap<String, Object>();
-		configMap.put("host", "my-namespace.servicebus.windows.net");
-		configMap.put("destination-name", "test-queue");
-		configMap.put("transport-type", "amqp-web-sockets");
-
-		var config = new Amqp1DestinationConfig();
-		config.setConfiguration(new MapConfiguration(configMap));
-
-		// act
-
-		config.initialize();
-
-		// assert
-
-		assertThat(config.getTls().isEnabled()).isTrue();
-		assertThat(config.getScheme()).isEqualTo("amqpwss");
-		assertThat(config.getUrl()).isEqualTo("amqpwss://my-namespace.servicebus.windows.net:443?amqp.idleTimeout=60000");
-	}
-
-	// =========================================================================
 	// Delivery Mode
 	// =========================================================================
 
@@ -730,6 +708,7 @@ public class initializeTests {
 
 		var config = new Amqp1DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "amqp-1",
 			"host", "localhost",
 			"destination-name", "test-queue"
 		)));
@@ -751,6 +730,7 @@ public class initializeTests {
 
 		var config = new Amqp1DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "amqp-1",
 			"host", "localhost",
 			"destination-name", "test-queue",
 			"delivery-mode", "non-persistent"
@@ -773,6 +753,7 @@ public class initializeTests {
 
 		var config = new Amqp1DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "amqp-1",
 			"host", "localhost",
 			"destination-name", "test-queue",
 			"delivery-mode", "invalid"
@@ -796,6 +777,7 @@ public class initializeTests {
 
 		var config = new Amqp1DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "amqp-1",
 			"host", "localhost",
 			"destination-name", "test-queue",
 			"delivery-mode", "NON-PERSISTENT"
@@ -821,6 +803,7 @@ public class initializeTests {
 
 		var config = new Amqp1DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "amqp-1",
 			"host", "localhost",
 			"destination-name", "test-queue"
 		)));
@@ -841,6 +824,7 @@ public class initializeTests {
 
 		var config = new Amqp1DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "amqp-1",
 			"host", "localhost",
 			"destination-name", "test-queue",
 			"priority", "0"
@@ -862,6 +846,7 @@ public class initializeTests {
 
 		var config = new Amqp1DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "amqp-1",
 			"host", "localhost",
 			"destination-name", "test-queue",
 			"priority", "9"
@@ -883,6 +868,7 @@ public class initializeTests {
 
 		var config = new Amqp1DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "amqp-1",
 			"host", "localhost",
 			"destination-name", "test-queue",
 			"priority", "-1"
@@ -906,6 +892,7 @@ public class initializeTests {
 
 		var config = new Amqp1DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "amqp-1",
 			"host", "localhost",
 			"destination-name", "test-queue",
 			"priority", "10"
@@ -933,6 +920,7 @@ public class initializeTests {
 
 		var config = new Amqp1DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "amqp-1",
 			"host", "localhost",
 			"destination-name", "test-queue"
 		)));
@@ -953,6 +941,7 @@ public class initializeTests {
 
 		var config = new Amqp1DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "amqp-1",
 			"host", "localhost",
 			"destination-name", "test-queue",
 			"time-to-live-seconds", "60"
@@ -971,6 +960,7 @@ public class initializeTests {
 
 		var config = new Amqp1DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "amqp-1",
 			"host", "localhost",
 			"destination-name", "test-queue",
 			"time-to-live-seconds", "-1"
@@ -998,6 +988,7 @@ public class initializeTests {
 
 		var config = new Amqp1DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "amqp-1",
 			"host", "localhost",
 			"destination-name", "test-queue"
 		)));
@@ -1018,6 +1009,7 @@ public class initializeTests {
 
 		var config = new Amqp1DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "amqp-1",
 			"host", "localhost",
 			"destination-name", "test-queue"
 		)));
@@ -1038,6 +1030,7 @@ public class initializeTests {
 
 		var config = new Amqp1DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "amqp-1",
 			"host", "localhost",
 			"destination-name", "test-queue",
 			"username", "myuser",
@@ -1061,6 +1054,7 @@ public class initializeTests {
 
 		var config = new Amqp1DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "amqp-1",
 			"host", "localhost",
 			"destination-name", "test-queue",
 			"username", "  myuser  "
@@ -1082,6 +1076,7 @@ public class initializeTests {
 
 		var config = new Amqp1DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "amqp-1",
 			"host", "localhost",
 			"destination-name", "test-queue",
 			"password", "  mypass  "
@@ -1107,6 +1102,7 @@ public class initializeTests {
 
 		var config = new Amqp1DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "amqp-1",
 			"host", "localhost",
 			"destination-name", "test-queue"
 		)));
@@ -1127,6 +1123,7 @@ public class initializeTests {
 
 		var config = new Amqp1DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "amqp-1",
 			"host", "localhost",
 			"destination-name", "test-queue",
 			"username", "testuser"
@@ -1153,6 +1150,7 @@ public class initializeTests {
 
 		var config = new Amqp1DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "amqp-1",
 			"host", "localhost",
 			"destination-name", "test-queue"
 		)));
@@ -1173,6 +1171,7 @@ public class initializeTests {
 
 		var config = new Amqp1DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "amqp-1",
 			"host", "localhost",
 			"destination-name", "test-queue",
 			"tls.enabled", "true"
@@ -1198,6 +1197,7 @@ public class initializeTests {
 
 		var config = new Amqp1DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "amqp-1",
 			"host", "localhost",
 			"destination-name", "test-queue"
 		)));
@@ -1218,6 +1218,7 @@ public class initializeTests {
 
 		var config = new Amqp1DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "amqp-1",
 			"host", "localhost",
 			"destination-name", "test-queue",
 			"idle-timeout-seconds", "30"
@@ -1239,6 +1240,7 @@ public class initializeTests {
 
 		var config = new Amqp1DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "amqp-1",
 			"host", "localhost",
 			"destination-name", "test-queue",
 			"idle-timeout-seconds", "0"
@@ -1260,6 +1262,7 @@ public class initializeTests {
 
 		var config = new Amqp1DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "amqp-1",
 			"host", "localhost",
 			"destination-name", "test-queue",
 			"idle-timeout-seconds", "-1"
@@ -1286,6 +1289,7 @@ public class initializeTests {
 		// arrange
 
 		var configMap = new HashMap<String, Object>();
+		configMap.put("kind", "amqp-1");
 		configMap.put("host", "my-broker.example.com");
 		configMap.put("port", "5673");
 		configMap.put("destination-name", "my-queue");

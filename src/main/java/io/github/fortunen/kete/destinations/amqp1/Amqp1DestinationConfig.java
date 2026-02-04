@@ -1,11 +1,8 @@
 package io.github.fortunen.kete.destinations.amqp1;
 
-import org.apache.commons.lang3.Strings;
 import org.apache.qpid.jms.JmsConnectionFactory;
 
 import io.github.fortunen.kete.DestinationConfig;
-import io.github.fortunen.kete.TlsMaterial;
-import io.github.fortunen.kete.utils.ConfigurationUtils;
 import io.github.fortunen.kete.utils.ValidationUtils;
 import jakarta.jms.DeliveryMode;
 import lombok.Data;
@@ -70,13 +67,6 @@ public class Amqp1DestinationConfig extends DestinationConfig {
 		// host
 
 		host = ValidationUtils.requireNonBlank(configuration.getString(HOST, "").trim(), HOST + " is required");
-
-		// tls - auto-enable for Azure Service Bus
-
-		if (!tls.isEnabled() && Strings.CS.contains(host, "servicebus")) {
-			configuration.setProperty(TLS_ENABLED, "true");
-			tls = TlsMaterial.builder().withConfiguration(ConfigurationUtils.getSubSet(configuration, TLS)).build();
-		}
 
 		// transportType
 

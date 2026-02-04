@@ -227,46 +227,23 @@ $script:Results["2. Package JAR"] = $jarSuccess
 # Step 3: Build and Push Docker Images
 # =============================================================================
 
-$script:QuickStartImages = @(
+# Build image list dynamically from quick-starts/$images folder
+$script:QuickStartImages = @()
 
-    # Core images (multi-stage builds requiring repo root context)
+# Auto-discover all images from quick-starts/$images folder
+Get-ChildItem -Path 'quick-starts/$images' -Directory | ForEach-Object {
+    $imageName = $_.Name
+    $dockerfile = "quick-starts/`$images/$imageName/Dockerfile"
 
-    @{ Name = "quick-start-keycloak"; Dockerfile = "quick-starts/quick-start-keycloak/Dockerfile"; Context = "." }
-    @{ Name = "quick-start-curl"; Dockerfile = "quick-starts/quick-start-curl/Dockerfile"; Context = "." }
+    # Keycloak needs repo root context for multi-stage maven build
+    $context = if ($imageName -eq "keycloak") { "." } else { "quick-starts/`$images/$imageName" }
 
-    # AMQP 0.9.1 images
-
-    @{ Name = "quick-start-rabbitmq"; Dockerfile = "quick-starts/amqp-0.9.1-rabbitmq/rabbitmq/Dockerfile"; Context = "quick-starts/amqp-0.9.1-rabbitmq/rabbitmq" }
-    @{ Name = "quick-start-lavinmq"; Dockerfile = "quick-starts/amqp-0.9.1-lavinmq/lavinmq/Dockerfile"; Context = "quick-starts/amqp-0.9.1-lavinmq/lavinmq" }
-
-    # AMQP 1.0 images (Note: amqp-1-rabbitmq reuses quick-start-rabbitmq with plugin enabled via command)
-
-    @{ Name = "quick-start-activemq"; Dockerfile = "quick-starts/amqp-1-activemq/activemq/Dockerfile"; Context = "quick-starts/amqp-1-activemq/activemq" }
-    @{ Name = "quick-start-qpid"; Dockerfile = "quick-starts/amqp-1-qpid/qpid/Dockerfile"; Context = "quick-starts/amqp-1-qpid/qpid" }
-
-    # Kafka images
-
-    @{ Name = "quick-start-kafka"; Dockerfile = "quick-starts/kafka-apache/kafka/Dockerfile"; Context = "quick-starts/kafka-apache/kafka" }
-    @{ Name = "quick-start-kafka-ui"; Dockerfile = "quick-starts/kafka-apache/kafka-ui/Dockerfile"; Context = "quick-starts/kafka-apache/kafka-ui" }
-    @{ Name = "quick-start-redpanda"; Dockerfile = "quick-starts/kafka-redpanda/redpanda/Dockerfile"; Context = "quick-starts/kafka-redpanda/redpanda" }
-    @{ Name = "quick-start-redpanda-console"; Dockerfile = "quick-starts/kafka-redpanda/redpanda-console/Dockerfile"; Context = "quick-starts/kafka-redpanda/redpanda-console" }
-
-    # MQTT images
-
-    @{ Name = "quick-start-emqx"; Dockerfile = "quick-starts/mqtt-3-emqx/emqx/Dockerfile"; Context = "quick-starts/mqtt-3-emqx/emqx" }
-    @{ Name = "quick-start-mosquitto"; Dockerfile = "quick-starts/mqtt-3-mosquitto/mosquitto/Dockerfile"; Context = "quick-starts/mqtt-3-mosquitto/mosquitto" }
-    @{ Name = "quick-start-hivemq"; Dockerfile = "quick-starts/mqtt-5-hivemq/hivemq/Dockerfile"; Context = "quick-starts/mqtt-5-hivemq/hivemq" }
-
-    # HTTP images
-
-    @{ Name = "quick-start-http-echo"; Dockerfile = "quick-starts/http-webhook/http-echo/Dockerfile"; Context = "quick-starts/http-webhook/http-echo" }
-
-    # Redis images
-
-    @{ Name = "quick-start-redis"; Dockerfile = "quick-starts/redis-pubsub-redis/redis/Dockerfile"; Context = "quick-starts/redis-pubsub-redis/redis" }
-    @{ Name = "quick-start-dragonfly"; Dockerfile = "quick-starts/redis-pubsub-dragonfly/dragonfly/Dockerfile"; Context = "quick-starts/redis-pubsub-dragonfly/dragonfly" }
-    @{ Name = "quick-start-keydb"; Dockerfile = "quick-starts/redis-pubsub-keydb/keydb/Dockerfile"; Context = "quick-starts/redis-pubsub-keydb/keydb" }
-)
+    $script:QuickStartImages += @{
+        Name = "quick-start-$imageName"
+        Dockerfile = $dockerfile
+        Context = $context
+    }
+}
 
 function Build-And-Push-Image {
 

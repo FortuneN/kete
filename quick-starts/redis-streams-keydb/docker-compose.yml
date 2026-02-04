@@ -15,6 +15,7 @@ services:
     command: start-dev
     ports:
       - 8080:8080
+      - 9000:9000
     environment:
       kete.routes.quick-start.destination.kind: redis-streams
       kete.routes.quick-start.destination.host: keydb

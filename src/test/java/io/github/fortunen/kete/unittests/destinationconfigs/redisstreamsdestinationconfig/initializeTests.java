@@ -14,6 +14,7 @@ public class initializeTests {
 
 	private Map<String, Object> createFullConfig() {
 		var map = new java.util.HashMap<String, Object>();
+		map.put("kind", "redis-streams");
 		map.put("host", "redis.example.com");
 		map.put("stream", "events");
 		map.put("port", "16379");
@@ -39,6 +40,7 @@ public class initializeTests {
 
 		var config = new RedisStreamsDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "redis-streams",
 			"stream", "test-stream"
 		)));
 
@@ -60,6 +62,7 @@ public class initializeTests {
 
 		var config = new RedisStreamsDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "redis-streams",
 			"host", "",
 			"stream", "test-stream"
 		)));
@@ -82,6 +85,7 @@ public class initializeTests {
 
 		var config = new RedisStreamsDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "redis-streams",
 			"host", "   ",
 			"stream", "test-stream"
 		)));
@@ -108,6 +112,7 @@ public class initializeTests {
 
 		var config = new RedisStreamsDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "redis-streams",
 			"host", "localhost"
 		)));
 
@@ -129,6 +134,7 @@ public class initializeTests {
 
 		var config = new RedisStreamsDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "redis-streams",
 			"host", "localhost",
 			"stream", ""
 		)));
@@ -151,6 +157,7 @@ public class initializeTests {
 
 		var config = new RedisStreamsDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "redis-streams",
 			"host", "localhost",
 			"stream", "   "
 		)));
@@ -177,6 +184,7 @@ public class initializeTests {
 
 		var config = new RedisStreamsDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "redis-streams",
 			"host", "localhost",
 			"stream", "test-stream"
 		)));
@@ -197,6 +205,7 @@ public class initializeTests {
 
 		var config = new RedisStreamsDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "redis-streams",
 			"host", "localhost",
 			"stream", "test-stream",
 			"tls.enabled", "true"
@@ -218,6 +227,7 @@ public class initializeTests {
 
 		var config = new RedisStreamsDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "redis-streams",
 			"host", "localhost",
 			"stream", "test-stream",
 			"port", "16379"
@@ -239,6 +249,7 @@ public class initializeTests {
 
 		var config = new RedisStreamsDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "redis-streams",
 			"host", "localhost",
 			"stream", "test-stream",
 			"port", "-1"
@@ -262,6 +273,7 @@ public class initializeTests {
 
 		var config = new RedisStreamsDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "redis-streams",
 			"host", "localhost",
 			"stream", "test-stream",
 			"port", "65536"
@@ -289,6 +301,7 @@ public class initializeTests {
 
 		var config = new RedisStreamsDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "redis-streams",
 			"host", "localhost",
 			"stream", "test-stream"
 		)));
@@ -309,6 +322,7 @@ public class initializeTests {
 
 		var config = new RedisStreamsDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "redis-streams",
 			"host", "localhost",
 			"stream", "test-stream",
 			"database", "5"
@@ -330,6 +344,7 @@ public class initializeTests {
 
 		var config = new RedisStreamsDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "redis-streams",
 			"host", "localhost",
 			"stream", "test-stream",
 			"database", "-1"
@@ -357,6 +372,7 @@ public class initializeTests {
 
 		var config = new RedisStreamsDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "redis-streams",
 			"host", "localhost",
 			"stream", "test-stream"
 		)));
@@ -377,6 +393,7 @@ public class initializeTests {
 
 		var config = new RedisStreamsDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "redis-streams",
 			"host", "localhost",
 			"stream", "test-stream",
 			"username", "redis-user"
@@ -402,6 +419,7 @@ public class initializeTests {
 
 		var config = new RedisStreamsDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "redis-streams",
 			"host", "localhost",
 			"stream", "test-stream"
 		)));
@@ -422,6 +440,7 @@ public class initializeTests {
 
 		var config = new RedisStreamsDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "redis-streams",
 			"host", "localhost",
 			"stream", "test-stream",
 			"password", "secret123"
@@ -447,6 +466,7 @@ public class initializeTests {
 
 		var config = new RedisStreamsDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "redis-streams",
 			"host", "localhost",
 			"stream", "test-stream"
 		)));
@@ -467,6 +487,7 @@ public class initializeTests {
 
 		var config = new RedisStreamsDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "redis-streams",
 			"host", "localhost",
 			"stream", "test-stream",
 			"client-name", "my-app"
@@ -492,6 +513,7 @@ public class initializeTests {
 
 		var config = new RedisStreamsDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "redis-streams",
 			"host", "localhost",
 			"stream", "test-stream"
 		)));
@@ -512,6 +534,7 @@ public class initializeTests {
 
 		var config = new RedisStreamsDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "redis-streams",
 			"host", "localhost",
 			"stream", "test-stream",
 			"connection-timeout-seconds", "30"
@@ -533,6 +556,7 @@ public class initializeTests {
 
 		var config = new RedisStreamsDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "redis-streams",
 			"host", "localhost",
 			"stream", "test-stream",
 			"connection-timeout-seconds", "-1"
@@ -560,6 +584,7 @@ public class initializeTests {
 
 		var config = new RedisStreamsDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "redis-streams",
 			"host", "localhost",
 			"stream", "test-stream"
 		)));
@@ -580,6 +605,7 @@ public class initializeTests {
 
 		var config = new RedisStreamsDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "redis-streams",
 			"host", "localhost",
 			"stream", "test-stream",
 			"command-timeout-seconds", "120"
@@ -601,6 +627,7 @@ public class initializeTests {
 
 		var config = new RedisStreamsDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "redis-streams",
 			"host", "localhost",
 			"stream", "test-stream",
 			"command-timeout-seconds", "-1"
@@ -628,6 +655,7 @@ public class initializeTests {
 
 		var config = new RedisStreamsDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "redis-streams",
 			"host", "localhost",
 			"stream", "test-stream"
 		)));
@@ -648,6 +676,7 @@ public class initializeTests {
 
 		var config = new RedisStreamsDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "redis-streams",
 			"host", "localhost",
 			"stream", "test-stream",
 			"max-len", "1000"
@@ -669,6 +698,7 @@ public class initializeTests {
 
 		var config = new RedisStreamsDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "redis-streams",
 			"host", "localhost",
 			"stream", "test-stream",
 			"max-len", "-1"
@@ -696,6 +726,7 @@ public class initializeTests {
 
 		var config = new RedisStreamsDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "redis-streams",
 			"host", "localhost",
 			"stream", "test-stream"
 		)));
@@ -716,6 +747,7 @@ public class initializeTests {
 
 		var config = new RedisStreamsDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "redis-streams",
 			"host", "localhost",
 			"stream", "test-stream",
 			"approximate-trimming", "false"
@@ -741,6 +773,7 @@ public class initializeTests {
 
 		var config = new RedisStreamsDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "redis-streams",
 			"host", "localhost",
 			"stream", "test-stream"
 		)));
@@ -764,6 +797,7 @@ public class initializeTests {
 
 		var config = new RedisStreamsDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "redis-streams",
 			"host", "localhost",
 			"stream", "test-stream",
 			"username", "redis-user",
@@ -788,6 +822,7 @@ public class initializeTests {
 
 		var config = new RedisStreamsDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "redis-streams",
 			"host", "localhost",
 			"stream", "test-stream",
 			"password", "secret123"
@@ -810,6 +845,7 @@ public class initializeTests {
 
 		var config = new RedisStreamsDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "redis-streams",
 			"host", "localhost",
 			"stream", "test-stream",
 			"tls.enabled", "true"
@@ -836,6 +872,7 @@ public class initializeTests {
 
 		var config = new RedisStreamsDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "redis-streams",
 			"host", "localhost",
 			"stream", "test-stream"
 		)));

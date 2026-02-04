@@ -24,6 +24,7 @@ public class initializeTests {
 
 		var config = new Amqp091DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "amqp-0.9.1",
 			"exchange", "test-exchange"
 		)));
 
@@ -45,6 +46,7 @@ public class initializeTests {
 
 		var config = new Amqp091DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "amqp-0.9.1",
 			"host", "",
 			"exchange", "test-exchange"
 		)));
@@ -67,6 +69,7 @@ public class initializeTests {
 
 		var config = new Amqp091DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "amqp-0.9.1",
 			"host", "   ",
 			"exchange", "test-exchange"
 		)));
@@ -93,6 +96,7 @@ public class initializeTests {
 
 		var config = new Amqp091DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "amqp-0.9.1",
 			"host", "localhost"
 		)));
 
@@ -114,6 +118,7 @@ public class initializeTests {
 
 		var config = new Amqp091DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "amqp-0.9.1",
 			"host", "localhost",
 			"exchange", ""
 		)));
@@ -136,6 +141,7 @@ public class initializeTests {
 
 		var config = new Amqp091DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "amqp-0.9.1",
 			"host", "localhost",
 			"exchange", "   "
 		)));
@@ -162,6 +168,7 @@ public class initializeTests {
 
 		var config = new Amqp091DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "amqp-0.9.1",
 			"host", "localhost",
 			"exchange", "test-exchange"
 		)));
@@ -182,6 +189,7 @@ public class initializeTests {
 
 		var config = new Amqp091DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "amqp-0.9.1",
 			"host", "localhost",
 			"port", 5673,
 			"exchange", "test-exchange"
@@ -203,6 +211,7 @@ public class initializeTests {
 
 		var config = new Amqp091DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "amqp-0.9.1",
 			"host", "localhost",
 			"port", 0,
 			"exchange", "test-exchange"
@@ -226,6 +235,7 @@ public class initializeTests {
 
 		var config = new Amqp091DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "amqp-0.9.1",
 			"host", "localhost",
 			"port", -1,
 			"exchange", "test-exchange"
@@ -249,6 +259,7 @@ public class initializeTests {
 
 		var config = new Amqp091DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "amqp-0.9.1",
 			"host", "localhost",
 			"port", 65536,
 			"exchange", "test-exchange"
@@ -276,6 +287,7 @@ public class initializeTests {
 
 		var config = new Amqp091DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "amqp-0.9.1",
 			"host", "localhost",
 			"exchange", "test-exchange"
 		)));
@@ -320,6 +332,7 @@ public class initializeTests {
 
 		var config = new Amqp091DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "amqp-0.9.1",
 			"host", "localhost",
 			"exchange", "test-exchange",
 			"routing-key", "my.routing.key"
@@ -341,6 +354,7 @@ public class initializeTests {
 
 		var config = new Amqp091DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "amqp-0.9.1",
 			"host", "localhost",
 			"exchange", "test-exchange",
 			"username", "admin"
@@ -362,6 +376,7 @@ public class initializeTests {
 
 		var config = new Amqp091DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "amqp-0.9.1",
 			"host", "localhost",
 			"exchange", "test-exchange",
 			"password", "secret"
@@ -383,6 +398,7 @@ public class initializeTests {
 
 		var config = new Amqp091DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "amqp-0.9.1",
 			"host", "localhost",
 			"exchange", "test-exchange",
 			"virtual-host", "/my-vhost"
@@ -408,6 +424,7 @@ public class initializeTests {
 
 		var config = new Amqp091DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "amqp-0.9.1",
 			"host", "localhost",
 			"exchange", "test-exchange",
 			"priority", 7
@@ -430,6 +447,7 @@ public class initializeTests {
 
 		var config = new Amqp091DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "amqp-0.9.1",
 			"host", "localhost",
 			"exchange", "test-exchange",
 			"priority", 0
@@ -452,6 +470,7 @@ public class initializeTests {
 
 		var config = new Amqp091DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "amqp-0.9.1",
 			"host", "localhost",
 			"exchange", "test-exchange",
 			"priority", 9
@@ -474,6 +493,7 @@ public class initializeTests {
 
 		var config = new Amqp091DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "amqp-0.9.1",
 			"host", "localhost",
 			"exchange", "test-exchange",
 			"priority", -1
@@ -497,6 +517,7 @@ public class initializeTests {
 
 		var config = new Amqp091DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "amqp-0.9.1",
 			"host", "localhost",
 			"exchange", "test-exchange",
 			"priority", 10
@@ -524,6 +545,7 @@ public class initializeTests {
 
 		var config = new Amqp091DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "amqp-0.9.1",
 			"host", "localhost",
 			"exchange", "test-exchange"
 		)));
@@ -545,6 +567,7 @@ public class initializeTests {
 
 		var config = new Amqp091DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "amqp-0.9.1",
 			"host", "localhost",
 			"exchange", "test-exchange",
 			"delivery-mode", "persistent"
@@ -567,6 +590,7 @@ public class initializeTests {
 
 		var config = new Amqp091DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "amqp-0.9.1",
 			"host", "localhost",
 			"exchange", "test-exchange",
 			"delivery-mode", "non-persistent"
@@ -589,6 +613,7 @@ public class initializeTests {
 
 		var config = new Amqp091DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "amqp-0.9.1",
 			"host", "localhost",
 			"exchange", "test-exchange",
 			"delivery-mode", "invalid"
@@ -616,6 +641,7 @@ public class initializeTests {
 
 		var config = new Amqp091DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "amqp-0.9.1",
 			"host", "localhost",
 			"exchange", "test-exchange",
 			"time-to-live-seconds", 60L
@@ -635,6 +661,7 @@ public class initializeTests {
 
 		var config = new Amqp091DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "amqp-0.9.1",
 			"host", "localhost",
 			"exchange", "test-exchange",
 			"time-to-live-seconds", -1L
@@ -662,6 +689,7 @@ public class initializeTests {
 
 		var config = new Amqp091DestinationConfig();
 		var configMap = new HashMap<String, Object>();
+		configMap.put("kind", "amqp-0.9.1");
 		configMap.put("host", "localhost");
 		configMap.put("exchange", "test-exchange");
 		configMap.put("handshake-timeout-seconds", 5);
@@ -687,6 +715,7 @@ public class initializeTests {
 
 		var config = new Amqp091DestinationConfig();
 		var configMap = new HashMap<String, Object>();
+		configMap.put("kind", "amqp-0.9.1");
 		configMap.put("host", "localhost");
 		configMap.put("exchange", "test-exchange");
 		configMap.put("handshake-timeout-seconds", -1);
@@ -710,6 +739,7 @@ public class initializeTests {
 
 		var config = new Amqp091DestinationConfig();
 		var configMap = new HashMap<String, Object>();
+		configMap.put("kind", "amqp-0.9.1");
 		configMap.put("host", "localhost");
 		configMap.put("exchange", "test-exchange");
 		configMap.put("connection-timeout-seconds", -1);
@@ -733,6 +763,7 @@ public class initializeTests {
 
 		var config = new Amqp091DestinationConfig();
 		var configMap = new HashMap<String, Object>();
+		configMap.put("kind", "amqp-0.9.1");
 		configMap.put("host", "localhost");
 		configMap.put("exchange", "test-exchange");
 		configMap.put("channel-rpc-timeout-seconds", -1);
@@ -760,6 +791,7 @@ public class initializeTests {
 
 		var config = new Amqp091DestinationConfig();
 		var configMap = new HashMap<String, Object>();
+		configMap.put("kind", "amqp-0.9.1");
 		configMap.put("host", "localhost");
 		configMap.put("exchange", "test-exchange");
 		configMap.put("automatic-recovery-enabled", false);
@@ -787,6 +819,7 @@ public class initializeTests {
 
 		var config = new Amqp091DestinationConfig();
 		var configMap = new HashMap<String, Object>();
+		configMap.put("kind", "amqp-0.9.1");
 		configMap.put("host", "localhost");
 		configMap.put("exchange", "test-exchange");
 		configMap.put("requested-heartbeat-seconds", -1);
@@ -810,6 +843,7 @@ public class initializeTests {
 
 		var config = new Amqp091DestinationConfig();
 		var configMap = new HashMap<String, Object>();
+		configMap.put("kind", "amqp-0.9.1");
 		configMap.put("host", "localhost");
 		configMap.put("exchange", "test-exchange");
 		configMap.put("network-recovery-interval-seconds", 0);
@@ -833,6 +867,7 @@ public class initializeTests {
 
 		var config = new Amqp091DestinationConfig();
 		var configMap = new HashMap<String, Object>();
+		configMap.put("kind", "amqp-0.9.1");
 		configMap.put("host", "localhost");
 		configMap.put("exchange", "test-exchange");
 		configMap.put("network-recovery-interval-seconds", -1);
@@ -860,6 +895,7 @@ public class initializeTests {
 
 		var config = new Amqp091DestinationConfig();
 		var configMap = new HashMap<String, Object>();
+		configMap.put("kind", "amqp-0.9.1");
 		configMap.put("host", "localhost");
 		configMap.put("exchange", "test-exchange");
 		configMap.put("pool.min-idle", 10);
@@ -883,6 +919,7 @@ public class initializeTests {
 
 		var config = new Amqp091DestinationConfig();
 		var configMap = new HashMap<String, Object>();
+		configMap.put("kind", "amqp-0.9.1");
 		configMap.put("host", "localhost");
 		configMap.put("exchange", "test-exchange");
 		configMap.put("pool.min-idle", 0);
@@ -906,6 +943,7 @@ public class initializeTests {
 
 		var config = new Amqp091DestinationConfig();
 		var configMap = new HashMap<String, Object>();
+		configMap.put("kind", "amqp-0.9.1");
 		configMap.put("host", "localhost");
 		configMap.put("exchange", "test-exchange");
 		configMap.put("pool.min-idle", 20);
@@ -934,6 +972,7 @@ public class initializeTests {
 
 		var config = new Amqp091DestinationConfig();
 		var configMap = new HashMap<String, Object>();
+		configMap.put("kind", "amqp-0.9.1");
 		configMap.put("host", "rabbitmq.example.com");
 		configMap.put("port", 5673);
 		configMap.put("exchange", "test-exchange");
@@ -968,6 +1007,7 @@ public class initializeTests {
 
 		var config = new Amqp091DestinationConfig();
 		var configMap = new HashMap<String, Object>();
+		configMap.put("kind", "amqp-0.9.1");
 		configMap.put("host", "localhost");
 		configMap.put("exchange", "test-exchange");
 		configMap.put("tls.enabled", "true");

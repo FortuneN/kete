@@ -40,6 +40,7 @@ public abstract class TestBase {
 	}
 
 	protected void configureDestination(MapConfiguration mapConfig) {
+		mapConfig.setProperty(Constants.KIND, "amqp-1");
 		config.setConfiguration(mapConfig);
 		config.initialize();
 		destination.setConfig(config);

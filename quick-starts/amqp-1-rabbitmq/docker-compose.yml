@@ -31,6 +31,7 @@ services:
     command: start-dev
     ports:
       - 8080:8080
+      - 9000:9000
     environment:
       kete.routes.quick-start.destination.kind: amqp-1
       kete.routes.quick-start.destination.host: rabbitmq

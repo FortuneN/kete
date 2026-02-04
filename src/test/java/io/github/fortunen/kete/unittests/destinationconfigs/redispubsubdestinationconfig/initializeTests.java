@@ -3,6 +3,7 @@ package io.github.fortunen.kete.unittests.destinationconfigs.redispubsubdestinat
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.configuration2.MapConfiguration;
@@ -23,6 +24,7 @@ public class initializeTests {
 
 		var config = new RedisPubSubDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "redis-pubsub",
 			"channel", "test-channel"
 		)));
 
@@ -44,6 +46,7 @@ public class initializeTests {
 
 		var config = new RedisPubSubDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "redis-pubsub",
 			"host", "",
 			"channel", "test-channel"
 		)));
@@ -66,6 +69,7 @@ public class initializeTests {
 
 		var config = new RedisPubSubDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "redis-pubsub",
 			"host", "   ",
 			"channel", "test-channel"
 		)));
@@ -92,6 +96,7 @@ public class initializeTests {
 
 		var config = new RedisPubSubDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "redis-pubsub",
 			"host", "localhost"
 		)));
 
@@ -113,6 +118,7 @@ public class initializeTests {
 
 		var config = new RedisPubSubDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "redis-pubsub",
 			"host", "localhost",
 			"channel", ""
 		)));
@@ -135,6 +141,7 @@ public class initializeTests {
 
 		var config = new RedisPubSubDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "redis-pubsub",
 			"host", "localhost",
 			"channel", "   "
 		)));
@@ -161,6 +168,7 @@ public class initializeTests {
 
 		var config = new RedisPubSubDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "redis-pubsub",
 			"host", "localhost",
 			"channel", "test-channel"
 		)));
@@ -181,6 +189,7 @@ public class initializeTests {
 
 		var config = new RedisPubSubDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "redis-pubsub",
 			"host", "localhost",
 			"channel", "test-channel",
 			"tls.enabled", "true"
@@ -202,6 +211,7 @@ public class initializeTests {
 
 		var config = new RedisPubSubDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "redis-pubsub",
 			"host", "localhost",
 			"channel", "test-channel",
 			"port", "16379"
@@ -223,6 +233,7 @@ public class initializeTests {
 
 		var config = new RedisPubSubDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "redis-pubsub",
 			"host", "localhost",
 			"channel", "test-channel",
 			"port", "-1"
@@ -246,6 +257,7 @@ public class initializeTests {
 
 		var config = new RedisPubSubDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "redis-pubsub",
 			"host", "localhost",
 			"channel", "test-channel",
 			"port", "65536"
@@ -273,6 +285,7 @@ public class initializeTests {
 
 		var config = new RedisPubSubDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "redis-pubsub",
 			"host", "localhost",
 			"channel", "test-channel"
 		)));
@@ -293,6 +306,7 @@ public class initializeTests {
 
 		var config = new RedisPubSubDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "redis-pubsub",
 			"host", "localhost",
 			"channel", "test-channel",
 			"database", "5"
@@ -314,6 +328,7 @@ public class initializeTests {
 
 		var config = new RedisPubSubDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "redis-pubsub",
 			"host", "localhost",
 			"channel", "test-channel",
 			"database", "-1"
@@ -341,6 +356,7 @@ public class initializeTests {
 
 		var config = new RedisPubSubDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "redis-pubsub",
 			"host", "localhost",
 			"channel", "test-channel"
 		)));
@@ -361,6 +377,7 @@ public class initializeTests {
 
 		var config = new RedisPubSubDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "redis-pubsub",
 			"host", "localhost",
 			"channel", "test-channel",
 			"username", "redis-user"
@@ -386,6 +403,7 @@ public class initializeTests {
 
 		var config = new RedisPubSubDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "redis-pubsub",
 			"host", "localhost",
 			"channel", "test-channel"
 		)));
@@ -406,6 +424,7 @@ public class initializeTests {
 
 		var config = new RedisPubSubDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "redis-pubsub",
 			"host", "localhost",
 			"channel", "test-channel",
 			"password", "secret123"
@@ -431,6 +450,7 @@ public class initializeTests {
 
 		var config = new RedisPubSubDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "redis-pubsub",
 			"host", "localhost",
 			"channel", "test-channel"
 		)));
@@ -451,6 +471,7 @@ public class initializeTests {
 
 		var config = new RedisPubSubDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "redis-pubsub",
 			"host", "localhost",
 			"channel", "test-channel",
 			"client-name", "my-app"
@@ -476,6 +497,7 @@ public class initializeTests {
 
 		var config = new RedisPubSubDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "redis-pubsub",
 			"host", "localhost",
 			"channel", "test-channel"
 		)));
@@ -496,6 +518,7 @@ public class initializeTests {
 
 		var config = new RedisPubSubDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "redis-pubsub",
 			"host", "localhost",
 			"channel", "test-channel",
 			"connection-timeout-seconds", "30"
@@ -517,6 +540,7 @@ public class initializeTests {
 
 		var config = new RedisPubSubDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "redis-pubsub",
 			"host", "localhost",
 			"channel", "test-channel",
 			"connection-timeout-seconds", "-1"
@@ -544,6 +568,7 @@ public class initializeTests {
 
 		var config = new RedisPubSubDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "redis-pubsub",
 			"host", "localhost",
 			"channel", "test-channel"
 		)));
@@ -564,6 +589,7 @@ public class initializeTests {
 
 		var config = new RedisPubSubDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "redis-pubsub",
 			"host", "localhost",
 			"channel", "test-channel",
 			"command-timeout-seconds", "120"
@@ -585,6 +611,7 @@ public class initializeTests {
 
 		var config = new RedisPubSubDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "redis-pubsub",
 			"host", "localhost",
 			"channel", "test-channel",
 			"command-timeout-seconds", "-1"
@@ -612,6 +639,7 @@ public class initializeTests {
 
 		var config = new RedisPubSubDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "redis-pubsub",
 			"host", "localhost",
 			"channel", "test-channel"
 		)));
@@ -635,6 +663,7 @@ public class initializeTests {
 
 		var config = new RedisPubSubDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "redis-pubsub",
 			"host", "localhost",
 			"channel", "test-channel",
 			"username", "redis-user",
@@ -659,6 +688,7 @@ public class initializeTests {
 
 		var config = new RedisPubSubDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "redis-pubsub",
 			"host", "localhost",
 			"channel", "test-channel",
 			"password", "secret123"
@@ -681,6 +711,7 @@ public class initializeTests {
 
 		var config = new RedisPubSubDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "redis-pubsub",
 			"host", "localhost",
 			"channel", "test-channel",
 			"tls.enabled", "true"
@@ -707,6 +738,7 @@ public class initializeTests {
 
 		var config = new RedisPubSubDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "redis-pubsub",
 			"host", "localhost",
 			"channel", "test-channel"
 		)));
@@ -730,18 +762,20 @@ public class initializeTests {
 
 		// arrange
 
+		var configMap = new HashMap<String, Object>();
+		configMap.put("kind", "redis-pubsub");
+		configMap.put("host", "redis.example.com");
+		configMap.put("channel", "events");
+		configMap.put("port", "16379");
+		configMap.put("database", "3");
+		configMap.put("username", "user");
+		configMap.put("password", "pass");
+		configMap.put("client-name", "my-client");
+		configMap.put("connection-timeout-seconds", "15");
+		configMap.put("command-timeout-seconds", "90");
+
 		var config = new RedisPubSubDestinationConfig();
-		config.setConfiguration(new MapConfiguration(Map.of(
-			"host", "redis.example.com",
-			"channel", "events",
-			"port", "16379",
-			"database", "3",
-			"username", "user",
-			"password", "pass",
-			"client-name", "my-client",
-			"connection-timeout-seconds", "15",
-			"command-timeout-seconds", "90"
-		)));
+		config.setConfiguration(new MapConfiguration(configMap));
 
 		// act
 

@@ -44,6 +44,7 @@ public class TestBase {
 	}
 
 	protected void configureDestination(MapConfiguration mapConfig) {
+		mapConfig.setProperty(Constants.KIND, "nats-jetstream");
 		config.setConfiguration(mapConfig);
 		config.initialize();
 		destination.setConfig(config);

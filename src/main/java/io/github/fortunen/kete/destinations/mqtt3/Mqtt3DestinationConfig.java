@@ -39,7 +39,7 @@ public class Mqtt3DestinationConfig extends DestinationConfig {
 	public static final int DEFAULT_QOS = 1;
 	public static final String RETAINED = "retained";
 
-	public static final int DEFAULT_MAX_INFLIGHT = 65535;
+	public static final int DEFAULT_MAX_INFLIGHT = 2048;
 	public static final String MAX_INFLIGHT = "max-inflight";
 	public static final int DEFAULT_CONNECTION_TIMEOUT_SECONDS = 10;
 	public static final int DEFAULT_KEEP_ALIVE_INTERVAL_SECONDS = 60;

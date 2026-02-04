@@ -1,7 +1,7 @@
 services:
 
   activemq:
-    image: apache/activemq-classic:6.1.6
+    image: ghcr.io/fortunen/kete/quick-start-activemq-classic
     ports:
       - 61613:61613
       - 8161:8161
@@ -19,6 +19,7 @@ services:
     command: start-dev
     ports:
       - 8080:8080
+      - 9000:9000
     environment:
       kete.routes.quick-start.destination.kind: stomp
       kete.routes.quick-start.destination.host: activemq

@@ -642,11 +642,6 @@
 									<pattern>org.bouncycastle</pattern>
 									<shadedPattern>io.github.fortunen.kete.shaded.bouncycastle</shadedPattern>
 								</relocation>
-								<!-- ActiveMQ STOMP -->
-								<relocation>
-									<pattern>org.apache.activemq</pattern>
-									<shadedPattern>io.github.fortunen.kete.shaded.activemq</shadedPattern>
-								</relocation>
 								<!-- Transitive dependencies -->
 								<!-- Woodstox (jackson-dataformat-xml transitive) -->
 								<relocation>

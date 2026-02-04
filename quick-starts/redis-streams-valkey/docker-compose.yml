@@ -1,7 +1,7 @@
 services:
 
   valkey:
-    image: valkey/valkey:8-alpine
+    image: ghcr.io/fortunen/kete/quick-start-valkey
     ports:
       - 6379:6379
     healthcheck:
@@ -15,6 +15,7 @@ services:
     command: start-dev
     ports:
       - 8080:8080
+      - 9000:9000
     environment:
       kete.routes.quick-start.destination.kind: redis-streams
       kete.routes.quick-start.destination.host: valkey

@@ -23,6 +23,7 @@ public class initializeTests {
 
 		var config = new PulsarDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "pulsar",
 			"topic", "persistent://public/default/events"
 		)));
 
@@ -44,6 +45,7 @@ public class initializeTests {
 
 		var config = new PulsarDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "pulsar",
 			"service-url", "",
 			"topic", "persistent://public/default/events"
 		)));
@@ -66,6 +68,7 @@ public class initializeTests {
 
 		var config = new PulsarDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "pulsar",
 			"service-url", "   ",
 			"topic", "persistent://public/default/events"
 		)));
@@ -92,6 +95,7 @@ public class initializeTests {
 
 		var config = new PulsarDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "pulsar",
 			"service-url", "pulsar://localhost:6650"
 		)));
 
@@ -113,6 +117,7 @@ public class initializeTests {
 
 		var config = new PulsarDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "pulsar",
 			"service-url", "pulsar://localhost:6650",
 			"topic", ""
 		)));
@@ -135,6 +140,7 @@ public class initializeTests {
 
 		var config = new PulsarDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "pulsar",
 			"service-url", "pulsar://localhost:6650",
 			"topic", "   "
 		)));
@@ -161,6 +167,7 @@ public class initializeTests {
 
 		var config = new PulsarDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "pulsar",
 			"service-url", "pulsar://localhost:6650",
 			"topic", "persistent://public/default/events"
 		)));
@@ -189,6 +196,7 @@ public class initializeTests {
 
 		var config = new PulsarDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "pulsar",
 			"service-url", "pulsar://localhost:6650",
 			"topic", "persistent://public/default/events",
 			"send-timeout-seconds", 60
@@ -210,6 +218,7 @@ public class initializeTests {
 
 		var config = new PulsarDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "pulsar",
 			"service-url", "pulsar://localhost:6650",
 			"topic", "persistent://public/default/events",
 			"max-pending-messages", 5000
@@ -231,6 +240,7 @@ public class initializeTests {
 
 		var config = new PulsarDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "pulsar",
 			"service-url", "pulsar://localhost:6650",
 			"topic", "persistent://public/default/events",
 			"batching-max-messages", 2000
@@ -252,6 +262,7 @@ public class initializeTests {
 
 		var config = new PulsarDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "pulsar",
 			"service-url", "pulsar://localhost:6650",
 			"topic", "persistent://public/default/events",
 			"block-if-queue-full", false
@@ -273,6 +284,7 @@ public class initializeTests {
 
 		var config = new PulsarDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "pulsar",
 			"service-url", "pulsar://localhost:6650",
 			"topic", "persistent://public/default/events",
 			"compression-type", "ZSTD"
@@ -294,6 +306,7 @@ public class initializeTests {
 
 		var config = new PulsarDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "pulsar",
 			"service-url", "pulsar://localhost:6650",
 			"topic", "persistent://public/default/events",
 			"producer-name", "keycloak-producer"
@@ -319,6 +332,7 @@ public class initializeTests {
 
 		var config = new PulsarDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "pulsar",
 			"service-url", "pulsar://localhost:6650",
 			"topic", "persistent://public/default/events",
 			"compression-type", "INVALID"
@@ -346,6 +360,7 @@ public class initializeTests {
 
 		var config = new PulsarDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "pulsar",
 			"service-url", "pulsar://localhost:6650",
 			"topic", "persistent://public/default/events",
 			"batching-max-publish-delay-seconds", 0
@@ -369,6 +384,7 @@ public class initializeTests {
 
 		var config = new PulsarDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "pulsar",
 			"service-url", "pulsar://localhost:6650",
 			"topic", "persistent://public/default/events",
 			"batching-max-publish-delay-seconds", -1
@@ -396,6 +412,7 @@ public class initializeTests {
 
 		var config = new PulsarDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "pulsar",
 			"service-url", "pulsar://localhost:6650",
 			"topic", "persistent://public/default/events"
 		)));
@@ -416,6 +433,7 @@ public class initializeTests {
 
 		var config = new PulsarDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "pulsar",
 			"service-url", "pulsar://localhost:6650",
 			"topic", "persistent://public/default/events"
 		)));
@@ -436,6 +454,7 @@ public class initializeTests {
 
 		var config = new PulsarDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "pulsar",
 			"service-url", "pulsar://localhost:6650",
 			"topic", "persistent://public/default/events",
 			"username", "pulsaruser",
@@ -459,6 +478,7 @@ public class initializeTests {
 
 		var config = new PulsarDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "pulsar",
 			"service-url", "pulsar://localhost:6650",
 			"topic", "persistent://public/default/events",
 			"username", "  pulsaruser  "
@@ -480,6 +500,7 @@ public class initializeTests {
 
 		var config = new PulsarDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "pulsar",
 			"service-url", "pulsar://localhost:6650",
 			"topic", "persistent://public/default/events",
 			"password", "  pulsarpass  "
@@ -505,6 +526,7 @@ public class initializeTests {
 
 		var config = new PulsarDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "pulsar",
 			"service-url", "pulsar://localhost:6650",
 			"topic", "persistent://public/default/events"
 		)));
@@ -525,6 +547,7 @@ public class initializeTests {
 
 		var config = new PulsarDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "pulsar",
 			"service-url", "pulsar://localhost:6650",
 			"topic", "persistent://public/default/events",
 			"token", "eyJhbGciOiJIUzI1NiJ9.test"
@@ -546,6 +569,7 @@ public class initializeTests {
 
 		var config = new PulsarDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "pulsar",
 			"service-url", "pulsar://localhost:6650",
 			"topic", "persistent://public/default/events",
 			"token", "  eyJhbGciOiJIUzI1NiJ9.test  "

@@ -25,6 +25,7 @@ public class initializeTests {
 
 		var config = new Mqtt5DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "mqtt-5",
 			"topic", "test-topic"
 		)));
 
@@ -46,6 +47,7 @@ public class initializeTests {
 
 		var config = new Mqtt5DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "mqtt-5",
 			"host", "",
 			"topic", "test-topic"
 		)));
@@ -68,6 +70,7 @@ public class initializeTests {
 
 		var config = new Mqtt5DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "mqtt-5",
 			"host", "   ",
 			"topic", "test-topic"
 		)));
@@ -94,6 +97,7 @@ public class initializeTests {
 
 		var config = new Mqtt5DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "mqtt-5",
 			"host", "localhost"
 		)));
 
@@ -115,6 +119,7 @@ public class initializeTests {
 
 		var config = new Mqtt5DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "mqtt-5",
 			"host", "localhost",
 			"topic", ""
 		)));
@@ -137,6 +142,7 @@ public class initializeTests {
 
 		var config = new Mqtt5DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "mqtt-5",
 			"host", "localhost",
 			"topic", "   "
 		)));
@@ -163,6 +169,7 @@ public class initializeTests {
 
 		var config = new Mqtt5DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "mqtt-5",
 			"host", "localhost",
 			"topic", "test-topic"
 		)));
@@ -183,6 +190,7 @@ public class initializeTests {
 
 		var config = new Mqtt5DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "mqtt-5",
 			"host", "localhost",
 			"topic", "test-topic",
 			"transport-type", "websocket"
@@ -204,6 +212,7 @@ public class initializeTests {
 
 		var config = new Mqtt5DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "mqtt-5",
 			"host", "localhost",
 			"topic", "test-topic",
 			"transport-type", "invalid"
@@ -227,6 +236,7 @@ public class initializeTests {
 
 		var config = new Mqtt5DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "mqtt-5",
 			"host", "localhost",
 			"topic", "test-topic",
 			"transport-type", "WEBSOCKET"
@@ -252,6 +262,7 @@ public class initializeTests {
 
 		var config = new Mqtt5DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "mqtt-5",
 			"host", "localhost",
 			"topic", "test-topic"
 		)));
@@ -272,6 +283,7 @@ public class initializeTests {
 
 		var config = new Mqtt5DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "mqtt-5",
 			"host", "localhost",
 			"topic", "test-topic",
 			"tls.enabled", "true"
@@ -293,6 +305,7 @@ public class initializeTests {
 
 		var config = new Mqtt5DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "mqtt-5",
 			"host", "localhost",
 			"topic", "test-topic",
 			"transport-type", "websocket"
@@ -314,6 +327,7 @@ public class initializeTests {
 
 		var config = new Mqtt5DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "mqtt-5",
 			"host", "localhost",
 			"topic", "test-topic",
 			"transport-type", "websocket",
@@ -336,6 +350,7 @@ public class initializeTests {
 
 		var config = new Mqtt5DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "mqtt-5",
 			"host", "localhost",
 			"topic", "test-topic",
 			"port", "11883"
@@ -361,6 +376,7 @@ public class initializeTests {
 
 		var config = new Mqtt5DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "mqtt-5",
 			"host", "localhost",
 			"topic", "test-topic",
 			"port", "0"
@@ -384,6 +400,7 @@ public class initializeTests {
 
 		var config = new Mqtt5DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "mqtt-5",
 			"host", "localhost",
 			"topic", "test-topic",
 			"port", "-1"
@@ -407,6 +424,7 @@ public class initializeTests {
 
 		var config = new Mqtt5DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "mqtt-5",
 			"host", "localhost",
 			"topic", "test-topic",
 			"port", "65536"
@@ -430,6 +448,7 @@ public class initializeTests {
 
 		var config = new Mqtt5DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "mqtt-5",
 			"host", "localhost",
 			"topic", "test-topic",
 			"port", "1"
@@ -451,6 +470,7 @@ public class initializeTests {
 
 		var config = new Mqtt5DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "mqtt-5",
 			"host", "localhost",
 			"topic", "test-topic",
 			"port", "65535"
@@ -476,6 +496,7 @@ public class initializeTests {
 
 		var config = new Mqtt5DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "mqtt-5",
 			"host", "localhost",
 			"topic", "test-topic"
 		)));
@@ -497,6 +518,7 @@ public class initializeTests {
 
 		var config = new Mqtt5DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "mqtt-5",
 			"host", "localhost",
 			"topic", "test-topic",
 			"tls.enabled", "true"
@@ -519,6 +541,7 @@ public class initializeTests {
 
 		var config = new Mqtt5DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "mqtt-5",
 			"host", "localhost",
 			"topic", "test-topic",
 			"transport-type", "websocket"
@@ -541,6 +564,7 @@ public class initializeTests {
 
 		var config = new Mqtt5DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "mqtt-5",
 			"host", "localhost",
 			"topic", "test-topic",
 			"transport-type", "websocket",
@@ -568,6 +592,7 @@ public class initializeTests {
 
 		var config = new Mqtt5DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "mqtt-5",
 			"host", "localhost",
 			"topic", "test-topic"
 		)));
@@ -588,6 +613,7 @@ public class initializeTests {
 
 		var config = new Mqtt5DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "mqtt-5",
 			"host", "localhost",
 			"topic", "test-topic",
 			"qos", "0"
@@ -609,6 +635,7 @@ public class initializeTests {
 
 		var config = new Mqtt5DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "mqtt-5",
 			"host", "localhost",
 			"topic", "test-topic",
 			"qos", "2"
@@ -630,6 +657,7 @@ public class initializeTests {
 
 		var config = new Mqtt5DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "mqtt-5",
 			"host", "localhost",
 			"topic", "test-topic",
 			"qos", "-1"
@@ -653,6 +681,7 @@ public class initializeTests {
 
 		var config = new Mqtt5DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "mqtt-5",
 			"host", "localhost",
 			"topic", "test-topic",
 			"qos", "3"
@@ -680,6 +709,7 @@ public class initializeTests {
 
 		var config = new Mqtt5DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "mqtt-5",
 			"host", "localhost",
 			"topic", "test-topic"
 		)));
@@ -700,6 +730,7 @@ public class initializeTests {
 
 		var config = new Mqtt5DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "mqtt-5",
 			"host", "localhost",
 			"topic", "test-topic",
 			"retained", "true"
@@ -725,6 +756,7 @@ public class initializeTests {
 
 		var config = new Mqtt5DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "mqtt-5",
 			"host", "localhost",
 			"topic", "test-topic"
 		)));
@@ -745,6 +777,7 @@ public class initializeTests {
 
 		var config = new Mqtt5DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "mqtt-5",
 			"host", "localhost",
 			"topic", "test-topic",
 			"client-id-prefix", "kete-"
@@ -770,6 +803,7 @@ public class initializeTests {
 
 		var config = new Mqtt5DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "mqtt-5",
 			"host", "localhost",
 			"topic", "test-topic"
 		)));
@@ -791,6 +825,7 @@ public class initializeTests {
 
 		var config = new Mqtt5DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "mqtt-5",
 			"host", "localhost",
 			"topic", "test-topic",
 			"clean-session", "false"
@@ -816,6 +851,7 @@ public class initializeTests {
 
 		var config = new Mqtt5DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "mqtt-5",
 			"host", "localhost",
 			"topic", "test-topic"
 		)));
@@ -837,6 +873,7 @@ public class initializeTests {
 
 		var config = new Mqtt5DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "mqtt-5",
 			"host", "localhost",
 			"topic", "test-topic",
 			"connection-timeout-seconds", "30"
@@ -862,6 +899,7 @@ public class initializeTests {
 
 		var config = new Mqtt5DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "mqtt-5",
 			"host", "localhost",
 			"topic", "test-topic"
 		)));
@@ -883,6 +921,7 @@ public class initializeTests {
 
 		var config = new Mqtt5DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "mqtt-5",
 			"host", "localhost",
 			"topic", "test-topic",
 			"keep-alive-interval-seconds", "120"
@@ -908,6 +947,7 @@ public class initializeTests {
 
 		var config = new Mqtt5DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "mqtt-5",
 			"host", "localhost",
 			"topic", "test-topic"
 		)));
@@ -928,6 +968,7 @@ public class initializeTests {
 
 		var config = new Mqtt5DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "mqtt-5",
 			"host", "localhost",
 			"topic", "test-topic"
 		)));
@@ -948,6 +989,7 @@ public class initializeTests {
 
 		var config = new Mqtt5DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "mqtt-5",
 			"host", "localhost",
 			"topic", "test-topic",
 			"username", "mqtt5user",
@@ -971,6 +1013,7 @@ public class initializeTests {
 
 		var config = new Mqtt5DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "mqtt-5",
 			"host", "localhost",
 			"topic", "test-topic",
 			"username", "mqtt5user"
@@ -992,6 +1035,7 @@ public class initializeTests {
 
 		var config = new Mqtt5DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "mqtt-5",
 			"host", "localhost",
 			"topic", "test-topic",
 			"password", "mqtt5pass"
@@ -1013,6 +1057,7 @@ public class initializeTests {
 
 		var config = new Mqtt5DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "mqtt-5",
 			"host", "localhost",
 			"topic", "test-topic",
 			"username", "  mqtt5user  "
@@ -1034,6 +1079,7 @@ public class initializeTests {
 
 		var config = new Mqtt5DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "mqtt-5",
 			"host", "localhost",
 			"topic", "test-topic",
 			"password", "  mqtt5pass  "
@@ -1059,6 +1105,7 @@ public class initializeTests {
 
 		var config = new Mqtt5DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "mqtt-5",
 			"host", "localhost",
 			"topic", "test-topic"
 		)));
@@ -1079,6 +1126,7 @@ public class initializeTests {
 
 		var config = new Mqtt5DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "mqtt-5",
 			"host", "localhost",
 			"topic", "test-topic"
 		)));
@@ -1103,6 +1151,7 @@ public class initializeTests {
 
 		var config = new Mqtt5DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "mqtt-5",
 			"host", "localhost",
 			"topic", "test-topic"
 		)));
@@ -1123,6 +1172,7 @@ public class initializeTests {
 
 		var config = new Mqtt5DestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "mqtt-5",
 			"host", "localhost",
 			"topic", "test-topic",
 			"tls.enabled", "true"
@@ -1147,6 +1197,7 @@ public class initializeTests {
 		// arrange
 
 		var configMap = new HashMap<String, Object>();
+		configMap.put("kind", "mqtt-5");
 		configMap.put("host", "mqtt5.example.com");
 		configMap.put("port", "8885");
 		configMap.put("topic", "keycloak/events/v5");

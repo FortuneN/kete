@@ -1,7 +1,7 @@
 services:
 
   pulsar:
-    image: apachepulsar/pulsar:4.0.2
+    image: ghcr.io/fortunen/kete/quick-start-pulsar
     ports:
       - 6650:6650
       - 8081:8080
@@ -18,6 +18,7 @@ services:
     command: start-dev
     ports:
       - 8080:8080
+      - 9000:9000
     environment:
       kete.routes.quick-start.destination.kind: pulsar
       kete.routes.quick-start.destination.service-url: pulsar://pulsar:6650

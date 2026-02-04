@@ -142,8 +142,8 @@ public class ProviderFactory implements EventListenerProviderFactory, ProviderEv
 					log.info("{} Route '{}' initialized: destination={}, serializer={}, realmMatchers={}, eventMatchers={}",
 						Constants.ID,
 						route.getName(),
-						route.getDestinationConfig().getClass().getSimpleName(),
-						route.getSerializer().getClass().getSimpleName(),
+						route.getSerializerKind(),
+						route.getDestinationKind(),
 						route.getRealmMatchers().length,
 						route.getEventMatchers().length);
 

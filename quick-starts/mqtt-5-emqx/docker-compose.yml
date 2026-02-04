@@ -1,7 +1,7 @@
 services:
 
   emqx:
-    image: emqx/emqx:latest
+    image: ghcr.io/fortunen/kete/quick-start-emqx
     ports:
       - 1883:1883
       - 18083:18083
@@ -15,11 +15,22 @@ services:
       timeout: 5s
       retries: 30
 
+
+  subscriber:
+    image: ghcr.io/fortunen/kete/quick-start-mqtt-subscriber
+    environment:
+      MQTT_BROKER_HOST: emqx
+      MQTT_BROKER_PORT: 1883
+      MQTT_TOPIC: keycloak-events
+    depends_on:
+      emqx:
+        condition: service_healthy
   keycloak:
     image: ghcr.io/fortunen/kete/quick-start-keycloak
     command: start-dev
     ports:
       - 8080:8080
+      - 9000:9000
     environment:
       kete.routes.quick-start.destination.kind: mqtt-5
       kete.routes.quick-start.destination.host: emqx
@@ -28,3 +39,6 @@ services:
     depends_on:
       emqx:
         condition: service_healthy
+      subscriber:
+        condition: service_started
+

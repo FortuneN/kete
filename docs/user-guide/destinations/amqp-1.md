@@ -15,7 +15,7 @@ Stream Keycloak events to AMQP 1 brokers.
 |--------|-------|
 | **Apache ActiveMQ Artemis** | Primary target, full JMS 2.0 support |
 | **RabbitMQ 4.0+** | Native AMQP 1.0 support (no plugin required) |
-| **Azure Service Bus** | Auto-enables TLS when hostname contains `servicebus` |
+| **Azure Service Bus** | Requires TLS (`tls.enabled=true`, port 5671) |
 | **Azure Event Hubs** | Via AMQP 1.0 |
 | **Apache Qpid** | Full AMQP 1.0 support |
 | **Amazon MQ for ActiveMQ** | Classic and Artemis flavors |
@@ -43,8 +43,8 @@ This destination uses AMQP 1.0 (OASIS standard). For RabbitMQ 3.x or LavinMQ, se
 === "Azure Service Bus"
 
     ```bash
-    # TLS auto-enabled when hostname contains 'servicebus'
     kete.routes.asb.destination.kind=amqp-1
+    kete.routes.asb.destination.tls.enabled=true
     kete.routes.asb.destination.host=your-namespace.servicebus.windows.net
     kete.routes.asb.destination.port=5671
     kete.routes.asb.destination.username=your-policy-name

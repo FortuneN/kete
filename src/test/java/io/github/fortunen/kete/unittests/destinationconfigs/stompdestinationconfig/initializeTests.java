@@ -23,6 +23,7 @@ public class initializeTests {
 
 		var config = new StompDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "stomp",
 			"destination", "/queue/events"
 		)));
 
@@ -44,6 +45,7 @@ public class initializeTests {
 
 		var config = new StompDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "stomp",
 			"host", "",
 			"destination", "/queue/events"
 		)));
@@ -66,6 +68,7 @@ public class initializeTests {
 
 		var config = new StompDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "stomp",
 			"host", "   ",
 			"destination", "/queue/events"
 		)));
@@ -92,6 +95,7 @@ public class initializeTests {
 
 		var config = new StompDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "stomp",
 			"host", "localhost"
 		)));
 
@@ -113,6 +117,7 @@ public class initializeTests {
 
 		var config = new StompDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "stomp",
 			"host", "localhost",
 			"destination", ""
 		)));
@@ -135,6 +140,7 @@ public class initializeTests {
 
 		var config = new StompDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "stomp",
 			"host", "localhost",
 			"destination", "   "
 		)));
@@ -161,6 +167,7 @@ public class initializeTests {
 
 		var config = new StompDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "stomp",
 			"host", "localhost",
 			"destination", "/queue/events"
 		)));
@@ -186,6 +193,7 @@ public class initializeTests {
 
 		var config = new StompDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "stomp",
 			"host", "localhost",
 			"destination", "/queue/events"
 		)));
@@ -206,6 +214,7 @@ public class initializeTests {
 
 		var config = new StompDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "stomp",
 			"host", "localhost",
 			"port", "61614",
 			"destination", "/queue/events"
@@ -227,6 +236,7 @@ public class initializeTests {
 
 		var config = new StompDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "stomp",
 			"host", "localhost",
 			"port", "65536",
 			"destination", "/queue/events"
@@ -250,6 +260,7 @@ public class initializeTests {
 
 		var config = new StompDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "stomp",
 			"host", "localhost",
 			"port", "0",
 			"destination", "/queue/events"
@@ -277,6 +288,7 @@ public class initializeTests {
 
 		var config = new StompDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "stomp",
 			"host", "localhost",
 			"destination", "/queue/events"
 		)));
@@ -297,6 +309,7 @@ public class initializeTests {
 
 		var config = new StompDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "stomp",
 			"host", "localhost",
 			"destination", "/queue/events",
 			"virtual-host", "/vhost1"
@@ -322,6 +335,7 @@ public class initializeTests {
 
 		var config = new StompDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "stomp",
 			"host", "localhost",
 			"destination", "/queue/events"
 		)));
@@ -342,6 +356,7 @@ public class initializeTests {
 
 		var config = new StompDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "stomp",
 			"host", "localhost",
 			"destination", "/queue/events"
 		)));
@@ -362,6 +377,7 @@ public class initializeTests {
 
 		var config = new StompDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "stomp",
 			"host", "localhost",
 			"destination", "/queue/events",
 			"username", "admin"
@@ -383,6 +399,7 @@ public class initializeTests {
 
 		var config = new StompDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "stomp",
 			"host", "localhost",
 			"destination", "/queue/events",
 			"password", "secret"
@@ -402,14 +419,37 @@ public class initializeTests {
 	// =========================================================================
 
 	@Test
-	public void shouldDisableReceiptByDefault() {
+	public void shouldEnableReceiptByDefault() {
 
 		// arrange
 
 		var config = new StompDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "stomp",
 			"host", "localhost",
 			"destination", "/queue/events"
+		)));
+
+		// act
+
+		config.initialize();
+
+		// assert
+
+		assertThat(config.isReceiptEnabled()).isTrue();
+	}
+
+	@Test
+	public void shouldDisableReceipt() {
+
+		// arrange
+
+		var config = new StompDestinationConfig();
+		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "stomp",
+			"host", "localhost",
+			"destination", "/queue/events",
+			"receipt-enabled", "false"
 		)));
 
 		// act
@@ -428,6 +468,7 @@ public class initializeTests {
 
 		var config = new StompDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "stomp",
 			"host", "localhost",
 			"destination", "/queue/events",
 			"receipt-enabled", "true"
@@ -453,6 +494,7 @@ public class initializeTests {
 
 		var config = new StompDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "stomp",
 			"host", "localhost",
 			"destination", "/queue/events"
 		)));
@@ -473,6 +515,7 @@ public class initializeTests {
 
 		var config = new StompDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "stomp",
 			"host", "localhost",
 			"destination", "/queue/events"
 		)));
@@ -493,6 +536,7 @@ public class initializeTests {
 
 		var config = new StompDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "stomp",
 			"host", "localhost",
 			"destination", "/queue/events",
 			"heart-beat-outgoing-seconds", "0",
@@ -516,6 +560,7 @@ public class initializeTests {
 
 		var config = new StompDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "stomp",
 			"host", "localhost",
 			"destination", "/queue/events",
 			"heart-beat-outgoing-seconds", "10"
@@ -537,6 +582,7 @@ public class initializeTests {
 
 		var config = new StompDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "stomp",
 			"host", "localhost",
 			"destination", "/queue/events",
 			"heart-beat-incoming-seconds", "10"
@@ -558,6 +604,7 @@ public class initializeTests {
 
 		var config = new StompDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "stomp",
 			"host", "localhost",
 			"destination", "/queue/events",
 			"heart-beat-outgoing-seconds", "-1"
@@ -581,6 +628,7 @@ public class initializeTests {
 
 		var config = new StompDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "stomp",
 			"host", "localhost",
 			"destination", "/queue/events",
 			"heart-beat-incoming-seconds", "-1"
@@ -608,6 +656,7 @@ public class initializeTests {
 
 		var config = new StompDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "stomp",
 			"host", "localhost",
 			"destination", "/queue/events"
 		)));
@@ -628,6 +677,7 @@ public class initializeTests {
 
 		var config = new StompDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "stomp",
 			"host", "localhost",
 			"destination", "/queue/events",
 		"read-timeout-seconds", "30"
@@ -649,6 +699,7 @@ public class initializeTests {
 
 		var config = new StompDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "stomp",
 			"host", "localhost",
 			"destination", "/queue/events",
 			"read-timeout-seconds", "0"
@@ -672,6 +723,7 @@ public class initializeTests {
 
 		var config = new StompDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "stomp",
 			"host", "localhost",
 			"destination", "/queue/events",
 			"read-timeout-seconds", "-1"
@@ -699,6 +751,7 @@ public class initializeTests {
 
 		var config = new StompDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "stomp",
 			"host", "localhost",
 			"destination", "/queue/events"
 		)));
@@ -719,6 +772,7 @@ public class initializeTests {
 
 		var config = new StompDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "stomp",
 			"host", "localhost",
 			"destination", "/queue/events",
 			"tls.enabled", "true"
