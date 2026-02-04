@@ -57,6 +57,30 @@ Stream Keycloak events to WebSocket servers.
     kete.routes.ws-auth.destination.headers.X-API-Key=my-api-key
     ```
 
+=== "With OAuth 2.0 (External)"
+
+    ```bash
+    kete.routes.oauth-ws.realm-matchers.realm=list:master
+    kete.routes.oauth-ws.destination.kind=websocket
+    kete.routes.oauth-ws.destination.url=wss://api.example.com/events
+    kete.routes.oauth-ws.destination.oauth.enabled=true
+    kete.routes.oauth-ws.destination.oauth.token-url=https://auth.example.com/oauth/token
+    kete.routes.oauth-ws.destination.oauth.client-id=keycloak-client
+    kete.routes.oauth-ws.destination.oauth.client-secret=secret
+    kete.routes.oauth-ws.destination.oauth.scope=events:write
+    ```
+
+=== "With OAuth 2.0 (Internal)"
+
+    ```bash
+    # Uses Keycloak itself as OAuth server - auto-creates client!
+    kete.routes.internal-oauth-ws.realm-matchers.realm=list:master
+    kete.routes.internal-oauth-ws.destination.kind=websocket
+    kete.routes.internal-oauth-ws.destination.url=wss://api.example.com/events
+    kete.routes.internal-oauth-ws.destination.oauth.enabled=true
+    kete.routes.internal-oauth-ws.destination.oauth.mode=internal
+    ```
+
 === "Binary Mode"
 
     ```bash
@@ -71,6 +95,7 @@ Stream Keycloak events to WebSocket servers.
 
 - ✅ Text and binary message modes
 - ✅ TLS/SSL support with mutual TLS (mTLS)
+- ✅ OAuth 2.0 Client Credentials with token caching
 - ✅ Custom headers for authentication
 - ✅ Automatic reconnection on connection loss
 - ✅ Configurable connection timeout
@@ -138,6 +163,53 @@ kete.routes.ws.destination.headers.Authorization=Bearer my-token
 kete.routes.ws.destination.headers.X-Custom-Header=value
 ```
 
+### OAuth 2.0 Properties
+
+The WebSocket destination supports two OAuth modes:
+
+#### External Mode (Default)
+
+Use an external OAuth 2.0 authorization server:
+
+| Property | Required | Default | Description |
+|----------|----------|---------|-------------|
+| `destination.oauth.enabled` | No | `false` | Enable OAuth 2.0 Client Credentials flow |
+| `destination.oauth.mode` | No | `external` | OAuth mode: `external` or `internal` |
+| `destination.oauth.token-url` | Yes* | - | OAuth token endpoint URL |
+| `destination.oauth.client-id` | Yes* | - | OAuth client ID |
+| `destination.oauth.client-secret` | Yes* | - | OAuth client secret |
+| `destination.oauth.scope` | No | `""` | Requested OAuth scopes (space-separated) |
+
+*Required when `oauth.enabled=true` and `oauth.mode=external`.
+
+#### Internal Mode
+
+Use the current Keycloak instance as the OAuth server. This mode **automatically registers a service account client** in Keycloak during initialization - the simplest setup possible:
+
+| Property | Required | Default | Description |
+|----------|----------|---------|-------------|
+| `destination.oauth.enabled` | Yes | `false` | Enable OAuth 2.0 |
+| `destination.oauth.mode` | Yes | - | Must be `internal` |
+| `destination.oauth.realm` | No | Route realm | Override realm for token URL |
+| `destination.oauth.client-id` | No | `kete-oauth-client` | Override auto-generated client ID |
+| `destination.oauth.client-secret` | No | Auto-generated | Override auto-generated secret |
+| `destination.oauth.scope` | No | `""` | Requested OAuth scopes |
+
+**Internal Mode Example:**
+
+```bash
+# Simplest OAuth setup - just 2 properties!
+kete.routes.ws.destination.oauth.enabled=true
+kete.routes.ws.destination.oauth.mode=internal
+```
+
+This automatically:
+
+1. Creates a confidential client `kete-oauth-client` in the route's realm
+2. Enables service account (client credentials grant)
+3. Generates a secure client secret
+4. Configures the token URL for the realm
+
 ### TLS Properties
 
 See [TLS & mTLS](overview.md#tls-mtls) for full details on TLS options.
@@ -179,6 +251,18 @@ kete.routes.secure-ws.realm-matchers.realm=list:master
 kete.routes.secure-ws.destination.url=wss://api.example.com/events
 kete.routes.secure-ws.destination.headers.Authorization=Bearer eyJhbGc...
 kete.routes.secure-ws.destination.tls.trust-store.path=/certs/ca.pem
+```
+
+### With OAuth 2.0
+
+```bash
+kete.routes.oauth-ws.destination.kind=websocket
+kete.routes.oauth-ws.realm-matchers.realm=list:master
+kete.routes.oauth-ws.destination.url=wss://api.example.com/events
+kete.routes.oauth-ws.destination.oauth.enabled=true
+kete.routes.oauth-ws.destination.oauth.token-url=https://auth.example.com/oauth/token
+kete.routes.oauth-ws.destination.oauth.client-id=keycloak-client
+kete.routes.oauth-ws.destination.oauth.client-secret=secret
 ```
 
 ### Using Individual Properties

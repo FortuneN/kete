@@ -95,6 +95,10 @@ public class WebSocketDestination extends Destination<WebSocketDestinationConfig
 
 		client.clearHeaders();
 
+		if (config.isOauthEnabled()) {
+			client.addHeader("Authorization", config.getOauth().getAccessToken().toAuthorizationHeader());
+		}
+
 		for (var entry : config.getCustomHeadersEntrySet()) {
 			client.addHeader(entry.getKey(), entry.getValue());
 		}

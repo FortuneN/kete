@@ -6,6 +6,7 @@ import java.util.concurrent.TimeUnit;
 import javax.net.SocketFactory;
 
 import io.github.fortunen.kete.DestinationConfig;
+import io.github.fortunen.kete.OAuthMaterial;
 import io.github.fortunen.kete.TlsMaterial;
 import io.github.fortunen.kete.utils.ConfigurationUtils;
 import io.github.fortunen.kete.utils.ValidationUtils;
@@ -34,12 +35,16 @@ public class WebSocketDestinationConfig extends DestinationConfig {
 	public static final int DEFAULT_CONNECTION_LOST_TIMEOUT_SECONDS = 60;
 	public static final String CONNECTION_LOST_TIMEOUT_SECONDS = "connection-lost-timeout-seconds";
 
+	public static final String OAUTH = "oauth";
+
 	private int port;
 	private String url;
 	private String host;
 	private String path;
 	private String scheme;
 	private boolean binaryMode;
+	private OAuthMaterial oauth;
+	private boolean oauthEnabled;
 	private SocketFactory socketFactory;
 	private int connectionTimeoutSeconds;
 	private int connectionLostTimeoutSeconds;
@@ -137,6 +142,12 @@ public class WebSocketDestinationConfig extends DestinationConfig {
 		connectionLostTimeoutSeconds = configuration.getInt(CONNECTION_LOST_TIMEOUT_SECONDS, DEFAULT_CONNECTION_LOST_TIMEOUT_SECONDS);
 
 		ValidationUtils.requireNonNegative(connectionLostTimeoutSeconds, CONNECTION_LOST_TIMEOUT_SECONDS + " must be non-negative");
+
+		// oauth
+
+		oauth = OAuthMaterial.builder().withKeycloakRealm(keycloakRealm).withKeycloakSession(keycloakSession).withConfiguration(ConfigurationUtils.getSubSet(configuration, OAUTH)).build();
+
+		oauthEnabled = ValidationUtils.isNotNull(oauth) && oauth.isEnabled();
 
 		// socketFactory
 
