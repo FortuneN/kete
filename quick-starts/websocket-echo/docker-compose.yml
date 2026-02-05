@@ -1,7 +1,7 @@
 services:
 
   websocket-echo:
-    image: jmalloc/echo-server:0.3.6
+    image: ghcr.io/fortunen/kete/quick-start-websocket-echo
     ports:
       - 8090:8080
     environment:
@@ -12,6 +12,7 @@ services:
     command: start-dev
     ports:
       - 8080:8080
+      - 9000:9000
     environment:
       kete.routes.quick-start.destination.kind: websocket
       kete.routes.quick-start.destination.url: ws://websocket-echo:8080/.ws

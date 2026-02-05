@@ -40,6 +40,7 @@ public abstract class TestBase {
 	}
 
 	protected void configureDestination(MapConfiguration mapConfig) {
+		mapConfig.setProperty(Constants.KIND, "amqp-1");
 		config.setConfiguration(mapConfig);
 		config.initialize();
 		destination.setConfig(config);
@@ -120,25 +121,33 @@ public abstract class TestBase {
 			requireClientAuth
 		);
 
-		// Write broker.xml to temp file for etc-override
-		var brokerXmlPath = Files.createTempFile("broker", ".xml");
+		// Create temp directory and copy files for mounting
+		var tempDir = Files.createTempDirectory("artemis-tls-");
+		tempDir.toFile().deleteOnExit();
+
+		// Write broker.xml to temp directory
+		var brokerXmlPath = tempDir.resolve("broker.xml");
 		Files.writeString(brokerXmlPath, brokerXml);
 		brokerXmlPath.toFile().deleteOnExit();
 
-		// Read keystore and truststore file bytes
+		// Copy keystore and truststore to temp directory
 		// Use serverKeyStoreFilePath for the container (server-side TLS) - it contains only the server key
-		var keyStoreBytes = Files.readAllBytes(Path.of(tls.getServerKeyStoreFilePath()));
-		var trustStoreBytes = Files.readAllBytes(Path.of(tls.getTrustStoreFilePath()));
+		var keyStorePath = tempDir.resolve("keystore.jks");
+		Files.copy(Path.of(tls.getServerKeyStoreFilePath()), keyStorePath);
+		keyStorePath.toFile().deleteOnExit();
+
+		var trustStorePath = tempDir.resolve("truststore.jks");
+		Files.copy(Path.of(tls.getTrustStoreFilePath()), trustStorePath);
+		trustStorePath.toFile().deleteOnExit();
 
 		container = new GenericContainer<>(DockerImageName.parse("apache/activemq-artemis:2.40.0-alpine"))
 			.withEnv("ARTEMIS_USER", DEFAULT_USERNAME)
 			.withEnv("ARTEMIS_PASSWORD", DEFAULT_PASSWORD)
 			.withEnv("ANONYMOUS_LOGIN", "true")
-			// Copy broker.xml to etc-override directory for SSL configuration
-			.withCopyToContainer(Transferable.of(brokerXml), "/var/lib/artemis-instance/etc-override/broker.xml")
-			// Copy keystore and truststore files to etc-override - they will be copied to etc after instance creation
-			.withCopyToContainer(Transferable.of(keyStoreBytes), "/var/lib/artemis-instance/etc-override/keystore.jks")
-			.withCopyToContainer(Transferable.of(trustStoreBytes), "/var/lib/artemis-instance/etc-override/truststore.jks")
+			// Copy files to container (in-memory)
+			.withCopyToContainer(Transferable.of(brokerXml, 0777), "/var/lib/artemis-instance/etc-override/broker.xml")
+			.withCopyToContainer(Transferable.of(Files.readAllBytes(Path.of(tls.getServerKeyStoreFilePath())), 0777), "/var/lib/artemis-instance/etc-override/keystore.jks")
+			.withCopyToContainer(Transferable.of(Files.readAllBytes(Path.of(tls.getTrustStoreFilePath())), 0777), "/var/lib/artemis-instance/etc-override/truststore.jks")
 			.withExposedPorts(AMQP_PORT, AMQPS_PORT, 8161)
 			.withLogConsumer(outputFrame -> System.out.println("[ARTEMIS] " + outputFrame.getUtf8String()));
 

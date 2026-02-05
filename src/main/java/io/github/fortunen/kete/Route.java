@@ -22,12 +22,13 @@ import lombok.extern.slf4j.Slf4j;
 @NoArgsConstructor(force = true)
 public class Route implements AutoCloseable {
 
-	public static final long BORROW_TIMEOUT_MS = 30_000;
 	public static final int ACCEPT_CACHE_MAX_SIZE = 1000;
 
 	private Retry retry;
 	private String name;
 	private Serializer serializer;
+	private String serializerKind;
+	private String destinationKind;
 	private DestinationConfig destinationConfig;
 	private Matcher[] realmMatchers = new Matcher[0];
 	private Matcher[] eventMatchers = new Matcher[0];
@@ -51,16 +52,31 @@ public class Route implements AutoCloseable {
 		destinationConfig.setKeycloakSession(session);
 		destinationConfig.initialize();
 
+		// destinationKind
+
+		destinationKind = destinationConfig.getDestinationKind();
+
 		// create destination pool (only if not already set - for testing)
 
 		if (ValidationUtils.isNull(destinationPool)) {
 
 			var poolConfig = new GenericObjectPoolConfig<Destination<?>>();
 
-			poolConfig.setMinIdle(destinationConfig.getMinPoolSize());
-			poolConfig.setMaxTotal(destinationConfig.getMaxPoolSize());
-			poolConfig.setBlockWhenExhausted(true);
-			poolConfig.setMaxWait(Duration.ofMillis(BORROW_TIMEOUT_MS));
+			poolConfig.setLifo(destinationConfig.isPoolLifo());
+			poolConfig.setMinIdle(destinationConfig.getPoolMinIdle());
+			poolConfig.setMaxIdle(destinationConfig.getPoolMaxIdle());
+			poolConfig.setFairness(destinationConfig.isPoolFairness());
+			poolConfig.setMaxTotal(destinationConfig.getPoolMaxTotal());
+			poolConfig.setTestOnCreate(destinationConfig.isPoolTestOnCreate());
+			poolConfig.setTestOnBorrow(destinationConfig.isPoolTestOnBorrow());
+			poolConfig.setTestOnReturn(destinationConfig.isPoolTestOnReturn());
+			poolConfig.setTestWhileIdle(destinationConfig.isPoolTestWhileIdle());
+			poolConfig.setBlockWhenExhausted(destinationConfig.isPoolBlockWhenExhausted());
+			poolConfig.setMaxWait(Duration.ofSeconds(destinationConfig.getPoolMaxWaitSeconds()));
+			poolConfig.setNumTestsPerEvictionRun(destinationConfig.getPoolNumTestsPerEvictionRun());
+			poolConfig.setMinEvictableIdleDuration(Duration.ofSeconds(destinationConfig.getPoolMinEvictableIdleTimeSeconds()));
+			poolConfig.setTimeBetweenEvictionRuns(Duration.ofSeconds(destinationConfig.getPoolTimeBetweenEvictionRunsSeconds()));
+			poolConfig.setSoftMinEvictableIdleDuration(Duration.ofSeconds(destinationConfig.getPoolSoftMinEvictableIdleTimeSeconds()));
 
 			var poolFactory = new DestinationPooledObjectFactory();
 

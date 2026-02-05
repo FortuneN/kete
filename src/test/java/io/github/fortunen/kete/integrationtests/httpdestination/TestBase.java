@@ -82,6 +82,7 @@ public class TestBase {
 
 	protected void configureDestinationWithMockServer() {
 		var map = new HashMap<String, Object>();
+		map.put("kind", "http");
 		map.put("host", mockServer.getHostName());
 		map.put("port", mockServer.getPort());
 		var mapConfig = new MapConfiguration(map);

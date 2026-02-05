@@ -3,6 +3,7 @@ package io.github.fortunen.kete.endtoendtests;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicReference;
@@ -14,6 +15,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.keycloak.admin.client.Keycloak;
 import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.images.builder.Transferable;
 import org.testcontainers.utility.DockerImageName;
 
 @SuppressWarnings("resource")
@@ -36,7 +38,10 @@ class Mqtt3DestinationE2ETests extends EndToEndTestBase {
 
 		// arrange
 
-		mosquitto = new GenericContainer<>(DockerImageName.parse("eclipse-mosquitto:2.0")).withNetwork(createNetwork()).withNetworkAliases("mosquitto").withExposedPorts(MQTT_PORT).withCommand("mosquitto", "-c", "/mosquitto-no-auth.conf").withCopyToContainer(org.testcontainers.images.builder.Transferable.of("listener 1883\nallow_anonymous true\n"), "/mosquitto-no-auth.conf");
+		// Create in-memory mosquitto config
+		var configContent = "listener 1883\nallow_anonymous true\n".getBytes(StandardCharsets.UTF_8);
+
+		mosquitto = new GenericContainer<>(DockerImageName.parse("eclipse-mosquitto:2.0")).withNetwork(createNetwork()).withNetworkAliases("mosquitto").withExposedPorts(MQTT_PORT).withCommand("mosquitto", "-c", "/mosquitto-no-auth.conf").withCopyToContainer(Transferable.of(configContent, 0777), "/mosquitto-no-auth.conf");
 		mosquitto.start();
 		waitForMqttReady(mosquitto, MQTT_PORT);
 

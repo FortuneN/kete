@@ -198,73 +198,6 @@ kete.routes.tibco.destination.password=admin
 
 These destinations use open standard protocols, providing wide broker compatibility with a single client library—similar to how KETE's `amqp-1` destination works with any AMQP 1.0 broker.
 
-### STOMP (`stomp`)
-
-Stream events to any STOMP-compatible message broker.
-
-**Priority:** 🥇 High (unlocks ActiveMQ Classic and many enterprise systems)
-
-**Protocol:** STOMP 1.2 (Simple Text Oriented Messaging Protocol)
-
-**Compatible Systems:**
-
-| System | STOMP Support | Already Reachable Via KETE? |
-|--------|:-------------:|:---------------------------:|
-| **ActiveMQ Classic** | ✅ Port 61613 | ❌ None (main gap!) |
-| **ActiveMQ Artemis** | ✅ Port 61613 | AMQP 1.0 |
-| **RabbitMQ** | ✅ Plugin | AMQP 0-9-1, AMQP 1.0 |
-| **Amazon MQ (ActiveMQ)** | ✅ Port 61614 | ❌ None |
-| **Apache Apollo** | ✅ Native | ❌ None |
-| **HornetQ** | ✅ Native | ❌ None (legacy) |
-| **Spring WebSocket STOMP** | ✅ Native | ❌ None |
-| **Solace PubSub+** | ✅ Native | AMQP 1.0 |
-| **TIBCO EMS** | ✅ Native | ❌ None |
-| **OpenMQ** | ✅ Native | ❌ None |
-| **SwiftMQ** | ✅ Native | ❌ None |
-| **LavinMQ** | ✅ Native | AMQP 0-9-1 |
-| **WildFly (embedded)** | ✅ Native | ❌ None |
-| **Payara (embedded)** | ✅ Native | ❌ None |
-| **Kaazing Gateway** | ✅ WebSocket | ❌ None |
-| **CoilMQ** | ✅ Native | ❌ None |
-
-**Potential Configuration:**
-
-```properties
-kete.routes.stomp.destination.kind=stomp
-kete.routes.stomp.destination.host=activemq.example.com
-kete.routes.stomp.destination.port=61613
-kete.routes.stomp.destination.destination=/queue/keycloak-events
-kete.routes.stomp.destination.username=admin
-kete.routes.stomp.destination.password=admin
-```
-
-**Implementation Notes:**
-
-STOMP is a simple text protocol (like HTTP):
-
-```
-SEND
-destination:/queue/keycloak-events
-content-type:application/json
-
-{"type":"LOGIN","userId":"123"}
-^@
-```
-
-**Dependencies Required:**
-- Lightweight option: `io.github.stomp-js:stompjava` or custom TCP client
-- Full option: `org.springframework:spring-messaging` + WebSocket support
-
-**Why This Matters:**
-
-ActiveMQ Classic is still widely deployed in enterprises. It only speaks:
-- OpenWire (proprietary, no good standalone Java client)
-- STOMP ✅
-
-It does NOT natively support AMQP 1.0, AMQP 0-9-1, Kafka, or MQTT.
-
----
-
 ### SignalR (`signalr`)
 
 Stream events to Microsoft SignalR hubs for real-time web applications.
@@ -431,7 +364,22 @@ kete.routes.sproc.destination.jdbc.procedure=CALL usp_ProcessKeycloakEvent(?, ?,
 
 ### Redis Pub/Sub (`redis-pubsub`)
 
-Publish events to Redis channels.
+Publish events to Redis channels for real-time messaging.
+
+**Priority:** 🥇 High (wide adoption, simple implementation)
+
+**Compatible Systems:**
+
+| System | Notes |
+|--------|-------|
+| **Redis** | Self-hosted, open-source |
+| **Redis Cloud** | Managed Redis by Redis Inc. |
+| **Amazon ElastiCache** | AWS managed Redis |
+| **Azure Cache for Redis** | Azure managed Redis |
+| **Google Memorystore** | GCP managed Redis |
+| **Upstash** | Serverless Redis |
+| **KeyDB** | Redis-compatible, multi-threaded |
+| **Dragonfly** | Redis-compatible, high-performance |
 
 **Potential Configuration:**
 
@@ -452,6 +400,10 @@ kete.routes.redis.destination.password=secret
 
 Append events to Redis Streams for persistent, ordered messaging.
 
+**Priority:** 🥇 High (persistent messaging with consumer groups)
+
+**Compatible Systems:** Same as Redis Pub/Sub above.
+
 **Potential Configuration:**
 
 ```properties
@@ -466,7 +418,18 @@ kete.routes.redis.destination.max-len=100000  # Trim to max entries
 
 ### NATS (`nats`)
 
-Publish events to NATS subjects.
+Publish events to NATS subjects for lightweight messaging.
+
+**Priority:** 🥈 Medium (simple, fast, growing adoption)
+
+**Compatible Systems:**
+
+| System | Notes |
+|--------|-------|
+| **NATS Server** | Open-source, lightweight |
+| **NATS JetStream** | Persistent streaming layer |
+| **Synadia Cloud** | Managed NATS |
+| **Synadia NGS** | Global NATS service |
 
 **Potential Configuration:**
 
@@ -485,7 +448,9 @@ kete.routes.nats.destination.password=secret
 
 ### NATS JetStream (`nats-jetstream`)
 
-Publish events to NATS JetStream for persistent messaging.
+Publish events to NATS JetStream for persistent messaging with replay and consumer groups.
+
+**Priority:** 🥈 Medium (persistent layer for NATS)
 
 **Potential Configuration:**
 
@@ -496,11 +461,24 @@ kete.routes.nats.destination.stream=KEYCLOAK
 kete.routes.nats.destination.subject=keycloak.events
 ```
 
+**Dependencies Required:**
+- `io.nats:jnats`
+
 ---
 
 ### Apache Pulsar Native (`pulsar-native`)
 
 Publish events to Apache Pulsar topics using the native Pulsar client (alternative to JMS wrapper).
+
+**Priority:** 🥉 Low (JMS wrapper preferred, see `pulsar-jms` above)
+
+**Compatible Systems:**
+
+| System | Notes |
+|--------|-------|
+| **Apache Pulsar** | Self-hosted |
+| **StreamNative Cloud** | Managed Pulsar |
+| **DataStax Astra Streaming** | Managed Pulsar |
 
 **Potential Configuration:**
 
@@ -561,6 +539,136 @@ kete.routes.proto.serializer.schema-file=/path/to/event.proto
 **Use Cases:**
 - gRPC-based consumers
 - Size-efficient binary format
+
+---
+
+## Logging & Observability Destinations
+
+### Syslog (`syslog`)
+
+Stream events to Syslog-compatible log aggregators using RFC 5424.
+
+**Priority:** 🥇 High (wide enterprise adoption, low implementation effort)
+
+**Protocol:** Syslog RFC 5424 over UDP/TCP/TLS
+
+**Compatible Systems:**
+
+| System | Notes |
+|--------|-------|
+| **rsyslog** | Linux default, high-performance |
+| **syslog-ng** | Enterprise syslog with advanced routing |
+| **Graylog** | Log management with syslog input |
+| **Splunk** | Via syslog input or HEC |
+| **Elastic/Logstash** | Via syslog input plugin |
+| **Papertrail** | Managed cloud logging |
+| **Datadog** | Log ingestion via syslog |
+| **Sumo Logic** | Cloud SIEM with syslog |
+| **Loggly** | Cloud log management |
+| **Fluentd/Fluent Bit** | Via syslog input |
+
+**Potential Configuration:**
+
+```properties
+kete.routes.syslog.destination.kind=syslog
+kete.routes.syslog.destination.host=syslog.example.com
+kete.routes.syslog.destination.port=514
+kete.routes.syslog.destination.protocol=udp  # udp, tcp, or tls
+kete.routes.syslog.destination.facility=local0
+kete.routes.syslog.destination.severity=info
+kete.routes.syslog.destination.app-name=keycloak
+```
+
+**Dependencies Required:**
+- `com.cloudbees:syslog-java-client` or custom RFC 5424 implementation
+
+**Why This Matters:**
+- Nearly universal enterprise adoption
+- Simple protocol (text-based, like STOMP)
+- Integrates with existing log infrastructure
+- Low implementation effort
+
+---
+
+## Real-Time Streaming Destinations
+
+### Server-Sent Events (`sse`)
+
+Stream events to clients via HTTP Server-Sent Events.
+
+**Priority:** 🥈 Medium (browser-friendly, simple implementation)
+
+**Protocol:** SSE (HTTP streaming, text/event-stream)
+
+**Compatible Systems:**
+
+| System | Notes |
+|--------|-------|
+| **Browsers** | Native EventSource API |
+| **curl** | `curl -N` for streaming |
+| **Real-time dashboards** | React, Vue, Angular apps |
+| **API Gateways** | Kong, AWS API Gateway |
+| **Mobile apps** | iOS/Android SSE clients |
+
+**Potential Configuration:**
+
+```properties
+kete.routes.sse.destination.kind=sse
+kete.routes.sse.destination.url=http://dashboard.example.com/events
+kete.routes.sse.destination.event-type=keycloak-event
+kete.routes.sse.destination.retry=3000
+```
+
+**Implementation Notes:**
+- KETE acts as SSE publisher to an endpoint
+- Can be used with an SSE relay/fanout server
+- Simpler than WebSocket (unidirectional)
+
+**Use Cases:**
+- Live admin dashboards
+- Real-time audit displays
+- Browser-based monitoring
+
+---
+
+### gRPC Streaming (`grpc`)
+
+Stream events to gRPC servers using bidirectional or server streaming.
+
+**Priority:** 🥉 Low (high effort, niche use case)
+
+**Protocol:** gRPC over HTTP/2
+
+**Compatible Systems:**
+
+| System | Notes |
+|--------|-------|
+| **Custom gRPC servers** | Any language with gRPC support |
+| **Envoy Proxy** | gRPC routing and load balancing |
+| **Google Cloud Run** | Serverless gRPC |
+| **Kubernetes services** | Native gRPC support |
+| **Istio** | Service mesh with gRPC |
+
+**Potential Configuration:**
+
+```properties
+kete.routes.grpc.destination.kind=grpc
+kete.routes.grpc.destination.target=grpc-server.example.com:9090
+kete.routes.grpc.destination.service=keycloak.EventService
+kete.routes.grpc.destination.method=StreamEvents
+kete.routes.grpc.destination.tls.enabled=true
+```
+
+**Dependencies Required:**
+- `io.grpc:grpc-netty-shaded`
+- `io.grpc:grpc-protobuf`
+- `io.grpc:grpc-stub`
+- Protobuf schema for events
+
+**Implementation Notes:**
+- Requires defining a `.proto` schema for Keycloak events
+- Higher complexity than HTTP/WebSocket
+- Best for microservices architectures already using gRPC
 
 ---
 

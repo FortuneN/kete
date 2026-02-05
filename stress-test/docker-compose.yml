@@ -1,0 +1,268 @@
+services:
+
+  postgres:
+    image: postgres:16-alpine
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_DB: keycloak
+      POSTGRES_USER: keycloak
+      POSTGRES_PASSWORD: keycloak
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U keycloak"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - 6379:6379
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  keycloak:
+    image: ghcr.io/fortunen/kete/quick-start-keycloak
+    command: start --http-enabled=true --hostname-strict=false
+    ports:
+      - 8080:8080
+      - 9000:9000
+    environment:
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres:5432/keycloak
+      KC_DB_USERNAME: keycloak
+      KC_DB_PASSWORD: keycloak
+      KC_METRICS_ENABLED: "true"
+      kete.routes.stress-test.destination.kind: redis-pubsub
+      kete.routes.stress-test.destination.host: redis
+      kete.routes.stress-test.destination.port: 6379
+      kete.routes.stress-test.destination.channel: keycloak-events-stress
+      kete.metrics.enabled: "true"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  login-repeater-1:
+    image: curlimages/curl:8.5.0
+    depends_on:
+      - keycloak
+    volumes:
+      - ./login-repeater.sh:/login-repeater.sh:ro
+    entrypoint: ["/bin/sh", "/login-repeater.sh"]
+    environment:
+      KEYCLOAK_URL: http://keycloak:8080
+      WORKER_ID: "1"
+
+  login-repeater-2:
+    image: curlimages/curl:8.5.0
+    depends_on:
+      - keycloak
+    volumes:
+      - ./login-repeater.sh:/login-repeater.sh:ro
+    entrypoint: ["/bin/sh", "/login-repeater.sh"]
+    environment:
+      KEYCLOAK_URL: http://keycloak:8080
+      WORKER_ID: "2"
+
+  login-repeater-3:
+    image: curlimages/curl:8.5.0
+    depends_on:
+      - keycloak
+    volumes:
+      - ./login-repeater.sh:/login-repeater.sh:ro
+    entrypoint: ["/bin/sh", "/login-repeater.sh"]
+    environment:
+      KEYCLOAK_URL: http://keycloak:8080
+      WORKER_ID: "3"
+
+  login-repeater-4:
+    image: curlimages/curl:8.5.0
+    depends_on:
+      - keycloak
+    volumes:
+      - ./login-repeater.sh:/login-repeater.sh:ro
+    entrypoint: ["/bin/sh", "/login-repeater.sh"]
+    environment:
+      KEYCLOAK_URL: http://keycloak:8080
+      WORKER_ID: "4"
+
+  login-repeater-5:
+    image: curlimages/curl:8.5.0
+    depends_on:
+      - keycloak
+    volumes:
+      - ./login-repeater.sh:/login-repeater.sh:ro
+    entrypoint: ["/bin/sh", "/login-repeater.sh"]
+    environment:
+      KEYCLOAK_URL: http://keycloak:8080
+      WORKER_ID: "5"
+
+  login-repeater-6:
+    image: curlimages/curl:8.5.0
+    depends_on:
+      - keycloak
+    volumes:
+      - ./login-repeater.sh:/login-repeater.sh:ro
+    entrypoint: ["/bin/sh", "/login-repeater.sh"]
+    environment:
+      KEYCLOAK_URL: http://keycloak:8080
+      WORKER_ID: "6"
+
+  login-repeater-7:
+    image: curlimages/curl:8.5.0
+    depends_on:
+      - keycloak
+    volumes:
+      - ./login-repeater.sh:/login-repeater.sh:ro
+    entrypoint: ["/bin/sh", "/login-repeater.sh"]
+    environment:
+      KEYCLOAK_URL: http://keycloak:8080
+      WORKER_ID: "7"
+
+  login-repeater-8:
+    image: curlimages/curl:8.5.0
+    depends_on:
+      - keycloak
+    volumes:
+      - ./login-repeater.sh:/login-repeater.sh:ro
+    entrypoint: ["/bin/sh", "/login-repeater.sh"]
+    environment:
+      KEYCLOAK_URL: http://keycloak:8080
+      WORKER_ID: "8"
+
+  login-repeater-9:
+    image: curlimages/curl:8.5.0
+    depends_on:
+      - keycloak
+    volumes:
+      - ./login-repeater.sh:/login-repeater.sh:ro
+    entrypoint: ["/bin/sh", "/login-repeater.sh"]
+    environment:
+      KEYCLOAK_URL: http://keycloak:8080
+      WORKER_ID: "9"
+
+  login-repeater-10:
+    image: curlimages/curl:8.5.0
+    depends_on:
+      - keycloak
+    volumes:
+      - ./login-repeater.sh:/login-repeater.sh:ro
+    entrypoint: ["/bin/sh", "/login-repeater.sh"]
+    environment:
+      KEYCLOAK_URL: http://keycloak:8080
+      WORKER_ID: "10"
+
+  login-repeater-11:
+    image: curlimages/curl:8.5.0
+    depends_on:
+      - keycloak
+    volumes:
+      - ./login-repeater.sh:/login-repeater.sh:ro
+    entrypoint: ["/bin/sh", "/login-repeater.sh"]
+    environment:
+      KEYCLOAK_URL: http://keycloak:8080
+      WORKER_ID: "11"
+
+  login-repeater-12:
+    image: curlimages/curl:8.5.0
+    depends_on:
+      - keycloak
+    volumes:
+      - ./login-repeater.sh:/login-repeater.sh:ro
+    entrypoint: ["/bin/sh", "/login-repeater.sh"]
+    environment:
+      KEYCLOAK_URL: http://keycloak:8080
+      WORKER_ID: "12"
+
+  login-repeater-13:
+    image: curlimages/curl:8.5.0
+    depends_on:
+      - keycloak
+    volumes:
+      - ./login-repeater.sh:/login-repeater.sh:ro
+    entrypoint: ["/bin/sh", "/login-repeater.sh"]
+    environment:
+      KEYCLOAK_URL: http://keycloak:8080
+      WORKER_ID: "13"
+
+  login-repeater-14:
+    image: curlimages/curl:8.5.0
+    depends_on:
+      - keycloak
+    volumes:
+      - ./login-repeater.sh:/login-repeater.sh:ro
+    entrypoint: ["/bin/sh", "/login-repeater.sh"]
+    environment:
+      KEYCLOAK_URL: http://keycloak:8080
+      WORKER_ID: "14"
+
+  login-repeater-15:
+    image: curlimages/curl:8.5.0
+    depends_on:
+      - keycloak
+    volumes:
+      - ./login-repeater.sh:/login-repeater.sh:ro
+    entrypoint: ["/bin/sh", "/login-repeater.sh"]
+    environment:
+      KEYCLOAK_URL: http://keycloak:8080
+      WORKER_ID: "15"
+
+  login-repeater-16:
+    image: curlimages/curl:8.5.0
+    depends_on:
+      - keycloak
+    volumes:
+      - ./login-repeater.sh:/login-repeater.sh:ro
+    entrypoint: ["/bin/sh", "/login-repeater.sh"]
+    environment:
+      KEYCLOAK_URL: http://keycloak:8080
+      WORKER_ID: "16"
+
+  login-repeater-17:
+    image: curlimages/curl:8.5.0
+    depends_on:
+      - keycloak
+    volumes:
+      - ./login-repeater.sh:/login-repeater.sh:ro
+    entrypoint: ["/bin/sh", "/login-repeater.sh"]
+    environment:
+      KEYCLOAK_URL: http://keycloak:8080
+      WORKER_ID: "17"
+
+  login-repeater-18:
+    image: curlimages/curl:8.5.0
+    depends_on:
+      - keycloak
+    volumes:
+      - ./login-repeater.sh:/login-repeater.sh:ro
+    entrypoint: ["/bin/sh", "/login-repeater.sh"]
+    environment:
+      KEYCLOAK_URL: http://keycloak:8080
+      WORKER_ID: "18"
+
+  login-repeater-19:
+    image: curlimages/curl:8.5.0
+    depends_on:
+      - keycloak
+    volumes:
+      - ./login-repeater.sh:/login-repeater.sh:ro
+    entrypoint: ["/bin/sh", "/login-repeater.sh"]
+    environment:
+      KEYCLOAK_URL: http://keycloak:8080
+      WORKER_ID: "19"
+
+  login-repeater-20:
+    image: curlimages/curl:8.5.0
+    depends_on:
+      - keycloak
+    volumes:
+      - ./login-repeater.sh:/login-repeater.sh:ro
+    entrypoint: ["/bin/sh", "/login-repeater.sh"]
+    environment:
+      KEYCLOAK_URL: http://keycloak:8080
+      WORKER_ID: "20"

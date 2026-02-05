@@ -126,9 +126,9 @@ Instead of `url`, you can configure each component separately:
 | `destination.path-and-query` | `/` | URL path and query string | `/api/v1/events?source=keycloak` |
 | `destination.method` | `POST` | HTTP method (POST or PUT) | `PUT` |
 | `destination.timeout-seconds` | `10` | Request timeout in seconds | `60` |
-| `destination.message-headers-enabled` | `true` | Include event metadata as HTTP headers | `false` |
-| `destination.min-pool-size` | `5` | Minimum connections in pool | `10` |
-| `destination.max-pool-size` | `20` | Maximum connections in pool | `50` |
+| `destination.pool.min-idle` | `1` | Minimum idle connections in pool | `5` |
+| `destination.pool.max-idle` | `10` | Maximum idle connections in pool | `20` |
+| `destination.pool.max-total` | `20` | Maximum total connections in pool | `50` |
 
 ### Custom Headers
 

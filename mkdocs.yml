@@ -113,6 +113,7 @@ nav:
       - Smile: user-guide/serializers/smile.md
     - Destinations:
       - Overview: user-guide/destinations/overview.md
+      - Support Matrix: user-guide/destinations/support-matrix.md
       - Kafka: user-guide/destinations/kafka.md
       - AMQP 0.9.1: user-guide/destinations/amqp-0.9.1.md
       - AMQP 1: user-guide/destinations/amqp-1.md
@@ -121,6 +122,11 @@ nav:
       - HTTP: user-guide/destinations/http.md
       - WebSocket: user-guide/destinations/websocket.md
       - STOMP: user-guide/destinations/stomp.md
+      - NATS: user-guide/destinations/nats.md
+      - NATS JetStream: user-guide/destinations/nats-jetstream.md
+      - Pulsar: user-guide/destinations/pulsar.md
+      - Redis Pub/Sub: user-guide/destinations/redis-pubsub.md
+      - Redis Streams: user-guide/destinations/redis-streams.md
     - Certificate Loaders:
       - Overview: user-guide/certificate-loaders/overview.md
       - PEM File Path: user-guide/certificate-loaders/pem-file-path.md
@@ -153,4 +159,4 @@ nav:
     - Transaction Support: developer-guide/transaction-support.md
     - Contributing: developer-guide/development.md
     - Test Patterns: developer-guide/test-patterns-and-conventions.md
-    - Future Enhancements: developer-guide/future-enhancements.md
+    - Quickstart Testing: developer-guide/quickstart-testing.md

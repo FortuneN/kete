@@ -1,10 +1,8 @@
 package io.github.fortunen.kete.destinations.http;
 
 import java.net.URI;
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.net.ssl.SSLContext;
+import java.net.http.HttpClient;
+import java.time.Duration;
 
 import org.apache.commons.configuration2.MapConfiguration;
 
@@ -37,7 +35,6 @@ public class HttpDestinationConfig extends DestinationConfig {
 	public static final String PUT = "PUT";
 	public static final String POST = "POST";
 	public static final String METHOD = "method";
-	public static final String HEADERS = "headers";
 
 	public static final int DEFAULT_TIMEOUT_SECONDS = 10;
 	public static final String TIMEOUT_SECONDS = "timeout-seconds";
@@ -60,11 +57,9 @@ public class HttpDestinationConfig extends DestinationConfig {
 	private String urlFromConfig;
 	private boolean methodIsPost;
 	private boolean hasTlsEnabled;
+	private boolean oauthEnabled;
 	private MapConfiguration tlsConfig;
-	private boolean messageHeadersEnabled;
-	private MapConfiguration headersConfig;
-	private SSLContext sslContext;
-	private Map<String, String> headers = new HashMap<>();
+	private HttpClient.Builder clientBuilder;
 
 	@Override
 	@SneakyThrows
@@ -162,10 +157,6 @@ public class HttpDestinationConfig extends DestinationConfig {
 			}
 		}
 
-		// messageHeadersEnabled
-
-		messageHeadersEnabled = configuration.getBoolean(MESSAGE_HEADERS_ENABLED, true);
-
 		// baseUrl
 
 		if ("/".equals(pathAndQuery)) {
@@ -190,23 +181,14 @@ public class HttpDestinationConfig extends DestinationConfig {
 
 		oauth = OAuthMaterial.builder().withKeycloakRealm(keycloakRealm).withKeycloakSession(keycloakSession).withConfiguration(ConfigurationUtils.getSubSet(configuration, OAUTH)).build();
 
-		// headers
+		oauthEnabled = ValidationUtils.isNotNull(oauth) && oauth.isEnabled();
 
-		headersConfig = ConfigurationUtils.getSubSet(configuration, HEADERS);
+		// clientBuilder
 
-		headersConfig.getKeys().forEachRemaining(key ->
-		{
-			var headerValue = headersConfig.getString(key, "").trim();
+		clientBuilder = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(timeoutSeconds));
 
-			if (ValidationUtils.isNotBlank(headerValue)) {
-				headers.put(key, headerValue);
-			}
-		});
-
-		// sslContext
-
-		sslContext = tls.isEnabled()
-			? tls.getKeyStoreAndTrustStoreSSLContext()
-			: null;
+		if (tls.isEnabled()) {
+			clientBuilder.sslContext(tls.getKeyStoreAndTrustStoreSSLContext());
+		}
 	}
 }

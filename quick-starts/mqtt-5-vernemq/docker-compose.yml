@@ -1,0 +1,45 @@
+services:
+
+  vernemq:
+    image: ghcr.io/fortunen/kete/quick-start-vernemq
+    ports:
+      - 1883:1883
+      - 8888:8888
+    environment:
+      DOCKER_VERNEMQ_ACCEPT_EULA: "yes"
+      DOCKER_VERNEMQ_ALLOW_ANONYMOUS: "on"
+    healthcheck:
+      test: ["CMD", "vernemq", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+
+  subscriber:
+    image: ghcr.io/fortunen/kete/quick-start-mqtt-subscriber
+    environment:
+      MQTT_BROKER_HOST: vernemq
+      MQTT_BROKER_PORT: 1883
+      MQTT_TOPIC: keycloak-events
+    depends_on:
+      vernemq:
+        condition: service_healthy
+  keycloak:
+    image: ghcr.io/fortunen/kete/quick-start-keycloak
+    command: start-dev
+    ports:
+      - 8080:8080
+      - 9000:9000
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+      kete.routes.quick-start.destination.kind: mqtt-5
+      kete.routes.quick-start.destination.host: vernemq
+      kete.routes.quick-start.destination.port: 1883
+      kete.routes.quick-start.destination.topic: keycloak-events
+    depends_on:
+      vernemq:
+        condition: service_healthy
+      subscriber:
+        condition: service_started
+

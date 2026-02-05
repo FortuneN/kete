@@ -1,0 +1,45 @@
+services:
+
+  rabbitmq:
+    image: ghcr.io/fortunen/kete/quick-start-rabbitmq
+    ports:
+      - 61613:61613
+      - 15672:15672
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: admin
+    command: >
+      sh -c "rabbitmq-plugins enable rabbitmq_stomp && rabbitmq-server"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  rabbitmq-init:
+    image: ghcr.io/fortunen/kete/quick-start-curl
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    entrypoint: >
+      sh -c '
+        curl -s -u admin:admin -X PUT http://rabbitmq:15672/api/queues/%2f/keycloak-events -H "content-type: application/json" -d "{\"durable\":true}"
+      '
+
+  keycloak:
+    image: ghcr.io/fortunen/kete/quick-start-keycloak
+    command: start-dev
+    ports:
+      - 8080:8080
+      - 9000:9000
+    environment:
+      kete.routes.quick-start.destination.kind: stomp
+      kete.routes.quick-start.destination.host: rabbitmq
+      kete.routes.quick-start.destination.port: 61613
+      kete.routes.quick-start.destination.destination: /queue/keycloak-events
+      kete.routes.quick-start.destination.username: admin
+      kete.routes.quick-start.destination.password: admin
+      kete.routes.quick-start.destination.virtual-host: /
+    depends_on:
+      rabbitmq-init:
+        condition: service_completed_successfully

@@ -13,7 +13,7 @@ import io.github.fortunen.kete.TlsMaterial;
 public class sendTests extends TestBase {
 
 	@Test
-	public void shouldSend_TextNonTls() throws Exception {
+	public void shouldSend_NonTls() throws Exception {
 
 		// arrange
 
@@ -34,33 +34,6 @@ public class sendTests extends TestBase {
 		);
 
 		// act & assert - echo server accepts and echoes, no exception means success
-
-		assertThatCode(() -> destination.send(message)).doesNotThrowAnyException();
-	}
-
-	@Test
-	public void shouldSend_BinaryNonTls() throws Exception {
-
-		// arrange
-
-		startWebSocketEchoServer();
-		var map = new HashMap<String, Object>();
-		map.put("host", container.getHost());
-		map.put("port", String.valueOf(getWebSocketPort()));
-		map.put("path", "/.ws");
-		map.put("binary-mode", "true");
-		var mapConfig = new MapConfiguration(map);
-		configureDestination(mapConfig);
-		destination.initialize();
-
-		var message = createMessage(
-			"test-event-id",
-			"LOGIN",
-			"application/json",
-			"{\"type\":\"LOGIN\"}".getBytes(StandardCharsets.UTF_8)
-		);
-
-		// act & assert - echo server accepts binary messages
 
 		assertThatCode(() -> destination.send(message)).doesNotThrowAnyException();
 	}

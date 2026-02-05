@@ -3,14 +3,16 @@ package io.github.fortunen.kete.integrationtests.amqp091destination;
 import static org.awaitility.Awaitility.await;
 
 import java.io.File;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.Duration;
 
 import org.apache.commons.configuration2.MapConfiguration;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.testcontainers.containers.RabbitMQContainer;
-import org.testcontainers.utility.MountableFile;
+import org.testcontainers.images.builder.Transferable;
 
 import com.rabbitmq.client.ConnectionFactory;
 
@@ -37,6 +39,7 @@ public class TestBase {
 	}
 
 	protected void configureDestination(MapConfiguration mapConfig) {
+		mapConfig.setProperty(Constants.KIND, "amqp-0.9.1");
 		config.setConfiguration(mapConfig);
 		config.initialize();
 		destination.setConfig(config);
@@ -112,16 +115,11 @@ public class TestBase {
 		configBuilder.append("\n"); // RabbitMQ config file needs empty line at end
 		var configContent = configBuilder.toString();
 
-		// Create temp config file
-		var configFile = File.createTempFile("rabbitmq", ".conf");
-		configFile.deleteOnExit();
-		Files.writeString(configFile.toPath(), configContent);
-
 		var rabbitContainer = new RabbitMQContainer("rabbitmq:3.13-management")
-			.withCopyFileToContainer(MountableFile.forHostPath(tls.getServerPrivateKeyPkcs1PemFilePath(), 0644), "/etc/rabbitmq/rabbitmq_key.pem")
-			.withCopyFileToContainer(MountableFile.forHostPath(tls.getServerCertificatePemFilePath(), 0644), "/etc/rabbitmq/rabbitmq_cert.pem")
-			.withCopyFileToContainer(MountableFile.forHostPath(tls.getCaCertificatePemFilePath(), 0644), "/etc/rabbitmq/ca_cert.pem")
-			.withRabbitMQConfig(MountableFile.forHostPath(configFile.getAbsolutePath()))
+			.withCopyToContainer(Transferable.of(Files.readAllBytes(Path.of(tls.getServerPrivateKeyPkcs1PemFilePath())), 0777), "/etc/rabbitmq/rabbitmq_key.pem")
+			.withCopyToContainer(Transferable.of(Files.readAllBytes(Path.of(tls.getServerCertificatePemFilePath())), 0777), "/etc/rabbitmq/rabbitmq_cert.pem")
+			.withCopyToContainer(Transferable.of(Files.readAllBytes(Path.of(tls.getCaCertificatePemFilePath())), 0777), "/etc/rabbitmq/ca_cert.pem")
+			.withCopyToContainer(Transferable.of(configContent.getBytes(StandardCharsets.UTF_8), 0777), "/etc/rabbitmq/rabbitmq.conf")
 			.withExposedPorts(AMQP_TLS_PORT)
 			.withStartupTimeout(Duration.ofMinutes(10))
 			.withLogConsumer(outputFrame -> System.out.println("[RABBITMQ] " + outputFrame.getUtf8String()));

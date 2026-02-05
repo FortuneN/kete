@@ -1,0 +1,39 @@
+services:
+
+  keydb:
+    image: ghcr.io/fortunen/kete/quick-start-keydb
+    ports:
+      - 6379:6379
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+
+  subscriber:
+    image: ghcr.io/fortunen/kete/quick-start-redis-subscriber
+    environment:
+      REDIS_HOST: keydb
+      REDIS_PORT: 6379
+      REDIS_CHANNEL: keycloak-events
+    depends_on:
+      keydb:
+        condition: service_healthy
+  keycloak:
+    image: ghcr.io/fortunen/kete/quick-start-keycloak
+    command: start-dev
+    ports:
+      - 8080:8080
+      - 9000:9000
+    environment:
+      kete.routes.quick-start.destination.kind: redis-pubsub
+      kete.routes.quick-start.destination.host: keydb
+      kete.routes.quick-start.destination.port: 6379
+      kete.routes.quick-start.destination.channel: keycloak-events
+    depends_on:
+      keydb:
+        condition: service_healthy
+      subscriber:
+        condition: service_started
+

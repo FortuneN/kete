@@ -13,8 +13,10 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 
 @Data
+@Slf4j
 @Component(name = "mqtt-3")
 @NoArgsConstructor(force = true)
 @EqualsAndHashCode(callSuper = true)
@@ -29,6 +31,7 @@ public class Mqtt3Destination extends Destination<Mqtt3DestinationConfig> {
 		ValidationUtils.requireNonNull(config, "config is required");
 
 		var clientId = config.getClientIdPrefix() + "-" + config.getClientIdCounter().incrementAndGet();
+
 		client = new MqttClient(config.getUrl(), clientId, new MemoryPersistence());
 		client.connect(config.getConnectOptions());
 	}
@@ -45,10 +48,11 @@ public class Mqtt3Destination extends Destination<Mqtt3DestinationConfig> {
 
 		// mqttMessage
 
-		var mqttMessage = new MqttMessage(message.eventBody());
+		var mqttMessage = new MqttMessage();
 
 		mqttMessage.setQos(config.getQos());
 		mqttMessage.setRetained(config.isRetained());
+		mqttMessage.setPayload(message.eventBody());
 
 		// publish
 
@@ -58,6 +62,14 @@ public class Mqtt3Destination extends Destination<Mqtt3DestinationConfig> {
 	@Override
 	@SneakyThrows
 	public void close() {
-		ValidationUtils.tryClose(client, "client");
+		try {
+			if (client != null && client.isConnected()) {
+				client.disconnect();
+			}
+		} catch (Exception e) {
+			log.warn("Failed to disconnect MQTT3 client: {}", e.getMessage());
+		} finally {
+			ValidationUtils.tryClose(client, "client");
+		}
 	}
 }

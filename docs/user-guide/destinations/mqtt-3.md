@@ -15,8 +15,15 @@ Stream Keycloak events to MQTT 3 brokers.
 |--------|-------|
 | **Eclipse Mosquitto** | Most popular open-source broker |
 | **HiveMQ** | Enterprise MQTT, clustering |
+| **HiveMQ Cloud** | Managed HiveMQ service |
 | **EMQX** | High-performance, clustering |
+| **EMQX Cloud** | Managed EMQX service |
+| **NanoMQ** | Ultra-lightweight, IoT edge |
 | **VerneMQ** | Distributed, Erlang-based |
+| **RabbitMQ** | Via `rabbitmq_mqtt` plugin |
+| **ActiveMQ Artemis** | Multi-protocol broker |
+| **Azure Event Grid** | MQTT Broker feature |
+| **Solace PubSub+** | Native MQTT support |
 | **AWS IoT Core** | Managed, auto-scaling |
 | **Azure IoT Hub** | Managed, device management |
 
@@ -123,13 +130,16 @@ Available variables: `${realmLowerCase}`, `${realmUpperCase}`, `${eventTypeLower
 | `retained` | `false` | Retain message on broker | `true` |
 | `client-id-prefix` | `kete-` | Client ID prefix (UUID appended) | `keycloak-` |
 | `clean-session` | `true` | Start with clean session | `false` |
-| `connection-timeout` | `10` | Connection timeout in seconds | `60` |
-| `keep-alive-interval` | `60` | Keep-alive ping interval in seconds | `120` |
+| `connection-timeout-seconds` | `10` | Connection timeout in seconds | `60` |
+| `keep-alive-interval-seconds` | `60` | Keep-alive ping interval in seconds | `120` |
 | `username` | `""` | MQTT username | `admin` |
 | `password` | `""` | MQTT password | `secret123` |
-| `message-headers-enabled` | `false` | **Not supported** — must remain `false` | - |
-| `min-pool-size` | `5` | Minimum connections in pool | `10` |
-| `max-pool-size` | `20` | Maximum connections in pool | `50` |
+| `pool.min-idle` | `1` | Minimum idle connections in pool | `5` |
+| `pool.max-idle` | `10` | Maximum idle connections in pool | `20` |
+| `pool.max-total` | `20` | Maximum total connections in pool | `50` |
+
+!!! note "No Message Headers"
+    MQTT 3.1.1 does not support message headers (this is a protocol limitation). For header support, use [MQTT 5](mqtt-5.md).
 
 ### TLS Properties
 

@@ -1,12 +1,12 @@
 package io.github.fortunen.kete.destinations.websocket;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.net.URI;
 import java.util.concurrent.TimeUnit;
 
 import javax.net.SocketFactory;
 
 import io.github.fortunen.kete.DestinationConfig;
+import io.github.fortunen.kete.OAuthMaterial;
 import io.github.fortunen.kete.TlsMaterial;
 import io.github.fortunen.kete.utils.ConfigurationUtils;
 import io.github.fortunen.kete.utils.ValidationUtils;
@@ -23,18 +23,19 @@ public class WebSocketDestinationConfig extends DestinationConfig {
 	public static final String URL = "url";
 	public static final String HOST = "host";
 	public static final String PORT = "port";
+	public static final String PATH = "path";
 	public static final int DEFAULT_WS_PORT = 80;
 	public static final int DEFAULT_WSS_PORT = 443;
-	public static final String PATH = "path";
 
 	public static final String BINARY_MODE = "binary-mode";
-	public static final String HEADERS = "headers";
 
-	public static final int DEFAULT_CONNECTION_TIMEOUT = 10;
-	public static final String CONNECTION_TIMEOUT = "connection-timeout";
+	public static final int DEFAULT_CONNECTION_TIMEOUT_SECONDS = 10;
+	public static final String CONNECTION_TIMEOUT_SECONDS = "connection-timeout-seconds";
 
-	public static final int DEFAULT_CONNECTION_LOST_TIMEOUT = 60;
-	public static final String CONNECTION_LOST_TIMEOUT = "connection-lost-timeout";
+	public static final int DEFAULT_CONNECTION_LOST_TIMEOUT_SECONDS = 60;
+	public static final String CONNECTION_LOST_TIMEOUT_SECONDS = "connection-lost-timeout-seconds";
+
+	public static final String OAUTH = "oauth";
 
 	private int port;
 	private String url;
@@ -42,11 +43,12 @@ public class WebSocketDestinationConfig extends DestinationConfig {
 	private String path;
 	private String scheme;
 	private boolean binaryMode;
-	private int connectionTimeout;
-	private int connectionLostTimeout;
+	private OAuthMaterial oauth;
+	private boolean oauthEnabled;
 	private SocketFactory socketFactory;
+	private int connectionTimeoutSeconds;
+	private int connectionLostTimeoutSeconds;
 	private TimeUnit connectionTimeoutUnit = TimeUnit.SECONDS;
-	private Map<String, String> headers = new HashMap<>();
 
 	@Override
 	@SneakyThrows
@@ -62,11 +64,21 @@ public class WebSocketDestinationConfig extends DestinationConfig {
 
 			url = urlFromConfig;
 
-			// parse scheme from url
+			var parsedUri = URI.create(url);
+
+			// host
+
+			host = ValidationUtils.requireNonBlank(parsedUri.getHost(), "url must contain a valid host");
+
+			// scheme
 
 			if (url.startsWith("wss://")) {
 
 				scheme = "wss";
+
+				// port
+
+				port = parsedUri.getPort() > 0 ? parsedUri.getPort() : DEFAULT_WSS_PORT;
 
 				if (!tls.isEnabled()) {
 					var tlsConfig = ConfigurationUtils.getSubSet(configuration, TLS);
@@ -75,7 +87,13 @@ public class WebSocketDestinationConfig extends DestinationConfig {
 				}
 
 			} else if (url.startsWith("ws://")) {
+
 				scheme = "ws";
+
+				// port
+
+				port = parsedUri.getPort() > 0 ? parsedUri.getPort() : DEFAULT_WS_PORT;
+
 			} else {
 				throw new IllegalStateException("url must start with 'ws://' or 'wss://'");
 			}
@@ -104,7 +122,7 @@ public class WebSocketDestinationConfig extends DestinationConfig {
 				path = "/" + path;
 			}
 
-			// build url
+			// url
 
 			url = scheme + "://" + host + ":" + port + path;
 		}
@@ -113,27 +131,23 @@ public class WebSocketDestinationConfig extends DestinationConfig {
 
 		binaryMode = configuration.getBoolean(BINARY_MODE, false);
 
-		// connectionTimeout
+		// connectionTimeoutSeconds
 
-		connectionTimeout = configuration.getInt(CONNECTION_TIMEOUT, DEFAULT_CONNECTION_TIMEOUT);
+		connectionTimeoutSeconds = configuration.getInt(CONNECTION_TIMEOUT_SECONDS, DEFAULT_CONNECTION_TIMEOUT_SECONDS);
 
-		ValidationUtils.requireGreaterThan(connectionTimeout, 0, CONNECTION_TIMEOUT + " must be greater than 0");
+		ValidationUtils.requireGreaterThan(connectionTimeoutSeconds, 0, CONNECTION_TIMEOUT_SECONDS + " must be greater than 0");
 
-		// connectionLostTimeout
+		// connectionLostTimeoutSeconds
 
-		connectionLostTimeout = configuration.getInt(CONNECTION_LOST_TIMEOUT, DEFAULT_CONNECTION_LOST_TIMEOUT);
+		connectionLostTimeoutSeconds = configuration.getInt(CONNECTION_LOST_TIMEOUT_SECONDS, DEFAULT_CONNECTION_LOST_TIMEOUT_SECONDS);
 
-		ValidationUtils.requireNonNegative(connectionLostTimeout, CONNECTION_LOST_TIMEOUT + " must be non-negative");
+		ValidationUtils.requireNonNegative(connectionLostTimeoutSeconds, CONNECTION_LOST_TIMEOUT_SECONDS + " must be non-negative");
 
-		// headers
+		// oauth
 
-		var headersConfig = ConfigurationUtils.getSubSet(configuration, HEADERS);
-		var keysIterator = headersConfig.getKeys();
+		oauth = OAuthMaterial.builder().withKeycloakRealm(keycloakRealm).withKeycloakSession(keycloakSession).withConfiguration(ConfigurationUtils.getSubSet(configuration, OAUTH)).build();
 
-		while (keysIterator.hasNext()) {
-			var key = keysIterator.next();
-			headers.put(key, headersConfig.getString(key));
-		}
+		oauthEnabled = ValidationUtils.isNotNull(oauth) && oauth.isEnabled();
 
 		// socketFactory
 

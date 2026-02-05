@@ -13,8 +13,7 @@ import org.keycloak.admin.client.resource.RealmResource;
 import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.RealmRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.Network;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
@@ -25,10 +24,9 @@ import jakarta.ws.rs.core.Response;
 
 import static org.awaitility.Awaitility.await;
 
+@Slf4j
 @SuppressWarnings("resource")
 public abstract class EndToEndTestBase {
-
-	private static final Logger LOG = LoggerFactory.getLogger(EndToEndTestBase.class);
 
 	private static final File SHADED_JAR_FILE = new File("target/kete.jar");
 
@@ -52,19 +50,19 @@ public abstract class EndToEndTestBase {
 			return;
 		}
 
-		LOG.info("Building shaded JAR with 'mvn package -DskipTests'...");
+		log.info("Building shaded JAR with 'mvn package -DskipTests'...");
 
 		if (buildWithMavenInvoker() && SHADED_JAR_FILE.exists()) {
 			SHADED_JAR_BUILT = true;
-			LOG.info("Shaded JAR built successfully at {}", SHADED_JAR_FILE.getAbsolutePath());
+			log.info("Shaded JAR built successfully at {}", SHADED_JAR_FILE.getAbsolutePath());
 			return;
 		}
 
-		LOG.info("Maven Invoker failed, falling back to CLI...");
+		log.info("Maven Invoker failed, falling back to CLI...");
 
 		if (buildWithCli() && SHADED_JAR_FILE.exists()) {
 			SHADED_JAR_BUILT = true;
-			LOG.info("Shaded JAR built successfully at {}", SHADED_JAR_FILE.getAbsolutePath());
+			log.info("Shaded JAR built successfully at {}", SHADED_JAR_FILE.getAbsolutePath());
 			return;
 		}
 
@@ -79,7 +77,7 @@ public abstract class EndToEndTestBase {
 			var pomFile = new File("pom.xml").getAbsoluteFile();
 
 			if (!pomFile.isFile()) {
-				LOG.warn("pom.xml not found at {}", pomFile.getAbsolutePath());
+				log.warn("pom.xml not found at {}", pomFile.getAbsolutePath());
 				return false;
 			}
 
@@ -94,8 +92,8 @@ public abstract class EndToEndTestBase {
 
 			var invoker = new org.apache.maven.shared.invoker.DefaultInvoker();
 
-			invoker.setOutputHandler(line -> LOG.info("[mvn] {}", line));
-			invoker.setErrorHandler(line -> LOG.warn("[mvn] {}", line));
+			invoker.setOutputHandler(line -> log.info("[mvn] {}", line));
+			invoker.setErrorHandler(line -> log.warn("[mvn] {}", line));
 
 			var mavenHome = System.getenv("MAVEN_HOME");
 
@@ -117,15 +115,15 @@ public abstract class EndToEndTestBase {
 
 			if (result.getExitCode() == 0) {
 
-				LOG.info("Shaded JAR built successfully via Maven Invoker at {}", SHADED_JAR_FILE.getAbsolutePath());
+				log.info("Shaded JAR built successfully via Maven Invoker at {}", SHADED_JAR_FILE.getAbsolutePath());
 				return true;
 
 			} else {
 
-				LOG.warn("Maven Invoker build failed with exit code {}", result.getExitCode());
+				log.warn("Maven Invoker build failed with exit code {}", result.getExitCode());
 
 				if (result.getExecutionException() != null) {
-					LOG.warn("Execution exception:", result.getExecutionException());
+					log.warn("Execution exception:", result.getExecutionException());
 				}
 
 				return false;
@@ -133,12 +131,12 @@ public abstract class EndToEndTestBase {
 
 		} catch (NoSuchMethodError e) {
 
-			LOG.warn("Maven Invoker API incompatibility detected: {}", e.getMessage());
+			log.warn("Maven Invoker API incompatibility detected: {}", e.getMessage());
 			return false;
 
 		} catch (Exception e) {
 
-			LOG.warn("Maven Invoker failed:", e);
+			log.warn("Maven Invoker failed:", e);
 			return false;
 
 		}
@@ -155,26 +153,26 @@ public abstract class EndToEndTestBase {
 
 			if (exitCode != 0) {
 
-				LOG.error("Maven CLI build failed with exit code {}", exitCode);
+				log.error("Maven CLI build failed with exit code {}", exitCode);
 				return false;
 
 			}
 
 			if (SHADED_JAR_FILE.exists()) {
 
-				LOG.info("Shaded JAR built successfully via CLI at {}", SHADED_JAR_FILE.getAbsolutePath());
+				log.info("Shaded JAR built successfully via CLI at {}", SHADED_JAR_FILE.getAbsolutePath());
 				return true;
 
 			} else {
 
-				LOG.error("Maven CLI build completed but shaded JAR still not found at {}", SHADED_JAR_FILE.getAbsolutePath());
+				log.error("Maven CLI build completed but shaded JAR still not found at {}", SHADED_JAR_FILE.getAbsolutePath());
 				return false;
 
 			}
 
 		} catch (Exception e) {
 
-			LOG.error("Failed to build shaded JAR via CLI: {}", e.getMessage(), e);
+			log.error("Failed to build shaded JAR via CLI: {}", e.getMessage(), e);
 			return false;
 
 		}
@@ -198,7 +196,7 @@ public abstract class EndToEndTestBase {
 			.withAdminPassword("admin")
 			.withProviderLibsFrom(List.of(SHADED_JAR_FILE))
 			.withStartupTimeout(CONTAINER_STARTUP_TIMEOUT)
-			.withLogConsumer(new Slf4jLogConsumer(LOG));
+			.withLogConsumer(new Slf4jLogConsumer(log));
 
 		envVars.forEach(keycloak::withEnv);
 
@@ -214,7 +212,7 @@ public abstract class EndToEndTestBase {
 			.withAdminPassword("admin")
 			.withProviderLibsFrom(List.of(SHADED_JAR_FILE))
 			.withStartupTimeout(CONTAINER_STARTUP_TIMEOUT)
-			.withLogConsumer(new Slf4jLogConsumer(LOG))
+			.withLogConsumer(new Slf4jLogConsumer(log))
 			.withEnabledMetrics();
 
 		envVars.forEach(keycloak::withEnv);
@@ -316,7 +314,7 @@ public abstract class EndToEndTestBase {
 	protected void waitForPortReady(String host, int port) throws Exception {
 		await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).until(() -> {
 			try (Socket socket = new Socket(host, port)) {
-				LOG.debug("Port {}:{} is ready", host, port);
+				log.debug("Port {}:{} is ready", host, port);
 				return true;
 			} catch (Exception e) {
 				return false;
@@ -339,7 +337,7 @@ public abstract class EndToEndTestBase {
 		await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).until(() -> {
 			try (var adminClient = org.apache.kafka.clients.admin.AdminClient.create(props)) {
 				adminClient.listTopics().names().get(5, TimeUnit.SECONDS);
-				LOG.debug("Kafka broker is ready at {}", kafka.getBootstrapServers());
+				log.debug("Kafka broker is ready at {}", kafka.getBootstrapServers());
 				return true;
 			} catch (Exception e) {
 				return false;
@@ -354,7 +352,7 @@ public abstract class EndToEndTestBase {
 	protected void waitForRabbitMqReady(com.rabbitmq.client.ConnectionFactory factory) throws Exception {
 		await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).until(() -> {
 			try (var connection = factory.newConnection()) {
-				LOG.debug("RabbitMQ is ready at {}:{}", factory.getHost(), factory.getPort());
+				log.debug("RabbitMQ is ready at {}:{}", factory.getHost(), factory.getPort());
 				return true;
 			} catch (Exception e) {
 				return false;

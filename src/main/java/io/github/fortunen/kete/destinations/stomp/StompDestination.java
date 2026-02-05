@@ -32,28 +32,10 @@ public class StompDestination extends Destination<StompDestinationConfig> {
 		connection = new StompConnection();
 
 		var socket = config.getSocketFactory().createSocket(config.getHost(), config.getPort());
-		socket.setSoTimeout(config.getReadTimeoutMillis());
+		socket.setSoTimeout(config.getReadTimeoutSeconds() * 1000);
+
 		connection.open(socket);
-
-		var connectHeaders = new HashMap<String, String>();
-
-		if (ValidationUtils.isNotBlank(config.getUsername())) {
-			connectHeaders.put("login", config.getUsername());
-		}
-
-		if (ValidationUtils.isNotBlank(config.getPassword())) {
-			connectHeaders.put("passcode", config.getPassword());
-		}
-
-		connectHeaders.put("accept-version", "1.1,1.2");
-
-		if (ValidationUtils.isNotBlank(config.getVirtualHost())) {
-			connectHeaders.put("host", config.getVirtualHost());
-		}
-
-		connectHeaders.put("heart-beat", config.getHeartBeatOutgoing() + "," + config.getHeartBeatIncoming());
-
-		connection.connect(connectHeaders);
+		connection.connect(config.getConnectHeaders());
 	}
 
 	@Override
@@ -62,17 +44,14 @@ public class StompDestination extends Destination<StompDestinationConfig> {
 
 		ValidationUtils.requireNonNull(message, "message is required");
 
-		var actualDestination = TemplateUtils.substitute(config.getDestination(), message);
 		var body = message.eventBody();
-
 		var headers = new HashMap<String, String>();
+		var actualDestination = TemplateUtils.substitute(config.getDestination(), message);
+
 		headers.put("content-type", message.contentType());
 		headers.put("content-length", String.valueOf(body.length));
-
-		if (config.isMessageHeadersEnabled()) {
-			headers.put(Constants.MESSAGE_HEADER_EVENT_TYPE, message.eventType());
-			headers.put(Constants.MESSAGE_HEADER_EVENT_KIND, message.kind());
-		}
+		headers.put(Constants.MESSAGE_HEADER_EVENT_KIND, message.kind());
+		headers.put(Constants.MESSAGE_HEADER_EVENT_TYPE, message.eventType());
 
 		if (config.isReceiptEnabled()) {
 			headers.put("receipt", message.eventId());

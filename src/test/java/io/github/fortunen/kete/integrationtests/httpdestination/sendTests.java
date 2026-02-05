@@ -63,6 +63,7 @@ public class sendTests extends TestBase {
 		mockServer.enqueue(new MockResponse().setResponseCode(200)); // for send() request
 
 		var map = new HashMap<String, Object>();
+		map.put("kind", "http");
 		map.put("host", mockServer.getHostName());
 		map.put("port", mockServer.getPort());
 		map.put("tls.enabled", true);
@@ -114,6 +115,7 @@ public class sendTests extends TestBase {
 		mockServer.enqueue(new MockResponse().setResponseCode(200)); // for send() request
 
 		var map = new HashMap<String, Object>();
+		map.put("kind", "http");
 		map.put("host", mockServer.getHostName());
 		map.put("port", mockServer.getPort());
 		map.put("tls.enabled", true);

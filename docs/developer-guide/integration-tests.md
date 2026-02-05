@@ -7,6 +7,8 @@
 - [Debugging Integration Tests](#debugging-integration-tests)
 - [Test Categories](#test-categories)
 - [Writing New Integration Tests](#writing-new-integration-tests)
+- [Container File Mounting Best Practices](#container-file-mounting-best-practices)
+- [Troubleshooting](#troubleshooting)
 
 
 
@@ -158,6 +160,22 @@ class MyIntegrationTests {
 }
 ```
 
+### Mounting Configuration Files
+
+**CRITICAL**: When tests require custom configuration files for containers (broker configs, certificates, etc.), **ALWAYS use in-memory `Transferable.of()` with 0777 permissions**. NEVER use `withFileSystemBind()` or `withCopyToContainer()` without permissions.
+
+```java
+// Step 1: Read file content into memory
+var brokerXmlBytes = Files.readAllBytes(Path.of(brokerXmlPath));
+
+// Step 2: Copy to container memory with full permissions
+@Container
+static GenericContainer<?> broker = new GenericContainer<>(imageName)
+    .withCopyToContainer(Transferable.of(brokerXmlBytes, 0777), "/etc/broker.xml");
+```
+
+See [Container File Mounting Best Practices](#container-file-mounting-best-practices) for complete details.
+
 ### Key Configuration Environment Variables
 
 | Variable | Description | Example |
@@ -188,6 +206,161 @@ static RabbitMQContainer rabbitmq = new RabbitMQContainer(DockerImageName.parse(
 
 
 
+## Container File Mounting Best Practices
+
+### Why In-Memory Transfer with Full Permissions?
+
+**ALWAYS use `withCopyToContainer(Transferable.of(bytes, 0777))` for mounting files into containers. NEVER use `withFileSystemBind()`.**
+
+| Aspect | In-Memory Transfer (`Transferable.of()`) | File System Bind (`withFileSystemBind`) |
+|--------|------------------------------------------|----------------------------------------|
+| **GitHub Actions** | ✅ Works reliably in CI/CD | ❌ Fails due to filesystem limitations |
+| **Permissions** | Full control with 0777 parameter | Unpredictable based on host OS |
+| **Cross-platform** | Identical behavior on all OS | Different behavior Windows/Linux/macOS |
+| **Performance** | Fast in-memory copy | Filesystem mount overhead |
+| **Best Practice** |  **REQUIRED in this codebase** |  **FORBIDDEN** |
+
+### Standard In-Memory Transfer Pattern
+
+Use this pattern consistently across all TestBase classes:
+
+```java
+// Step 1: Read file content into byte array
+var configBytes = Files.readAllBytes(Path.of(sourceConfigPath));
+var keystoreBytes = Files.readAllBytes(Path.of(sourceKeystorePath));
+var truststoreBytes = Files.readAllBytes(Path.of(sourceTruststorePath));
+
+// Step 2: Copy to container memory with 0777 permissions
+container = new GenericContainer<>(imageName)
+    .withCopyToContainer(Transferable.of(configBytes, 0777), "/container/path/config.xml")
+    .withCopyToContainer(Transferable.of(keystoreBytes, 0777), "/container/path/keystore.jks")
+    .withCopyToContainer(Transferable.of(truststoreBytes, 0777), "/container/path/truststore.jks");
+```
+
+### Complete Example: AMQP1 with TLS
+
+From `io.github.fortunen.kete.integrationtests.amqp1destination.TestBase`:
+
+```java
+private void startActiveMqArtemisWithTls(TlsMaterial tls, boolean requireClientAuth) throws Exception {
+    
+    // Create broker configuration XML as string
+    var brokerXml = createArtemisBrokerXml(
+        tls.getKeyStorePassword(),
+        tls.getTrustStorePassword(),
+        requireClientAuth
+    );
+
+    // Read certificate files into memory
+    var keystoreBytes = Files.readAllBytes(Path.of(tls.getServerKeyStoreFilePath()));
+    var truststoreBytes = Files.readAllBytes(Path.of(tls.getTrustStoreFilePath()));
+
+    // Copy all files to container memory with 0777 permissions
+    container = new GenericContainer<>(DockerImageName.parse("apache/activemq-artemis:2.40.0-alpine"))
+        .withEnv("ARTEMIS_USER", DEFAULT_USERNAME)
+        .withEnv("ARTEMIS_PASSWORD", DEFAULT_PASSWORD)
+        .withEnv("ANONYMOUS_LOGIN", "true")
+        .withCopyToContainer(
+            Transferable.of(brokerXml.getBytes(StandardCharsets.UTF_8), 0777),
+            "/var/lib/artemis-instance/etc-override/broker.xml")
+        .withCopyToContainer(
+            Transferable.of(keystoreBytes, 0777),
+            "/var/lib/artemis-instance/etc-override/keystore.jks")
+        .withCopyToContainer(
+            Transferable.of(truststoreBytes, 0777),
+            "/var/lib/artemis-instance/etc-override/truststore.jks")
+        .withExposedPorts(AMQP_PORT, AMQPS_PORT, 8161)
+        .waitingFor(Wait.forLogMessage(".*AMQ221007.*", 1))
+        .withStartupTimeout(Duration.ofMinutes(10));
+
+    container.start();
+}
+```
+
+### Inline Content Pattern
+
+For configuration generated as strings (XML, YAML, TOML, properties):
+
+```java
+// Create config content as string
+var mosquittoConf = """
+    listener 1883
+    allow_anonymous true
+    """;
+
+mosquitto = new GenericContainer<>(DockerImageName.parse("eclipse-mosquitto:2.0"))
+    .withNetwork(createNetwork())
+    .withNetworkAliases("mosquitto")
+    .withExposedPorts(MQTT_PORT)
+    .withCommand("mosquitto", "-c", "/mosquitto-no-auth.conf")
+    .withCopyToContainer(
+        Transferable.of(mosquittoConf.getBytes(StandardCharsets.UTF_8), 0777),
+        "/mosquitto-no-auth.conf");
+```
+
+### Key Implementation Details
+
+1. **Always specify 0777 permissions**: `Transferable.of(content, 0777)` ensures maximum compatibility
+2. **Read files into memory**: Use `Files.readAllBytes(Path.of(path))` for binary files
+3. **Convert strings to bytes**: Use `.getBytes(StandardCharsets.UTF_8)` for text content
+4. **Import Transferable**: `import org.testcontainers.utility.MountableFile.Transferable;`
+5. **No cleanup needed**: In-memory content is garbage collected automatically
+
+### Pattern Variations by Use Case
+
+#### Multiple Configuration Files (STOMP, AMQP1, WebSocket)
+```java
+var activeMqXml = createActiveMqConfig();
+var keyStoreBytes = Files.readAllBytes(Path.of(tls.getServerKeyStoreFilePath()));
+var trustStoreBytes = Files.readAllBytes(Path.of(tls.getTrustStoreFilePath()));
+
+container
+    .withCopyToContainer(Transferable.of(activeMqXml.getBytes(UTF_8), 0777), "/conf/activemq.xml")
+    .withCopyToContainer(Transferable.of(keyStoreBytes, 0777), "/conf/keystore.jks")
+    .withCopyToContainer(Transferable.of(trustStoreBytes, 0777), "/conf/truststore.jks");
+```
+
+#### Single Config File (MQTT E2E)
+```java
+var mosquittoConf = "listener 1883\nallow_anonymous true\n";
+
+container.withCopyToContainer(
+    Transferable.of(mosquittoConf.getBytes(UTF_8), 0777),
+    "/mosquitto-no-auth.conf");
+```
+
+#### TLS Certificates (Pulsar, NATS, Redis)
+```java
+var certBytes = Files.readAllBytes(Path.of(tls.getServerCertificatePemFilePath()));
+var keyBytes = Files.readAllBytes(Path.of(tls.getServerPrivateKeyPemFilePath()));
+var caBytes = Files.readAllBytes(Path.of(tls.getCaCertificatePemFilePath()));
+
+container
+    .withCopyToContainer(Transferable.of(certBytes, 0777), "/certs/server.crt")
+    .withCopyToContainer(Transferable.of(keyBytes, 0777), "/certs/server.key")
+    .withCopyToContainer(Transferable.of(caBytes, 0777), "/certs/ca.crt");
+```
+
+### Common Pitfalls to Avoid
+
+|  Don't | ✅ Do |
+|--------|-------|
+| `withFileSystemBind(hostPath, "/path", BindMode.READ_ONLY)` | `withCopyToContainer(Transferable.of(bytes, 0777), "/path")` |
+| `Transferable.of(content)` without permissions | `Transferable.of(content, 0777)` |
+| `withCopyToContainer(Transferable.of(bytes), "/path")` | `withCopyToContainer(Transferable.of(bytes, 0777), "/path")` |
+| Create temp files on disk | Read directly into memory with `Files.readAllBytes()` |
+| Use `BindMode.READ_ONLY` | Always use 0777 permissions for maximum compatibility |
+
+### Why This Matters
+
+- **GitHub Actions Compatibility**: Eliminates filesystem mounting issues in CI/CD
+- **Cross-platform**: Identical behavior on Windows, Linux, macOS
+- **Permissions**: 0777 ensures containers can read/write/execute without issues
+- **Simplicity**: No temp file cleanup needed, automatic garbage collection
+- **Reliability**: Consistent pattern across all test classes reduces bugs
+
+
+
 ## Troubleshooting
 
 ### Container Fails to Start
@@ -196,7 +369,7 @@ static RabbitMQContainer rabbitmq = new RabbitMQContainer(DockerImageName.parse(
 - Check for port conflicts
 - Increase container startup timeout:
   ```java
-  keycloak.withStartupTimeout(Duration.ofMinutes(5));
+  keycloak.withStartupTimeout(Duration.ofMinutes(10));
   ```
 
 ### Provider Not Loading
@@ -214,8 +387,16 @@ static RabbitMQContainer rabbitmq = new RabbitMQContainer(DockerImageName.parse(
 - Check destination container is reachable (network aliases)
 - Enable debug logging in the provider
 
+### File Mounting Issues
+
+- **File not accessible in container**: Ensure using `Transferable.of(bytes, 0777)` with full permissions
+- **Permission denied**: Always use 0777 permissions parameter
+- **GitHub Actions failures**: Never use `withFileSystemBind()`, always use `Transferable.of()`
+- **Missing permissions parameter**: Verify all `Transferable.of()` calls include `0777` as second parameter
+
 
 
 ## Related Documentation
 
 - [Testing Reference](testing.md)
+- [Test Patterns and Conventions](test-patterns-and-conventions.md)

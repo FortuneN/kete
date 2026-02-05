@@ -1,6 +1,10 @@
 package io.github.fortunen.kete.destinations.kafka;
 
+import java.nio.charset.StandardCharsets;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.ByteArraySerializer;
@@ -31,8 +35,9 @@ public class KafkaDestinationConfig extends DestinationConfig {
 
 	private String topic;
 	private boolean transactional;
-	private boolean messageHeadersEnabled;
 	private Properties producerConfiguration;
+	private Set<Map.Entry<String, byte[]>> customHeadersBytesEntrySet;
+	private Map<String, byte[]> customHeadersBytes = new LinkedHashMap<>();
 
 	@Override
 	@SneakyThrows
@@ -74,21 +79,25 @@ public class KafkaDestinationConfig extends DestinationConfig {
 		producerConfiguration.putIfAbsent(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
 		producerConfiguration.putIfAbsent(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, ByteArraySerializer.class.getName());
 
-		// messageHeadersEnabled
-
-		messageHeadersEnabled = configuration.getBoolean(MESSAGE_HEADERS_ENABLED, true);
-
-		// tls - rebuild with writeFiles only if enabled (Kafka needs file paths)
+		// tls
 
 		if (tls.isEnabled()) {
 			tls = TlsMaterial.builder().withConfiguration(ConfigurationUtils.getSubSet(configuration, TLS)).withWriteFiles(true).build();
 			tls.updateKafkaConfiguration(producerConfiguration);
 		}
 
-		// transactional producer - not supported with connection pooling
+		// transactional
 
 		transactional = producerConfiguration.containsKey(ProducerConfig.TRANSACTIONAL_ID_CONFIG);
 
 		ValidationUtils.requireFalse(transactional, "transactional producers are not supported with connection pooling");
+
+		// customHeadersBytes
+
+		getCustomHeaders().forEach((key, value) -> {
+			customHeadersBytes.put(key, value.getBytes(StandardCharsets.UTF_8));
+		});
+
+		customHeadersBytesEntrySet = customHeadersBytes.entrySet();
 	}
 }

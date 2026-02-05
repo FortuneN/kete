@@ -63,6 +63,20 @@ This destination uses AMQP 0.9.1 (RabbitMQ's native protocol). For AMQP 1 broker
 
 
 
+## Features
+
+- Full AMQP 0.9.1 protocol support
+- Exchange and routing key configuration
+- TLS/SSL support with mutual TLS (mTLS)
+- Persistent and non-persistent delivery modes
+- Message priority and TTL configuration
+- Automatic reconnection and topology recovery
+- Custom headers on messages
+- Virtual host support
+- Dynamic exchange and routing key (templating)
+
+
+
 ## Configuration Properties
 
 ### Required Properties
@@ -103,18 +117,29 @@ kete.routes.main-rabbitmq.destination.routing-key=events
 | `routing-key` | Routing key (supports templating) | `""` | `${eventTypeLowerCase}` |
 | `priority` | Message priority (0-9) | `4` | `7` |
 | `delivery-mode` | Message durability: `persistent` or `non-persistent` | `persistent` | `persistent` |
-| `time-to-live` | Message TTL in milliseconds (0 = never expires) | `0` | `60000` |
-| `connection-timeout` | Connection timeout (ms) | `10000` | `30000` |
-| `handshake-timeout` | Handshake timeout (ms) | `10000` | `5000` |
-| `channel-rpc-timeout` | Channel RPC timeout (ms) | `10000` | `15000` |
-| `requested-heartbeat` | Heartbeat interval (seconds) | `30` | `60` |
+| `time-to-live-seconds` | Message TTL in seconds (0 = never expires) | `0` | `60` |
+| `connection-timeout-seconds` | Connection timeout in seconds | `10` | `30` |
+| `handshake-timeout-seconds` | Handshake timeout in seconds | `10` | `5` |
+| `channel-rpc-timeout-seconds` | Channel RPC timeout in seconds | `10` | `15` |
+| `requested-heartbeat-seconds` | Heartbeat interval in seconds | `30` | `60` |
 | `automatic-recovery-enabled` | Enable automatic connection recovery | `true` | `false` |
-| `network-recovery-interval` | Network recovery interval (ms) | `5000` | `10000` |
+| `network-recovery-interval-seconds` | Network recovery interval in seconds | `5` | `10` |
 | `topology-recovery-enabled` | Enable topology recovery | Same as `automatic-recovery-enabled` | `true` |
-| `message-headers-enabled` | Include event metadata as headers | `true` | `false` |
-| `min-pool-size` | Minimum connections in pool | `5` | `10` |
-| `max-pool-size` | Maximum connections in pool | `20` | `50` |
+| `pool.min-idle` | `1` | Minimum idle connections in pool | `5` |
+| `pool.max-idle` | `10` | Maximum idle connections in pool | `20` |
+| `pool.max-total` | `20` | Maximum total connections in pool | `50` |
 | `tls.*` | TLS/SSL configuration | - | See [TLS & mTLS](overview.md#tls-mtls) |
+
+### Custom Headers
+
+Custom headers can be added to AMQP messages:
+
+```bash
+kete.routes.rabbitmq.destination.headers.X-Source=keycloak
+kete.routes.rabbitmq.destination.headers.X-Environment=production
+```
+
+Headers are included in the AMQP message properties.
 
 ### Dynamic Exchange/Routing Key (Templating)
 

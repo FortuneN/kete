@@ -1,11 +1,8 @@
 package io.github.fortunen.kete.destinations.amqp1;
 
-import org.apache.commons.lang3.Strings;
 import org.apache.qpid.jms.JmsConnectionFactory;
 
 import io.github.fortunen.kete.DestinationConfig;
-import io.github.fortunen.kete.TlsMaterial;
-import io.github.fortunen.kete.utils.ConfigurationUtils;
 import io.github.fortunen.kete.utils.ValidationUtils;
 import jakarta.jms.DeliveryMode;
 import lombok.Data;
@@ -30,8 +27,8 @@ public class Amqp1DestinationConfig extends DestinationConfig {
 	public static final String TLS = "tls";
 	public static final String TLS_ENABLED = TLS + ".enabled";
 
-	public static final int DEFAULT_IDLE_TIMEOUT = 60000;
-	public static final String IDLE_TIMEOUT = "idle-timeout";
+	public static final int DEFAULT_IDLE_TIMEOUT_SECONDS = 60;
+	public static final String IDLE_TIMEOUT_SECONDS = "idle-timeout-seconds";
 
 	public static final String DESTINATION_NAME = "destination-name";
 	public static final String DESTINATION_TYPE = "destination-type";
@@ -40,26 +37,25 @@ public class Amqp1DestinationConfig extends DestinationConfig {
 	public static final int MAX_PRIORITY = 9;
 	public static final int DEFAULT_PRIORITY = 4;
 	public static final String PRIORITY = "priority";
-	public static final long DEFAULT_TIME_TO_LIVE = 0L;
-	public static final String TIME_TO_LIVE = "time-to-live";
+	public static final long DEFAULT_TIME_TO_LIVE_SECONDS = 0L;
 	public static final String DELIVERY_MODE = "delivery-mode";
+	public static final String TIME_TO_LIVE_SECONDS = "time-to-live-seconds";
 
 	private int port;
 	private String url;
 	private String host;
 	private int priority;
 	private String scheme;
-	private int idleTimeout;
-	private long timeToLive;
 	private String username;
 	private String password;
 	private int deliveryMode;
 	private String transportType;
+	private long timeToLiveSeconds;
+	private int idleTimeoutSeconds;
 	private String destinationType;
 	private String queueOrTopicName;
 	private String deliveryModeString;
 	private boolean destinationIsQueue;
-	private boolean messageHeadersEnabled;
 	private JmsConnectionFactory connectionFactory;
 
 	@Override
@@ -71,13 +67,6 @@ public class Amqp1DestinationConfig extends DestinationConfig {
 		// host
 
 		host = ValidationUtils.requireNonBlank(configuration.getString(HOST, "").trim(), HOST + " is required");
-
-		// tls - auto-enable for Azure Service Bus
-
-		if (!tls.isEnabled() && Strings.CS.contains(host, "servicebus")) {
-			configuration.setProperty(TLS_ENABLED, "true");
-			tls = TlsMaterial.builder().withConfiguration(ConfigurationUtils.getSubSet(configuration, TLS)).build();
-		}
 
 		// transportType
 
@@ -105,7 +94,7 @@ public class Amqp1DestinationConfig extends DestinationConfig {
 
 		destinationIsQueue = destinationType.equals("queue");
 
-		// scheme and port
+		// scheme
 
 		if (transportType.equals("amqp-web-sockets")) {
 			scheme = tls.isEnabled() ? "amqpwss" : "amqpws";
@@ -117,14 +106,14 @@ public class Amqp1DestinationConfig extends DestinationConfig {
 
 		ValidationUtils.requireValidPort(port, PORT);
 
-		// idleTimeout (AMQP heartbeat/keepalive in milliseconds, 0 = disabled)
+		// idleTimeoutSeconds
 
-		idleTimeout = ValidationUtils.requireNonNegative(configuration.getInt(IDLE_TIMEOUT, DEFAULT_IDLE_TIMEOUT), IDLE_TIMEOUT + " must be non-negative");
+		idleTimeoutSeconds = ValidationUtils.requireNonNegative(configuration.getInt(IDLE_TIMEOUT_SECONDS, DEFAULT_IDLE_TIMEOUT_SECONDS), IDLE_TIMEOUT_SECONDS + " must be non-negative");
 
-		// url (with optional amqp.idleTimeout parameter for keep-alive)
+		// url (AMQP protocol expects idle timeout in milliseconds)
 
-		if (idleTimeout > 0) {
-			url = scheme + "://" + host + ":" + port + "?amqp.idleTimeout=" + idleTimeout;
+		if (idleTimeoutSeconds > 0) {
+			url = scheme + "://" + host + ":" + port + "?amqp.idleTimeout=" + (idleTimeoutSeconds * 1000);
 		} else {
 			url = scheme + "://" + host + ":" + port + "?amqp.idleTimeout=0";
 		}
@@ -141,13 +130,9 @@ public class Amqp1DestinationConfig extends DestinationConfig {
 
 		priority = ValidationUtils.requireInRange(configuration.getInt(PRIORITY, DEFAULT_PRIORITY), MIN_PRIORITY, MAX_PRIORITY, PRIORITY + " must be between " + MIN_PRIORITY + " and " + MAX_PRIORITY);
 
-		// timeToLive
+		// timeToLiveSeconds
 
-		timeToLive = ValidationUtils.requireNonNegative(configuration.getLong(TIME_TO_LIVE, DEFAULT_TIME_TO_LIVE), TIME_TO_LIVE + " must be non-negative");
-
-		// messageHeadersEnabled
-
-		messageHeadersEnabled = configuration.getBoolean(MESSAGE_HEADERS_ENABLED, true);
+		timeToLiveSeconds = ValidationUtils.requireNonNegative(configuration.getLong(TIME_TO_LIVE_SECONDS, DEFAULT_TIME_TO_LIVE_SECONDS), TIME_TO_LIVE_SECONDS + " must be non-negative");
 
 		// connectionFactory
 

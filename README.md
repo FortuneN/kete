@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/FortuneN/kete/release/logo/png/kete-hexagon-128.png" alt="KETE Logo" width="128" height="128">
+  <img src="https://raw.githubusercontent.com/FortuneN/kete/release/logo/png/kete-hexagon-128.png" alt="KETE Logo" width="128" height="128" />
 </p>
 
 <h1 align="center">
@@ -12,9 +12,15 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/FortuneN/kete/actions/workflows/release.yml"><img src="https://github.com/FortuneN/kete/actions/workflows/release.yml/badge.svg" alt="Build Status"></a>
-  <a href="https://github.com/FortuneN/kete/releases/latest"><img src="https://img.shields.io/github/v/release/FortuneN/kete?label=Release" alt="Latest Release"></a>
-  <a href="https://www.apache.org/licenses/LICENSE-2.0"><img src="https://img.shields.io/badge/License-Apache%202.0-blue" alt="Apache 2.0 License"></a>
+  <a href="https://github.com/FortuneN/kete/actions/workflows/release.yml">
+    <img src="https://github.com/FortuneN/kete/actions/workflows/release.yml/badge.svg" alt="Build Status"  >
+  </a>
+  <a href="https://github.com/FortuneN/kete/releases/latest">
+    <img src="https://img.shields.io/github/v/release/FortuneN/kete?label=Release" alt="Latest Release" />
+  </a>
+  <a href="https://www.apache.org/licenses/LICENSE-2.0">
+    <img src="https://img.shields.io/badge/License-Apache%202.0-blue" alt="Apache 2.0 License" />
+  </a>
 </p>
 
 <p align="center">
@@ -41,18 +47,21 @@
 
 | Protocol | Examples |
 |----------|----------|
-| **Kafka** | Apache Kafka, Confluent, Redpanda, Azure Event Hubs, ... |
-| **AMQP 1.0** | RabbitMQ, ActiveMQ, Azure Service Bus, Qpid, ... |
-| **AMQP 0-9-1** | RabbitMQ, LavinMQ, ... |
-| **MQTT 3.1.1** | Mosquitto, EMQX, HiveMQ, ... |
-| **MQTT 5.0** | Mosquitto, EMQX, HiveMQ, Azure Event Grid, ... |
-| **HTTP** | Webhooks, REST APIs, Azure Event Grid, ... |
-| **STOMP** | ActiveMQ, ... |
-| **WebSocket** | WebSocket Applications/Servers, ... |
+| **Kafka** | Apache Kafka, Confluent Platform, Redpanda, Azure Event Hubs, AWS MSK, Aiven for Apache Kafka, Instaclustr, CloudKarafka |
+| **AMQP 1.0** | Apache ActiveMQ, Apache Artemis, Azure Service Bus, Azure Event Hubs, Apache Qpid, RabbitMQ, SwiftMQ, Solace PubSub+, IBM MQ |
+| **AMQP 0-9-1** | RabbitMQ, LavinMQ, Apache Qpid, CloudAMQP, Amazon MQ |
+| **MQTT 3.1.1** | Eclipse Mosquitto, EMQX, HiveMQ, VerneMQ, NanoMQ, RabbitMQ, AWS IoT Core, Azure IoT Hub |
+| **MQTT 5.0** | Eclipse Mosquitto, EMQX, HiveMQ, VerneMQ, NanoMQ, RabbitMQ, Azure Event Grid, AWS IoT Core |
+| **Redis** | Redis, Valkey, Dragonfly, KeyDB, AWS ElastiCache, Azure Cache for Redis, Upstash Redis, Google Cloud Memorystore (Pub/Sub & Streams) |
+| **NATS** | NATS Server, NATS JetStream, Synadia Cloud, NGS (NATS Global Service) |
+| **Pulsar** | Apache Pulsar, StreamNative Cloud, DataStax Astra Streaming, StreamNative Private Cloud, Clever Cloud Pulsar |
+| **HTTP** | Webhooks, REST APIs, Azure Event Grid, AWS EventBridge, Google Cloud Pub/Sub Push, Twilio, Slack, Discord, Custom HTTP Endpoints |
+| **STOMP** | Apache ActiveMQ, Apache Artemis, RabbitMQ, EMQX, HornetQ |
+| **WebSocket** | Custom WebSocket Servers, Socket.IO, SignalR, Ably, Pusher, WebSocket-based Chat Applications |
 
 ## Quick Start (5 minutes)
 
-### Step 1: <a href="https://raw.githubusercontent.com/FortuneN/kete/release/quick-starts/amqp-0.9.1-rabbitmq/docker-compose.yml" download>Download</a> or create docker-compose.yml
+### Step 1: <a href="https://raw.githubusercontent.com/FortuneN/kete/develop/quick-starts/amqp-0.9.1-rabbitmq/docker-compose.yml" download>Download</a> or create docker-compose.yml
 
 ```yaml
 services:
@@ -84,6 +93,7 @@ services:
     command: start-dev
     ports:
       - 8080:8080
+      - 9000:9000
     environment:
       kete.routes.quick-start.destination.kind: amqp-0.9.1
       kete.routes.quick-start.destination.host: rabbitmq
@@ -131,6 +141,17 @@ docker compose up -d
 
 [Create new issue →](https://github.com/FortuneN/kete/issues/new)
 
+## Please consider supporting the project
+
+| Platform | Type | Link |
+|----------|------|------|
+| **GitHub (Stars)** | Free | [Give the project a star](https://github.com/FortuneN/kete) |
+| **GitHub (Sponsors)** | One-time / Recurring | [Sponsor on GitHub](https://github.com/sponsors/FortuneN) |
+| **PayPal** | One-time / Recurring | [Donate using PayPal](https://paypal.me/FortuneNgwenya) |
+| **Buy Me a Coffee** | One-time / Recurring | [Donate using Buy Me a Coffee](https://www.buymeacoffee.com/FortuneN) |
+| **Ko-fi** | One-time / Recurring | [Donate using Ko-fi](https://ko-fi.com/FortuneN) |
+| **Liberapay** | Recurring | [Donate using Liberapay](https://liberapay.com/FortuneN) |
+
 ## Credits
 
 | Library | Description |
@@ -139,6 +160,7 @@ docker compose up -d
 | [Lombok](https://projectlombok.org/) | Boilerplate reduction for Java |
 | [Apache Commons](https://commons.apache.org/) | Configuration2, Lang3, Text, IO, Pool2 utilities |
 | [Apache Kafka Client](https://kafka.apache.org/) | Kafka producer library |
+| [Apache Pulsar Client](https://pulsar.apache.org/) | Pulsar producer library |
 | [RabbitMQ Client](https://www.rabbitmq.com/java-client.html) | AMQP 0-9-1 client |
 | [Eclipse Paho](https://www.eclipse.org/paho/) | MQTT 3.1.1 and MQTT 5.0 clients |
 | [Apache Qpid JMS](https://qpid.apache.org/components/jms/) | AMQP 1.0 JMS client |
@@ -146,6 +168,8 @@ docker compose up -d
 | [Pooled JMS](https://github.com/messaginghub/pooled-jms) | JMS connection pooling |
 | [Java-WebSocket](https://github.com/TooTallNate/Java-WebSocket) | WebSocket client library |
 | [OkHttp](https://square.github.io/okhttp/) | HTTP client with TLS support |
+| [Lettuce](https://lettuce.io/) | Redis client for Pub/Sub and Streams |
+| [NATS Java Client](https://github.com/nats-io/nats.java) | NATS and JetStream messaging |
 | [Nimbus OAuth SDK](https://connect2id.com/products/nimbus-oauth-openid-connect-sdk) | OAuth 2.0 client credentials |
 | [Resilience4j](https://resilience4j.readme.io/) | Retry patterns with exponential backoff |
 | [Jackson](https://github.com/FasterXML/jackson) | JSON, XML, YAML, CSV, CBOR, TOML, Smile, Properties |
@@ -158,14 +182,3 @@ docker compose up -d
 | [Mockito](https://site.mockito.org/) | Mocking framework for tests |
 | [AssertJ](https://assertj.github.io/doc/) | Fluent assertions for tests |
 | [Testcontainers](https://testcontainers.com/) | Docker-based integration testing |
-
-## Please consider supporting the project
-
-| Platform | Type | Link |
-|----------|------|------|
-| **GitHub (Stars)** | Free | [Give the project a star](https://github.com/FortuneN/kete) |
-| **GitHub (Sponsors)** | One-time / Recurring | [Sponsor on GitHub](https://github.com/sponsors/FortuneN) |
-| **PayPal** | One-time / Recurring | [Donate using PayPal](https://paypal.me/FortuneNgwenya) |
-| **Buy Me a Coffee** | One-time / Recurring | [Donate using Buy Me a Coffee](https://www.buymeacoffee.com/FortuneN) |
-| **Ko-fi** | One-time / Recurring | [Donate using Ko-fi](https://ko-fi.com/FortuneN) |
-| **Liberapay** | Recurring | [Donate using Liberapay](https://liberapay.com/FortuneN) |

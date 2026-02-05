@@ -29,7 +29,7 @@ The `wait-duration` property accepts multiple formats:
 
 | Format | Example | Meaning |
 |--------|---------|---------|
-| Milliseconds (digits only) | `1500` | 1500 ms |
+| Seconds (digits only) | `15` | 15 seconds |
 | With suffix | `100ms` | 100 milliseconds |
 | With suffix | `30s` | 30 seconds |
 | With suffix | `15m` | 15 minutes |

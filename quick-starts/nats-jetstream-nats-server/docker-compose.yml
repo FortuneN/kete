@@ -1,0 +1,51 @@
+services:
+
+  nats:
+    image: ghcr.io/fortunen/kete/quick-start-nats
+    ports:
+      - 4222:4222
+      - 8222:8222
+    command: ["--jetstream", "--http_port", "8222"]
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:8222/varz || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  nats-setup:
+    image: ghcr.io/fortunen/kete/quick-start-nats-box
+    depends_on:
+      nats:
+        condition: service_healthy
+    command:
+      - sh
+      - -c
+      - |
+        nats -s nats://nats:4222 stream add KEYCLOAK_EVENTS --defaults \
+          --subjects "keycloak.>" \
+          --storage file \
+          --replicas 1 \
+          --retention limits \
+          --max-age 7d \
+          --max-bytes 1GB \
+          --discard old \
+          --deny-delete \
+          --deny-purge &&
+        echo "Stream KEYCLOAK_EVENTS created successfully" &&
+        sleep infinity
+
+  keycloak:
+    image: ghcr.io/fortunen/kete/quick-start-keycloak
+    command: start-dev
+    ports:
+      - 8080:8080
+      - 9000:9000
+    environment:
+      kete.routes.quick-start.destination.kind: nats-jetstream
+      kete.routes.quick-start.destination.servers: nats://nats:4222
+      kete.routes.quick-start.destination.subject: keycloak.events
+      kete.routes.quick-start.destination.stream: KEYCLOAK_EVENTS
+      kete.routes.quick-start.destination.authentication-method: none
+    depends_on:
+      nats-setup:
+        condition: service_started

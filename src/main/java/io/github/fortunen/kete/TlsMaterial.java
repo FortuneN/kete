@@ -102,6 +102,7 @@ public class TlsMaterial {
 	private String trustStoreFilePath;
 	private String trustManagerAlgorithm;
 	private SSLContext trustStoreSSLContext;
+	private TrustManagerFactory trustManagerFactory;
 
 	// keystore stuff
 
@@ -113,6 +114,7 @@ public class TlsMaterial {
 	private String keyStoreFilePath;
 	private String keyManagerAlgorithm;
 	private SSLContext keyStoreSSLContext;
+	private KeyManagerFactory keyManagerFactory;
 	private KeyStore keyStoreAndTrustStore;
 
 	// client stuff
@@ -212,7 +214,6 @@ public class TlsMaterial {
 				material.trustStorePassword = trustStoreConfiguration.getString(PASSWORD, "").trim();
 				material.trustStoreType = trustStoreConfiguration.getString(TYPE, TRUST_STORE_DEFAULT_TYPE).trim();
 				material.trustManagerAlgorithm = trustStoreConfiguration.getString(TRUST_MANAGER_ALGORITHM, KEY_MANAGER_DEFAULT_ALGORITHM).trim();
-
 				material.trustStore = KeyStore.getInstance(material.trustStoreType);
 
 				var trustStoreLoaderConfiguration = ConfigurationUtils.getSubSet(trustStoreConfiguration, LOADER);
@@ -253,7 +254,6 @@ public class TlsMaterial {
 				material.keyPassword = keyStoreConfiguration.getString(KEY_PASSWORD, "").trim();
 				material.keyStorePassword = keyStoreConfiguration.getString(PASSWORD, "").trim();
 				material.keyManagerAlgorithm = keyStoreConfiguration.getString(KEY_MANAGER_ALGORITHM, KEY_MANAGER_DEFAULT_ALGORITHM).trim();
-
 				material.keyStore = KeyStore.getInstance(material.keyStoreType);
 
 				var certificateLoaderConfiguration = ConfigurationUtils.getSubSet(keyStoreConfiguration, LOADER);
@@ -370,10 +370,8 @@ public class TlsMaterial {
 			}
 
 			material.trustManagerAlgorithm = ValidationUtils.requireNonBlankElse(material.trustManagerAlgorithm, TRUST_MANAGER_DEFAULT_ALGORITHM).trim();
-
-			var trustManagerFactory = TrustManagerFactory.getInstance(material.trustManagerAlgorithm);
-
-			trustManagerFactory.init(material.trustStore);
+			material.trustManagerFactory = TrustManagerFactory.getInstance(material.trustManagerAlgorithm);
+			material.trustManagerFactory.init(material.trustStore);
 
 			// keystore stuff
 
@@ -407,12 +405,12 @@ public class TlsMaterial {
 			material.keyManagerAlgorithm = ValidationUtils.requireNonBlankElse(material.keyManagerAlgorithm, KEY_MANAGER_DEFAULT_ALGORITHM).trim();
 
 			var keyManagerFactoryInitializedSuccessfully = false;
-			var keyManagerFactory = KeyManagerFactory.getInstance(material.keyManagerAlgorithm);
+			material.keyManagerFactory = KeyManagerFactory.getInstance(material.keyManagerAlgorithm);
 
 			for (var password : new String[] { material.keyPassword, material.keyStorePassword, null, "", "changeit", "secret" }) {
 				try {
 
-					keyManagerFactory.init(material.keyStore, ValidationUtils.isNotNull(password) ? password.toCharArray() : null);
+					material.keyManagerFactory.init(material.keyStore, ValidationUtils.isNotNull(password) ? password.toCharArray() : null);
 					material.keyPassword = password;
 					keyManagerFactoryInitializedSuccessfully = true;
 
@@ -424,20 +422,19 @@ public class TlsMaterial {
 			}
 
 			if (!keyManagerFactoryInitializedSuccessfully) {
-
-				keyManagerFactory.init(material.keyStore, ValidationUtils.isNotBlank(material.keyPassword) ? material.keyPassword.toCharArray() : null);
+				material.keyManagerFactory.init(material.keyStore, ValidationUtils.isNotBlank(material.keyPassword) ? material.keyPassword.toCharArray() : null);
 			}
 
 			// ssl contexts
 
 			material.trustStoreSSLContext = SSLContext.getInstance(material.version);
-			material.trustStoreSSLContext.init(null, trustManagerFactory.getTrustManagers(), null);
+			material.trustStoreSSLContext.init(null, material.trustManagerFactory.getTrustManagers(), null);
 
 			material.keyStoreSSLContext = SSLContext.getInstance(material.version);
-			material.keyStoreSSLContext.init(keyManagerFactory.getKeyManagers(), null, null);
+			material.keyStoreSSLContext.init(material.keyManagerFactory.getKeyManagers(), null, null);
 
 			material.keyStoreAndTrustStoreSSLContext = SSLContext.getInstance(material.version);
-			material.keyStoreAndTrustStoreSSLContext.init(keyManagerFactory.getKeyManagers(), trustManagerFactory.getTrustManagers(), null);
+			material.keyStoreAndTrustStoreSSLContext.init(material.keyManagerFactory.getKeyManagers(), material.trustManagerFactory.getTrustManagers(), null);
 
 			// server stuff
 
@@ -459,12 +456,11 @@ public class TlsMaterial {
 				}
 
 				if (!serverKeyManagerFactoryInitializedSuccessfully) {
-
 					serverKeyManagerFactory.init(material.serverKeyStore, ValidationUtils.isNotBlank(material.keyPassword) ? material.keyPassword.toCharArray() : null);
 				}
 
 				material.serverKeyStoreSSLContext = SSLContext.getInstance(material.version);
-				material.serverKeyStoreSSLContext.init(serverKeyManagerFactory.getKeyManagers(), trustManagerFactory.getTrustManagers(), null);
+				material.serverKeyStoreSSLContext.init(serverKeyManagerFactory.getKeyManagers(), material.trustManagerFactory.getTrustManagers(), null);
 			}
 
 			material.keyStoreAndTrustStore = KeyStore.getInstance(material.keyStoreType);

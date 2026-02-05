@@ -2,7 +2,9 @@ package io.github.fortunen.kete.integrationtests.mqtt3destination;
 
 import static org.awaitility.Awaitility.await;
 
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.Duration;
 import java.util.UUID;
 
@@ -14,8 +16,8 @@ import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.testcontainers.hivemq.HiveMQContainer;
+import org.testcontainers.images.builder.Transferable;
 import org.testcontainers.utility.DockerImageName;
-import org.testcontainers.utility.MountableFile;
 
 import io.github.fortunen.kete.Constants;
 import io.github.fortunen.kete.EventMessage;
@@ -41,6 +43,7 @@ public class TestBase {
 	}
 
 	protected void configureDestination(MapConfiguration mapConfig) {
+		mapConfig.setProperty(Constants.KIND, "mqtt-3");
 		config.setConfiguration(mapConfig);
 		config.initialize();
 		destination.setConfig(config);
@@ -52,11 +55,9 @@ public class TestBase {
 
 		// Create HiveMQ config with WebSocket listener
 		var configXml = createHiveMqConfigWithWebSocket();
-		var configFile = Files.createTempFile("hivemq-config", ".xml");
-		Files.writeString(configFile, configXml);
 
 		container = new HiveMQContainer(DockerImageName.parse("hivemq/hivemq-ce:2024.3"))
-			.withHiveMQConfig(MountableFile.forHostPath(configFile))
+			.withCopyToContainer(Transferable.of(configXml.getBytes(StandardCharsets.UTF_8), 0777), "/opt/hivemq/conf/config.xml")
 			.withExposedPorts(1883, MQTT_WS_PORT);
 		container.start();
 
@@ -114,15 +115,14 @@ public class TestBase {
 			clientAuthMode
 		);
 
-		// Write config to temp file
-		var configFile = Files.createTempFile("hivemq-tls-config", ".xml");
-		Files.writeString(configFile, configXml);
+		// Read certificate files into memory
+		var keystoreBytes = Files.readAllBytes(Path.of(tls.getServerKeyStoreFilePath()));
+		var truststoreBytes = Files.readAllBytes(Path.of(tls.getTrustStoreFilePath()));
 
 		container = new HiveMQContainer(DockerImageName.parse("hivemq/hivemq-ce:2024.3"))
-			.withHiveMQConfig(MountableFile.forHostPath(configFile))
-			// Use serverKeyStoreFilePath for the container (server-side TLS) - it contains only the server key
-			.withFileInHomeFolder(MountableFile.forHostPath(tls.getServerKeyStoreFilePath()), "conf/keystore.jks")
-			.withFileInHomeFolder(MountableFile.forHostPath(tls.getTrustStoreFilePath()), "conf/truststore.jks")
+			.withCopyToContainer(Transferable.of(configXml.getBytes(StandardCharsets.UTF_8), 0777), "/opt/hivemq/conf/config.xml")
+			.withCopyToContainer(Transferable.of(keystoreBytes, 0777), "/opt/hivemq/conf/keystore.jks")
+			.withCopyToContainer(Transferable.of(truststoreBytes, 0777), "/opt/hivemq/conf/truststore.jks")
 			.withExposedPorts(1883, MQTT_TLS_PORT);
 		container.start();
 

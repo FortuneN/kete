@@ -1,0 +1,166 @@
+package io.github.fortunen.kete.integrationtests.redisstreamsdestination;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
+
+import java.nio.charset.StandardCharsets;
+import java.time.Duration;
+import java.util.HashMap;
+
+import org.apache.commons.configuration2.MapConfiguration;
+import org.junit.jupiter.api.Test;
+
+import io.github.fortunen.kete.TlsMaterial;
+
+public class sendTests extends TestBase {
+
+	@Test
+	public void shouldSend_NonTls() throws Exception {
+
+		// arrange
+
+		startRedis();
+		var map = new HashMap<String, Object>();
+		map.put("host", getHost());
+		map.put("port", getPort());
+		map.put("stream", "test-stream");
+		var mapConfig = new MapConfiguration(map);
+		configureDestination(mapConfig);
+		destination.initialize();
+
+		var message = createMessage(
+			"test-event-id",
+			"test-realm",
+			false,
+			"LOGIN",
+			"application/json",
+			"{\"type\":\"LOGIN\"}".getBytes(StandardCharsets.UTF_8),
+			null,
+			null
+		);
+
+		// act
+
+		destination.send(message);
+
+		// assert
+
+		await().atMost(Duration.ofSeconds(10)).until(() -> !readFromStream("test-stream").isEmpty());
+
+		var messages = readFromStream("test-stream");
+		assertThat(messages).hasSize(1);
+		assertThat(messages.get(0).getBody().get("body")).isEqualTo("{\"type\":\"LOGIN\"}");
+		assertThat(messages.get(0).getBody().get("eventtype")).isEqualTo("LOGIN");
+		assertThat(messages.get(0).getBody().get("contenttype")).isEqualTo("application/json");
+	}
+
+	@Test
+	public void shouldSend_Tls() throws Exception {
+
+		// arrange
+
+		var tls = TlsMaterial.builder()
+			.withEnabled(true)
+			.withWriteFiles(true)
+			.withTrustStorePassword("changeit")
+			.withKeyStorePassword("changeit")
+			.withKeyPassword("changeit")
+			.withServerHostNames(new String[] { "localhost", "127.0.0.1", "host.docker.internal" })
+			.build();
+
+		startWithServerOnlyTLS(tls);
+		var map = new HashMap<String, Object>();
+		map.put("host", getHost());
+		map.put("port", getTlsPort());
+		map.put("stream", "test-stream");
+		map.put("tls.enabled", true);
+		map.put("tls.trust-store.loader.kind", "jks-file-path");
+		map.put("tls.trust-store.loader.path", tls.getTrustStoreFilePath());
+		map.put("tls.trust-store.password", tls.getTrustStorePassword());
+		var mapConfig = new MapConfiguration(map);
+		configureDestination(mapConfig);
+		destination.initialize();
+
+		var message = createMessage(
+			"test-event-id",
+			"test-realm",
+			false,
+			"LOGIN",
+			"application/json",
+			"{\"type\":\"LOGIN\"}".getBytes(StandardCharsets.UTF_8),
+			null,
+			null
+		);
+
+		// act
+
+		destination.send(message);
+
+		// assert
+
+		await().atMost(Duration.ofSeconds(10)).until(() -> !readFromStreamWithTls("test-stream", tls).isEmpty());
+
+		var messages = readFromStreamWithTls("test-stream", tls);
+		assertThat(messages).hasSize(1);
+		assertThat(messages.get(0).getBody().get("body")).isEqualTo("{\"type\":\"LOGIN\"}");
+		assertThat(messages.get(0).getBody().get("eventtype")).isEqualTo("LOGIN");
+		assertThat(messages.get(0).getBody().get("contenttype")).isEqualTo("application/json");
+	}
+
+	@Test
+	public void shouldSend_Mtls() throws Exception {
+
+		// arrange
+
+		var tls = TlsMaterial.builder()
+			.withEnabled(true)
+			.withWriteFiles(true)
+			.withTrustStorePassword("changeit")
+			.withKeyStorePassword("changeit")
+			.withKeyPassword("changeit")
+			.withServerHostNames(new String[] { "localhost", "127.0.0.1", "host.docker.internal" })
+			.build();
+
+		startWithClientAndServerTLS(tls);
+		var map = new HashMap<String, Object>();
+		map.put("host", getHost());
+		map.put("port", getTlsPort());
+		map.put("stream", "test-stream");
+		map.put("tls.enabled", true);
+		map.put("tls.trust-store.loader.kind", "jks-file-path");
+		map.put("tls.trust-store.loader.path", tls.getTrustStoreFilePath());
+		map.put("tls.trust-store.password", tls.getTrustStorePassword());
+		map.put("tls.key-store.loader.kind", "jks-file-path");
+		map.put("tls.key-store.loader.path", tls.getKeyStoreFilePath());
+		map.put("tls.key-store.password", tls.getKeyStorePassword());
+		map.put("tls.key-password", tls.getKeyPassword());
+		var mapConfig = new MapConfiguration(map);
+		configureDestination(mapConfig);
+		destination.initialize();
+
+		var message = createMessage(
+			"test-event-id",
+			"test-realm",
+			false,
+			"LOGIN",
+			"application/json",
+			"{\"type\":\"LOGIN\"}".getBytes(StandardCharsets.UTF_8),
+			null,
+			null
+		);
+
+		// act
+
+		destination.send(message);
+
+		// assert
+
+		await().atMost(Duration.ofSeconds(10)).until(() -> !readFromStreamWithTls("test-stream", tls).isEmpty());
+
+		var messages = readFromStreamWithTls("test-stream", tls);
+		assertThat(messages).hasSize(1);
+		assertThat(messages.get(0).getBody().get("body")).isEqualTo("{\"type\":\"LOGIN\"}");
+		assertThat(messages.get(0).getBody().get("eventtype")).isEqualTo("LOGIN");
+		assertThat(messages.get(0).getBody().get("contenttype")).isEqualTo("application/json");
+	}
+}

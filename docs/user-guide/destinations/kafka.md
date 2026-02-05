@@ -15,11 +15,15 @@ Stream Keycloak events to Kafka-compatible systems.
 | System | Notes |
 |--------|-------|
 | **Apache Kafka** | Primary target, all features supported |
-| **Redpanda** | Kafka-compatible |
+| **Redpanda** | Kafka-compatible, zero-JVM |
 | **Confluent Cloud** | Managed Kafka (supports SASL/TLS) |
 | **Azure Event Hubs** | Kafka protocol endpoint (requires SASL_SSL) |
 | **Amazon MSK** | Managed Kafka (supports IAM/SASL) |
-| **Aiven for Kafka** | Managed Kafka |
+| **Amazon MSK Serverless** | Serverless managed Kafka |
+| **Aiven for Kafka** | Multi-cloud managed Kafka |
+| **Strimzi** | Kubernetes Kafka operator |
+| **WarpStream** | Confluent's zero-disk Kafka |
+| **Instaclustr** | Multi-cloud managed Kafka |
 
 
 
@@ -131,9 +135,9 @@ Any property under `kete.routes.<NAME>.destination.*` is passed directly to the 
 | `max.in.flight.requests.per.connection` | `5` |
 | `key.serializer` | StringSerializer |
 | `value.serializer` | ByteArraySerializer |
-| `message-headers-enabled` | `true` |
-| `min-pool-size` | `5` |
-| `max-pool-size` | `20` |
+| `pool.min-idle` | `1` |
+| `pool.max-idle` | `10` |
+| `pool.max-total` | `20` |
 
 #### Common Properties
 
@@ -149,8 +153,20 @@ Any property under `kete.routes.<NAME>.destination.*` is passed directly to the 
 | `retries` | Retry attempts | `2147483647` | `3` |
 | `max.in.flight.requests.per.connection` | Max unacked requests | `5` | `1` |
 | `enable.idempotence` | Idempotent producer | `true` | `true`, `false` |
-| `min-pool-size` | Minimum connections in pool | `5` | `10` |
-| `max-pool-size` | Maximum connections in pool | `20` | `50` |
+| `pool.min-idle` | Minimum idle connections in pool | `1` | `5` |
+| `pool.max-idle` | Maximum idle connections in pool | `10` | `20` |
+| `pool.max-total` | Maximum total connections in pool | `20` | `50` |
+
+### Custom Headers
+
+Custom headers can be added to Kafka messages:
+
+```bash
+kete.routes.kafka.destination.headers.X-Source=keycloak
+kete.routes.kafka.destination.headers.X-Environment=production
+```
+
+All custom headers are included in the Kafka message headers.
 
 ### Topic Templating
 

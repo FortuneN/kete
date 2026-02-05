@@ -82,7 +82,6 @@ function Write-SummaryTable {
 
     $passed = @($Results.Values | Where-Object { $_ -eq $true }).Count
     $failed = @($Results.Values | Where-Object { $_ -eq $false }).Count
-    $total = $Results.Count
 
     Write-Host ""
     Write-Host "  ┌────────────────────────────────────────────┬──────────┐" -ForegroundColor DarkGray
@@ -148,19 +147,11 @@ Write-StepHeader 2 "Build Quick-Start Docker Images"
 
 $stepStart = Get-Date
 
-# quick-start-keycloak
 Write-Task "Building image: ghcr.io/fortunen/kete/quick-start-keycloak"
-$buildOutput = docker build -q -t ghcr.io/fortunen/kete/quick-start-keycloak -f quick-starts/quick-start-keycloak/Dockerfile . 2>&1
+docker build -q -t ghcr.io/fortunen/kete/quick-start-keycloak -f quick-starts/quick-start-keycloak/Dockerfile . 2>&1
 $keycloakSuccess = $LASTEXITCODE -eq 0
 Write-TaskResult "quick-start-keycloak" $keycloakSuccess
 $script:Results["Docker: quick-start-keycloak"] = $keycloakSuccess
-
-# quick-start-curl
-Write-Task "Building image: ghcr.io/fortunen/kete/quick-start-curl"
-$buildOutput = docker build -q -t ghcr.io/fortunen/kete/quick-start-curl -f quick-starts/quick-start-curl/Dockerfile . 2>&1
-$curlSuccess = $LASTEXITCODE -eq 0
-Write-TaskResult "quick-start-curl" $curlSuccess
-$script:Results["Docker: quick-start-curl"] = $curlSuccess
 
 $duration = Format-Duration((Get-Date) - $stepStart)
 Write-Host ""
@@ -175,7 +166,7 @@ Write-StepHeader 3 "Build Documentation Site"
 $stepStart = Get-Date
 Write-Task "Building MkDocs site with --strict validation..."
 
-$docsOutput = python -m mkdocs build --strict 2>&1
+python -m mkdocs build --strict 2>&1
 $docsSuccess = $LASTEXITCODE -eq 0
 $duration = Format-Duration((Get-Date) - $stepStart)
 

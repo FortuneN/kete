@@ -1,0 +1,21 @@
+# Azure Cache for Redis (Redis Streams)
+# See GUIDE.md for setup instructions
+
+services:
+
+  keycloak:
+    image: ghcr.io/fortunen/kete/quick-start-keycloak
+    command: start-dev
+    ports:
+      - 8080:8080
+      - 9000:9000
+    environment:
+      # Azure Cache for Redis configuration
+      # Replace these values or use a .env file
+      kete.routes.quick-start.destination.kind: redis-streams
+      kete.routes.quick-start.destination.host: ${AZURE_REDIS_HOST:-<YOUR-CACHE-NAME>.redis.cache.windows.net}
+      kete.routes.quick-start.destination.port: 6380
+      kete.routes.quick-start.destination.stream: keycloak-events
+      kete.routes.quick-start.destination.max-len: 10000
+      kete.routes.quick-start.destination.tls.enabled: "true"
+      kete.routes.quick-start.destination.password: ${AZURE_REDIS_KEY:-<YOUR-ACCESS-KEY>}
