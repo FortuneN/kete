@@ -158,21 +158,12 @@ Write-StepHeader 2 "Build Docker Images (validation only)"
 
 $stepStart = Get-Date
 
-# quick-start-keycloak
 $imageName = "$script:Registry/quick-start-keycloak:$script:Tag"
 Write-Task "Building $imageName"
 docker build -q -t $imageName -f quick-starts/quick-start-keycloak/Dockerfile . 2>&1 | Out-Null
 $buildSuccess = $LASTEXITCODE -eq 0
 Write-TaskResult "quick-start-keycloak" $buildSuccess
 $script:Results["Docker: quick-start-keycloak"] = $buildSuccess
-
-# quick-start-curl
-$imageName = "$script:Registry/quick-start-curl:$script:Tag"
-Write-Task "Building $imageName"
-docker build -q -t $imageName -f quick-starts/quick-start-curl/Dockerfile . 2>&1 | Out-Null
-$buildSuccess = $LASTEXITCODE -eq 0
-Write-TaskResult "quick-start-curl" $buildSuccess
-$script:Results["Docker: quick-start-curl"] = $buildSuccess
 
 $duration = Format-Duration((Get-Date) - $stepStart)
 Write-Host ""
@@ -187,7 +178,7 @@ Write-StepHeader 3 "Build Documentation (Validation Only)"
 $stepStart = Get-Date
 Write-Task "Building MkDocs site with --strict validation..."
 
-$docsOutput = python -m mkdocs build --strict 2>&1
+python -m mkdocs build --strict 2>&1
 $docsSuccess = $LASTEXITCODE -eq 0
 $duration = Format-Duration((Get-Date) - $stepStart)
 
