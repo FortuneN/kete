@@ -148,12 +148,16 @@ Write-StepHeader 2 "Build Quick-Start Docker Images"
 $stepStart = Get-Date
 
 Write-Task "Building image: ghcr.io/fortunen/kete/quick-start-keycloak"
-docker build -q -t ghcr.io/fortunen/kete/quick-start-keycloak -f quick-starts/quick-start-keycloak/Dockerfile . 2>&1
-$keycloakSuccess = $LASTEXITCODE -eq 0
-Write-TaskResult "quick-start-keycloak" $keycloakSuccess
-$script:Results["Docker: quick-start-keycloak"] = $keycloakSuccess
 
+docker build -q -t ghcr.io/fortunen/kete/quick-start-keycloak -f quick-starts/quick-start-keycloak/Dockerfile . 2>&1
+
+$keycloakSuccess = $LASTEXITCODE -eq 0
+
+Write-TaskResult "quick-start-keycloak" $keycloakSuccess
+
+$script:Results["Docker: quick-start-keycloak"] = $keycloakSuccess
 $duration = Format-Duration((Get-Date) - $stepStart)
+
 Write-Host ""
 Write-Host "    Docker builds completed in $duration" -ForegroundColor DarkGray
 

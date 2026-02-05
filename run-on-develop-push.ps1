@@ -157,15 +157,18 @@ $script:Results["Tests"] = $testsPassed
 Write-StepHeader 2 "Build Docker Images (validation only)"
 
 $stepStart = Get-Date
-
 $imageName = "$script:Registry/quick-start-keycloak:$script:Tag"
+
 Write-Task "Building $imageName"
+
 docker build -q -t $imageName -f quick-starts/quick-start-keycloak/Dockerfile . 2>&1 | Out-Null
 $buildSuccess = $LASTEXITCODE -eq 0
-Write-TaskResult "quick-start-keycloak" $buildSuccess
-$script:Results["Docker: quick-start-keycloak"] = $buildSuccess
 
+Write-TaskResult "quick-start-keycloak" $buildSuccess
+
+$script:Results["Docker: quick-start-keycloak"] = $buildSuccess
 $duration = Format-Duration((Get-Date) - $stepStart)
+
 Write-Host ""
 Write-Host "    Docker build completed in $duration" -ForegroundColor DarkGray
 
