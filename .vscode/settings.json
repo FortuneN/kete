@@ -11,7 +11,7 @@
             ]
         }
     ],
-    "java.configuration.updateBuildConfiguration": "interactive",
+    "java.configuration.updateBuildConfiguration": "automatic",
     "java.compile.nullAnalysis.mode": "automatic",
     "tabby.endpoint": "http://127.0.0.1:11435",
     "tabby.config.telemetry": true,
