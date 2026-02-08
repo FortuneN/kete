@@ -2,22 +2,26 @@ package io.github.fortunen.kete.integrationtests.websocketdestination;
 
 import static org.awaitility.Awaitility.await;
 
+import java.net.InetSocketAddress;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
-
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import org.apache.commons.configuration2.MapConfiguration;
+import org.java_websocket.WebSocket;
+import org.java_websocket.handshake.ClientHandshake;
+import org.java_websocket.server.WebSocketServer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.testcontainers.Testcontainers;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.Network;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.images.builder.Transferable;
 import org.testcontainers.utility.DockerImageName;
 
+import io.github.fortunen.kete.Constants;
 import io.github.fortunen.kete.EventMessage;
 import io.github.fortunen.kete.TlsMaterial;
 import io.github.fortunen.kete.destinations.websocket.WebSocketDestination;
@@ -27,7 +31,6 @@ import io.github.fortunen.kete.destinations.websocket.WebSocketDestinationConfig
 public class TestBase {
 
 	protected static final byte[] EMPTY_BYTES = new byte[0];
-	protected static final int WEBSOCKET_PORT = 8080;
 	protected static final int WEBSOCKET_TLS_PORT = 8443;
 
 	protected GenericContainer<?> container;
@@ -35,16 +38,27 @@ public class TestBase {
 	protected Network network;
 	protected WebSocketDestination destination;
 	protected WebSocketDestinationConfig config;
+	protected TestWebSocketServer wsServer;
+	protected LinkedBlockingQueue<String> receivedMessages;
 
 	@BeforeEach
 	void setUp() {
 		destination = new WebSocketDestination();
 		config = new WebSocketDestinationConfig();
+		receivedMessages = new LinkedBlockingQueue<>();
 	}
 
 	@AfterEach
 	void tearDown() throws Exception {
 		cleanUpContainers();
+		if (wsServer != null) {
+			try {
+				wsServer.stop(1000);
+			} catch (Exception e) {
+				// ignore
+			}
+			wsServer = null;
+		}
 		if (destination != null) {
 			try {
 				destination.close();
@@ -55,28 +69,20 @@ public class TestBase {
 	}
 
 	protected void configureDestination(MapConfiguration mapConfig) {
-		mapConfig.setProperty(io.github.fortunen.kete.Constants.KIND, "websocket");
+		mapConfig.setProperty(Constants.KIND, "websocket");
 		config.setConfiguration(mapConfig);
 		config.initialize();
 		destination.setConfig(config);
 	}
 
-	protected GenericContainer<?> startWebSocketEchoServer() throws Exception {
+	protected void startWebSocketServer() throws Exception {
 
 		cleanUpContainers();
 
-		// Use websocket echo server image
-		container = new GenericContainer<>(DockerImageName.parse("jmalloc/echo-server:0.3.6"))
-			.withExposedPorts(WEBSOCKET_PORT)
-			.withEnv("PORT", String.valueOf(WEBSOCKET_PORT))
-			.waitingFor(Wait.forHttp("/").forPort(WEBSOCKET_PORT).forStatusCode(200))
-			.withStartupTimeout(Duration.ofMinutes(10));
+		wsServer = new TestWebSocketServer(0, receivedMessages);
+		wsServer.start();
 
-		container.start();
-
-		waitForWebSocketReady();
-
-		return container;
+		await().atMost(Duration.ofSeconds(10)).until(() -> wsServer.getPort() > 0);
 	}
 
 	protected void startWithServerOnlyTLS(TlsMaterial tls) throws Exception {
@@ -99,45 +105,19 @@ public class TestBase {
 			throw new IllegalArgumentException("TLS must be enabled");
 		}
 
-		// Create a Docker network for communication between containers
+		// Start host-side WebSocket server that captures messages
+		wsServer = new TestWebSocketServer(0, receivedMessages);
+		wsServer.start();
+		await().atMost(Duration.ofSeconds(10)).until(() -> wsServer.getPort() > 0);
+
+		// Expose host-side server port to Docker containers
+		Testcontainers.exposeHostPorts(wsServer.getPort());
+
+		// Create a Docker network for nginx
 		network = Network.newNetwork();
 
-		// Start the echo server without TLS (nginx will handle TLS termination)
-		// The echo-server is only accessible within the Docker network
-		container = new GenericContainer<>(DockerImageName.parse("jmalloc/echo-server:0.3.6"))
-			.withNetwork(network)
-			.withNetworkAliases("echo-server")
-			.withExposedPorts(WEBSOCKET_PORT)
-			.withEnv("PORT", String.valueOf(WEBSOCKET_PORT))
-			.waitingFor(Wait.forListeningPort())
-			.withStartupTimeout(Duration.ofMinutes(10));
-
-		container.start();
-
-		// Create temp directory and copy files for mounting
-		var tempDir = Files.createTempDirectory("nginx-tls-");
-		tempDir.toFile().deleteOnExit();
-
-		// Create nginx config for WebSocket TLS termination
-		var nginxConf = createNginxConfig(requireClientAuth);
-
-		// Write nginx.conf to temp directory
-		var nginxConfPath = tempDir.resolve("nginx.conf");
-		Files.writeString(nginxConfPath, nginxConf);
-		nginxConfPath.toFile().deleteOnExit();
-
-		// Copy certificate files (PEM format required for nginx) to temp directory
-		var serverCertPath = tempDir.resolve("server.crt");
-		Files.copy(Path.of(tls.getServerCertificatePemFilePath()), serverCertPath);
-		serverCertPath.toFile().deleteOnExit();
-
-		var serverKeyPath = tempDir.resolve("server.key");
-		Files.copy(Path.of(tls.getServerPrivateKeyPemFilePath()), serverKeyPath);
-		serverKeyPath.toFile().deleteOnExit();
-
-		var caCertPath = tempDir.resolve("ca.crt");
-		Files.copy(Path.of(tls.getCaCertificatePemFilePath()), caCertPath);
-		caCertPath.toFile().deleteOnExit();
+		// Create nginx config for WebSocket TLS termination, proxying to host-side server
+		var nginxConf = createNginxConfig(requireClientAuth, wsServer.getPort());
 
 		// Start nginx as TLS termination proxy
 		nginxProxy = new GenericContainer<>(DockerImageName.parse("nginx:1.27-alpine"))
@@ -155,7 +135,7 @@ public class TestBase {
 		waitForWebSocketTlsReady(tls);
 	}
 
-	private String createNginxConfig(boolean requireClientAuth) {
+	private String createNginxConfig(boolean requireClientAuth, int backendPort) {
 		var sslClientCertificate = requireClientAuth
 			? """
 			        ssl_client_certificate /etc/nginx/ca.crt;
@@ -170,7 +150,7 @@ public class TestBase {
 
 			http {
 			    upstream websocket {
-			        server echo-server:%d;
+			        server host.testcontainers.internal:%d;
 			    }
 
 			    server {
@@ -189,7 +169,7 @@ public class TestBase {
 			        }
 			    }
 			}
-			""".formatted(WEBSOCKET_PORT, WEBSOCKET_TLS_PORT, sslClientCertificate);
+			""".formatted(backendPort, WEBSOCKET_TLS_PORT, sslClientCertificate);
 	}
 
 	protected void cleanUpContainers() {
@@ -220,7 +200,7 @@ public class TestBase {
 	}
 
 	protected int getWebSocketPort() {
-		return container.getMappedPort(WEBSOCKET_PORT);
+		return wsServer.getPort();
 	}
 
 	protected int getWebSocketTlsPort() {
@@ -231,35 +211,17 @@ public class TestBase {
 		return nginxProxy.getHost();
 	}
 
-	protected void waitForWebSocketReady() {
-		await().atMost(Duration.ofSeconds(30))
-			.pollInterval(Duration.ofSeconds(1))
-			.until(() -> {
-				try {
-					var url = new java.net.URL("http://" + container.getHost() + ":" + getWebSocketPort() + "/");
-					var conn = (java.net.HttpURLConnection) url.openConnection();
-					conn.setConnectTimeout(1000);
-					conn.setReadTimeout(1000);
-					return conn.getResponseCode() == 200;
-				} catch (Exception e) {
-					return false;
-				}
-			});
-	}
-
 	protected void waitForWebSocketTlsReady(TlsMaterial tls) {
 		await().atMost(Duration.ofSeconds(30))
 			.pollInterval(Duration.ofSeconds(1))
 			.until(() -> {
 				try {
-					SSLContext sslContext = tls.getKeyStoreAndTrustStoreSSLContext();
-					var url = new java.net.URL("https://" + getNginxHost() + ":" + getWebSocketTlsPort() + "/");
-					var conn = (HttpsURLConnection) url.openConnection();
-					conn.setSSLSocketFactory(sslContext.getSocketFactory());
-					conn.setHostnameVerifier((hostname, session) -> true); // Disable hostname verification for test
-					conn.setConnectTimeout(2000);
-					conn.setReadTimeout(2000);
-					return conn.getResponseCode() == 200;
+					var sslContext = tls.getKeyStoreAndTrustStoreSSLContext();
+					var factory = sslContext.getSocketFactory();
+					try (var socket = factory.createSocket(getNginxHost(), getWebSocketTlsPort())) {
+						socket.setSoTimeout(2000);
+						return socket.isConnected();
+					}
 				} catch (Exception e) {
 					return false;
 				}
@@ -268,5 +230,41 @@ public class TestBase {
 
 	protected EventMessage createMessage(String eventId, String eventType, String contentType, byte[] eventBody) {
 		return new EventMessage("test-realm", eventId, eventBody, eventType, contentType, "", "false", "", "");
+	}
+
+	protected static class TestWebSocketServer extends WebSocketServer {
+
+		private final LinkedBlockingQueue<String> messages;
+
+		public TestWebSocketServer(int port, LinkedBlockingQueue<String> messages) {
+			super(new InetSocketAddress(port));
+			this.messages = messages;
+			setReuseAddr(true);
+		}
+
+		@Override
+		public void onOpen(WebSocket conn, ClientHandshake handshake) {
+			// Connection opened
+		}
+
+		@Override
+		public void onClose(WebSocket conn, int code, String reason, boolean remote) {
+			// Connection closed
+		}
+
+		@Override
+		public void onMessage(WebSocket conn, String message) {
+			messages.offer(message);
+		}
+
+		@Override
+		public void onError(WebSocket conn, Exception ex) {
+			// Handle error
+		}
+
+		@Override
+		public void onStart() {
+			// Server started
+		}
 	}
 }

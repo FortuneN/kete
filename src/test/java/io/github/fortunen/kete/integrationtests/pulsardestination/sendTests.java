@@ -6,6 +6,7 @@ import static org.awaitility.Awaitility.await;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.HashMap;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.commons.configuration2.MapConfiguration;
 import org.junit.jupiter.api.Test;
@@ -30,6 +31,8 @@ public class sendTests extends TestBase {
 
 		try (var subscriber = createSubscriber(topic)) {
 
+			var receivedMessage = new AtomicReference<byte[]>();
+
 			var message = createMessage(
 				"test-event-id",
 				"test-realm",
@@ -51,14 +54,17 @@ public class sendTests extends TestBase {
 				try {
 					var messages = receiveMessages(subscriber, 1, 1);
 					if (!messages.isEmpty()) {
-						var received = new String(messages.get(0), StandardCharsets.UTF_8);
-						return received.contains("{\"type\":\"LOGIN\"}");
+						receivedMessage.set(messages.get(0));
+						return true;
 					}
 					return false;
 				} catch (Exception e) {
 					return false;
 				}
 			});
+
+			assertThat(receivedMessage.get()).isNotNull();
+			assertThat(new String(receivedMessage.get(), StandardCharsets.UTF_8)).isEqualTo("{\"type\":\"LOGIN\"}");
 		}
 	}
 
@@ -92,6 +98,8 @@ public class sendTests extends TestBase {
 
 		try (var subscriber = createSubscriberWithTls(topic, tls)) {
 
+			var receivedMessage = new AtomicReference<byte[]>();
+
 			var message = createMessage(
 				"test-event-id",
 				"test-realm",
@@ -113,14 +121,17 @@ public class sendTests extends TestBase {
 				try {
 					var messages = receiveMessages(subscriber, 1, 1);
 					if (!messages.isEmpty()) {
-						var received = new String(messages.get(0), StandardCharsets.UTF_8);
-						return received.contains("{\"type\":\"LOGIN\"}");
+						receivedMessage.set(messages.get(0));
+						return true;
 					}
 					return false;
 				} catch (Exception e) {
 					return false;
 				}
 			});
+
+			assertThat(receivedMessage.get()).isNotNull();
+			assertThat(new String(receivedMessage.get(), StandardCharsets.UTF_8)).isEqualTo("{\"type\":\"LOGIN\"}");
 		}
 	}
 
@@ -158,6 +169,8 @@ public class sendTests extends TestBase {
 
 		try (var subscriber = createSubscriberWithTls(topic, tls)) {
 
+			var receivedMessage = new AtomicReference<byte[]>();
+
 			var message = createMessage(
 				"test-event-id",
 				"test-realm",
@@ -179,14 +192,17 @@ public class sendTests extends TestBase {
 				try {
 					var messages = receiveMessages(subscriber, 1, 1);
 					if (!messages.isEmpty()) {
-						var received = new String(messages.get(0), StandardCharsets.UTF_8);
-						return received.contains("{\"type\":\"LOGIN\"}");
+						receivedMessage.set(messages.get(0));
+						return true;
 					}
 					return false;
 				} catch (Exception e) {
 					return false;
 				}
 			});
+
+			assertThat(receivedMessage.get()).isNotNull();
+			assertThat(new String(receivedMessage.get(), StandardCharsets.UTF_8)).isEqualTo("{\"type\":\"LOGIN\"}");
 		}
 	}
 }

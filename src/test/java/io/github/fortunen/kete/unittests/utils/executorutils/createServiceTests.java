@@ -3,6 +3,7 @@ package io.github.fortunen.kete.unittests.utils.executorutils;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import io.github.fortunen.kete.utils.ExecutorUtils;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.junit.jupiter.api.Test;
 
 public class createServiceTests {
@@ -46,7 +47,7 @@ public class createServiceTests {
 		// arrange
 
 		var executor = ExecutorUtils.createService();
-		var taskExecuted = new java.util.concurrent.atomic.AtomicBoolean(false);
+		var taskExecuted = new AtomicBoolean(false);
 
 		// act
 

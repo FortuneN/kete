@@ -161,7 +161,7 @@ $imageName = "$script:Registry/quick-start-keycloak:$script:Tag"
 
 Write-Task "Building $imageName"
 
-docker build -q -t $imageName -f quick-starts/quick-start-keycloak/Dockerfile . 2>&1 | Out-Null
+docker build -q -t $imageName -f "quick-starts/`$images/keycloak/Dockerfile" . 2>&1 | Out-Null
 $buildSuccess = $LASTEXITCODE -eq 0
 
 Write-TaskResult "quick-start-keycloak" $buildSuccess

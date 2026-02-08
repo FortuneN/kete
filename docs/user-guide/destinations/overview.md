@@ -182,6 +182,7 @@ Header names are **all lowercase with no dashes or underscores** for maximum com
 | [HTTP](http.md) | ✅ | `contenttype` header | All three as HTTP headers |
 | [WebSocket](websocket.md) | ❌ | Not supported | Headers sent via handshake only |
 | [STOMP](stomp.md) | ✅ | Native `content-type` header | `eventtype` and `eventkind` as STOMP headers |
+| [ZeroMQ](zeromq.md) | ❌ | Not supported | Raw message bytes only |
 
 ## TLS & mTLS
 
@@ -253,6 +254,7 @@ For detailed information about each loader and their properties, see **[Certific
 | **[http](http.md)** | HTTP/HTTPS | Webhooks, REST APIs, any HTTP endpoint, Azure Event Grid |
 | **[websocket](websocket.md)** | WebSocket | Real-time servers, custom backends, dashboards |
 | **[stomp](stomp.md)** | STOMP 1.2 | ActiveMQ Classic, ActiveMQ Artemis, Amazon MQ, RabbitMQ, EMQX |
+| **[zeromq](zeromq.md)** | ZMTP (ZeroMQ) | Any ZeroMQ peer (brokerless, 40+ language bindings) |
 
 ## Cloud Services Compatibility
 
@@ -302,4 +304,11 @@ kete.routes.events.destination.routing-key=events
 ```bash
 kete.routes.events.destination.kind=http
 kete.routes.events.destination.url=https://api.example.com/events
+```
+
+**ZeroMQ (PUB/SUB):**
+```bash
+kete.routes.events.destination.kind=zeromq
+kete.routes.events.destination.endpoint=tcp://subscriber:5556
+# Defaults: socket-type=PUBLISH, connection-mode=CONNECT
 ```

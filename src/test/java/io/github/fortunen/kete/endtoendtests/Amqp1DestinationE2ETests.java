@@ -15,7 +15,9 @@ import org.keycloak.admin.client.Keycloak;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.utility.DockerImageName;
 
+import jakarta.jms.BytesMessage;
 import jakarta.jms.Session;
+import jakarta.jms.TextMessage;
 
 @SuppressWarnings("resource")
 class Amqp1DestinationE2ETests extends EndToEndTestBase {
@@ -69,9 +71,9 @@ class Amqp1DestinationE2ETests extends EndToEndTestBase {
 			consumer.setMessageListener(message -> {
 				try {
 					String body;
-					if (message instanceof jakarta.jms.TextMessage textMessage) {
+					if (message instanceof TextMessage textMessage) {
 						body = textMessage.getText();
-					} else if (message instanceof jakarta.jms.BytesMessage bytesMessage) {
+					} else if (message instanceof BytesMessage bytesMessage) {
 						var bytes = new byte[(int) bytesMessage.getBodyLength()];
 						bytesMessage.readBytes(bytes);
 						body = new String(bytes, StandardCharsets.UTF_8);

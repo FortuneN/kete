@@ -34,7 +34,7 @@ class initTests {
 
 		var factory = new ProviderFactory();
 		var scope = mock(Scope.class);
-        when(scope.getPropertyNames()).thenReturn(Set.of());
+		when(scope.getPropertyNames()).thenReturn(Set.of());
 		// act
 
 		factory.init(scope);

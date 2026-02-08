@@ -9,6 +9,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import io.github.fortunen.kete.Component;
 import io.github.fortunen.kete.Constants;
@@ -48,7 +49,7 @@ public class HttpDestination extends Destination<HttpDestinationConfig> {
 				var key = entry.getKey();
 				return !MESSAGE_HEADER_CONTENT_TYPE.equalsIgnoreCase(key) && !MESSAGE_HEADER_EVENT_KIND.equalsIgnoreCase(key) && !MESSAGE_HEADER_EVENT_TYPE.equalsIgnoreCase(key);
 			})
-			.collect(java.util.stream.Collectors.toSet());
+			.collect(Collectors.toSet());
 
 		httpClient = config.getClientBuilder().build();
 

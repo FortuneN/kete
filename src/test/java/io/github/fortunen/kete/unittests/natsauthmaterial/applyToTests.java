@@ -2,16 +2,16 @@ package io.github.fortunen.kete.unittests.natsauthmaterial;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 
-import io.github.fortunen.kete.NatsAuthMaterial;
-import io.nats.client.Options;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.HashMap;
+
 import org.apache.commons.configuration2.MapConfiguration;
 import org.junit.jupiter.api.Test;
+
+import io.github.fortunen.kete.NatsAuthMaterial;
+import io.nats.client.Options;
 
 class applyToTests {
 

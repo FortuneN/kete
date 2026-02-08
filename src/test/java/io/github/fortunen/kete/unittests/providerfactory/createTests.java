@@ -2,6 +2,7 @@ package io.github.fortunen.kete.unittests.providerfactory;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -87,6 +88,6 @@ class createTests {
 
 		// assert
 
-		verify(transactionManager).enlistAfterCompletion(org.mockito.ArgumentMatchers.any());
+		verify(transactionManager).enlistAfterCompletion(any());
 	}
 }

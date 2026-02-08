@@ -17,6 +17,8 @@ import io.lettuce.core.RedisClient;
 import io.lettuce.core.RedisURI;
 import io.lettuce.core.pubsub.RedisPubSubAdapter;
 
+import java.util.List;
+
 @SuppressWarnings("resource")
 class RedisPubSubDestinationE2ETests extends EndToEndTestBase {
 
@@ -121,7 +123,7 @@ class RedisPubSubDestinationE2ETests extends EndToEndTestBase {
 			messages.add(message);
 		}
 
-		public java.util.List<String> getMessages() {
+		public List<String> getMessages() {
 			return messages;
 		}
 	}

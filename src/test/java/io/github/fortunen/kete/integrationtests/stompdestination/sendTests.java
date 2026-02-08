@@ -7,6 +7,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.commons.configuration2.MapConfiguration;
 import org.junit.jupiter.api.Test;
@@ -32,6 +33,8 @@ public class sendTests extends TestBase {
 
 		try (var subscriber = createSubscriber(stompDestination, 1)) {
 
+			var receivedMessage = new AtomicReference<String>();
+
 			var message = createMessage(
 				"test-event-id",
 				"LOGIN",
@@ -48,11 +51,18 @@ public class sendTests extends TestBase {
 			await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).until(() -> {
 				try {
 					var received = subscriber.takeMessage(1, TimeUnit.SECONDS);
-					return received != null && received.contains("{\"type\":\"LOGIN\"}");
+					if (received != null) {
+						receivedMessage.set(received);
+						return true;
+					}
+					return false;
 				} catch (Exception e) {
 					return false;
 				}
 			});
+
+			assertThat(receivedMessage.get()).isNotNull();
+			assertThat(receivedMessage.get()).isEqualTo("{\"type\":\"LOGIN\"}");
 		}
 	}
 
@@ -86,6 +96,8 @@ public class sendTests extends TestBase {
 
 		try (var subscriber = createTlsSubscriber(stompDestination, tls)) {
 
+			var receivedMessage = new AtomicReference<String>();
+
 			var message = createMessage(
 				"test-event-id",
 				"LOGIN",
@@ -102,11 +114,18 @@ public class sendTests extends TestBase {
 			await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).until(() -> {
 				try {
 					var received = subscriber.takeMessage(1, TimeUnit.SECONDS);
-					return received != null && received.contains("{\"type\":\"LOGIN\"}");
+					if (received != null) {
+						receivedMessage.set(received);
+						return true;
+					}
+					return false;
 				} catch (Exception e) {
 					return false;
 				}
 			});
+
+			assertThat(receivedMessage.get()).isNotNull();
+			assertThat(receivedMessage.get()).isEqualTo("{\"type\":\"LOGIN\"}");
 		}
 	}
 
@@ -144,6 +163,8 @@ public class sendTests extends TestBase {
 
 		try (var subscriber = createTlsSubscriber(stompDestination, tls)) {
 
+			var receivedMessage = new AtomicReference<String>();
+
 			var message = createMessage(
 				"test-event-id",
 				"LOGIN",
@@ -160,11 +181,18 @@ public class sendTests extends TestBase {
 			await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).until(() -> {
 				try {
 					var received = subscriber.takeMessage(1, TimeUnit.SECONDS);
-					return received != null && received.contains("{\"type\":\"LOGIN\"}");
+					if (received != null) {
+						receivedMessage.set(received);
+						return true;
+					}
+					return false;
 				} catch (Exception e) {
 					return false;
 				}
 			});
+
+			assertThat(receivedMessage.get()).isNotNull();
+			assertThat(receivedMessage.get()).isEqualTo("{\"type\":\"LOGIN\"}");
 		}
 	}
 }

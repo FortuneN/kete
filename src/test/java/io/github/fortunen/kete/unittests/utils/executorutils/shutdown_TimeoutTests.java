@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 
 import io.github.fortunen.kete.utils.ExecutorUtils;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.junit.jupiter.api.Test;
 
 public class shutdown_TimeoutTests {
@@ -70,7 +71,7 @@ public class shutdown_TimeoutTests {
 		// arrange
 
 		ExecutorService executor = ExecutorUtils.createService();
-		var taskCompleted = new java.util.concurrent.atomic.AtomicBoolean(false);
+		var taskCompleted = new AtomicBoolean(false);
 
 		executor.submit(() -> {
 			try {

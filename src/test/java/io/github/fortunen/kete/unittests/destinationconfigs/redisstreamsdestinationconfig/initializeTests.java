@@ -3,6 +3,7 @@ package io.github.fortunen.kete.unittests.destinationconfigs.redisstreamsdestina
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.configuration2.MapConfiguration;
@@ -13,7 +14,7 @@ import io.github.fortunen.kete.destinations.redisstreams.RedisStreamsDestination
 public class initializeTests {
 
 	private Map<String, Object> createFullConfig() {
-		var map = new java.util.HashMap<String, Object>();
+		var map = new HashMap<String, Object>();
 		map.put("kind", "redis-streams");
 		map.put("host", "redis.example.com");
 		map.put("stream", "events");
@@ -810,9 +811,11 @@ public class initializeTests {
 
 		// assert
 
+		var credentials = config.getRedisUri().getCredentialsProvider().resolveCredentials().block();
+
 		assertThat(config.getRedisUri()).isNotNull();
-		assertThat(config.getRedisUri().getUsername()).isEqualTo("redis-user");
-		assertThat(config.getRedisUri().getPassword()).isEqualTo("secret123".toCharArray());
+		assertThat(credentials.getUsername()).isEqualTo("redis-user");
+		assertThat(credentials.getPassword()).isEqualTo("secret123".toCharArray());
 	}
 
 	@Test
@@ -834,8 +837,10 @@ public class initializeTests {
 
 		// assert
 
+		var credentials = config.getRedisUri().getCredentialsProvider().resolveCredentials().block();
+
 		assertThat(config.getRedisUri()).isNotNull();
-		assertThat(config.getRedisUri().getPassword()).isEqualTo("secret123".toCharArray());
+		assertThat(credentials.getPassword()).isEqualTo("secret123".toCharArray());
 	}
 
 	@Test

@@ -1,6 +1,7 @@
 package io.github.fortunen.kete.utils;
 
 import java.lang.reflect.Method;
+import java.io.Closeable;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.Duration;
@@ -1165,7 +1166,7 @@ public final class ValidationUtils {
 		}
 	}
 
-	public static void tryClose(java.io.Closeable resource, String resourceName) {
+	public static void tryClose(Closeable resource, String resourceName) {
 		if (isNotNull(resource)) {
 			try {
 				resource.close();

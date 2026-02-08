@@ -1,6 +1,7 @@
 package io.github.fortunen.kete.unittests.certificateloaders.pemfiletextcertificateloader;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
 
 import io.github.fortunen.kete.certificateloaders.PemFileTextCertificateLoader;
 import java.security.KeyStore;
@@ -270,7 +271,7 @@ public class loadKeyStoreTests {
 
 		// act
 
-		var thrown = org.assertj.core.api.Assertions.catchThrowable(
+		var thrown = catchThrowable(
 			() -> loader.loadKeyStore(keyStore, "password".toCharArray())
 		);
 

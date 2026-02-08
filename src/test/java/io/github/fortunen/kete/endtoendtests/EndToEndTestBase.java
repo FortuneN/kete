@@ -5,8 +5,13 @@ import java.net.Socket;
 import java.time.Duration;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+
+import org.apache.kafka.clients.admin.AdminClient;
+import org.apache.maven.shared.invoker.DefaultInvocationRequest;
+import org.apache.maven.shared.invoker.DefaultInvoker;
 
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.resource.RealmResource;
@@ -20,6 +25,7 @@ import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.kafka.KafkaContainer;
 
 import dasniko.testcontainers.keycloak.KeycloakContainer;
+import com.rabbitmq.client.ConnectionFactory;
 import jakarta.ws.rs.core.Response;
 
 import static org.awaitility.Awaitility.await;
@@ -72,7 +78,7 @@ public abstract class EndToEndTestBase {
 	private static boolean buildWithMavenInvoker() {
 		try {
 
-			var request = new org.apache.maven.shared.invoker.DefaultInvocationRequest();
+			var request = new DefaultInvocationRequest();
 
 			var pomFile = new File("pom.xml").getAbsoluteFile();
 
@@ -82,7 +88,7 @@ public abstract class EndToEndTestBase {
 			}
 
 			request.setPomFile(pomFile);
-			request.setGoals(java.util.List.of("package"));
+			request.setGoals(List.of("package"));
 			request.addArg("-DskipTests");
 			request.setBatchMode(true);
 
@@ -90,7 +96,7 @@ public abstract class EndToEndTestBase {
 
 			request.setTimeoutInSeconds(60 * 10);
 
-			var invoker = new org.apache.maven.shared.invoker.DefaultInvoker();
+			var invoker = new DefaultInvoker();
 
 			invoker.setOutputHandler(line -> log.info("[mvn] {}", line));
 			invoker.setErrorHandler(line -> log.warn("[mvn] {}", line));
@@ -228,7 +234,7 @@ public abstract class EndToEndTestBase {
 		realm.setEnabled(true);
 		realm.setEventsEnabled(true);
 		realm.setAdminEventsEnabled(true);
-		realm.setEventsListeners(java.util.List.of("kete"));
+		realm.setEventsListeners(List.of("kete"));
 
 		adminClient.realms().create(realm);
 
@@ -246,7 +252,7 @@ public abstract class EndToEndTestBase {
 		credential.setValue(TEST_PASSWORD);
 		credential.setTemporary(false);
 
-		user.setCredentials(java.util.List.of(credential));
+		user.setCredentials(List.of(credential));
 
 		RealmResource realmResource = adminClient.realm(TEST_REALM);
 
@@ -328,14 +334,14 @@ public abstract class EndToEndTestBase {
 
 	protected void waitForKafkaReady(KafkaContainer kafka) throws Exception {
 
-		var props = new java.util.Properties();
+		var props = new Properties();
 
 		props.put("bootstrap.servers", kafka.getBootstrapServers());
 		props.put("request.timeout.ms", "5000");
 		props.put("default.api.timeout.ms", "5000");
 
 		await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).until(() -> {
-			try (var adminClient = org.apache.kafka.clients.admin.AdminClient.create(props)) {
+			try (var adminClient = AdminClient.create(props)) {
 				adminClient.listTopics().names().get(5, TimeUnit.SECONDS);
 				log.debug("Kafka broker is ready at {}", kafka.getBootstrapServers());
 				return true;
@@ -349,7 +355,7 @@ public abstract class EndToEndTestBase {
 		waitForPortReady(container.getHost(), container.getMappedPort(port));
 	}
 
-	protected void waitForRabbitMqReady(com.rabbitmq.client.ConnectionFactory factory) throws Exception {
+	protected void waitForRabbitMqReady(ConnectionFactory factory) throws Exception {
 		await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).until(() -> {
 			try (var connection = factory.newConnection()) {
 				log.debug("RabbitMQ is ready at {}:{}", factory.getHost(), factory.getPort());

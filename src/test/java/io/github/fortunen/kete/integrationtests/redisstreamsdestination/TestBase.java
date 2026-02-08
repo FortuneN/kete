@@ -20,6 +20,7 @@ import io.github.fortunen.kete.TlsMaterial;
 import io.github.fortunen.kete.destinations.redisstreams.RedisStreamsDestination;
 import io.github.fortunen.kete.destinations.redisstreams.RedisStreamsDestinationConfig;
 import io.lettuce.core.ClientOptions;
+import io.lettuce.core.Range;
 import io.lettuce.core.RedisClient;
 import io.lettuce.core.RedisURI;
 import io.lettuce.core.SslOptions;
@@ -110,7 +111,7 @@ public class TestBase {
 			.withCopyToContainer(Transferable.of(Files.readAllBytes(Path.of(tls.getServerCertificatePemFilePath())), 0777), "/certs/server.crt")
 			.withCopyToContainer(Transferable.of(Files.readAllBytes(Path.of(tls.getServerPrivateKeyPemFilePath())), 0777), "/certs/server.key")
 			.withCopyToContainer(Transferable.of(Files.readAllBytes(Path.of(tls.getCaCertificatePemFilePath())), 0777), "/certs/ca.crt")
-			.withStartupTimeout(java.time.Duration.ofMinutes(10));
+			.withStartupTimeout(Duration.ofMinutes(10));
 
 		container.start();
 
@@ -260,7 +261,7 @@ public class TestBase {
 		}
 
 		try (var connection = client.connect()) {
-			var messages = connection.sync().xrange(stream, io.lettuce.core.Range.unbounded());
+			var messages = connection.sync().xrange(stream, Range.unbounded());
 			return messages;
 		} finally {
 			client.close();

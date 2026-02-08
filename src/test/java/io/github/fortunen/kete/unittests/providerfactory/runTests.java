@@ -2,6 +2,7 @@ package io.github.fortunen.kete.unittests.providerfactory;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -218,7 +219,7 @@ class runTests {
 
 		var failingDestinationConfig = mock(DestinationConfig.class);
 		try {
-			org.mockito.Mockito.doThrow(new RuntimeException("Init failed")).when(failingDestinationConfig).initialize();
+			doThrow(new RuntimeException("Init failed")).when(failingDestinationConfig).initialize();
 		} catch (Exception e) {
 			// expected
 		}
@@ -263,7 +264,7 @@ class runTests {
 		// arrange
 
 		var failingDestinationConfig = mock(DestinationConfig.class);
-		org.mockito.Mockito.doThrow(new RuntimeException("Init failed")).when(failingDestinationConfig).initialize();
+		doThrow(new RuntimeException("Init failed")).when(failingDestinationConfig).initialize();
 
 		try (var route = new Route()) {
 
@@ -306,7 +307,7 @@ class runTests {
 		config.setRoutes(new Route[] { mockRoute });
 
 		factory.setConfiguration(config);
-		factory.setEventExecutor(java.util.concurrent.Executors.newFixedThreadPool(1));
+		factory.setEventExecutor(Executors.newFixedThreadPool(1));
 
 		var session = mock(KeycloakSession.class);
 		var realmProvider = mock(RealmProvider.class);
@@ -346,7 +347,7 @@ class runTests {
 		config.setRoutes(new Route[] { mockRoute });
 
 		factory.setConfiguration(config);
-		factory.setEventExecutor(java.util.concurrent.Executors.newFixedThreadPool(1));
+		factory.setEventExecutor(Executors.newFixedThreadPool(1));
 
 		var session = mock(KeycloakSession.class);
 		var realmProvider = mock(RealmProvider.class);
@@ -373,7 +374,7 @@ class runTests {
 		config.setRoutes(null);
 
 		factory.setConfiguration(config);
-		factory.setEventExecutor(java.util.concurrent.Executors.newFixedThreadPool(1));
+		factory.setEventExecutor(Executors.newFixedThreadPool(1));
 
 		var session = mock(KeycloakSession.class);
 		var realmProvider = mock(RealmProvider.class);

@@ -7,6 +7,7 @@ import io.github.fortunen.kete.certificateloaders.JksFileBase64CertificateLoader
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.security.KeyStore;
+import java.security.cert.Certificate;
 import java.util.Base64;
 import java.util.Map;
 import okhttp3.tls.HeldCertificate;
@@ -31,7 +32,7 @@ class loadKeyStoreTests {
 			"test-key",
 			heldCert.keyPair().getPrivate(),
 			"test".toCharArray(),
-			new java.security.cert.Certificate[] { heldCert.certificate() }
+			new Certificate[] { heldCert.certificate() }
 		);
 
 		var baos = new ByteArrayOutputStream();

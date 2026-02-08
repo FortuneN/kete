@@ -8,6 +8,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.Test;
 
 public class executeTests {
@@ -83,7 +84,7 @@ public class executeTests {
 		// arrange
 
 		ExecutorService executor = ExecutorUtils.createService();
-		var counter = new java.util.concurrent.atomic.AtomicInteger(0);
+		var counter = new AtomicInteger(0);
 		var latch = new CountDownLatch(3);
 
 		try {

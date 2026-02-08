@@ -2,7 +2,6 @@ package io.github.fortunen.kete.integrationtests.natsdestination;
 
 import static org.awaitility.Awaitility.await;
 
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
@@ -20,10 +19,14 @@ import io.github.fortunen.kete.EventMessage;
 import io.github.fortunen.kete.TlsMaterial;
 import io.github.fortunen.kete.destinations.nats.NatsDestination;
 import io.github.fortunen.kete.destinations.nats.NatsDestinationConfig;
-import io.nats.client.Connection;
-import io.nats.client.Dispatcher;
 import io.nats.client.Nats;
 import io.nats.client.Options;
+
+import java.net.HttpURLConnection;
+import java.net.URI;
+import java.util.List;
+
+import io.nats.client.Message;
 
 @SuppressWarnings("resource")
 public class TestBase {
@@ -72,7 +75,6 @@ public class TestBase {
 		return startNatsWithTls(tls, true);
 	}
 
-	@SuppressWarnings("resource")
 	private GenericContainer<?> startNatsWithTls(TlsMaterial tls, boolean requireClientCert) throws Exception {
 
 		if (tls == null) {
@@ -113,7 +115,7 @@ public class TestBase {
 				"--tlsverify=" + tlsVerifyOption,
 				"--tlscacert=/certs/ca.crt"
 			)
-			.withStartupTimeout(java.time.Duration.ofMinutes(10));
+			.withStartupTimeout(Duration.ofMinutes(10));
 
 		container.start();
 
@@ -142,11 +144,11 @@ public class TestBase {
 		await().atMost(Duration.ofMinutes(2)).pollInterval(Duration.ofSeconds(1)).until(() -> {
 			try {
 				var url = "http://" + container.getHost() + ":" + container.getMappedPort(NATS_MONITORING_PORT) + "/varz";
-				var connection = new java.net.URL(url).openConnection();
+				var connection = new URI(url).toURL().openConnection();
 				connection.setConnectTimeout(1000);
 				connection.setReadTimeout(1000);
 				connection.connect();
-				var responseCode = ((java.net.HttpURLConnection) connection).getResponseCode();
+				var responseCode = ((HttpURLConnection) connection).getResponseCode();
 				return responseCode == 200;
 			} catch (Exception e) {
 				return false;
@@ -210,11 +212,11 @@ public class TestBase {
 
 		private final CopyOnWriteArrayList<String> messages = new CopyOnWriteArrayList<>();
 
-		public void onMessage(io.nats.client.Message msg) {
+		public void onMessage(Message msg) {
 			messages.add(new String(msg.getData()));
 		}
 
-		public java.util.List<String> getMessages() {
+		public List<String> getMessages() {
 			return messages;
 		}
 	}

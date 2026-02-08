@@ -3,6 +3,7 @@ package io.github.fortunen.kete.unittests.destinationconfigs.kafkadestinationcon
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -692,8 +693,8 @@ public class initializeTests {
 		// assert
 
 		assertThat(config.getCustomHeadersBytes())
-			.containsEntry("X-Custom-Header", "custom-value".getBytes(java.nio.charset.StandardCharsets.UTF_8))
-			.containsEntry("Authorization", "Bearer token123".getBytes(java.nio.charset.StandardCharsets.UTF_8))
+			.containsEntry("X-Custom-Header", "custom-value".getBytes(StandardCharsets.UTF_8))
+			.containsEntry("Authorization", "Bearer token123".getBytes(StandardCharsets.UTF_8))
 			.hasSize(2);
 	}
 
@@ -772,7 +773,7 @@ public class initializeTests {
 
 		// assert
 
-		var expectedBytes = "héllo wörld 中文".getBytes(java.nio.charset.StandardCharsets.UTF_8);
+		var expectedBytes = "héllo wörld 中文".getBytes(StandardCharsets.UTF_8);
 		assertThat(config.getCustomHeadersBytes().get("X-Unicode")).isEqualTo(expectedBytes);
 	}
 

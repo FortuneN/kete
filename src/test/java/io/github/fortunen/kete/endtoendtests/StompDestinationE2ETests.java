@@ -6,7 +6,6 @@ import static org.awaitility.Awaitility.await;
 import java.net.Socket;
 import java.time.Duration;
 import java.util.HashMap;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;

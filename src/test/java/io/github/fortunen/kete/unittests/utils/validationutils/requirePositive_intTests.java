@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 
 import java.io.IOException;
+import java.sql.SQLException;
 
 import org.junit.jupiter.api.Test;
 
@@ -214,7 +215,7 @@ public class requirePositive_intTests {
 		// act
 
 		var thrown = catchThrowable(() -> {
-			ValidationUtils.requirePositive(value, () -> new java.sql.SQLException("negative value error"));
+			ValidationUtils.requirePositive(value, () -> new SQLException("negative value error"));
 		});
 
 		// assert

@@ -2,7 +2,6 @@ package io.github.fortunen.kete.integrationtests.amqp091destination;
 
 import static org.awaitility.Awaitility.await;
 
-import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;

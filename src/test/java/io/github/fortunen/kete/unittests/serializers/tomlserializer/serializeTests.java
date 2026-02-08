@@ -10,6 +10,7 @@ import org.keycloak.events.Event;
 import org.keycloak.events.EventType;
 import org.keycloak.events.admin.AdminEvent;
 import org.keycloak.events.admin.OperationType;
+import org.keycloak.events.admin.ResourceType;
 
 public class serializeTests {
 
@@ -49,7 +50,7 @@ public class serializeTests {
 		var adminEvent = new AdminEvent();
 		adminEvent.setOperationType(OperationType.CREATE);
 		adminEvent.setRealmId("test-realm");
-		adminEvent.setResourceType(org.keycloak.events.admin.ResourceType.USER);
+		adminEvent.setResourceType(ResourceType.USER);
 
 		// act
 

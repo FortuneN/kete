@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.catchThrowable;
 
 import io.github.fortunen.kete.certificateloaders.PemFilePathCertificateLoader;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.security.KeyStore;
 import java.util.Map;
 import okhttp3.tls.HeldCertificate;
@@ -15,7 +16,7 @@ import org.junit.jupiter.api.io.TempDir;
 public class loadKeyStoreTests {
 
 	@TempDir
-	java.nio.file.Path tempDir;
+	Path tempDir;
 
 	@Test
 	public void shouldLoadCertificateIntoKeyStore() throws Exception {

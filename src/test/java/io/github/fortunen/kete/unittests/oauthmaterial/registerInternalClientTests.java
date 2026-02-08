@@ -10,6 +10,7 @@ import io.github.fortunen.kete.OAuthMaterial.OAuthMode;
 import java.net.URI;
 import java.util.HashMap;
 import org.apache.commons.configuration2.MapConfiguration;
+import org.keycloak.models.ClientModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.RealmProvider;
@@ -166,7 +167,7 @@ class registerInternalClientTests {
 		var session = mock(KeycloakSession.class);
 		var realmProvider = mock(RealmProvider.class);
 		var realmModel = mock(RealmModel.class);
-		var existingClient = mock(org.keycloak.models.ClientModel.class);
+		var existingClient = mock(ClientModel.class);
 
 		when(session.realms()).thenReturn(realmProvider);
 		when(realmProvider.getRealmByName("test-realm")).thenReturn(realmModel);

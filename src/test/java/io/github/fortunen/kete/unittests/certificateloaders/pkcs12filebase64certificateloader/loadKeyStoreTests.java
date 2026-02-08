@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.catchThrowable;
 import io.github.fortunen.kete.certificateloaders.Pkcs12FileBase64CertificateLoader;
 import java.io.ByteArrayOutputStream;
 import java.security.KeyStore;
+import java.security.cert.Certificate;
 import java.util.Base64;
 import java.util.Map;
 import okhttp3.tls.HeldCertificate;
@@ -32,7 +33,7 @@ public class loadKeyStoreTests {
 			"test-key",
 			heldCert.keyPair().getPrivate(),
 			TEST_PASSWORD.toCharArray(),
-			new java.security.cert.Certificate[] { heldCert.certificate() }
+			new Certificate[] { heldCert.certificate() }
 		);
 
 		// Export to base64
@@ -88,7 +89,7 @@ public class loadKeyStoreTests {
 			"chain-key",
 			endEntity.keyPair().getPrivate(),
 			TEST_PASSWORD.toCharArray(),
-			new java.security.cert.Certificate[] { endEntity.certificate(), rootCa.certificate() }
+			new Certificate[] { endEntity.certificate(), rootCa.certificate() }
 		);
 
 		// Export to base64
@@ -157,7 +158,7 @@ public class loadKeyStoreTests {
 			"test-key",
 			heldCert.keyPair().getPrivate(),
 			TEST_PASSWORD.toCharArray(),
-			new java.security.cert.Certificate[] { heldCert.certificate() }
+			new Certificate[] { heldCert.certificate() }
 		);
 
 		var baos = new ByteArrayOutputStream();
@@ -198,7 +199,7 @@ public class loadKeyStoreTests {
 			"test-key",
 			heldCert.keyPair().getPrivate(),
 			null,
-			new java.security.cert.Certificate[] { heldCert.certificate() }
+			new Certificate[] { heldCert.certificate() }
 		);
 
 		var baos = new ByteArrayOutputStream();
@@ -239,7 +240,7 @@ public class loadKeyStoreTests {
 			"test-key",
 			heldCert.keyPair().getPrivate(),
 			null,
-			new java.security.cert.Certificate[] { heldCert.certificate() }
+			new Certificate[] { heldCert.certificate() }
 		);
 
 		var baos = new ByteArrayOutputStream();
@@ -280,7 +281,7 @@ public class loadKeyStoreTests {
 			"test-key",
 			heldCert.keyPair().getPrivate(),
 			null,
-			new java.security.cert.Certificate[] { heldCert.certificate() }
+			new Certificate[] { heldCert.certificate() }
 		);
 
 		var baos = new ByteArrayOutputStream();

@@ -58,6 +58,7 @@
 | **HTTP** | Webhooks, REST APIs, Azure Event Grid, AWS EventBridge, Google Cloud Pub/Sub Push, Twilio, Slack, Discord, Custom HTTP Endpoints |
 | **STOMP** | Apache ActiveMQ, Apache Artemis, RabbitMQ, EMQX, HornetQ |
 | **WebSocket** | Custom WebSocket Servers, Socket.IO, SignalR, Ably, Pusher, WebSocket-based Chat Applications |
+| **ZeroMQ** | Any ZeroMQ peer — brokerless, 40+ language bindings (Python, C, .NET, Java, Node.js, Go, Rust) |
 
 ## Quick Start (5 minutes)
 
@@ -170,6 +171,7 @@ docker compose up -d
 | [OkHttp](https://square.github.io/okhttp/) | HTTP client with TLS support |
 | [Lettuce](https://lettuce.io/) | Redis client for Pub/Sub and Streams |
 | [NATS Java Client](https://github.com/nats-io/nats.java) | NATS and JetStream messaging |
+| [JeroMQ](https://github.com/zeromq/jeromq) | Pure Java ZeroMQ implementation |
 | [Nimbus OAuth SDK](https://connect2id.com/products/nimbus-oauth-openid-connect-sdk) | OAuth 2.0 client credentials |
 | [Resilience4j](https://resilience4j.readme.io/) | Retry patterns with exponential backoff |
 | [Jackson](https://github.com/FasterXML/jackson) | JSON, XML, YAML, CSV, CBOR, TOML, Smile, Properties |

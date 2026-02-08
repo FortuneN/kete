@@ -19,18 +19,16 @@ For bare metal and standalone deployments, configure via Keycloak's native confi
     ```properties
     spi-events-listener-kete-enabled=true
     spi-events-listener-kete-metrics-enabled=true
-    spi-events-listener-kete-routes-0-name=my-route
-    spi-events-listener-kete-routes-0-destination-kind=kafka
-    spi-events-listener-kete-routes-0-destination-bootstrap-servers=localhost:9092
-    spi-events-listener-kete-routes-0-destination-topic=keycloak-events
+    spi-events-listener-kete-routes-myroute-destination-kind=kafka
+    spi-events-listener-kete-routes-myroute-destination-bootstrap-servers=localhost:9092
+    spi-events-listener-kete-routes-myroute-destination-topic=keycloak-events
     ```
 
     Or via CLI:
     ```bash
     bin/kc.sh start \
       --spi-events-listener-kete-enabled=true \
-      --spi-events-listener-kete-routes-0-name=my-route \
-      --spi-events-listener-kete-routes-0-destination-kind=kafka \
+      --spi-events-listener-kete-routes-myroute-destination-kind=kafka \
       ...
     ```
 
@@ -43,10 +41,9 @@ For bare metal and standalone deployments, configure via Keycloak's native confi
             <properties>
                 <property name="enabled" value="true"/>
                 <property name="metrics.enabled" value="true"/>
-                <property name="routes.0.name" value="my-route"/>
-                <property name="routes.0.destination.kind" value="kafka"/>
-                <property name="routes.0.destination.bootstrap.servers" value="localhost:9092"/>
-                <property name="routes.0.destination.topic" value="keycloak-events"/>
+                <property name="routes.myroute.destination.kind" value="kafka"/>
+                <property name="routes.myroute.destination.bootstrap.servers" value="localhost:9092"/>
+                <property name="routes.myroute.destination.topic" value="keycloak-events"/>
             </properties>
         </provider>
     </spi>
@@ -59,10 +56,9 @@ Environment variables override SPI configuration. Ideal for containerized deploy
 ```bash
 kete.enabled=true
 kete.metrics.enabled=true
-kete.routes.0.name=my-route
-kete.routes.0.destination.kind=kafka
-kete.routes.0.destination.bootstrap.servers=kafka:9092
-kete.routes.0.destination.topic=keycloak-events
+kete.routes.myroute.destination.kind=kafka
+kete.routes.myroute.destination.bootstrap.servers=kafka:9092
+kete.routes.myroute.destination.topic=keycloak-events
 ```
 
 ## Configuration Pattern

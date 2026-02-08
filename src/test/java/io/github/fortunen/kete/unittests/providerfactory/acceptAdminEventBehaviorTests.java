@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Test;
 import org.keycloak.events.admin.AdminEvent;
 import org.keycloak.events.admin.OperationType;
 import org.keycloak.events.admin.ResourceType;
+import org.mockito.ArgumentCaptor;
 
 import io.github.fortunen.kete.Configuration;
 import io.github.fortunen.kete.Constants;
@@ -133,7 +134,7 @@ class acceptAdminEventBehaviorTests {
 
 		// assert
 
-		var captor = org.mockito.ArgumentCaptor.forClass(EventMessage.class);
+		var captor = ArgumentCaptor.forClass(EventMessage.class);
 		verify(mockRoute, timeout(1000)).send(captor.capture());
 
 		var message = captor.getValue();

@@ -15,6 +15,9 @@ import org.testcontainers.utility.DockerImageName;
 import io.lettuce.core.Range;
 import io.lettuce.core.RedisClient;
 import io.lettuce.core.RedisURI;
+import io.lettuce.core.StreamMessage;
+
+import java.util.List;
 
 @SuppressWarnings("resource")
 class RedisStreamsDestinationE2ETests extends EndToEndTestBase {
@@ -112,7 +115,7 @@ class RedisStreamsDestinationE2ETests extends EndToEndTestBase {
 		});
 	}
 
-	private java.util.List<io.lettuce.core.StreamMessage<String, String>> readFromStream(String stream) {
+	private List<StreamMessage<String, String>> readFromStream(String stream) {
 		var uri = RedisURI.builder()
 			.withHost(redis.getHost())
 			.withPort(redis.getMappedPort(6379))

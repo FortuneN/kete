@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -225,6 +226,6 @@ public class sendTests extends TestBase {
 
 		// assert
 
-		verify(destination, org.mockito.Mockito.times(3)).send(message);
+		verify(destination, times(3)).send(message);
 	}
 }

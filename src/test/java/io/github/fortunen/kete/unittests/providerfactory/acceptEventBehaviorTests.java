@@ -5,6 +5,7 @@ import static org.awaitility.Awaitility.await;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -16,6 +17,7 @@ import java.util.concurrent.Executors;
 import org.junit.jupiter.api.Test;
 import org.keycloak.events.Event;
 import org.keycloak.events.EventType;
+import org.mockito.ArgumentCaptor;
 
 import io.github.fortunen.kete.Configuration;
 import io.github.fortunen.kete.Constants;
@@ -135,7 +137,7 @@ class acceptEventBehaviorTests {
 		factory.accept(event);
 		await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).until(() -> {
 			try {
-				verify(mockRoute, org.mockito.Mockito.never()).send(any(EventMessage.class));
+				verify(mockRoute, never()).send(any(EventMessage.class));
 				return true;
 			} catch (AssertionError e) {
 				return false;
@@ -177,7 +179,7 @@ class acceptEventBehaviorTests {
 
 		// assert
 
-		var captor = org.mockito.ArgumentCaptor.forClass(EventMessage.class);
+		var captor = ArgumentCaptor.forClass(EventMessage.class);
 		verify(mockRoute, timeout(1000)).send(captor.capture());
 
 		var message = captor.getValue();

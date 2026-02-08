@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Properties;
 
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
@@ -60,7 +61,7 @@ class KafkaDestinationE2ETests extends EndToEndTestBase {
 
 				// assert
 
-				var consumerProps = new java.util.Properties();
+				var consumerProps = new Properties();
 				consumerProps.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafka.getBootstrapServers());
 				consumerProps.put(ConsumerConfig.GROUP_ID_CONFIG, "test-group");
 				consumerProps.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");

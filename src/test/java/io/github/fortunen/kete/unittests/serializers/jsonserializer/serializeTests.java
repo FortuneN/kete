@@ -4,12 +4,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.Mockito.mock;
 
+import java.util.HashMap;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.keycloak.events.Event;
 import org.keycloak.events.EventType;
 import org.keycloak.events.admin.AdminEvent;
+import org.keycloak.events.admin.AuthDetails;
 import org.keycloak.events.admin.OperationType;
+import org.keycloak.events.admin.ResourceType;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -54,7 +57,7 @@ public class serializeTests {
 		var adminEvent = new AdminEvent();
 		adminEvent.setOperationType(OperationType.CREATE);
 		adminEvent.setRealmId("test-realm");
-		adminEvent.setResourceType(org.keycloak.events.admin.ResourceType.USER);
+		adminEvent.setResourceType(ResourceType.USER);
 
 		// act
 
@@ -190,9 +193,9 @@ public class serializeTests {
 		var currentTime = System.currentTimeMillis();
 		adminEvent.setOperationType(OperationType.CREATE);
 		adminEvent.setRealmId("realm");
-		adminEvent.setResourceType(org.keycloak.events.admin.ResourceType.USER);
+		adminEvent.setResourceType(ResourceType.USER);
 		adminEvent.setResourcePath("users/123");
-		adminEvent.setAuthDetails(mock(org.keycloak.events.admin.AuthDetails.class));
+		adminEvent.setAuthDetails(mock(AuthDetails.class));
 		adminEvent.setTime(currentTime);
 
 		// act
@@ -323,7 +326,7 @@ public class serializeTests {
 		var serializer = new JsonSerializer();
 		var event = new Event();
 		event.setType(EventType.LOGIN);
-		var details = new java.util.HashMap<String, String>();
+		var details = new HashMap<String, String>();
 		details.put("nested", "{\"level2\":{\"level3\":[\"a\",\"b\",\"c\"]}}");
 		event.setDetails(details);
 

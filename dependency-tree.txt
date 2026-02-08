@@ -1,0 +1,284 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] ----------------------< io.github.fortunen:kete >-----------------------
+[INFO] Building KETE 0.0.0
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- dependency:3.7.0:tree (default-cli) @ kete ---
+[INFO] io.github.fortunen:kete:jar:0.0.0
+[INFO] +- org.keycloak:keycloak-core:jar:25.0.6:provided
+[INFO] |  +- org.keycloak:keycloak-common:jar:25.0.6:provided
+[INFO] |  |  \- jakarta.activation:jakarta.activation-api:jar:2.1.2:provided
+[INFO] |  +- com.fasterxml.jackson.core:jackson-core:jar:2.17.0:compile
+[INFO] |  +- com.fasterxml.jackson.datatype:jackson-datatype-jdk8:jar:2.17.0:provided
+[INFO] |  \- org.eclipse.microprofile.openapi:microprofile-openapi-api:jar:3.1.1:provided
+[INFO] +- org.keycloak:keycloak-server-spi:jar:25.0.6:provided
+[INFO] +- org.keycloak:keycloak-services:jar:25.0.6:provided
+[INFO] |  +- jakarta.mail:jakarta.mail-api:jar:2.1.1:provided
+[INFO] |  +- org.eclipse.angus:angus-mail:jar:2.0.1:provided
+[INFO] |  |  \- org.eclipse.angus:angus-activation:jar:2.0.1:provided
+[INFO] |  +- org.twitter4j:twitter4j-core:jar:4.1.2:provided
+[INFO] |  +- org.jboss.logging:jboss-logging:jar:3.5.3.Final:provided
+[INFO] |  +- org.jboss.logging:commons-logging-jboss-logging:jar:1.0.0.Final:provided
+[INFO] |  +- jakarta.ws.rs:jakarta.ws.rs-api:jar:3.1.0:provided
+[INFO] |  +- jakarta.transaction:jakarta.transaction-api:jar:2.0.1:provided
+[INFO] |  +- jakarta.xml.soap:jakarta.xml.soap-api:jar:3.0.0:provided
+[INFO] |  +- com.googlecode.owasp-java-html-sanitizer:owasp-java-html-sanitizer:jar:20240325.1:provided
+[INFO] |  +- com.googlecode.owasp-java-html-sanitizer:java8-shim:jar:20240325.1:provided
+[INFO] |  +- com.googlecode.owasp-java-html-sanitizer:java10-shim:jar:20240325.1:provided
+[INFO] |  +- com.fasterxml.jackson.core:jackson-annotations:jar:2.17.0:compile
+[INFO] |  +- javax.annotation:javax.annotation-api:jar:1.3.2:provided
+[INFO] |  +- com.google.zxing:javase:jar:3.4.0:provided
+[INFO] |  |  +- com.google.zxing:core:jar:3.4.0:provided
+[INFO] |  |  \- com.github.jai-imageio:jai-imageio-core:jar:1.4.0:provided
+[INFO] |  +- com.apicatalog:titanium-json-ld:jar:1.3.3:provided
+[INFO] |  +- io.setl:rdf-urdna:jar:1.1:provided
+[INFO] |  +- com.webauthn4j:webauthn4j-core:jar:0.21.5.RELEASE:provided
+[INFO] |  |  +- com.webauthn4j:webauthn4j-util:jar:0.21.5.RELEASE:provided
+[INFO] |  |  +- org.apache.kerby:kerby-asn1:jar:2.0.3:provided
+[INFO] |  |  \- org.checkerframework:checker-qual:jar:3.42.0:provided
+[INFO] |  +- com.github.ua-parser:uap-java:jar:1.5.4:provided
+[INFO] |  |  \- org.apache.commons:commons-collections4:jar:4.4:provided
+[INFO] |  +- io.smallrye.common:smallrye-common-annotation:jar:2.2.0:provided
+[INFO] |  \- org.keycloak:keycloak-model-storage-private:jar:25.0.6:provided
+[INFO] |     +- org.keycloak:keycloak-server-spi-private:jar:25.0.6:provided
+[INFO] |     \- org.keycloak:keycloak-model-storage:jar:25.0.6:provided
+[INFO] +- io.micrometer:micrometer-core:jar:1.12.2:provided
+[INFO] |  +- io.micrometer:micrometer-commons:jar:1.12.2:provided
+[INFO] |  +- io.micrometer:micrometer-observation:jar:1.12.2:provided
+[INFO] |  +- org.hdrhistogram:HdrHistogram:jar:2.1.12:provided
+[INFO] |  \- org.latencyutils:LatencyUtils:jar:2.0.3:provided
+[INFO] +- com.fasterxml.jackson.core:jackson-databind:jar:2.17.0:compile
+[INFO] +- com.fasterxml.jackson.dataformat:jackson-dataformat-xml:jar:2.17.0:compile
+[INFO] |  +- org.codehaus.woodstox:stax2-api:jar:4.2.2:compile
+[INFO] |  \- com.fasterxml.woodstox:woodstox-core:jar:6.6.1:compile
+[INFO] +- com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:jar:2.17.0:compile
+[INFO] |  \- org.yaml:snakeyaml:jar:2.0:compile
+[INFO] +- com.fasterxml.jackson.dataformat:jackson-dataformat-csv:jar:2.17.0:compile
+[INFO] +- com.fasterxml.jackson.dataformat:jackson-dataformat-toml:jar:2.17.0:compile
+[INFO] +- com.fasterxml.jackson.dataformat:jackson-dataformat-smile:jar:2.17.0:compile
+[INFO] +- com.fasterxml.jackson.dataformat:jackson-dataformat-cbor:jar:2.17.0:compile
+[INFO] +- com.fasterxml.jackson.dataformat:jackson-dataformat-properties:jar:2.17.0:compile
+[INFO] +- org.apache.kafka:kafka-clients:jar:4.1.1:compile
+[INFO] |  +- com.github.luben:zstd-jni:jar:1.5.6-10:runtime
+[INFO] |  +- org.lz4:lz4-java:jar:1.8.0:runtime
+[INFO] |  +- org.xerial.snappy:snappy-java:jar:1.1.10.5:runtime
+[INFO] |  \- org.slf4j:slf4j-api:jar:2.0.6:compile
+[INFO] +- org.apache.pulsar:pulsar-client:jar:3.3.3:compile
+[INFO] |  +- org.apache.pulsar:pulsar-client-api:jar:3.3.3:compile
+[INFO] |  +- org.apache.pulsar:pulsar-client-admin-api:jar:3.3.3:compile
+[INFO] |  +- org.apache.pulsar:bouncy-castle-bc:jar:pkg:3.3.3:compile
+[INFO] |  +- org.bouncycastle:bcutil-jdk18on:jar:1.78.1:compile
+[INFO] |  +- io.opentelemetry:opentelemetry-api:jar:1.32.0:compile
+[INFO] |  +- io.opentelemetry:opentelemetry-context:jar:1.32.0:compile
+[INFO] |  +- io.opentelemetry:opentelemetry-api-incubator:jar:1.44.1-alpha:compile
+[INFO] |  \- javax.validation:validation-api:jar:1.1.0.Final:compile
+[INFO] +- com.rabbitmq:amqp-client:jar:5.25.0:compile
+[INFO] +- org.projectlombok:lombok:jar:1.18.42:compile
+[INFO] +- org.apache.commons:commons-lang3:jar:3.20.0:compile
+[INFO] +- commons-io:commons-io:jar:2.21.0:compile
+[INFO] +- org.apache.commons:commons-text:jar:1.15.0:compile
+[INFO] +- com.hrakaroo:glob:jar:0.9.0:compile
+[INFO] +- org.apache.commons:commons-configuration2:jar:2.13.0:compile
+[INFO] |  \- commons-logging:commons-logging:jar:1.3.5:compile
+[INFO] +- org.reflections:reflections:jar:0.10.2:compile
+[INFO] |  +- org.javassist:javassist:jar:3.28.0-GA:compile
+[INFO] |  \- com.google.code.findbugs:jsr305:jar:3.0.2:compile
+[INFO] +- io.github.resilience4j:resilience4j-retry:jar:2.3.0:compile
+[INFO] |  \- io.github.resilience4j:resilience4j-core:jar:2.3.0:compile
+[INFO] +- org.apache.commons:commons-pool2:jar:2.13.1:compile
+[INFO] +- com.nimbusds:oauth2-oidc-sdk:jar:11.26:compile
+[INFO] |  +- com.github.stephenc.jcip:jcip-annotations:jar:1.0-1:compile
+[INFO] |  +- com.nimbusds:content-type:jar:2.3:compile
+[INFO] |  +- net.minidev:json-smart:jar:2.5.2:compile
+[INFO] |  |  \- net.minidev:accessors-smart:jar:2.5.2:compile
+[INFO] |  |     \- org.ow2.asm:asm:jar:9.6:compile
+[INFO] |  +- com.nimbusds:lang-tag:jar:1.7:compile
+[INFO] |  \- com.nimbusds:nimbus-jose-jwt:jar:9.37.3:compile
+[INFO] +- org.eclipse.paho:org.eclipse.paho.client.mqttv3:jar:1.2.5:compile
+[INFO] +- org.eclipse.paho:org.eclipse.paho.mqttv5.client:jar:1.2.5:compile
+[INFO] +- org.apache.qpid:qpid-jms-client:jar:2.9.0:compile
+[INFO] |  +- jakarta.jms:jakarta.jms-api:jar:3.1.0:compile
+[INFO] |  +- org.apache.qpid:proton-j:jar:0.34.1:compile
+[INFO] |  +- io.netty:netty-buffer:jar:4.1.108.Final:compile
+[INFO] |  +- io.netty:netty-common:jar:4.1.108.Final:compile
+[INFO] |  +- io.netty:netty-handler:jar:4.1.108.Final:compile
+[INFO] |  |  +- io.netty:netty-resolver:jar:4.1.108.Final:compile
+[INFO] |  |  +- io.netty:netty-transport-native-unix-common:jar:4.1.108.Final:compile
+[INFO] |  |  \- io.netty:netty-codec:jar:4.1.108.Final:compile
+[INFO] |  +- io.netty:netty-transport:jar:4.1.108.Final:compile
+[INFO] |  +- io.netty:netty-transport-native-epoll:jar:linux-x86_64:4.1.108.Final:compile
+[INFO] |  |  \- io.netty:netty-transport-classes-epoll:jar:4.1.108.Final:compile
+[INFO] |  +- io.netty:netty-transport-native-kqueue:jar:osx-x86_64:4.1.108.Final:compile
+[INFO] |  |  \- io.netty:netty-transport-classes-kqueue:jar:4.1.108.Final:compile
+[INFO] |  \- io.netty:netty-codec-http:jar:4.1.108.Final:compile
+[INFO] +- org.java-websocket:Java-WebSocket:jar:1.6.0:compile
+[INFO] +- org.messaginghub:pooled-jms:jar:3.2.2:compile
+[INFO] +- com.google.guava:guava:jar:33.5.0-jre:compile
+[INFO] |  +- com.google.guava:failureaccess:jar:1.0.1:compile
+[INFO] |  +- org.jspecify:jspecify:jar:1.0.0:compile
+[INFO] |  +- com.google.errorprone:error_prone_annotations:jar:2.24.0:compile
+[INFO] |  \- com.google.j2objc:j2objc-annotations:jar:2.8:compile
+[INFO] +- com.squareup.okhttp3:okhttp-tls:jar:4.12.0:compile
+[INFO] |  +- com.squareup.okio:okio:jar:3.6.0:compile
+[INFO] |  |  \- com.squareup.okio:okio-jvm:jar:3.6.0:compile
+[INFO] |  |     \- org.jetbrains.kotlin:kotlin-stdlib-common:jar:1.9.22:compile
+[INFO] |  +- org.jetbrains.kotlin:kotlin-stdlib-jdk8:jar:1.9.22:compile
+[INFO] |  |  +- org.jetbrains.kotlin:kotlin-stdlib:jar:1.9.22:compile
+[INFO] |  |  \- org.jetbrains.kotlin:kotlin-stdlib-jdk7:jar:1.9.22:compile
+[INFO] |  \- com.squareup.okhttp3:okhttp:jar:4.12.0:runtime
+[INFO] +- org.bouncycastle:bcprov-jdk18on:jar:1.80:compile
+[INFO] +- org.bouncycastle:bcpkix-jdk18on:jar:1.80:compile
+[INFO] +- io.lettuce:lettuce-core:jar:6.5.3.RELEASE:compile
+[INFO] |  \- io.projectreactor:reactor-core:jar:3.6.6:compile
+[INFO] |     \- org.reactivestreams:reactive-streams:jar:1.0.4:compile
+[INFO] +- io.nats:jnats:jar:2.20.5:compile
+[INFO] |  \- net.i2p.crypto:eddsa:jar:0.3.0:runtime
+[INFO] +- org.junit.jupiter:junit-jupiter-api:jar:5.12.2:test
+[INFO] |  +- org.opentest4j:opentest4j:jar:1.3.0:test
+[INFO] |  \- org.apiguardian:apiguardian-api:jar:1.1.2:test
+[INFO] +- org.assertj:assertj-core:jar:3.27.7:test
+[INFO] +- org.junit.jupiter:junit-jupiter-engine:jar:5.12.2:test
+[INFO] +- org.junit.platform:junit-platform-engine:jar:1.12.2:test
+[INFO] +- org.junit.platform:junit-platform-commons:jar:1.12.2:test
+[INFO] +- org.mockito:mockito-core:jar:5.21.0:test
+[INFO] |  \- org.objenesis:objenesis:jar:3.3:test
+[INFO] +- org.slf4j:slf4j-jdk14:jar:2.0.6:compile
+[INFO] +- net.bytebuddy:byte-buddy:jar:1.15.11:test
+[INFO] +- net.bytebuddy:byte-buddy-agent:jar:1.15.11:test
+[INFO] +- org.slf4j:slf4j-simple:jar:2.0.6:test
+[INFO] +- org.mockito:mockito-junit-jupiter:jar:5.21.0:test
+[INFO] +- com.squareup.okhttp3:mockwebserver:jar:4.12.0:test
+[INFO] |  \- junit:junit:jar:4.13.2:test
+[INFO] |     \- org.hamcrest:hamcrest-core:jar:1.3:test
+[INFO] +- org.testcontainers:testcontainers:jar:1.21.4:test
+[INFO] |  +- org.apache.commons:commons-compress:jar:1.26.1:test
+[INFO] |  |  \- commons-codec:commons-codec:jar:1.16.1:test
+[INFO] |  +- org.rnorth.duct-tape:duct-tape:jar:1.0.8:test
+[INFO] |  +- com.github.docker-java:docker-java-api:jar:3.3.5:test
+[INFO] |  \- com.github.docker-java:docker-java-transport-zerodep:jar:3.3.5:test
+[INFO] |     +- com.github.docker-java:docker-java-transport:jar:3.3.5:test
+[INFO] |     \- net.java.dev.jna:jna:jar:5.8.0:test
+[INFO] +- org.testcontainers:kafka:jar:1.21.4:test
+[INFO] +- org.testcontainers:rabbitmq:jar:1.21.4:test
+[INFO] +- org.testcontainers:hivemq:jar:1.21.4:test
+[INFO] |  \- org.jetbrains:annotations:jar:24.1.0:compile
+[INFO] +- org.testcontainers:mockserver:jar:1.21.4:test
+[INFO] +- org.mock-server:mockserver-client-java:jar:5.15.0:test
+[INFO] |  \- org.mock-server:mockserver-core:jar:5.15.0:test
+[INFO] |     +- com.lmax:disruptor:jar:3.4.4:test
+[INFO] |     +- javax.servlet:javax.servlet-api:jar:4.0.1:test
+[INFO] |     +- io.netty:netty-codec-http2:jar:4.1.108.Final:test
+[INFO] |     +- io.netty:netty-codec-socks:jar:4.1.108.Final:test
+[INFO] |     +- io.netty:netty-handler-proxy:jar:4.1.108.Final:test
+[INFO] |     +- io.netty:netty-tcnative-boringssl-static:jar:2.0.65.Final:test
+[INFO] |     |  +- io.netty:netty-tcnative-classes:jar:2.0.65.Final:test
+[INFO] |     |  +- io.netty:netty-tcnative-boringssl-static:jar:linux-x86_64:2.0.65.Final:test
+[INFO] |     |  +- io.netty:netty-tcnative-boringssl-static:jar:linux-aarch_64:2.0.65.Final:test
+[INFO] |     |  +- io.netty:netty-tcnative-boringssl-static:jar:osx-x86_64:2.0.65.Final:test
+[INFO] |     |  +- io.netty:netty-tcnative-boringssl-static:jar:osx-aarch_64:2.0.65.Final:test
+[INFO] |     |  \- io.netty:netty-tcnative-boringssl-static:jar:windows-x86_64:2.0.65.Final:test
+[INFO] |     +- com.jcraft:jzlib:jar:1.1.3:test
+[INFO] |     +- com.fasterxml.uuid:java-uuid-generator:jar:4.1.0:test
+[INFO] |     +- org.apache.velocity:velocity-engine-scripting:jar:2.3:test
+[INFO] |     +- org.apache.velocity:velocity-engine-core:jar:2.3:test
+[INFO] |     +- org.apache.velocity.tools:velocity-tools-generic:jar:3.1:test
+[INFO] |     |  +- commons-beanutils:commons-beanutils:jar:1.9.4:test
+[INFO] |     |  |  \- commons-collections:commons-collections:jar:3.2.2:test
+[INFO] |     |  +- org.apache.commons:commons-digester3:jar:3.2:test
+[INFO] |     |  \- com.github.cliftonlabs:json-simple:jar:3.0.2:test
+[INFO] |     +- com.samskivert:jmustache:jar:1.15:test
+[INFO] |     +- net.javacrumbs.json-unit:json-unit-core:jar:2.36.0:test
+[INFO] |     +- com.networknt:json-schema-validator:jar:1.0.76:test
+[INFO] |     |  \- com.ethlo.time:itu:jar:1.7.0:test
+[INFO] |     +- com.jayway.jsonpath:json-path:jar:2.7.0:test
+[INFO] |     +- io.swagger.parser.v3:swagger-parser:jar:2.1.10:test
+[INFO] |     |  +- io.swagger.parser.v3:swagger-parser-v2-converter:jar:2.1.10:test
+[INFO] |     |  |  +- io.swagger:swagger-core:jar:1.6.9:test
+[INFO] |     |  |  |  \- io.swagger:swagger-models:jar:1.6.9:test
+[INFO] |     |  |  |     \- io.swagger:swagger-annotations:jar:1.6.9:test
+[INFO] |     |  |  +- io.swagger:swagger-parser:jar:1.0.64:test
+[INFO] |     |  |  +- io.swagger:swagger-compat-spec-parser:jar:1.0.64:test
+[INFO] |     |  |  |  \- com.github.java-json-tools:json-schema-validator:jar:2.2.14:test
+[INFO] |     |  |  |     +- com.github.java-json-tools:jackson-coreutils-equivalence:jar:1.0:test
+[INFO] |     |  |  |     +- com.github.java-json-tools:json-schema-core:jar:1.2.14:test
+[INFO] |     |  |  |     |  +- com.github.java-json-tools:uri-template:jar:0.10:test
+[INFO] |     |  |  |     |  \- org.mozilla:rhino:jar:1.7.7.2:test
+[INFO] |     |  |  |     +- com.sun.mail:mailapi:jar:1.6.2:test
+[INFO] |     |  |  |     +- joda-time:joda-time:jar:2.10.5:test
+[INFO] |     |  |  |     +- com.googlecode.libphonenumber:libphonenumber:jar:8.11.1:test
+[INFO] |     |  |  |     \- net.sf.jopt-simple:jopt-simple:jar:5.0.4:test
+[INFO] |     |  |  +- io.swagger.core.v3:swagger-models:jar:2.2.8:test
+[INFO] |     |  |  \- io.swagger.parser.v3:swagger-parser-core:jar:2.1.10:test
+[INFO] |     |  \- io.swagger.parser.v3:swagger-parser-v3:jar:2.1.10:test
+[INFO] |     |     \- io.swagger.core.v3:swagger-core:jar:2.2.8:test
+[INFO] |     |        +- com.fasterxml.jackson.datatype:jackson-datatype-jsr310:jar:2.17.0:test
+[INFO] |     |        \- io.swagger.core.v3:swagger-annotations:jar:2.2.8:test
+[INFO] |     +- jakarta.xml.bind:jakarta.xml.bind-api:jar:4.0.1:test
+[INFO] |     +- com.sun.xml.bind:jaxb-impl:jar:4.0.1:test
+[INFO] |     |  \- com.sun.xml.bind:jaxb-core:jar:4.0.1:test
+[INFO] |     +- org.xmlunit:xmlunit-core:jar:2.9.1:test
+[INFO] |     +- org.xmlunit:xmlunit-placeholders:jar:2.9.1:test
+[INFO] |     +- io.github.classgraph:classgraph:jar:4.8.154:test
+[INFO] |     +- io.prometheus:simpleclient:jar:0.16.0:test
+[INFO] |     |  +- io.prometheus:simpleclient_tracer_otel:jar:0.16.0:test
+[INFO] |     |  |  \- io.prometheus:simpleclient_tracer_common:jar:0.16.0:test
+[INFO] |     |  \- io.prometheus:simpleclient_tracer_otel_agent:jar:0.16.0:test
+[INFO] |     \- io.prometheus:simpleclient_httpserver:jar:0.16.0:test
+[INFO] |        \- io.prometheus:simpleclient_common:jar:0.16.0:test
+[INFO] +- com.github.dasniko:testcontainers-keycloak:jar:3.7.0:test
+[INFO] |  +- io.quarkus:quarkus-junit4-mock:jar:3.8.5:test
+[INFO] |  +- org.jboss.shrinkwrap:shrinkwrap-api:jar:2.0.0-beta-2:test
+[INFO] |  \- org.jboss.shrinkwrap:shrinkwrap-impl-base:jar:2.0.0-beta-2:test
+[INFO] |     \- org.jboss.shrinkwrap:shrinkwrap-spi:jar:2.0.0-beta-2:test
+[INFO] +- org.keycloak:keycloak-admin-client:jar:25.0.6:test
+[INFO] |  +- org.jboss.resteasy:resteasy-client:jar:6.2.7.Final:test
+[INFO] |  |  +- org.jboss.resteasy:resteasy-client-api:jar:6.2.7.Final:test
+[INFO] |  |  +- org.jboss.resteasy:resteasy-core-spi:jar:6.2.7.Final:test
+[INFO] |  |  |  \- jakarta.validation:jakarta.validation-api:jar:3.0.2:test
+[INFO] |  |  +- org.jboss.resteasy:resteasy-core:jar:6.2.7.Final:test
+[INFO] |  |  |  +- io.smallrye:jandex:jar:3.1.6:test
+[INFO] |  |  |  \- com.ibm.async:asyncutil:jar:0.1.0:test
+[INFO] |  |  \- org.apache.httpcomponents:httpclient:jar:4.5.14:provided
+[INFO] |  |     \- org.apache.httpcomponents:httpcore:jar:4.4.16:provided
+[INFO] |  +- org.jboss.resteasy:resteasy-multipart-provider:jar:6.2.7.Final:test
+[INFO] |  |  +- org.apache.james:apache-mime4j-dom:jar:0.8.11:test
+[INFO] |  |  |  \- org.apache.james:apache-mime4j-core:jar:0.8.11:test
+[INFO] |  |  \- org.apache.james:apache-mime4j-storage:jar:0.8.11:test
+[INFO] |  +- org.jboss.resteasy:resteasy-jackson2-provider:jar:6.2.7.Final:test
+[INFO] |  |  +- com.fasterxml.jackson.jakarta.rs:jackson-jakarta-rs-base:jar:2.17.0:test
+[INFO] |  |  +- com.fasterxml.jackson.jakarta.rs:jackson-jakarta-rs-json-provider:jar:2.17.0:test
+[INFO] |  |  +- com.fasterxml.jackson.module:jackson-module-jakarta-xmlbind-annotations:jar:2.17.0:test
+[INFO] |  |  \- com.github.java-json-tools:json-patch:jar:1.13:test
+[INFO] |  |     +- com.github.java-json-tools:msg-simple:jar:1.2:test
+[INFO] |  |     |  \- com.github.java-json-tools:btf:jar:1.3:test
+[INFO] |  |     \- com.github.java-json-tools:jackson-coreutils:jar:2.0:test
+[INFO] |  \- org.jboss.resteasy:resteasy-jaxb-provider:jar:6.2.7.Final:test
+[INFO] |     +- org.glassfish.jaxb:codemodel:jar:4.0.3:test
+[INFO] |     +- org.glassfish.jaxb:jaxb-core:jar:4.0.4:test
+[INFO] |     +- org.glassfish.jaxb:jaxb-jxc:jar:4.0.3:test
+[INFO] |     +- org.glassfish.jaxb:jaxb-runtime:jar:4.0.4:test
+[INFO] |     +- org.glassfish.jaxb:txw2:jar:4.0.4:test
+[INFO] |     +- org.glassfish.jaxb:jaxb-xjc:jar:4.0.3:test
+[INFO] |     +- org.glassfish.jaxb:xsom:jar:2.3.3-b02:test
+[INFO] |     +- com.sun.istack:istack-commons-runtime:jar:3.0.10:test
+[INFO] |     +- com.sun.istack:istack-commons-tools:jar:3.0.10:test
+[INFO] |     +- com.sun.xml.bind.external:relaxng-datatype:jar:4.0.3:test
+[INFO] |     \- com.sun.xml.bind.external:rngom:jar:2.3.3-b02:test
+[INFO] +- org.apache.maven.shared:maven-invoker:jar:3.3.0:test
+[INFO] |  \- org.apache.maven.shared:maven-shared-utils:jar:3.3.4:test
+[INFO] +- org.awaitility:awaitility:jar:4.2.2:test
+[INFO] |  \- org.hamcrest:hamcrest:jar:2.2:test
+[INFO] \- org.apache.activemq:activemq-stomp:jar:6.1.6:compile
+[INFO]    \- org.apache.activemq:activemq-broker:jar:6.1.6:compile
+[INFO]       +- org.apache.activemq:activemq-client:jar:6.1.6:compile
+[INFO]       |  \- org.fusesource.hawtbuf:hawtbuf:jar:1.11:compile
+[INFO]       +- org.apache.activemq:activemq-openwire-legacy:jar:6.1.6:compile
+[INFO]       \- jakarta.annotation:jakarta.annotation-api:jar:2.1.1:compile
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  1.004 s
+[INFO] Finished at: 2026-02-07T21:28:04+02:00
+[INFO] ------------------------------------------------------------------------

@@ -127,6 +127,7 @@ nav:
       - Pulsar: user-guide/destinations/pulsar.md
       - Redis Pub/Sub: user-guide/destinations/redis-pubsub.md
       - Redis Streams: user-guide/destinations/redis-streams.md
+      - ZeroMQ: user-guide/destinations/zeromq.md
     - Certificate Loaders:
       - Overview: user-guide/certificate-loaders/overview.md
       - PEM File Path: user-guide/certificate-loaders/pem-file-path.md

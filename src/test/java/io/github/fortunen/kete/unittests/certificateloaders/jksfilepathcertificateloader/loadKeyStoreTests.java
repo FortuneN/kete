@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.KeyStore;
+import java.security.cert.Certificate;
 import java.util.Map;
 import okhttp3.tls.HeldCertificate;
 import org.apache.commons.configuration2.MapConfiguration;
@@ -36,7 +37,7 @@ class loadKeyStoreTests {
 			"test-key",
 			heldCert.keyPair().getPrivate(),
 			"test".toCharArray(),
-			new java.security.cert.Certificate[] { heldCert.certificate() }
+			new Certificate[] { heldCert.certificate() }
 		);
 
 		var keystoreFile = tempDir.resolve("test.p12");

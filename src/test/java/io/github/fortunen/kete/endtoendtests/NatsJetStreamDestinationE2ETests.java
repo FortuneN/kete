@@ -22,6 +22,9 @@ import io.nats.client.Options;
 import io.nats.client.api.StreamConfiguration;
 import io.nats.client.api.StorageType;
 
+import java.net.HttpURLConnection;
+import java.net.URI;
+
 @SuppressWarnings("resource")
 class NatsJetStreamDestinationE2ETests extends EndToEndTestBase {
 
@@ -151,11 +154,11 @@ class NatsJetStreamDestinationE2ETests extends EndToEndTestBase {
 			.until(() -> {
 				try {
 					var url = "http://" + container.getHost() + ":" + container.getMappedPort(NATS_MONITORING_PORT) + "/varz";
-					var conn = new java.net.URL(url).openConnection();
+					var conn = URI.create(url).toURL().openConnection();
 					conn.setConnectTimeout(1000);
 					conn.setReadTimeout(1000);
 					conn.connect();
-					var responseCode = ((java.net.HttpURLConnection) conn).getResponseCode();
+					var responseCode = ((HttpURLConnection) conn).getResponseCode();
 					return responseCode == 200;
 				} catch (Exception e) {
 					return false;

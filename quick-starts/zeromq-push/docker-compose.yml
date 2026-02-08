@@ -1,0 +1,21 @@
+services:
+
+  subscriber:
+    image: ghcr.io/fortunen/kete/quick-start-zeromq-subscriber
+    environment:
+      ZEROMQ_ENDPOINT: tcp://*:5555
+      ZEROMQ_SOCKET_TYPE: PULL
+
+  keycloak:
+    image: ghcr.io/fortunen/kete/quick-start-keycloak
+    command: start-dev
+    ports:
+      - 8080:8080
+      - 9000:9000
+    environment:
+      kete.routes.quick-start.destination.kind: zeromq
+      kete.routes.quick-start.destination.endpoint: tcp://subscriber:5555
+      kete.routes.quick-start.destination.socket-type: push
+    depends_on:
+      subscriber:
+        condition: service_started

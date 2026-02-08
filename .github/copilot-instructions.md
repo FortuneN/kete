@@ -14,6 +14,16 @@
 
 6. **Use internet resources, don't assume** - When required actions are unclear or ambiguous, ask consult relevant product/plugin/tool/platform/e.t.c documentation or other internet resources rather than making assumptions.
 
+7. use var as much as possible
+
+8. Validation tools as much as possible
+
+9. ALWAYS commit before and after making changes [COMPILE AND RUN BEFORE COMMIT], with clear commit messages describing the change and its purpose. This ensures a clear history of changes and allows for easy rollback if needed and no destruction for progress.
+
+10. Do not use Git for any other reason other than for (9). Strictly no other exceptions
+
+11. Always remove unused imports and code, and fix any warnings before committing. This ensures a clean codebase and reduces technical debt.
+
 ## During Long-Running Operations
 
 ### Real-Time Progress Reporting for Tests

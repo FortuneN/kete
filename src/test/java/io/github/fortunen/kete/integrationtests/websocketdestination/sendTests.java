@@ -1,9 +1,12 @@
 package io.github.fortunen.kete.integrationtests.websocketdestination;
 
-import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.HashMap;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.configuration2.MapConfiguration;
 import org.junit.jupiter.api.Test;
@@ -17,11 +20,11 @@ public class sendTests extends TestBase {
 
 		// arrange
 
-		startWebSocketEchoServer();
+		startWebSocketServer();
 		var map = new HashMap<String, Object>();
-		map.put("host", container.getHost());
+		map.put("host", "localhost");
 		map.put("port", String.valueOf(getWebSocketPort()));
-		map.put("path", "/.ws");
+		map.put("path", "/");
 		var mapConfig = new MapConfiguration(map);
 		configureDestination(mapConfig);
 		destination.initialize();
@@ -33,15 +36,23 @@ public class sendTests extends TestBase {
 			"{\"type\":\"LOGIN\"}".getBytes(StandardCharsets.UTF_8)
 		);
 
-		// act & assert - echo server accepts and echoes, no exception means success
+		// act
 
-		assertThatCode(() -> destination.send(message)).doesNotThrowAnyException();
+		destination.send(message);
+
+		// assert
+
+		await().atMost(Duration.ofSeconds(30)).pollInterval(Duration.ofMillis(500)).until(() -> !receivedMessages.isEmpty());
+
+		var received = receivedMessages.poll(1, TimeUnit.SECONDS);
+		assertThat(received).isNotNull();
+		assertThat(received).isEqualTo("{\"type\":\"LOGIN\"}");
 	}
 
 	@Test
 	public void shouldSend_Tls() throws Exception {
 
-		// arrange - Start WebSocket echo server with nginx TLS termination
+		// arrange - Start host-side WebSocket server with nginx TLS termination
 
 		var tls = TlsMaterial.builder()
 			.withEnabled(true)
@@ -57,7 +68,7 @@ public class sendTests extends TestBase {
 		var map = new HashMap<String, Object>();
 		map.put("host", getNginxHost());
 		map.put("port", String.valueOf(getWebSocketTlsPort()));
-		map.put("path", "/.ws");
+		map.put("path", "/");
 		map.put("tls.enabled", true);
 		map.put("tls.trust-store.loader.kind", "jks-file-path");
 		map.put("tls.trust-store.loader.path", tls.getTrustStoreFilePath());
@@ -73,15 +84,23 @@ public class sendTests extends TestBase {
 			"{\"type\":\"LOGIN\"}".getBytes(StandardCharsets.UTF_8)
 		);
 
-		// act & assert - send over TLS connection
+		// act
 
-		assertThatCode(() -> destination.send(message)).doesNotThrowAnyException();
+		destination.send(message);
+
+		// assert
+
+		await().atMost(Duration.ofSeconds(30)).pollInterval(Duration.ofMillis(500)).until(() -> !receivedMessages.isEmpty());
+
+		var received = receivedMessages.poll(1, TimeUnit.SECONDS);
+		assertThat(received).isNotNull();
+		assertThat(received).isEqualTo("{\"type\":\"LOGIN\"}");
 	}
 
 	@Test
 	public void shouldSend_mTls() throws Exception {
 
-		// arrange - Start WebSocket echo server with nginx mTLS (client auth required)
+		// arrange - Start host-side WebSocket server with nginx mTLS (client auth required)
 
 		var tls = TlsMaterial.builder()
 			.withEnabled(true)
@@ -97,7 +116,7 @@ public class sendTests extends TestBase {
 		var map = new HashMap<String, Object>();
 		map.put("host", getNginxHost());
 		map.put("port", String.valueOf(getWebSocketTlsPort()));
-		map.put("path", "/.ws");
+		map.put("path", "/");
 		map.put("tls.enabled", true);
 		map.put("tls.trust-store.loader.kind", "jks-file-path");
 		map.put("tls.trust-store.loader.path", tls.getTrustStoreFilePath());
@@ -117,8 +136,16 @@ public class sendTests extends TestBase {
 			"{\"type\":\"LOGIN\"}".getBytes(StandardCharsets.UTF_8)
 		);
 
-		// act & assert - send over mTLS connection
+		// act
 
-		assertThatCode(() -> destination.send(message)).doesNotThrowAnyException();
+		destination.send(message);
+
+		// assert
+
+		await().atMost(Duration.ofSeconds(30)).pollInterval(Duration.ofMillis(500)).until(() -> !receivedMessages.isEmpty());
+
+		var received = receivedMessages.poll(1, TimeUnit.SECONDS);
+		assertThat(received).isNotNull();
+		assertThat(received).isEqualTo("{\"type\":\"LOGIN\"}");
 	}
 }

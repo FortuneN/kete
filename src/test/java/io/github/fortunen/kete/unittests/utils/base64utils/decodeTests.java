@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.catchThrowable;
 
 import io.github.fortunen.kete.utils.Base64Utils;
 import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import org.junit.jupiter.api.Test;
 
 public class decodeTests {
@@ -100,7 +101,7 @@ public class decodeTests {
 		// arrange
 
 		var originalBytes = new byte[] { 0x00, 0x01, 0x02, (byte) 0xFF, (byte) 0xFE };
-		var base64 = java.util.Base64.getEncoder().encodeToString(originalBytes);
+		var base64 = Base64.getEncoder().encodeToString(originalBytes);
 
 		// act
 
@@ -118,7 +119,7 @@ public class decodeTests {
 		// arrange
 
 		var original = "こんにちは世界"; // Japanese "Hello World"
-		var base64 = java.util.Base64.getEncoder().encodeToString(original.getBytes(StandardCharsets.UTF_8));
+		var base64 = Base64.getEncoder().encodeToString(original.getBytes(StandardCharsets.UTF_8));
 
 		// act
 
@@ -136,7 +137,7 @@ public class decodeTests {
 		// arrange
 
 		var original = "A".repeat(1000);
-		var base64 = java.util.Base64.getEncoder().encodeToString(original.getBytes(StandardCharsets.UTF_8));
+		var base64 = Base64.getEncoder().encodeToString(original.getBytes(StandardCharsets.UTF_8));
 
 		// act
 
@@ -190,7 +191,7 @@ public class decodeTests {
 		// arrange
 
 		var original = "Test with special chars: !@#$%^&*()_+-=[]{}|;':\",./<>?";
-		var base64 = java.util.Base64.getEncoder().encodeToString(original.getBytes(StandardCharsets.UTF_8));
+		var base64 = Base64.getEncoder().encodeToString(original.getBytes(StandardCharsets.UTF_8));
 
 		// act
 

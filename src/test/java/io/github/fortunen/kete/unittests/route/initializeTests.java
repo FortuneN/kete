@@ -6,14 +6,14 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import io.github.fortunen.kete.Destination;
-import io.github.fortunen.kete.DestinationConfig;
-import io.github.fortunen.kete.Matcher;
-import io.github.fortunen.kete.Route;
-import io.github.fortunen.kete.Serializer;
 import org.apache.commons.pool2.impl.GenericObjectPool;
 import org.junit.jupiter.api.Test;
 import org.keycloak.models.KeycloakSession;
+
+import io.github.fortunen.kete.Destination;
+import io.github.fortunen.kete.DestinationConfig;
+import io.github.fortunen.kete.Route;
+import io.github.fortunen.kete.Serializer;
 
 @SuppressWarnings("unchecked")
 public class initializeTests extends TestBase {

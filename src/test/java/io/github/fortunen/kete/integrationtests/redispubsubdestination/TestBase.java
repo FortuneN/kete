@@ -124,7 +124,7 @@ public class TestBase {
 			.withCopyToContainer(Transferable.of(Files.readAllBytes(Path.of(tls.getServerCertificatePemFilePath())), 0777), "/certs/server.crt")
 			.withCopyToContainer(Transferable.of(Files.readAllBytes(Path.of(tls.getServerPrivateKeyPemFilePath())), 0777), "/certs/server.key")
 			.withCopyToContainer(Transferable.of(Files.readAllBytes(Path.of(tls.getCaCertificatePemFilePath())), 0777), "/certs/ca.crt")
-			.withStartupTimeout(java.time.Duration.ofMinutes(10));
+			.withStartupTimeout(Duration.ofMinutes(10));
 
 		container.start();
 

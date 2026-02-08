@@ -676,9 +676,11 @@ public class initializeTests {
 
 		// assert
 
+		var credentials = config.getRedisUri().getCredentialsProvider().resolveCredentials().block();
+
 		assertThat(config.getRedisUri()).isNotNull();
-		assertThat(config.getRedisUri().getUsername()).isEqualTo("redis-user");
-		assertThat(config.getRedisUri().getPassword()).isEqualTo("secret123".toCharArray());
+		assertThat(credentials.getUsername()).isEqualTo("redis-user");
+		assertThat(credentials.getPassword()).isEqualTo("secret123".toCharArray());
 	}
 
 	@Test
@@ -700,8 +702,10 @@ public class initializeTests {
 
 		// assert
 
+		var credentials = config.getRedisUri().getCredentialsProvider().resolveCredentials().block();
+
 		assertThat(config.getRedisUri()).isNotNull();
-		assertThat(config.getRedisUri().getPassword()).isEqualTo("secret123".toCharArray());
+		assertThat(credentials.getPassword()).isEqualTo("secret123".toCharArray());
 	}
 
 	@Test

@@ -2,7 +2,6 @@ package io.github.fortunen.kete.integrationtests.stompdestination;
 
 import static org.awaitility.Awaitility.await;
 
-import java.io.StringWriter;
 import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -25,6 +24,7 @@ import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.images.builder.Transferable;
 import org.testcontainers.utility.DockerImageName;
 
+import io.github.fortunen.kete.Constants;
 import io.github.fortunen.kete.EventMessage;
 import io.github.fortunen.kete.TlsMaterial;
 import io.github.fortunen.kete.destinations.stomp.StompDestination;
@@ -60,7 +60,7 @@ public class TestBase {
 	}
 
 	protected void configureDestination(MapConfiguration mapConfig) {
-		mapConfig.setProperty(io.github.fortunen.kete.Constants.KIND, "stomp");
+		mapConfig.setProperty(Constants.KIND, "stomp");
 		config.setConfiguration(mapConfig);
 		config.initialize();
 		destination.setConfig(config);

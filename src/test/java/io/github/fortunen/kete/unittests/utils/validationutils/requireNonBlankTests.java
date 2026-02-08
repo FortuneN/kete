@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.catchThrowable;
 import io.github.fortunen.kete.utils.ValidationUtils;
 import java.io.IOException;
 import java.sql.SQLException;
+import javax.naming.NamingException;
 import org.junit.jupiter.api.Test;
 
 public class requireNonBlankTests {
@@ -279,13 +280,13 @@ public class requireNonBlankTests {
 		// act
 
 		var thrown = catchThrowable(() -> {
-			ValidationUtils.requireNonBlank(value, () -> new javax.naming.NamingException("JNDI error"));
+			ValidationUtils.requireNonBlank(value, () -> new NamingException("JNDI error"));
 		});
 
 		// assert
 
 		assertThat(thrown)
-			.isInstanceOf(javax.naming.NamingException.class)
+			.isInstanceOf(NamingException.class)
 			.hasMessage("JNDI error");
 	}
 }

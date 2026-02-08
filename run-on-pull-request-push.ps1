@@ -149,7 +149,7 @@ $stepStart = Get-Date
 
 Write-Task "Building image: ghcr.io/fortunen/kete/quick-start-keycloak"
 
-docker build -q -t ghcr.io/fortunen/kete/quick-start-keycloak -f quick-starts/quick-start-keycloak/Dockerfile . 2>&1
+docker build -q -t ghcr.io/fortunen/kete/quick-start-keycloak -f "quick-starts/`$images/keycloak/Dockerfile" . 2>&1
 
 $keycloakSuccess = $LASTEXITCODE -eq 0
 

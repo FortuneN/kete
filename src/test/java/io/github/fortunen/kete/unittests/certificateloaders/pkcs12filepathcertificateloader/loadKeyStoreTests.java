@@ -9,6 +9,7 @@ import java.io.FileOutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.KeyStore;
+import java.security.cert.Certificate;
 import java.util.Map;
 import okhttp3.tls.HeldCertificate;
 import org.apache.commons.configuration2.MapConfiguration;
@@ -39,7 +40,7 @@ public class loadKeyStoreTests {
 			"test-key",
 			heldCert.keyPair().getPrivate(),
 			TEST_PASSWORD.toCharArray(),
-			new java.security.cert.Certificate[] { heldCert.certificate() }
+			new Certificate[] { heldCert.certificate() }
 		);
 		try (var fos = new FileOutputStream(pkcs12File.toFile())) {
 			pkcs12KeyStore.store(fos, TEST_PASSWORD.toCharArray());
@@ -94,7 +95,7 @@ public class loadKeyStoreTests {
 			"chain-key",
 			endEntity.keyPair().getPrivate(),
 			TEST_PASSWORD.toCharArray(),
-			new java.security.cert.Certificate[] { endEntity.certificate(), rootCa.certificate() }
+			new Certificate[] { endEntity.certificate(), rootCa.certificate() }
 		);
 		try (var fos = new FileOutputStream(pkcs12File.toFile())) {
 			pkcs12KeyStore.store(fos, TEST_PASSWORD.toCharArray());
@@ -188,7 +189,7 @@ public class loadKeyStoreTests {
 			"test-key",
 			heldCert.keyPair().getPrivate(),
 			TEST_PASSWORD.toCharArray(),
-			new java.security.cert.Certificate[] { heldCert.certificate() }
+			new Certificate[] { heldCert.certificate() }
 		);
 		try (var fos = new FileOutputStream(pkcs12File.toFile())) {
 			pkcs12KeyStore.store(fos, TEST_PASSWORD.toCharArray());
@@ -228,7 +229,7 @@ public class loadKeyStoreTests {
 			"test-key",
 			heldCert.keyPair().getPrivate(),
 			null,
-			new java.security.cert.Certificate[] { heldCert.certificate() }
+			new Certificate[] { heldCert.certificate() }
 		);
 		try (var fos = new FileOutputStream(pkcs12File.toFile())) {
 			pkcs12KeyStore.store(fos, null);
@@ -268,7 +269,7 @@ public class loadKeyStoreTests {
 			"test-key",
 			heldCert.keyPair().getPrivate(),
 			null,
-			new java.security.cert.Certificate[] { heldCert.certificate() }
+			new Certificate[] { heldCert.certificate() }
 		);
 		try (var fos = new FileOutputStream(pkcs12File.toFile())) {
 			pkcs12KeyStore.store(fos, null);
@@ -308,7 +309,7 @@ public class loadKeyStoreTests {
 			"test-key",
 			heldCert.keyPair().getPrivate(),
 			null,
-			new java.security.cert.Certificate[] { heldCert.certificate() }
+			new Certificate[] { heldCert.certificate() }
 		);
 		try (var fos = new FileOutputStream(pkcs12File.toFile())) {
 			pkcs12KeyStore.store(fos, null);

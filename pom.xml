@@ -370,6 +370,11 @@
 			<artifactId>activemq-stomp</artifactId>
 			<version>6.1.6</version>
 		</dependency>
+		<dependency>
+			<groupId>org.zeromq</groupId>
+			<artifactId>jeromq</artifactId>
+			<version>0.6.0</version>
+		</dependency>
 
 	</dependencies>
 

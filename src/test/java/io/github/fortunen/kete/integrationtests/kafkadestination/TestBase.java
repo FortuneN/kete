@@ -1,5 +1,7 @@
 package io.github.fortunen.kete.integrationtests.kafkadestination;
 
+import static org.awaitility.Awaitility.await;
+
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -15,16 +17,15 @@ import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.config.SslConfigs;
 import org.apache.kafka.common.header.Header;
+import org.apache.kafka.common.header.Headers;
 import org.apache.kafka.common.serialization.ByteArrayDeserializer;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.testcontainers.containers.BindMode;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.output.OutputFrame;
 import org.testcontainers.images.builder.Transferable;
 import org.testcontainers.kafka.KafkaContainer;
-import org.testcontainers.utility.MountableFile;
 
 import com.github.dockerjava.api.command.InspectContainerResponse;
 
@@ -33,8 +34,6 @@ import io.github.fortunen.kete.EventMessage;
 import io.github.fortunen.kete.TlsMaterial;
 import io.github.fortunen.kete.destinations.kafka.KafkaDestination;
 import io.github.fortunen.kete.destinations.kafka.KafkaDestinationConfig;
-
-import static org.awaitility.Awaitility.await;
 
 public class TestBase {
 
@@ -184,7 +183,7 @@ public class TestBase {
 				props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, getBootstrapServers());
 				props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
 				props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, ByteArrayDeserializer.class.getName());
-				try (var consumer = new org.apache.kafka.clients.consumer.KafkaConsumer<String, byte[]>(props)) {
+				try (var consumer = new KafkaConsumer<String, byte[]>(props)) {
 					consumer.listTopics(Duration.ofSeconds(10));
 					return true;
 				}
@@ -204,7 +203,7 @@ public class TestBase {
 				props.put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, "SASL_PLAINTEXT");
 				props.put("sasl.mechanism", "PLAIN");
 				props.put("sasl.jaas.config", String.format("org.apache.kafka.common.security.plain.PlainLoginModule required username=\"%s\" password=\"%s\";", username, password));
-				try (var consumer = new org.apache.kafka.clients.consumer.KafkaConsumer<String, byte[]>(props)) {
+				try (var consumer = new KafkaConsumer<String, byte[]>(props)) {
 					consumer.listTopics(Duration.ofSeconds(10));
 					return true;
 				}
@@ -302,7 +301,7 @@ public class TestBase {
 		return consumer;
 	}
 
-	protected String getHeaderValue(org.apache.kafka.common.header.Headers headers, String key) {
+	protected String getHeaderValue(Headers headers, String key) {
 		Header header = headers.lastHeader(key);
 		return header != null ? new String(header.value(), StandardCharsets.UTF_8) : null;
 	}
