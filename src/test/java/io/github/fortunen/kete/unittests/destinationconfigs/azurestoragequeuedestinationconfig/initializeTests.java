@@ -741,76 +741,6 @@ public class initializeTests {
 	}
 
 	// =========================================================================
-	// Connection String - Emulator
-	// =========================================================================
-
-	@Test
-	public void shouldAcceptEmulatorConnectionString() {
-
-		// arrange
-
-		var map = new HashMap<String, Object>();
-		map.put("kind", "azure-storage-queue");
-		map.put("connection-string", "UseDevelopmentStorage=true");
-		map.put("queue", "test-queue");
-		var config = new AzureStorageQueueDestinationConfig();
-		config.setConfiguration(new MapConfiguration(map));
-
-		// act
-
-		config.initialize();
-
-		// assert
-
-		assertThat(config.isUseSasAuth()).isFalse();
-		assertThat(config.getAccountName()).isEqualTo("devstoreaccount1");
-		assertThat(config.getAccountKey()).isEqualTo(VALID_ACCOUNT_KEY);
-		assertThat(config.getUrl()).isEqualTo("http://127.0.0.1:10001/devstoreaccount1");
-	}
-
-	@Test
-	public void shouldAcceptEmulatorConnectionStringWithProxy() {
-
-		// arrange
-
-		var map = new HashMap<String, Object>();
-		map.put("kind", "azure-storage-queue");
-		map.put("connection-string", "UseDevelopmentStorage=true;DevelopmentStorageProxyUri=http://myhost");
-		map.put("queue", "test-queue");
-		var config = new AzureStorageQueueDestinationConfig();
-		config.setConfiguration(new MapConfiguration(map));
-
-		// act
-
-		config.initialize();
-
-		// assert
-
-		assertThat(config.getUrl()).isEqualTo("http://myhost:10001/devstoreaccount1");
-	}
-
-	@Test
-	public void shouldStripTrailingSlashFromEmulatorProxyUri() {
-
-		// arrange
-
-		var map = new HashMap<String, Object>();
-		map.put("kind", "azure-storage-queue");
-		map.put("connection-string", "UseDevelopmentStorage=true;DevelopmentStorageProxyUri=http://myhost/");
-		map.put("queue", "test-queue");
-		var config = new AzureStorageQueueDestinationConfig();
-		config.setConfiguration(new MapConfiguration(map));
-
-		// act
-
-		config.initialize();
-
-		// assert
-
-		assertThat(config.getUrl()).isEqualTo("http://myhost:10001/devstoreaccount1");
-	}
-
-	// =========================================================================
 	// Connection String - Mutual Exclusivity
 	// =========================================================================
 
@@ -821,7 +751,7 @@ public class initializeTests {
 
 		var map = new HashMap<String, Object>();
 		map.put("kind", "azure-storage-queue");
-		map.put("connection-string", "UseDevelopmentStorage=true");
+		map.put("connection-string", "AccountName=myaccount;AccountKey=" + VALID_ACCOUNT_KEY);
 		map.put("account-name", "myaccount");
 		map.put("queue", "test-queue");
 		var config = new AzureStorageQueueDestinationConfig();
@@ -843,7 +773,7 @@ public class initializeTests {
 
 		var map = new HashMap<String, Object>();
 		map.put("kind", "azure-storage-queue");
-		map.put("connection-string", "UseDevelopmentStorage=true");
+		map.put("connection-string", "AccountName=myaccount;AccountKey=" + VALID_ACCOUNT_KEY);
 		map.put("account-key", VALID_ACCOUNT_KEY);
 		map.put("queue", "test-queue");
 		var config = new AzureStorageQueueDestinationConfig();
@@ -865,7 +795,7 @@ public class initializeTests {
 
 		var map = new HashMap<String, Object>();
 		map.put("kind", "azure-storage-queue");
-		map.put("connection-string", "UseDevelopmentStorage=true");
+		map.put("connection-string", "AccountName=myaccount;AccountKey=" + VALID_ACCOUNT_KEY);
 		map.put("sas-token", "sv=2024-08-04&sig=test");
 		map.put("queue", "test-queue");
 		var config = new AzureStorageQueueDestinationConfig();
@@ -887,7 +817,7 @@ public class initializeTests {
 
 		var map = new HashMap<String, Object>();
 		map.put("kind", "azure-storage-queue");
-		map.put("connection-string", "UseDevelopmentStorage=true");
+		map.put("connection-string", "AccountName=myaccount;AccountKey=" + VALID_ACCOUNT_KEY);
 		map.put("url", "https://myaccount.queue.core.windows.net");
 		map.put("queue", "test-queue");
 		var config = new AzureStorageQueueDestinationConfig();

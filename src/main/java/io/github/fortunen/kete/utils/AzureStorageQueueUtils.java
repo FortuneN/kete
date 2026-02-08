@@ -12,9 +12,6 @@ import lombok.SneakyThrows;
 public final class AzureStorageQueueUtils {
 
 	static final String HMAC_SHA256 = "HmacSHA256";
-	static final String EMULATOR_ACCOUNT_NAME = "devstoreaccount1";
-	static final String EMULATOR_ACCOUNT_KEY = "Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==";
-	static final String DEFAULT_EMULATOR_QUEUE_ENDPOINT = "http://127.0.0.1:10001/devstoreaccount1";
 
 	private static final String SIGNATURE_VERB_PART = "POST\n\n\n";
 	private static final String SIGNATURE_CONTENT_TYPE_PART = "\n\napplication/xml\n\n\n\n\n\n";
@@ -26,20 +23,6 @@ public final class AzureStorageQueueUtils {
 	public static ConnectionStringInfo parseConnectionString(String connectionString) {
 
 		var parts = parseKeyValuePairs(connectionString);
-
-		// UseDevelopmentStorage=true (emulator shorthand)
-
-		if ("true".equalsIgnoreCase(parts.get("UseDevelopmentStorage"))) {
-			var proxyUri = parts.getOrDefault("DevelopmentStorageProxyUri", "").trim();
-			String emulatorUrl;
-			if (ValidationUtils.isNotBlank(proxyUri)) {
-				if (proxyUri.endsWith("/")) proxyUri = proxyUri.substring(0, proxyUri.length() - 1);
-				emulatorUrl = proxyUri + ":10001/" + EMULATOR_ACCOUNT_NAME;
-			} else {
-				emulatorUrl = DEFAULT_EMULATOR_QUEUE_ENDPOINT;
-			}
-			return new ConnectionStringInfo(EMULATOR_ACCOUNT_NAME, EMULATOR_ACCOUNT_KEY, null, emulatorUrl, false);
-		}
 
 		// extract fields
 
