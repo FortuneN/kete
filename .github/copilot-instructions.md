@@ -80,9 +80,13 @@ This applies to:
 
 - **No other integration test files**: No `initializeTests`, `closeTests`, or extra send tests. Only `TestBase.java` + `sendTests.java`.
 
-- **Nginx proxy fallback**: If the destination broker/server does NOT natively support TLS/mTLS, use an nginx reverse proxy container to terminate TLS and still run all 3 tests.
+- **Real emulator over mocks**: If a real emulator or official emulator image exists for a destination (e.g., Azurite for Azure Storage Queue, `google/cloud-sdk:emulators` for GCP Pub/Sub), integration and E2E tests MUST use it. MockWebServer is only acceptable when the destination has no emulator concept (e.g., HTTP webhooks where MockWebServer IS the target server, not a stand-in). Testing against mocks validates your assumptions; testing against real emulators validates reality.
 
-**REFERENCE PATTERN**: See `integrationtests/httpdestination/` for the canonical implementation of this policy.
+- **Nginx TLS proxy for emulators**: Most emulators do not support TLS/mTLS natively. This is not a reason to skip TLS/mTLS tests or fall back to MockWebServer. Instead, place an `nginx:1.27-alpine` reverse proxy in front of the emulator on a shared Docker network. Nginx terminates TLS (and optionally requires client certificates for mTLS), then proxies plain HTTP to the emulator. This way all 3 tests (NonTls, TLS, mTLS) run against the real emulator protocol, with nginx handling only the transport layer. The NonTls test connects directly to the emulator; TLS and mTLS tests connect through nginx.
+
+- **Verification via emulator APIs**: After sending a message, verify delivery by reading it back from the emulator using its native API (e.g., Azurite REST peek, Pub/Sub subscription pull, Redis XRANGE). Do NOT rely on MockWebServer request recording. The test must prove the message actually arrived at the destination system.
+
+**REFERENCE PATTERNS**: See `integrationtests/azurestoragequeuedestination/` (Azurite + nginx) and `integrationtests/gcppubsubdestination/` (GCP Pub/Sub emulator + nginx) for the canonical emulator-based implementation. See `integrationtests/httpdestination/` for the canonical MockWebServer implementation (where MockWebServer is the actual target, not a substitute).
 
 ### Destination Documentation (CRITICAL)
 

@@ -1386,13 +1386,13 @@ Each destination MUST have exactly **3 integration send tests** in a single `sen
 
 ```
 integrationtests/<destination>/
-    TestBase.java     ← MockWebServer lifecycle, TLS helpers, configureDestination()
+    TestBase.java     ← Container lifecycle, TLS/nginx helpers, configureDestination(), verification helpers
     sendTests.java    ← Exactly 3 tests: shouldSend_NonTls, shouldSend_Tls, shouldSend_mTls
 ```
 
 **No other integration test files.** No `initializeTests`, `closeTests`, or extra send tests.
 
-#### TLS Test Pattern
+#### TLS Test Pattern (Emulator + Nginx)
 
 ```java
 @Test
@@ -1406,35 +1406,119 @@ public void shouldSend_Tls() throws Exception {
         .withTrustStorePassword("changeit")
         .withKeyStorePassword("changeit")
         .withKeyPassword("changeit")
-        .withServerHostNames(new String[] { "localhost", "127.0.0.1" })
+        .withServerHostNames(new String[] { "localhost", "127.0.0.1",
+            "host.docker.internal", "kubernetes.docker.internal" })
         .build();
 
-    startMockServerWithTls(tls);
-    // ... enqueue responses, configure destination with tls.trust-store properties ...
+    startEmulatorOnNetwork();        // emulator on shared Docker network
+    startNginxTlsProxy(tls, false);  // nginx with TLS in front of emulator
+    createResources();               // create topic/queue/etc. via emulator API
+    configureDestinationWithTls(tls); // point destination at nginx URL
+    destination.initialize();
+
+    var message = createMessage(...);
 
     // act
 
     destination.send(message);
 
-    // assert — verify request reached server
+    // assert — read back from emulator (plain HTTP) to verify delivery
+
+    var received = readFromEmulator();
+    assertThat(received).contains(expectedContent);
 }
 ```
 
-#### mTLS Test Pattern
+#### mTLS Test Pattern (Emulator + Nginx)
 
-Same as TLS, but additionally configure `tls.key-store.*` properties and call `startMockServerWithMtls(tls)` (which calls `mockServer.requireClientAuth()`).
+Same as TLS, but `startNginxTlsProxy(tls, true)` enables `ssl_verify_client on` in nginx, and `configureDestinationWithMtls(tls)` adds `tls.key-store.*` properties.
 
-#### Nginx Proxy Fallback
+#### TLS Test Pattern (Native Broker TLS)
 
-If the destination broker/server does **NOT** natively support TLS/mTLS, use an **nginx reverse proxy** container to terminate TLS and still run all 3 tests. This ensures every destination has consistent TLS coverage regardless of native support.
+For brokers that natively support TLS (Redis, Kafka, MQTT, etc.), configure TLS directly on the broker container — no nginx needed:
+
+```java
+@Test
+public void shouldSend_Tls() throws Exception {
+
+    // arrange
+
+    var tls = TlsMaterial.builder()
+        .withEnabled(true).withWriteFiles(true)
+        .withTrustStorePassword("changeit").withKeyStorePassword("changeit").withKeyPassword("changeit")
+        .withServerHostNames(new String[] { "localhost", "127.0.0.1" })
+        .build();
+
+    startBrokerWithTls(tls);          // broker configured with server cert/key
+    configureDestinationWithTls(tls); // point destination at broker's TLS port
+    destination.initialize();
+
+    // act + assert ...
+}
+```
+
+#### Real Emulators Over Mocks
+
+If an official emulator or emulator image exists for a destination system, integration and E2E tests **MUST** use it instead of MockWebServer.
+
+| Destination | Emulator Image | Use MockWebServer? |
+|---|---|---|
+| Azure Storage Queue | `mcr.microsoft.com/azure-storage/azurite` | **No** — use Azurite |
+| GCP Pub/Sub | `google/cloud-sdk:emulators` | **No** — use Pub/Sub emulator |
+| HTTP Webhook | N/A (no emulator concept) | **Yes** — MockWebServer IS the target server |
+| Redis | `redis:latest`, `valkey/valkey:latest`, etc. | **No** — use real broker |
+| Kafka | `apache/kafka:latest`, `redpandadata/redpanda`, etc. | **No** — use real broker |
+| MQTT | `eclipse-mosquitto:latest`, `emqx:latest`, etc. | **No** — use real broker |
+
+**Why?** MockWebServer validates that your code sends HTTP requests matching your assumptions. A real emulator validates that those requests are actually understood and processed by the target system. Testing against mocks tests your fantasy; testing against emulators tests reality.
+
+#### Nginx TLS Proxy for Emulators
+
+Most emulators do not natively support TLS or mTLS. This is **not** a reason to skip TLS tests or fall back to MockWebServer. Instead, place an **nginx reverse proxy** (`nginx:1.27-alpine`) on a shared Docker network in front of the emulator:
+
+```
+┌──────────┐       TLS/mTLS       ┌───────────┐      plain HTTP      ┌────────────┐
+│  Test /  │ ────────────────────► │   nginx   │ ──────────────────► │  Emulator  │
+│  KETE    │   port 8443 (TLS)    │  :8443    │   emulator:PORT     │  :PORT     │
+└──────────┘                      └───────────┘                      └────────────┘
+```
+
+**How it works:**
+
+1. Emulator and nginx containers share a Docker `Network`
+2. Nginx is configured with server certificate + key from `TlsMaterial`
+3. For mTLS, nginx additionally requires client certificates (`ssl_verify_client on`)
+4. Nginx proxies all requests to the emulator via plain HTTP using the Docker network alias
+5. `shouldSend_NonTls` connects directly to the emulator (no nginx)
+6. `shouldSend_Tls` and `shouldSend_mTls` connect through nginx
+
+**Key distinction:** This approach is for emulators that **genuinely do not support TLS**. If a broker natively supports TLS (e.g., Mosquitto, Redis, Kafka), configure TLS on the broker itself — do not use nginx as a crutch to avoid figuring out the broker's TLS configuration.
+
+#### Verification via Emulator APIs
+
+After sending a message, **verify delivery by reading it back** from the emulator using its native API:
+
+| Emulator | Verification Method |
+|---|---|
+| Azurite | `GET /{account}/{queue}/messages?peekonly=true` (SharedKey auth) |
+| GCP Pub/Sub emulator | `POST /v1/projects/{project}/subscriptions/{sub}:pull` |
+| Redis | `XRANGE` / `SUBSCRIBE` |
+| Kafka | Consumer poll |
+
+Do **NOT** rely on MockWebServer request recording to verify delivery. The test must prove the message actually arrived at and was accepted by the destination system.
 
 #### E2E Tests — Exactly 1 Per Destination
 
 Each destination has exactly **1 E2E test** that verifies the full pipeline: Keycloak → KETE plugin → destination broker → message received.
 
-#### Reference Implementation
+#### Reference Implementations
 
-See `integrationtests/httpdestination/` for the canonical implementation of this policy.
+| Pattern | Reference |
+|---|---|
+| Emulator + nginx TLS proxy | `integrationtests/azurestoragequeuedestination/` (Azurite) |
+| Emulator + nginx TLS proxy | `integrationtests/gcppubsubdestination/` (GCP Pub/Sub) |
+| Native TLS on broker | `integrationtests/redisdestination/` (Redis with native TLS) |
+| MockWebServer (target IS the server) | `integrationtests/httpdestination/` |
 
 
 

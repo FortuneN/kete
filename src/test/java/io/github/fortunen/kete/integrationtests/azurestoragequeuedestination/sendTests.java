@@ -8,7 +8,6 @@ import java.util.Base64;
 import org.junit.jupiter.api.Test;
 
 import io.github.fortunen.kete.TlsMaterial;
-import okhttp3.mockwebserver.MockResponse;
 
 public class sendTests extends TestBase {
 
@@ -17,9 +16,8 @@ public class sendTests extends TestBase {
 
 		// arrange
 
-		startMockServer();
-		mockServer.enqueue(new MockResponse().setResponseCode(201).setBody("<?xml version=\"1.0\"?><QueueMessagesList><QueueMessage><MessageId>id</MessageId></QueueMessage></QueueMessagesList>"));
-
+		startAzurite();
+		createQueue("my-queue");
 		configureDestination("my-queue");
 		destination.initialize();
 
@@ -34,20 +32,10 @@ public class sendTests extends TestBase {
 
 		// assert
 
-		var request = mockServer.takeRequest();
-		assertThat(request.getMethod()).isEqualTo("POST");
-		assertThat(request.getPath()).isEqualTo("/devstoreaccount1/my-queue/messages");
-		assertThat(request.getHeader("Content-Type")).isEqualTo("application/xml");
-		assertThat(request.getHeader("Authorization")).startsWith("SharedKey devstoreaccount1:");
-		assertThat(request.getHeader("x-ms-date")).isNotBlank();
-		assertThat(request.getHeader("x-ms-version")).isEqualTo("2024-08-04");
-
-		var body = request.getBody().readUtf8();
-		assertThat(body).startsWith("<QueueMessage><MessageText>");
-		assertThat(body).endsWith("</MessageText></QueueMessage>");
-
-		var base64Content = body.replace("<QueueMessage><MessageText>", "").replace("</MessageText></QueueMessage>", "");
-		var decoded = new String(Base64.getDecoder().decode(base64Content), StandardCharsets.UTF_8);
+		var response = peekMessage("my-queue");
+		assertThat(response).contains("<QueueMessage>");
+		var messageText = extractMessageText(response);
+		var decoded = new String(Base64.getDecoder().decode(messageText), StandardCharsets.UTF_8);
 		assertThat(decoded).isEqualTo("{\"type\":\"LOGIN\"}");
 	}
 
@@ -62,9 +50,9 @@ public class sendTests extends TestBase {
 			.withServerHostNames(new String[] { "localhost", "127.0.0.1", "host.docker.internal", "kubernetes.docker.internal" })
 			.build();
 
-		startMockServerWithTls(tls);
-		mockServer.enqueue(new MockResponse().setResponseCode(201).setBody("<?xml version=\"1.0\"?><QueueMessagesList><QueueMessage><MessageId>id</MessageId></QueueMessage></QueueMessagesList>"));
-
+		startAzuriteOnNetwork();
+		startNginxTlsProxy(tls, false);
+		createQueue("my-queue");
 		configureDestinationWithTls("my-queue", tls);
 		destination.initialize();
 
@@ -77,16 +65,12 @@ public class sendTests extends TestBase {
 
 		destination.send(message);
 
-		// assert
+		// assert — read directly from Azurite (plain HTTP) to verify
 
-		var request = mockServer.takeRequest();
-		assertThat(request.getMethod()).isEqualTo("POST");
-		assertThat(request.getPath()).isEqualTo("/devstoreaccount1/my-queue/messages");
-		assertThat(request.getHeader("Authorization")).startsWith("SharedKey devstoreaccount1:");
-
-		var body = request.getBody().readUtf8();
-		var base64Content = body.replace("<QueueMessage><MessageText>", "").replace("</MessageText></QueueMessage>", "");
-		var decoded = new String(Base64.getDecoder().decode(base64Content), StandardCharsets.UTF_8);
+		var response = peekMessage("my-queue");
+		assertThat(response).contains("<QueueMessage>");
+		var messageText = extractMessageText(response);
+		var decoded = new String(Base64.getDecoder().decode(messageText), StandardCharsets.UTF_8);
 		assertThat(decoded).isEqualTo("{\"type\":\"LOGIN\"}");
 	}
 
@@ -101,9 +85,9 @@ public class sendTests extends TestBase {
 			.withServerHostNames(new String[] { "localhost", "127.0.0.1", "host.docker.internal", "kubernetes.docker.internal" })
 			.build();
 
-		startMockServerWithMtls(tls);
-		mockServer.enqueue(new MockResponse().setResponseCode(201).setBody("<?xml version=\"1.0\"?><QueueMessagesList><QueueMessage><MessageId>id</MessageId></QueueMessage></QueueMessagesList>"));
-
+		startAzuriteOnNetwork();
+		startNginxTlsProxy(tls, true);
+		createQueue("my-queue");
 		configureDestinationWithMtls("my-queue", tls);
 		destination.initialize();
 
@@ -116,16 +100,18 @@ public class sendTests extends TestBase {
 
 		destination.send(message);
 
-		// assert
+		// assert — read directly from Azurite (plain HTTP) to verify
 
-		var request = mockServer.takeRequest();
-		assertThat(request.getMethod()).isEqualTo("POST");
-		assertThat(request.getPath()).isEqualTo("/devstoreaccount1/my-queue/messages");
-		assertThat(request.getHeader("Authorization")).startsWith("SharedKey devstoreaccount1:");
-
-		var body = request.getBody().readUtf8();
-		var base64Content = body.replace("<QueueMessage><MessageText>", "").replace("</MessageText></QueueMessage>", "");
-		var decoded = new String(Base64.getDecoder().decode(base64Content), StandardCharsets.UTF_8);
+		var response = peekMessage("my-queue");
+		assertThat(response).contains("<QueueMessage>");
+		var messageText = extractMessageText(response);
+		var decoded = new String(Base64.getDecoder().decode(messageText), StandardCharsets.UTF_8);
 		assertThat(decoded).isEqualTo("{\"type\":\"LOGIN\"}");
+	}
+
+	private String extractMessageText(String xml) {
+		var start = xml.indexOf("<MessageText>") + "<MessageText>".length();
+		var end = xml.indexOf("</MessageText>");
+		return xml.substring(start, end);
 	}
 }
