@@ -15,7 +15,6 @@ import io.github.fortunen.kete.EventMessage;
 import io.github.fortunen.kete.destinations.zeromq.ZeroMQDestination;
 import io.github.fortunen.kete.destinations.zeromq.ZeroMQDestinationConfig;
 
-@SuppressWarnings("resource")
 public class TestBase {
 
 	protected static final byte[] EMPTY_BYTES = new byte[0];

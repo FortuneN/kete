@@ -19,7 +19,6 @@ import jakarta.jms.BytesMessage;
 import jakarta.jms.Session;
 import jakarta.jms.TextMessage;
 
-@SuppressWarnings("resource")
 class Amqp1DestinationE2ETests extends EndToEndTestBase {
 
 	private static final String QUEUE_NAME = "keycloak-events";

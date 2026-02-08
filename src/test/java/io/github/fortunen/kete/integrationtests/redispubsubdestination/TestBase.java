@@ -25,7 +25,6 @@ import io.lettuce.core.RedisURI;
 import io.lettuce.core.SslOptions;
 import io.lettuce.core.pubsub.RedisPubSubAdapter;
 
-@SuppressWarnings("resource")
 public class TestBase {
 
 	protected static final byte[] EMPTY_BYTES = new byte[0];
@@ -85,7 +84,6 @@ public class TestBase {
 		return startRedisWithTls(tls, true);
 	}
 
-	@SuppressWarnings("resource")
 	private GenericContainer<?> startRedisWithTls(TlsMaterial tls, boolean requireClientCert) throws Exception {
 
 		if (tls == null) {

@@ -25,7 +25,6 @@ import io.nats.client.api.StorageType;
 import java.net.HttpURLConnection;
 import java.net.URI;
 
-@SuppressWarnings("resource")
 class NatsJetStreamDestinationE2ETests extends EndToEndTestBase {
 
 	private static final String STREAM_NAME = "KEYCLOAK_EVENTS";

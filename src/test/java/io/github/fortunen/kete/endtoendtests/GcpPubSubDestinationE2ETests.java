@@ -20,7 +20,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import static org.awaitility.Awaitility.await;
 
-@SuppressWarnings("resource")
 class GcpPubSubDestinationE2ETests extends EndToEndTestBase {
 
 	private static final String PROJECT_ID = "test-project";

@@ -20,7 +20,6 @@ import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.images.builder.Transferable;
 import org.testcontainers.utility.DockerImageName;
 
-@SuppressWarnings("resource")
 class Mqtt5DestinationE2ETests extends EndToEndTestBase {
 
 	private static final String TOPIC = "keycloak/events";

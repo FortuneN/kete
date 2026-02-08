@@ -18,7 +18,6 @@ import org.junit.jupiter.api.Test;
 import org.keycloak.admin.client.Keycloak;
 import org.testcontainers.Testcontainers;
 
-@SuppressWarnings("resource")
 class WebSocketDestinationE2ETests extends EndToEndTestBase {
 
 	private TestWebSocketServer wsServer;

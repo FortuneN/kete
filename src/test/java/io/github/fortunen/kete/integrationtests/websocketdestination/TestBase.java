@@ -27,7 +27,6 @@ import io.github.fortunen.kete.TlsMaterial;
 import io.github.fortunen.kete.destinations.websocket.WebSocketDestination;
 import io.github.fortunen.kete.destinations.websocket.WebSocketDestinationConfig;
 
-@SuppressWarnings("resource")
 public class TestBase {
 
 	protected static final byte[] EMPTY_BYTES = new byte[0];

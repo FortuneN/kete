@@ -15,73 +15,6 @@ These systems provide JMS client libraries that can be integrated with minimal e
     2. Adding the client library dependency to `pom.xml` (with shade relocation)
     3. Documentation and quick-start examples
 
-### Amazon SQS via JMS (`sqs-jms`)
-
-Amazon provides a JMS 2.0 client library for SQS, making integration straightforward.
-
-**Priority:** 🥇 High (AWS market dominance)
-
-**Potential Configuration:**
-
-```properties
-kete.routes.sqs.destination.kind=sqs-jms
-kete.routes.sqs.destination.region=us-east-1
-kete.routes.sqs.destination.queue=keycloak-events
-# Optional for FIFO queues
-kete.routes.sqs.destination.message-group-id=${realm}
-# Authentication via environment variables or IAM role
-```
-
-**ConnectionFactory:**
-```java
-import com.amazon.sqs.javamessaging.SQSConnectionFactory;
-
-connectionFactory = new SQSConnectionFactory(
-    new ProviderConfiguration(),
-    SqsClient.builder().region(Region.of(region)).build()
-);
-```
-
-**Dependencies Required:**
-- `com.amazonaws:amazon-sqs-java-messaging-lib`
-- `software.amazon.awssdk:sqs`
-
-**Authentication Options:**
-- Environment variables (`AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`)
-- IAM instance profile (EC2/ECS)
-- IRSA (EKS)
-- Web Identity Token
-
----
-
-### Apache Pulsar via JMS (`pulsar-jms`)
-
-DataStax provides a JMS 2.0 client for Apache Pulsar.
-
-**Priority:** 🥈 Medium (growing adoption)
-
-**Potential Configuration:**
-
-```properties
-kete.routes.pulsar.destination.kind=pulsar-jms
-kete.routes.pulsar.destination.service-url=pulsar://localhost:6650
-kete.routes.pulsar.destination.topic=keycloak-events
-kete.routes.pulsar.destination.namespace=public/default
-```
-
-**ConnectionFactory:**
-```java
-import com.datastax.oss.pulsar.jms.PulsarConnectionFactory;
-
-Map<String, Object> config = Map.of("brokerServiceUrl", serviceUrl);
-connectionFactory = new PulsarConnectionFactory(config);
-```
-
-**Dependencies Required:**
-- `com.datastax.oss:pulsar-jms`
-
----
-
 ### IBM MQ (`ibm-mq-jms`)
 
 IBM MQ has native JMS support—it's one of the original JMS implementations.
@@ -117,37 +50,6 @@ connectionFactory = factory;
 
 **Dependencies Required:**
 - `com.ibm.mq:com.ibm.mq.allclient`
-
----
-
-### ActiveMQ Classic (`activemq-classic-jms`)
-
-Apache ActiveMQ "Classic" (5.x) uses OpenWire protocol with native JMS.
-
-**Priority:** Low (most users should migrate to Artemis/AMQP 1.0)
-
-**Potential Configuration:**
-
-```properties
-kete.routes.amq.destination.kind=activemq-classic-jms
-kete.routes.amq.destination.broker-url=tcp://localhost:61616
-kete.routes.amq.destination.queue=keycloak-events
-kete.routes.amq.destination.username=admin
-kete.routes.amq.destination.password=admin
-```
-
-**ConnectionFactory:**
-```java
-import org.apache.activemq.ActiveMQConnectionFactory;
-
-connectionFactory = new ActiveMQConnectionFactory(brokerUrl);
-```
-
-**Dependencies Required:**
-- `org.apache.activemq:activemq-client`
-
-!!! note
-    ActiveMQ Artemis already works via AMQP 1.0 using the existing `amqp-1` destination with Qpid JMS. This would only be needed for legacy OpenWire-only deployments.
 
 ---
 
@@ -235,27 +137,101 @@ kete.routes.signalr.destination.access-token=...
 
 ## Cloud Destinations (Native SDK Required)
 
-### Google Cloud Pub/Sub (`gcp-pubsub`)
+### Google Cloud Tasks (`gcp-cloudtasks`)
 
-Publish events to Google Cloud Pub/Sub topics.
+Enqueue Keycloak events as Cloud Tasks for reliable, rate-controlled asynchronous processing.
+
+**Priority:** 🥉 Low (niche, task-queue pattern)
 
 **Potential Configuration:**
 
 ```properties
-kete.routes.gcp.destination.kind=gcp-pubsub
+kete.routes.gcp.destination.kind=gcp-cloudtasks
 kete.routes.gcp.destination.project-id=my-gcp-project
-kete.routes.gcp.destination.topic=keycloak-events
+kete.routes.gcp.destination.location=us-central1
+kete.routes.gcp.destination.queue=keycloak-events
+kete.routes.gcp.destination.target-url=https://my-service.run.app/handle-event
 kete.routes.gcp.destination.credentials-file=/path/to/service-account.json
 # Or use GOOGLE_APPLICATION_CREDENTIALS environment variable
 ```
 
 **Dependencies Required:**
-- `com.google.cloud:google-cloud-pubsub`
+- `com.google.cloud:google-cloud-tasks`
 
 **Authentication Options:**
 - Service account JSON key file
 - Workload Identity (GKE)
 - Application Default Credentials
+
+**Use Cases:**
+- Rate-limited event processing with automatic retries
+- Deferred/scheduled event handling
+- Offloading event processing to Cloud Run or Cloud Functions
+
+---
+
+### Google Cloud Workflows (`gcp-workflows`)
+
+Trigger Google Cloud Workflows executions from Keycloak events for orchestrated multi-step processing.
+
+**Priority:** 🥉 Low (niche, orchestration pattern)
+
+**Potential Configuration:**
+
+```properties
+kete.routes.gcp.destination.kind=gcp-workflows
+kete.routes.gcp.destination.project-id=my-gcp-project
+kete.routes.gcp.destination.location=us-central1
+kete.routes.gcp.destination.workflow=process-keycloak-event
+kete.routes.gcp.destination.credentials-file=/path/to/service-account.json
+# Or use GOOGLE_APPLICATION_CREDENTIALS environment variable
+```
+
+**Dependencies Required:**
+- `com.google.cloud:google-cloud-workflows-executions`
+
+**Authentication Options:**
+- Service account JSON key file
+- Workload Identity (GKE)
+- Application Default Credentials
+
+**Use Cases:**
+- Multi-step event processing workflows (e.g., notify → provision → audit)
+- Orchestrating responses across multiple GCP services
+- Complex event-driven automation with built-in error handling
+
+---
+
+### Google Eventarc Advanced (`gcp-eventarc-advanced`)
+
+Publish Keycloak events to Google Eventarc for advanced event routing across GCP services and third-party destinations.
+
+**Priority:** 🥉 Low (niche, GCP-native event routing)
+
+**Potential Configuration:**
+
+```properties
+kete.routes.gcp.destination.kind=gcp-eventarc-advanced
+kete.routes.gcp.destination.project-id=my-gcp-project
+kete.routes.gcp.destination.location=us-central1
+kete.routes.gcp.destination.channel=keycloak-events
+kete.routes.gcp.destination.credentials-file=/path/to/service-account.json
+# Or use GOOGLE_APPLICATION_CREDENTIALS environment variable
+# Events published in CloudEvents format
+```
+
+**Dependencies Required:**
+- `com.google.cloud:google-cloud-eventarc-publishing`
+
+**Authentication Options:**
+- Service account JSON key file
+- Workload Identity (GKE)
+- Application Default Credentials
+
+**Use Cases:**
+- Fan-out Keycloak events to multiple GCP services via Eventarc triggers
+- Routing events to Cloud Run, Cloud Functions, GKE, or Workflows
+- Cross-project event distribution using Eventarc channels
 
 ---
 
@@ -319,6 +295,39 @@ kete.routes.aws.destination.partition-key=${realm}
 
 ---
 
+### AWS EventBridge (`aws-eventbridge`)
+
+Publish Keycloak events to Amazon EventBridge for event-driven routing across AWS services and SaaS integrations.
+
+**Priority:** 🥈 Medium (AWS serverless ecosystem, event routing)
+
+**Potential Configuration:**
+
+```properties
+kete.routes.aws.destination.kind=aws-eventbridge
+kete.routes.aws.destination.event-bus-name=keycloak-events
+kete.routes.aws.destination.region=us-east-1
+kete.routes.aws.destination.source=keycloak
+kete.routes.aws.destination.detail-type=${event-type}
+# Authentication via environment variables or IAM role
+```
+
+**Dependencies Required:**
+- `software.amazon.awssdk:eventbridge`
+
+**Authentication Options:**
+- Environment variables (AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY)
+- IAM instance profile (EC2/ECS)
+- IRSA (EKS)
+
+**Use Cases:**
+- Fan-out Keycloak events to multiple AWS services via EventBridge rules
+- Routing events to Lambda, Step Functions, SQS, SNS, or API destinations
+- Cross-account event distribution
+- SaaS integration via EventBridge partner event sources
+
+---
+
 ## Database Destinations
 
 ### JDBC Tables (`jdbc-tables`)
@@ -359,142 +368,6 @@ kete.routes.sproc.destination.jdbc.password=secret
 kete.routes.sproc.destination.jdbc.procedure=CALL usp_ProcessKeycloakEvent(?, ?, ?, ?)
 # Parameters: event_id, event_type, realm, payload
 ```
-
----
-
-### Redis Pub/Sub (`redis-pubsub`)
-
-Publish events to Redis channels for real-time messaging.
-
-**Priority:** 🥇 High (wide adoption, simple implementation)
-
-**Compatible Systems:**
-
-| System | Notes |
-|--------|-------|
-| **Redis** | Self-hosted, open-source |
-| **Redis Cloud** | Managed Redis by Redis Inc. |
-| **Amazon ElastiCache** | AWS managed Redis |
-| **Azure Cache for Redis** | Azure managed Redis |
-| **Google Memorystore** | GCP managed Redis |
-| **Upstash** | Serverless Redis |
-| **KeyDB** | Redis-compatible, multi-threaded |
-| **Dragonfly** | Redis-compatible, high-performance |
-
-**Potential Configuration:**
-
-```properties
-kete.routes.redis.destination.kind=redis-pubsub
-kete.routes.redis.destination.host=redis.example.com
-kete.routes.redis.destination.port=6379
-kete.routes.redis.destination.channel=keycloak-events
-kete.routes.redis.destination.password=secret
-```
-
-**Dependencies Required:**
-- `io.lettuce:lettuce-core` or `redis.clients:jedis`
-
----
-
-### Redis Streams (`redis-streams`)
-
-Append events to Redis Streams for persistent, ordered messaging.
-
-**Priority:** 🥇 High (persistent messaging with consumer groups)
-
-**Compatible Systems:** Same as Redis Pub/Sub above.
-
-**Potential Configuration:**
-
-```properties
-kete.routes.redis.destination.kind=redis-streams
-kete.routes.redis.destination.host=redis.example.com
-kete.routes.redis.destination.port=6379
-kete.routes.redis.destination.stream=keycloak-events
-kete.routes.redis.destination.max-len=100000  # Trim to max entries
-```
-
----
-
-### NATS (`nats`)
-
-Publish events to NATS subjects for lightweight messaging.
-
-**Priority:** 🥈 Medium (simple, fast, growing adoption)
-
-**Compatible Systems:**
-
-| System | Notes |
-|--------|-------|
-| **NATS Server** | Open-source, lightweight |
-| **NATS JetStream** | Persistent streaming layer |
-| **Synadia Cloud** | Managed NATS |
-| **Synadia NGS** | Global NATS service |
-
-**Potential Configuration:**
-
-```properties
-kete.routes.nats.destination.kind=nats
-kete.routes.nats.destination.servers=nats://localhost:4222
-kete.routes.nats.destination.subject=keycloak.events
-kete.routes.nats.destination.username=user
-kete.routes.nats.destination.password=secret
-```
-
-**Dependencies Required:**
-- `io.nats:jnats`
-
----
-
-### NATS JetStream (`nats-jetstream`)
-
-Publish events to NATS JetStream for persistent messaging with replay and consumer groups.
-
-**Priority:** 🥈 Medium (persistent layer for NATS)
-
-**Potential Configuration:**
-
-```properties
-kete.routes.nats.destination.kind=nats-jetstream
-kete.routes.nats.destination.servers=nats://localhost:4222
-kete.routes.nats.destination.stream=KEYCLOAK
-kete.routes.nats.destination.subject=keycloak.events
-```
-
-**Dependencies Required:**
-- `io.nats:jnats`
-
----
-
-### Apache Pulsar Native (`pulsar-native`)
-
-Publish events to Apache Pulsar topics using the native Pulsar client (alternative to JMS wrapper).
-
-**Priority:** 🥉 Low (JMS wrapper preferred, see `pulsar-jms` above)
-
-**Compatible Systems:**
-
-| System | Notes |
-|--------|-------|
-| **Apache Pulsar** | Self-hosted |
-| **StreamNative Cloud** | Managed Pulsar |
-| **DataStax Astra Streaming** | Managed Pulsar |
-
-**Potential Configuration:**
-
-```properties
-kete.routes.pulsar.destination.kind=pulsar-native
-kete.routes.pulsar.destination.service-url=pulsar://localhost:6650
-kete.routes.pulsar.destination.topic=persistent://public/default/keycloak-events
-kete.routes.pulsar.destination.auth-plugin=org.apache.pulsar.client.impl.auth.AuthenticationToken
-kete.routes.pulsar.destination.auth-params=token:xxx
-```
-
-**Dependencies Required:**
-- `org.apache.pulsar:pulsar-client`
-
-!!! note
-    Consider using `pulsar-jms` instead (see JMS-Compatible Systems above) for simpler integration with existing KETE JMS infrastructure.
 
 ---
 

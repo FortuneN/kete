@@ -17,7 +17,6 @@ import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.GetResponse;
 
-@SuppressWarnings({"resource", "null"})
 class Amqp091DestinationE2ETests extends EndToEndTestBase {
 
 	private static final String QUEUE_NAME = "keycloak-events";
@@ -31,7 +30,7 @@ class Amqp091DestinationE2ETests extends EndToEndTestBase {
 		}
 		cleanupNetwork();
 	}
-
+	
 	@Test
 	void shouldForwardLoginEventToRabbitMQQueue() throws Exception {
 

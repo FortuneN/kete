@@ -17,7 +17,6 @@ import org.keycloak.admin.client.Keycloak;
 import org.testcontainers.kafka.KafkaContainer;
 import org.testcontainers.utility.DockerImageName;
 
-@SuppressWarnings("resource")
 class KafkaDestinationE2ETests extends EndToEndTestBase {
 
 	private static final String KAFKA_TOPIC_TEMPLATE = "keycloak-events-${realmLowerCase}";

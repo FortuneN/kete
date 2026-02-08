@@ -22,7 +22,6 @@ import io.nats.client.Options;
 import java.net.HttpURLConnection;
 import java.net.URI;
 
-@SuppressWarnings("resource")
 class NatsDestinationE2ETests extends EndToEndTestBase {
 
 	private static final String NATS_SUBJECT = "keycloak.events";

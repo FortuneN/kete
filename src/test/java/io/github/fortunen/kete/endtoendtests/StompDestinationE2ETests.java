@@ -19,7 +19,6 @@ import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.utility.DockerImageName;
 
-@SuppressWarnings("resource")
 class StompDestinationE2ETests extends EndToEndTestBase {
 
 	private static final String STOMP_DESTINATION = "/queue/keycloak-events";

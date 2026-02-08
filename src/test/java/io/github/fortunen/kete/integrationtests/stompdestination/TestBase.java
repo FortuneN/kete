@@ -30,7 +30,6 @@ import io.github.fortunen.kete.TlsMaterial;
 import io.github.fortunen.kete.destinations.stomp.StompDestination;
 import io.github.fortunen.kete.destinations.stomp.StompDestinationConfig;
 
-@SuppressWarnings("resource")
 public class TestBase {
 
 	protected static final byte[] EMPTY_BYTES = new byte[0];

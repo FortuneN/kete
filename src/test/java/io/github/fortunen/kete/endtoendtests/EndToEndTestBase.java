@@ -31,7 +31,6 @@ import jakarta.ws.rs.core.Response;
 import static org.awaitility.Awaitility.await;
 
 @Slf4j
-@SuppressWarnings("resource")
 public abstract class EndToEndTestBase {
 
 	private static final File SHADED_JAR_FILE = new File("target/kete.jar");

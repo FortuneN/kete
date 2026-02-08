@@ -25,7 +25,6 @@ import io.github.fortunen.kete.TlsMaterial;
 import io.github.fortunen.kete.destinations.mqtt3.Mqtt3Destination;
 import io.github.fortunen.kete.destinations.mqtt3.Mqtt3DestinationConfig;
 
-@SuppressWarnings("resource")
 public class TestBase {
 
 	protected static final byte[] EMPTY_BYTES = new byte[0];

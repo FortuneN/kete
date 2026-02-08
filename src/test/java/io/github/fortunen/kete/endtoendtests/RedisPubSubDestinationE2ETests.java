@@ -19,7 +19,6 @@ import io.lettuce.core.pubsub.RedisPubSubAdapter;
 
 import java.util.List;
 
-@SuppressWarnings("resource")
 class RedisPubSubDestinationE2ETests extends EndToEndTestBase {
 
 	private static final String REDIS_CHANNEL_TEMPLATE = "keycloak-events-${realmLowerCase}";

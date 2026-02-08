@@ -30,7 +30,6 @@ import java.net.HttpURLConnection;
 import java.net.URI;
 import java.util.List;
 
-@SuppressWarnings("resource")
 public class TestBase {
 
 	protected static final byte[] EMPTY_BYTES = new byte[0];

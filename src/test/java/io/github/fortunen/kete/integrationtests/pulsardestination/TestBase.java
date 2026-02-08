@@ -24,7 +24,6 @@ import io.github.fortunen.kete.TlsMaterial;
 import io.github.fortunen.kete.destinations.pulsar.PulsarDestination;
 import io.github.fortunen.kete.destinations.pulsar.PulsarDestinationConfig;
 
-@SuppressWarnings("resource")
 public class TestBase {
 
 	protected static final byte[] EMPTY_BYTES = new byte[0];
@@ -115,7 +114,6 @@ public class TestBase {
 		return startPulsarWithTls(tls, true);
 	}
 
-	@SuppressWarnings("resource")
 	private GenericContainer<?> startPulsarWithTls(TlsMaterial tls, boolean requireClientCert) throws Exception {
 
 		if (tls == null) {

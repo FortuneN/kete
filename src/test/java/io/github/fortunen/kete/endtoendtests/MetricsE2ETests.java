@@ -34,7 +34,6 @@ class MetricsE2ETests extends EndToEndTestBase {
 		cleanupNetwork();
 	}
 
-	@SuppressWarnings("resource")
 	@Test
 	void shouldExposeMetricsWhenEnabled() throws Exception {
 

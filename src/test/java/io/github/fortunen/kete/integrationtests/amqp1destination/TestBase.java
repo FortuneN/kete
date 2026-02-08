@@ -20,7 +20,6 @@ import io.github.fortunen.kete.TlsMaterial;
 import io.github.fortunen.kete.destinations.amqp1.Amqp1Destination;
 import io.github.fortunen.kete.destinations.amqp1.Amqp1DestinationConfig;
 
-@SuppressWarnings("resource")
 public abstract class TestBase {
 
 	protected static final byte[] EMPTY_BYTES = new byte[0];

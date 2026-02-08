@@ -18,7 +18,6 @@ import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.images.builder.Transferable;
 import org.testcontainers.utility.DockerImageName;
 
-@SuppressWarnings("resource")
 class Mqtt3DestinationE2ETests extends EndToEndTestBase {
 
 	private static final String TOPIC_TEMPLATE = "keycloak/${kindLowerCase}";
