@@ -74,6 +74,7 @@ try
 
 	git reset --soft $mergeBase | Out-Host
 	git commit -m $msg | Out-Host
+	git push | Out-Host
 }
 catch
 {
