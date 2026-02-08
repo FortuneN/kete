@@ -423,6 +423,36 @@ See [Extending KETE](extending.md) for comprehensive details.
 3. Add `@Component(name = "xxx")` annotation
 4. Implement `doInitialize()` and `doSend(EventMessage)`
 5. Add tests following the [test patterns](test-patterns-and-conventions.md)
+6. Add destination documentation page (see below)
+
+#### Destination Documentation Checklist
+
+Every new destination **requires** a documentation page at `docs/user-guide/destinations/<kind>.md` and updates to several cross-reference pages.
+
+**Destination page sections** (strict order):
+
+| # | Section | Notes |
+|---|---------|-------|
+| 1 | `# <Name> Destination` | Page title |
+| 2 | One-liner description | "Stream Keycloak events to `<system>`." |
+| 3 | Kind/Protocol table | `destination.kind` value + Protocol name |
+| 4 | `## Compatible Systems` | Table of brokers/services with notes |
+| 5 | `## Example Configurations` | Tabbed examples (`=== "Tab Name"` syntax, min 2 tabs) |
+| 6 | `## Features` | Bullet list of capabilities |
+| 7 | `## Configuration Properties` | Sub-sections: Required → Optional → Templating → Headers → Auth → TLS |
+| 8 | `## Configuration Examples` | Numbered: `### Example 1: <Title>`, `### Example 2: <Title>`, etc. |
+| 9 | `## Quick Starts` | Table linking to quickstart folders |
+| 10 | `## See Also` | Links to Serializers, Matchers, Event Types, Certificate Loaders |
+
+**Cross-reference pages to update:**
+
+| Page | What to Update |
+|------|---------------|
+| `mkdocs.yml` | Add nav entry under `Destinations:` |
+| `destinations/overview.md` | Available Destinations table, Cloud Services Compatibility table (if cloud), Message Headers table, Quick Examples section |
+| `destinations/support-matrix.md` | Quick Reference Matrix (add column + row), "By Protocol" section, Decision Guide tree, Performance Considerations table, Available Quickstarts table |
+
+**Reference pages**: `kafka.md` (complex destination), `http.md` (OAuth, headers), `pulsar.md` (auth methods), `zeromq.md` (limitations section)
 
 ### Adding a New Serializer
 

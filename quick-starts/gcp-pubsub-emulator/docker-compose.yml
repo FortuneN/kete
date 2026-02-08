@@ -1,0 +1,40 @@
+services:
+
+  pubsub-emulator:
+    image: ghcr.io/fortunen/kete/quick-start-gcp-pubsub-emulator
+    ports:
+      - 8085:8085
+    command: ["gcloud", "beta", "emulators", "pubsub", "start", "--project=demo-project", "--host-port=0.0.0.0:8085"]
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8085 || exit 0"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  pubsub-setup:
+    image: ghcr.io/fortunen/kete/quick-start-curl
+    depends_on:
+      pubsub-emulator:
+        condition: service_healthy
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        curl -sf -X PUT http://pubsub-emulator:8085/v1/projects/demo-project/topics/keycloak-events -H "Content-Type: application/json" -d "{}" &&
+        curl -sf -X PUT http://pubsub-emulator:8085/v1/projects/demo-project/subscriptions/keycloak-events-sub -H "Content-Type: application/json" -d "{\"topic\":\"projects/demo-project/topics/keycloak-events\"}" &&
+        echo "Topic and subscription created successfully" &&
+        sleep infinity
+
+  keycloak:
+    image: ghcr.io/fortunen/kete/quick-start-keycloak
+    command: start-dev
+    ports:
+      - 8080:8080
+      - 9000:9000
+    environment:
+      kete.routes.quick-start.destination.kind: gcp-pubsub
+      kete.routes.quick-start.destination.project: demo-project
+      kete.routes.quick-start.destination.topic: keycloak-events
+      kete.routes.quick-start.destination.url: http://pubsub-emulator:8085
+    depends_on:
+      pubsub-setup:
+        condition: service_started

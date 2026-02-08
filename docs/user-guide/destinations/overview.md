@@ -183,6 +183,7 @@ Header names are **all lowercase with no dashes or underscores** for maximum com
 | [WebSocket](websocket.md) | ❌ | Not supported | Headers sent via handshake only |
 | [STOMP](stomp.md) | ✅ | Native `content-type` header | `eventtype` and `eventkind` as STOMP headers |
 | [ZeroMQ](zeromq.md) | ❌ | Not supported | Raw message bytes only |
+| [GCP Pub/Sub](gcp-pubsub.md) | ✅ | `contenttype` attribute | All three as Pub/Sub message attributes |
 
 ## TLS & mTLS
 
@@ -255,6 +256,7 @@ For detailed information about each loader and their properties, see **[Certific
 | **[websocket](websocket.md)** | WebSocket | Real-time servers, custom backends, dashboards |
 | **[stomp](stomp.md)** | STOMP 1.2 | ActiveMQ Classic, ActiveMQ Artemis, Amazon MQ, RabbitMQ, EMQX |
 | **[zeromq](zeromq.md)** | ZMTP (ZeroMQ) | Any ZeroMQ peer (brokerless, 40+ language bindings) |
+| **[gcp-pubsub](gcp-pubsub.md)** | HTTP/REST (Pub/Sub API) | Google Cloud Pub/Sub, GCP Pub/Sub Emulator |
 
 ## Cloud Services Compatibility
 
@@ -275,6 +277,7 @@ KETE works with major cloud messaging services through protocol compatibility:
 | **AWS IoT Core** | `mqtt-3` | [MQTT 3](mqtt-3.md) |
 | **Azure IoT Hub** | `mqtt-3` | [MQTT 3](mqtt-3.md) |
 | **Google Cloud Memorystore** | `redis-pubsub` or `redis-streams` | [Redis Pub/Sub](redis-pubsub.md) / [Redis Streams](redis-streams.md) |
+| **Google Cloud Pub/Sub** | `gcp-pubsub` | [GCP Pub/Sub](gcp-pubsub.md) |
 | **Upstash** | `redis-pubsub` or `redis-streams` | [Redis Pub/Sub](redis-pubsub.md) / [Redis Streams](redis-streams.md) |
 | **Aiven for Kafka** | `kafka` | [Kafka](kafka.md) |
 | **StreamNative Cloud** | `pulsar` | [Pulsar](pulsar.md) |
@@ -311,4 +314,12 @@ kete.routes.events.destination.url=https://api.example.com/events
 kete.routes.events.destination.kind=zeromq
 kete.routes.events.destination.endpoint=tcp://subscriber:5556
 # Defaults: socket-type=PUBLISH, connection-mode=CONNECT
+```
+
+**GCP Pub/Sub:**
+```bash
+kete.routes.events.destination.kind=gcp-pubsub
+kete.routes.events.destination.project=my-gcp-project
+kete.routes.events.destination.topic=keycloak-events
+kete.routes.events.destination.credentials-file-path=/secrets/service-account.json
 ```

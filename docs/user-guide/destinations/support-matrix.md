@@ -4,48 +4,49 @@ This page provides a comprehensive cross-reference of message brokers and the de
 
 ## Quick Reference Matrix
 
-| Broker | AMQP 0.9.1 | AMQP 1.0 | MQTT 3 | MQTT 5 | STOMP | Kafka | Redis | NATS | Pulsar | HTTP | WebSocket | ZeroMQ |
-|--------|:----------:|:--------:|:------:|:------:|:-----:|:-----:|:-----:|:----:|:------:|:----:|:---------:|:------:|
-| **RabbitMQ** | ✅ | ✅ 4.0+ | ✅ Plugin | ✅ Plugin | ✅ Plugin | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ Plugin | ❌ |
-| **LavinMQ** | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ |
-| **Redis** | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
-| **Valkey** | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
-| **Dragonfly** | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
-| **KeyDB** | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
-| **Microsoft Garnet** | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
-| **Amazon ElastiCache** | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
-| **Azure Cache for Redis** | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
-| **Google Cloud Memorystore** | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
-| **Upstash** | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
-| **ActiveMQ Artemis** | ❌ | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
-| **ActiveMQ Classic** | ❌ | ✅ | ✅ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
-| **Eclipse Mosquitto** | ❌ | ❌ | ✅ | ✅ 2.0+ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ |
-| **HiveMQ** | ❌ | ❌ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ |
-| **HiveMQ Cloud** | ❌ | ❌ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ |
-| **EMQX** | ❌ | ❌ | ✅ | ✅ | ✅ Gateway | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ |
-| **EMQX Cloud** | ❌ | ❌ | ✅ | ✅ | ✅ Gateway | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ |
-| **NanoMQ** | ❌ | ❌ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ |
-| **VerneMQ** | ❌ | ❌ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ |
-| **Apache Qpid** | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
-| **IBM MQ** | ❌ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
-| **NATS Server** | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ |
-| **Synadia Cloud** | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ |
-| **Apache Pulsar** | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ |
-| **StreamNative Cloud** | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ |
-| **DataStax Astra Streaming** | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ |
-| **Azure Service Bus** | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ |
-| **Azure Event Hubs** | ❌ | ✅ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ |
-| **Azure Event Grid** | ❌ | ❌ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ✅ | ❌ |
-| **Apache Kafka** | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
-| **Amazon MSK** | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
-| **Redpanda** | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
-| **Confluent Cloud** | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
-| **Aiven for Kafka** | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
-| **Strimzi** | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
-| **Solace PubSub+** | ❌ | ❌ | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ | ✅ | ✅ | ❌ |
-| **AWS IoT Core** | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ✅ | ❌ |
-| **Azure IoT Hub** | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ |
-| **Any ZeroMQ peer** | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ |
+| Broker | AMQP 0.9.1 | AMQP 1.0 | MQTT 3 | MQTT 5 | STOMP | Kafka | Redis | NATS | Pulsar | HTTP | WebSocket | ZeroMQ | GCP Pub/Sub |
+|--------|:----------:|:--------:|:------:|:------:|:-----:|:-----:|:-----:|:----:|:------:|:----:|:---------:|:------:|:-----------:|
+| **RabbitMQ** | ✅ | ✅ 4.0+ | ✅ Plugin | ✅ Plugin | ✅ Plugin | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ Plugin | ❌ | ❌ |
+| **LavinMQ** | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ |
+| **Redis** | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| **Valkey** | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| **Dragonfly** | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| **KeyDB** | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| **Microsoft Garnet** | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| **Amazon ElastiCache** | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| **Azure Cache for Redis** | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| **Google Cloud Memorystore** | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| **Upstash** | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| **ActiveMQ Artemis** | ❌ | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| **ActiveMQ Classic** | ❌ | ✅ | ✅ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| **Eclipse Mosquitto** | ❌ | ❌ | ✅ | ✅ 2.0+ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ |
+| **HiveMQ** | ❌ | ❌ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ |
+| **HiveMQ Cloud** | ❌ | ❌ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ |
+| **EMQX** | ❌ | ❌ | ✅ | ✅ | ✅ Gateway | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ |
+| **EMQX Cloud** | ❌ | ❌ | ✅ | ✅ | ✅ Gateway | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ |
+| **NanoMQ** | ❌ | ❌ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ |
+| **VerneMQ** | ❌ | ❌ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ |
+| **Apache Qpid** | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| **IBM MQ** | ❌ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| **NATS Server** | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| **Synadia Cloud** | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| **Apache Pulsar** | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ |
+| **StreamNative Cloud** | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ |
+| **DataStax Astra Streaming** | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ |
+| **Azure Service Bus** | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ |
+| **Azure Event Hubs** | ❌ | ✅ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ |
+| **Azure Event Grid** | ❌ | ❌ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ✅ | ❌ | ❌ |
+| **Google Cloud Pub/Sub** | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ |
+| **Apache Kafka** | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| **Amazon MSK** | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| **Redpanda** | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| **Confluent Cloud** | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| **Aiven for Kafka** | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| **Strimzi** | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| **Solace PubSub+** | ❌ | ❌ | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ | ✅ | ✅ | ❌ | ❌ |
+| **AWS IoT Core** | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ✅ | ❌ | ❌ |
+| **Azure IoT Hub** | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ |
+| **Any ZeroMQ peer** | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ |
 
 !!! note "Brokerless Destination"
     ZeroMQ is a brokerless messaging library — it connects directly to peers without a message broker. The "Any ZeroMQ peer" row represents any application using a ZeroMQ binding (Python, C, .NET, Java, Node.js, etc.).
@@ -272,6 +273,17 @@ ZeroMQ is **brokerless** — no broker to deploy or manage. KETE connects direct
 See: [ZeroMQ Destination](zeromq.md)
 
 
+### GCP Pub/Sub
+
+Use `destination.kind=gcp-pubsub`:
+
+- **Google Cloud Pub/Sub** — Fully managed, global messaging service
+- **GCP Pub/Sub Emulator** — Local development and testing
+
+**Quickstarts available:** [gcp-pubsub](../../quick-starts/gcp-pubsub/), [gcp-pubsub-emulator](../../quick-starts/gcp-pubsub-emulator/)
+
+See: [GCP Pub/Sub Destination](gcp-pubsub.md)
+
 
 ## Choosing the Right Protocol
 
@@ -318,6 +330,10 @@ Is it a REST API, webhook, or HTTP endpoint?
 
 Do you need brokerless peer-to-peer messaging?
 ├── Yes → Use zeromq (no broker, direct peer connection)
+└── No → Continue...
+
+Is it Google Cloud Pub/Sub?
+├── Yes → Use gcp-pubsub
 └── No → Use websocket for generic WebSocket servers
 ```
 
@@ -338,6 +354,7 @@ Do you need brokerless peer-to-peer messaging?
 | `stomp` | ⭐⭐⭐ | ⭐⭐⭐ | Text-based, debugging |
 | `http` | ⭐⭐ | ⭐⭐ | Webhooks, integrations |
 | `zeromq` | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | Brokerless, peer-to-peer, ultra-low latency |
+| `gcp-pubsub` | ⭐⭐⭐⭐ | ⭐⭐⭐ | Google Cloud managed messaging |
 | `websocket` | ⭐⭐⭐ | ⭐⭐⭐⭐ | Real-time dashboards |
 
 
@@ -398,3 +415,5 @@ All quickstarts are in the `quick-starts/` directory:
 | WebSocket | Echo Server | `websocket-echo/` |
 | ZeroMQ | PUB/SUB | `zeromq-publish/` |
 | ZeroMQ | PUSH/PULL | `zeromq-push/` |
+| GCP Pub/Sub | GCP Pub/Sub Emulator | `gcp-pubsub-emulator/` |
+| GCP Pub/Sub | Google Cloud Pub/Sub | `gcp-pubsub/` |
