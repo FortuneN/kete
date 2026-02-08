@@ -1,0 +1,24 @@
+{
+  "UserConfig": {
+    "NamespaceConfig": [
+      {
+        "Type": "EventHub",
+        "Name": "ehemulatorns",
+        "Entities": [
+          {
+            "Name": "keycloak-events",
+            "PartitionCount": "2",
+            "ConsumerGroups": [
+              {
+                "Name": "kete-consumer"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "LoggingConfig": {
+      "Type": "Console"
+    }
+  }
+}

@@ -1,0 +1,78 @@
+# Azure Event Hubs Emulator (AMQP 1.0)
+# Local development emulator - no Azure subscription required
+# See: https://github.com/Azure/azure-event-hubs-emulator-installer
+
+services:
+
+  azurite:
+    image: ghcr.io/fortunen/kete/quick-start-azurite
+    ports:
+      - 10000:10000
+      - 10001:10001
+      - 10002:10002
+    healthcheck:
+      test: ["CMD", "nc", "-z", "127.0.0.1", "10000"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  eventhubs-emulator:
+    image: ghcr.io/fortunen/kete/quick-start-eventhubs-emulator
+    ports:
+      - 5672:5672
+      - 5300:5300
+    volumes:
+      - ./Config.json:/Eventhubs_Emulator/ConfigFiles/Config.json:ro
+    environment:
+      ACCEPT_EULA: "Y"
+      BLOB_SERVER: azurite
+      METADATA_SERVER: azurite
+    depends_on:
+      azurite:
+        condition: service_healthy
+
+  # Wait for the emulator AMQP port to be ready before starting Keycloak
+  wait-for-emulator:
+    image: ghcr.io/fortunen/kete/quick-start-alpine
+    command: >
+      sh -c "
+        echo 'Waiting for Event Hubs emulator AMQP port to be ready...';
+        while ! nc -z eventhubs-emulator 5672 2>/dev/null; do
+          sleep 2;
+        done;
+        echo 'Event Hubs emulator AMQP port is ready!'
+      "
+    depends_on:
+      - eventhubs-emulator
+
+  # AMQP 1.0 subscriber to verify event reception
+  subscriber:
+    image: ghcr.io/fortunen/kete/quick-start-amqp1-subscriber
+    environment:
+      AMQP_HOST: eventhubs-emulator
+      AMQP_PORT: 5672
+      AMQP_USERNAME: RootManageSharedAccessKey
+      AMQP_PASSWORD: SAS_KEY_VALUE
+      AMQP_ADDRESS: keycloak-events
+    depends_on:
+      wait-for-emulator:
+        condition: service_completed_successfully
+
+  keycloak:
+    image: ghcr.io/fortunen/kete/quick-start-keycloak
+    command: start-dev
+    depends_on:
+      wait-for-emulator:
+        condition: service_completed_successfully
+      subscriber:
+        condition: service_started
+    ports:
+      - 8080:8080
+      - 9000:9000
+    environment:
+      kete.routes.quick-start.destination.kind: amqp-1
+      kete.routes.quick-start.destination.host: eventhubs-emulator
+      kete.routes.quick-start.destination.port: 5672
+      kete.routes.quick-start.destination.username: RootManageSharedAccessKey
+      kete.routes.quick-start.destination.password: SAS_KEY_VALUE
+      kete.routes.quick-start.destination.destination-name: keycloak-events

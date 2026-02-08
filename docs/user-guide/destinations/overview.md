@@ -184,6 +184,7 @@ Header names are **all lowercase with no dashes or underscores** for maximum com
 | [STOMP](stomp.md) | ✅ | Native `content-type` header | `eventtype` and `eventkind` as STOMP headers |
 | [ZeroMQ](zeromq.md) | ❌ | Not supported | Raw message bytes only |
 | [GCP Pub/Sub](gcp-pubsub.md) | ✅ | `contenttype` attribute | All three as Pub/Sub message attributes |
+| Azure Storage Queue | ❌ | Not supported | Queue messages contain body only |
 
 ## TLS & mTLS
 
@@ -257,6 +258,7 @@ For detailed information about each loader and their properties, see **[Certific
 | **[stomp](stomp.md)** | STOMP 1.2 | ActiveMQ Classic, ActiveMQ Artemis, Amazon MQ, RabbitMQ, EMQX |
 | **[zeromq](zeromq.md)** | ZMTP (ZeroMQ) | Any ZeroMQ peer (brokerless, 40+ language bindings) |
 | **[gcp-pubsub](gcp-pubsub.md)** | HTTP/REST (Pub/Sub API) | Google Cloud Pub/Sub, GCP Pub/Sub Emulator |
+| **[azure-storage-queue](azure-storage-queue.md)** | Azure Storage Queue REST API | Azure Storage Queue, Azurite Emulator |
 
 ## Cloud Services Compatibility
 
@@ -268,6 +270,7 @@ KETE works with major cloud messaging services through protocol compatibility:
 | **Azure Service Bus** | `amqp-1` | [AMQP 1](amqp-1.md) |
 | **Azure Event Grid** | `http` or `mqtt-5` | [HTTP](http.md) / [MQTT 5](mqtt-5.md) |
 | **Azure Cache for Redis** | `redis-pubsub` or `redis-stream` | [Redis Pub/Sub](redis-pubsub.md) / [Redis Stream](redis-stream.md) |
+| **Azure Storage Queue** | `azure-storage-queue` | [Azure Storage Queue](azure-storage-queue.md) |
 | **Amazon ElastiCache** | `redis-pubsub` or `redis-stream` | [Redis Pub/Sub](redis-pubsub.md) / [Redis Stream](redis-stream.md) |
 | **Amazon MSK** | `kafka` | [Kafka](kafka.md) |
 | **Amazon MQ (Artemis)** | `amqp-1` or `stomp` | [AMQP 1](amqp-1.md) / [STOMP](stomp.md) |
@@ -322,4 +325,12 @@ kete.routes.events.destination.kind=gcp-pubsub
 kete.routes.events.destination.project=my-gcp-project
 kete.routes.events.destination.topic=keycloak-events
 kete.routes.events.destination.credentials-file-path=/secrets/service-account.json
+```
+
+**Azure Storage Queue:**
+```bash
+kete.routes.events.destination.kind=azure-storage-queue
+kete.routes.events.destination.account-name=mystorageaccount
+kete.routes.events.destination.account-key=your-account-key
+kete.routes.events.destination.queue=keycloak-events
 ```

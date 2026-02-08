@@ -129,6 +129,7 @@ nav:
       - Redis Stream: user-guide/destinations/redis-stream.md
       - ZeroMQ: user-guide/destinations/zeromq.md
       - GCP Pub/Sub: user-guide/destinations/gcp-pubsub.md
+      - Azure Storage Queue: user-guide/destinations/azure-storage-queue.md
     - Certificate Loaders:
       - Overview: user-guide/certificate-loaders/overview.md
       - PEM File Path: user-guide/certificate-loaders/pem-file-path.md

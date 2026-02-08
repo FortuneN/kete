@@ -148,7 +148,7 @@ Use `destination.kind=amqp-1`:
 - **Amazon MQ** - Managed ActiveMQ
 - **Solace PubSub+** - Multi-protocol
 
-**Quickstarts available:** [amqp-1-activemq](../../quick-starts/amqp-1-activemq/), [amqp-1-azure-event-hubs](../../quick-starts/amqp-1-azure-event-hubs/), [amqp-1-azure-service-bus](../../quick-starts/amqp-1-azure-service-bus/), [amqp-1-azure-service-bus-emulator](../../quick-starts/amqp-1-azure-service-bus-emulator/), [amqp-1-qpid](../../quick-starts/amqp-1-qpid/), [amqp-1-rabbitmq](../../quick-starts/amqp-1-rabbitmq/)
+**Quickstarts available:** [amqp-1-activemq](../../quick-starts/amqp-1-activemq/), [amqp-1-azure-event-hubs](../../quick-starts/amqp-1-azure-event-hubs/), [amqp-1-azure-event-hubs-emulator](../../quick-starts/amqp-1-azure-event-hubs-emulator/), [amqp-1-azure-service-bus](../../quick-starts/amqp-1-azure-service-bus/), [amqp-1-azure-service-bus-emulator](../../quick-starts/amqp-1-azure-service-bus-emulator/), [amqp-1-qpid](../../quick-starts/amqp-1-qpid/), [amqp-1-rabbitmq](../../quick-starts/amqp-1-rabbitmq/)
 
 See: [AMQP 1 Destination](amqp-1.md)
 
@@ -233,14 +233,15 @@ Use `destination.kind=redis-pubsub` or `destination.kind=redis-stream`:
 - **Valkey** - Redis fork, fully compatible
 - **Dragonfly** - Redis-compatible, multi-threaded
 - **KeyDB** - Redis-compatible, multi-threaded
+- **Microsoft Garnet** - Redis-compatible, .NET-based
 - **Amazon ElastiCache** - AWS-managed Redis
 - **Azure Cache for Redis** - Azure-managed Redis
 - **Google Cloud Memorystore** - GCP-managed Redis
 - **Upstash** - Serverless Redis
 
-**Quickstarts available (Pub/Sub):** [redis-pubsub-redis](../../quick-starts/redis-pubsub-redis/), [redis-pubsub-valkey](../../quick-starts/redis-pubsub-valkey/), [redis-pubsub-dragonfly](../../quick-starts/redis-pubsub-dragonfly/), [redis-pubsub-keydb](../../quick-starts/redis-pubsub-keydb/), [redis-pubsub-azure-cache-for-redis](../../quick-starts/redis-pubsub-azure-cache-for-redis/), [redis-pubsub-upstash](../../quick-starts/redis-pubsub-upstash/)
+**Quickstarts available (Pub/Sub):** [redis-pubsub-redis](../../quick-starts/redis-pubsub-redis/), [redis-pubsub-valkey](../../quick-starts/redis-pubsub-valkey/), [redis-pubsub-dragonfly](../../quick-starts/redis-pubsub-dragonfly/), [redis-pubsub-keydb](../../quick-starts/redis-pubsub-keydb/), [redis-pubsub-garnet](../../quick-starts/redis-pubsub-garnet/), [redis-pubsub-azure-cache-for-redis](../../quick-starts/redis-pubsub-azure-cache-for-redis/), [redis-pubsub-upstash](../../quick-starts/redis-pubsub-upstash/)
 
-**Quickstarts available (Streams):** [redis-stream-redis](../../quick-starts/redis-stream-redis/), [redis-stream-valkey](../../quick-starts/redis-stream-valkey/), [redis-stream-dragonfly](../../quick-starts/redis-stream-dragonfly/), [redis-stream-keydb](../../quick-starts/redis-stream-keydb/), [redis-stream-azure-cache-for-redis](../../quick-starts/redis-stream-azure-cache-for-redis/), [redis-stream-upstash](../../quick-starts/redis-stream-upstash/)
+**Quickstarts available (Streams):** [redis-stream-redis](../../quick-starts/redis-stream-redis/), [redis-stream-valkey](../../quick-starts/redis-stream-valkey/), [redis-stream-dragonfly](../../quick-starts/redis-stream-dragonfly/), [redis-stream-keydb](../../quick-starts/redis-stream-keydb/), [redis-stream-garnet](../../quick-starts/redis-stream-garnet/), [redis-stream-azure-cache-for-redis](../../quick-starts/redis-stream-azure-cache-for-redis/), [redis-stream-upstash](../../quick-starts/redis-stream-upstash/)
 
 See: [Redis Pub/Sub Destination](redis-pubsub.md), [Redis Stream Destination](redis-stream.md)
 
@@ -283,6 +284,16 @@ Use `destination.kind=gcp-pubsub`:
 **Quickstarts available:** [gcp-pubsub](../../quick-starts/gcp-pubsub/), [gcp-pubsub-emulator](../../quick-starts/gcp-pubsub-emulator/)
 
 See: [GCP Pub/Sub Destination](gcp-pubsub.md)
+
+
+### Azure Storage Queue
+
+Use `destination.kind=azure-storage-queue`:
+
+- **Azure Storage Queue** — Simple, cost-effective cloud message queue
+- **Azurite Emulator** — Local development and testing
+
+**Quickstarts available:** [azure-storage-queue](../../quick-starts/azure-storage-queue/), [azure-storage-queue-emulator](../../quick-starts/azure-storage-queue-emulator/)
 
 
 ## Choosing the Right Protocol
@@ -334,6 +345,10 @@ Do you need brokerless peer-to-peer messaging?
 
 Is it Google Cloud Pub/Sub?
 ├── Yes → Use gcp-pubsub
+└── No → Continue...
+
+Is it Azure Storage Queue?
+├── Yes → Use azure-storage-queue
 └── No → Use websocket for generic WebSocket servers
 ```
 
@@ -355,6 +370,7 @@ Is it Google Cloud Pub/Sub?
 | `http` | ⭐⭐ | ⭐⭐ | Webhooks, integrations |
 | `zeromq` | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | Brokerless, peer-to-peer, ultra-low latency |
 | `gcp-pubsub` | ⭐⭐⭐⭐ | ⭐⭐⭐ | Google Cloud managed messaging |
+| `azure-storage-queue` | ⭐⭐⭐ | ⭐⭐⭐ | Simple Azure cloud queue messaging |
 | `websocket` | ⭐⭐⭐ | ⭐⭐⭐⭐ | Real-time dashboards |
 
 
@@ -369,6 +385,7 @@ All quickstarts are in the `quick-starts/` directory:
 | AMQP 0.9.1 | LavinMQ | `amqp-0.9.1-lavinmq/` |
 | AMQP 1.0 | ActiveMQ | `amqp-1-activemq/` |
 | AMQP 1.0 | Azure Event Hubs | `amqp-1-azure-event-hubs/` |
+| AMQP 1.0 | Azure Event Hubs Emulator | `amqp-1-azure-event-hubs-emulator/` |
 | AMQP 1.0 | Azure Service Bus | `amqp-1-azure-service-bus/` |
 | AMQP 1.0 | Azure Service Bus Emulator | `amqp-1-azure-service-bus-emulator/` |
 | AMQP 1.0 | Apache Qpid | `amqp-1-qpid/` |
@@ -399,12 +416,14 @@ All quickstarts are in the `quick-starts/` directory:
 | Redis Pub/Sub | Valkey | `redis-pubsub-valkey/` |
 | Redis Pub/Sub | Dragonfly | `redis-pubsub-dragonfly/` |
 | Redis Pub/Sub | KeyDB | `redis-pubsub-keydb/` |
+| Redis Pub/Sub | Microsoft Garnet | `redis-pubsub-garnet/` |
 | Redis Pub/Sub | Azure Cache for Redis | `redis-pubsub-azure-cache-for-redis/` |
 | Redis Pub/Sub | Upstash | `redis-pubsub-upstash/` |
 | Redis Stream | Redis | `redis-stream-redis/` |
 | Redis Stream | Valkey | `redis-stream-valkey/` |
 | Redis Stream | Dragonfly | `redis-stream-dragonfly/` |
 | Redis Stream | KeyDB | `redis-stream-keydb/` |
+| Redis Stream | Microsoft Garnet | `redis-stream-garnet/` |
 | Redis Stream | Azure Cache for Redis | `redis-stream-azure-cache-for-redis/` |
 | Redis Stream | Upstash | `redis-stream-upstash/` |
 | NATS | NATS Server | `nats-nats-server/` |
@@ -417,3 +436,5 @@ All quickstarts are in the `quick-starts/` directory:
 | ZeroMQ | PUSH/PULL | `zeromq-push/` |
 | GCP Pub/Sub | GCP Pub/Sub Emulator | `gcp-pubsub-emulator/` |
 | GCP Pub/Sub | Google Cloud Pub/Sub | `gcp-pubsub/` |
+| Azure Storage Queue | Azure (Cloud) | `azure-storage-queue/` |
+| Azure Storage Queue | Azurite Emulator | `azure-storage-queue-emulator/` |
