@@ -1,14 +1,15 @@
 services:
 
-  valkey:
-    image: ghcr.io/fortunen/kete/quick-start-valkey
+  dragonfly:
+    image: ghcr.io/fortunen/kete/quick-start-dragonfly
     ports:
       - 6379:6379
+    command: ["--logtostderr"]
     healthcheck:
-      test: ["CMD", "valkey-cli", "ping"]
+      test: ["CMD", "redis-cli", "ping"]
       interval: 5s
       timeout: 5s
-      retries: 10
+      retries: 30
 
   keycloak:
     image: ghcr.io/fortunen/kete/quick-start-keycloak
@@ -17,10 +18,11 @@ services:
       - 8080:8080
       - 9000:9000
     environment:
-      kete.routes.quick-start.destination.kind: redis-streams
-      kete.routes.quick-start.destination.host: valkey
+      kete.routes.quick-start.destination.kind: redis-stream
+      kete.routes.quick-start.destination.host: dragonfly
       kete.routes.quick-start.destination.port: 6379
       kete.routes.quick-start.destination.stream: keycloak-events
+      kete.routes.quick-start.destination.max-len: 10000
     depends_on:
-      valkey:
+      dragonfly:
         condition: service_healthy

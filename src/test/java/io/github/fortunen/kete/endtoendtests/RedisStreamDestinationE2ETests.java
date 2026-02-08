@@ -48,7 +48,7 @@ class RedisStreamDestinationE2ETests extends EndToEndTestBase {
 		var envVars = new HashMap<String, String>();
 		envVars.put("kete.enabled", "true");
 		envVars.put("kete.routes.redis-test.realm-matchers.filter", "list:" + TEST_REALM);
-		envVars.put("kete.routes.redis-test.destination.kind", "redis-streams");
+		envVars.put("kete.routes.redis-test.destination.kind", "redis-stream");
 		envVars.put("kete.routes.redis-test.destination.host", "redis");
 		envVars.put("kete.routes.redis-test.destination.port", "6379");
 		envVars.put("kete.routes.redis-test.destination.stream", REDIS_STREAM_TEMPLATE);

@@ -226,7 +226,7 @@ See: [Kafka Destination](kafka.md)
 
 ### Redis-Compatible Systems
 
-Use `destination.kind=redis-pubsub` or `destination.kind=redis-streams`:
+Use `destination.kind=redis-pubsub` or `destination.kind=redis-stream`:
 
 - **Redis** - Open-source, in-memory data store
 - **Redis Stack** - Redis with additional modules
@@ -240,9 +240,9 @@ Use `destination.kind=redis-pubsub` or `destination.kind=redis-streams`:
 
 **Quickstarts available (Pub/Sub):** [redis-pubsub-redis](../../quick-starts/redis-pubsub-redis/), [redis-pubsub-valkey](../../quick-starts/redis-pubsub-valkey/), [redis-pubsub-dragonfly](../../quick-starts/redis-pubsub-dragonfly/), [redis-pubsub-keydb](../../quick-starts/redis-pubsub-keydb/), [redis-pubsub-azure-cache-for-redis](../../quick-starts/redis-pubsub-azure-cache-for-redis/), [redis-pubsub-upstash](../../quick-starts/redis-pubsub-upstash/)
 
-**Quickstarts available (Streams):** [redis-streams-redis](../../quick-starts/redis-streams-redis/), [redis-streams-valkey](../../quick-starts/redis-streams-valkey/), [redis-streams-dragonfly](../../quick-starts/redis-streams-dragonfly/), [redis-streams-keydb](../../quick-starts/redis-streams-keydb/), [redis-streams-azure-cache-for-redis](../../quick-starts/redis-streams-azure-cache-for-redis/), [redis-streams-upstash](../../quick-starts/redis-streams-upstash/)
+**Quickstarts available (Streams):** [redis-stream-redis](../../quick-starts/redis-stream-redis/), [redis-stream-valkey](../../quick-starts/redis-stream-valkey/), [redis-stream-dragonfly](../../quick-starts/redis-stream-dragonfly/), [redis-stream-keydb](../../quick-starts/redis-stream-keydb/), [redis-stream-azure-cache-for-redis](../../quick-starts/redis-stream-azure-cache-for-redis/), [redis-stream-upstash](../../quick-starts/redis-stream-upstash/)
 
-See: [Redis Pub/Sub Destination](redis-pubsub.md), [Redis Streams Destination](redis-streams.md)
+See: [Redis Pub/Sub Destination](redis-pubsub.md), [Redis Stream Destination](redis-stream.md)
 
 
 ### NATS-Compatible Systems
@@ -300,7 +300,7 @@ Is your broker Kafka, Redpanda, or Event Hubs (Kafka mode)?
 
 Is your broker Redis, ElastiCache, Azure Cache for Redis, Dragonfly, KeyDB, or Upstash?
 ├── Yes → Do you need message persistence?
-│   ├── Yes → Use redis-streams (persistent, consumer groups, headers)
+│   ├── Yes → Use redis-stream (persistent, consumer groups, headers)
 │   └── No → Use redis-pubsub (fire-and-forget, lower latency)
 └── No → Continue...
 
@@ -345,7 +345,7 @@ Is it Google Cloud Pub/Sub?
 | `pulsar` | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ | Multi-tenancy, geo-replication |
 | `nats-jetstream` | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ | Persistent messaging with acknowledgments |
 | `nats` | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | Fire-and-forget, ultra-low latency |
-| `redis-streams` | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | Persistent messaging, consumer groups |
+| `redis-stream` | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | Persistent messaging, consumer groups |
 | `redis-pubsub` | ⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | Fire-and-forget, lowest latency |
 | `amqp-0.9.1` | ⭐⭐⭐⭐ | ⭐⭐⭐⭐ | RabbitMQ workloads |
 | `amqp-1` | ⭐⭐⭐⭐ | ⭐⭐⭐⭐ | Enterprise messaging |
@@ -401,12 +401,12 @@ All quickstarts are in the `quick-starts/` directory:
 | Redis Pub/Sub | KeyDB | `redis-pubsub-keydb/` |
 | Redis Pub/Sub | Azure Cache for Redis | `redis-pubsub-azure-cache-for-redis/` |
 | Redis Pub/Sub | Upstash | `redis-pubsub-upstash/` |
-| Redis Streams | Redis | `redis-streams-redis/` |
-| Redis Streams | Valkey | `redis-streams-valkey/` |
-| Redis Streams | Dragonfly | `redis-streams-dragonfly/` |
-| Redis Streams | KeyDB | `redis-streams-keydb/` |
-| Redis Streams | Azure Cache for Redis | `redis-streams-azure-cache-for-redis/` |
-| Redis Streams | Upstash | `redis-streams-upstash/` |
+| Redis Stream | Redis | `redis-stream-redis/` |
+| Redis Stream | Valkey | `redis-stream-valkey/` |
+| Redis Stream | Dragonfly | `redis-stream-dragonfly/` |
+| Redis Stream | KeyDB | `redis-stream-keydb/` |
+| Redis Stream | Azure Cache for Redis | `redis-stream-azure-cache-for-redis/` |
+| Redis Stream | Upstash | `redis-stream-upstash/` |
 | NATS | NATS Server | `nats-nats-server/` |
 | NATS JetStream | NATS Server | `nats-jetstream-nats-server/` |
 | Pulsar | Apache Pulsar | `pulsar-apache/` |

@@ -44,7 +44,7 @@ public class TestBase {
 	}
 
 	protected void configureDestination(MapConfiguration mapConfig) {
-		mapConfig.setProperty(Constants.KIND, "redis-streams");
+		mapConfig.setProperty(Constants.KIND, "redis-stream");
 		config.setConfiguration(mapConfig);
 		config.initialize();
 		destination.setConfig(config);

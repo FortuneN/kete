@@ -6,7 +6,7 @@ A comprehensive stress testing suite for KETE (Keycloak Events To Everywhere) th
 
 This stress test simulates real-world high-traffic scenarios by:
 - Running **5 concurrent login repeaters** that continuously authenticate against Keycloak
-- Streaming all authentication events through **KETE to Redis Streams**
+- Streaming all authentication events through **KETE to Redis Stream**
 - Monitoring **throughput and metrics every minute** for 10 minutes
 - Calculating **messages per second** and tracking system health
 
@@ -14,7 +14,7 @@ This stress test simulates real-world high-traffic scenarios by:
 
 ### Infrastructure (`docker-compose.yml`)
 - **Keycloak**: Event source with KETE provider enabled (metrics enabled)
-- **Redis**: Destination system (Redis Streams)
+- **Redis**: Destination system (Redis Stream)
 - **5x Login Repeaters**: Concurrent workers generating authentication events in tight loops
 
 ### Login Repeater (`login-repeater.sh`)
@@ -231,7 +231,7 @@ docker logs stress-test-keycloak-1 | grep "kete Route"
 
 Expected output:
 ```
-kete Route 'stress-test' initialized: destination=RedisStreamsDestinationConfig
+kete Route 'stress-test' initialized: destination=RedisStreamDestinationConfig
 ```
 
 ### Check Redis Stream Manually
@@ -282,7 +282,7 @@ rm stress-test-results-*.csv
 
 - Workers may see connection errors during Keycloak startup (expected, they retry)
 - Very high loads (>1000 msg/s) may require Keycloak tuning
-- Redis Streams is used for easy verification; production systems may use Kafka/NATS
+- Redis Stream is used for easy verification; production systems may use Kafka/NATS
 - Test runs entirely on localhost; network latency not simulated
 
 ## License

@@ -21,7 +21,7 @@ import java.util.LinkedHashMap;
 
 @Data
 @NoArgsConstructor(force = true)
-@Component(name = "redis-streams")
+@Component(name = "redis-stream")
 @EqualsAndHashCode(callSuper = true)
 public class RedisStreamDestination extends Destination<RedisStreamDestinationConfig> {
 

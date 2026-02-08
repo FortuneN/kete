@@ -1,4 +1,4 @@
-# Azure Cache for Redis (Redis Streams)
+# Azure Cache for Redis (Redis Stream)
 # See GUIDE.md for setup instructions
 
 services:
@@ -12,7 +12,7 @@ services:
     environment:
       # Azure Cache for Redis configuration
       # Replace these values or use a .env file
-      kete.routes.quick-start.destination.kind: redis-streams
+      kete.routes.quick-start.destination.kind: redis-stream
       kete.routes.quick-start.destination.host: ${AZURE_REDIS_HOST:-<YOUR-CACHE-NAME>.redis.cache.windows.net}
       kete.routes.quick-start.destination.port: 6380
       kete.routes.quick-start.destination.stream: keycloak-events

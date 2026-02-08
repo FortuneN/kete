@@ -17,7 +17,7 @@ services:
       - 8080:8080
       - 9000:9000
     environment:
-      kete.routes.quick-start.destination.kind: redis-streams
+      kete.routes.quick-start.destination.kind: redis-stream
       kete.routes.quick-start.destination.host: redis
       kete.routes.quick-start.destination.port: 6379
       kete.routes.quick-start.destination.stream: keycloak-events

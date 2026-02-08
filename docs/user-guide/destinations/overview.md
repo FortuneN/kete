@@ -177,7 +177,7 @@ Header names are **all lowercase with no dashes or underscores** for maximum com
 | [AMQP 1](amqp-1.md) | ✅ | `contenttype` JMS property | All three as JMS String properties |
 | [MQTT 5](mqtt-5.md) | ✅ | Native MQTT `contentType` | `eventtype` and `eventkind` as User Properties |
 | [MQTT 3](mqtt-3.md) | ❌ | Not supported | Protocol limitation |
-| [Redis Streams](redis-streams.md) | ✅ | `contenttype` field | All three as stream entry fields |
+| [Redis Stream](redis-stream.md) | ✅ | `contenttype` field | All three as stream entry fields |
 | [Redis Pub/Sub](redis-pubsub.md) | ❌ | Not supported | Protocol limitation |
 | [HTTP](http.md) | ✅ | `contenttype` header | All three as HTTP headers |
 | [WebSocket](websocket.md) | ❌ | Not supported | Headers sent via handshake only |
@@ -248,7 +248,7 @@ For detailed information about each loader and their properties, see **[Certific
 | **[mqtt-3](mqtt-3.md)** | MQTT 3 | Mosquitto, HiveMQ, EMQX, VerneMQ, NanoMQ, RabbitMQ, AWS IoT, Azure IoT Hub |
 | **[mqtt-5](mqtt-5.md)** | MQTT 5 | HiveMQ, EMQX, VerneMQ, NanoMQ, Mosquitto 2.0+, RabbitMQ, Azure Event Grid |
 | **[redis-pubsub](redis-pubsub.md)** | Redis RESP | Redis, Valkey, Dragonfly, KeyDB, ElastiCache, Azure Cache for Redis, Upstash |
-| **[redis-streams](redis-streams.md)** | Redis RESP | Redis 5.0+, Valkey, Dragonfly, KeyDB, ElastiCache, Azure Cache for Redis, Upstash |
+| **[redis-stream](redis-stream.md)** | Redis RESP | Redis 5.0+, Valkey, Dragonfly, KeyDB, ElastiCache, Azure Cache for Redis, Upstash |
 | **[nats](nats.md)** | NATS Protocol | NATS Server, Synadia Cloud |
 | **[nats-jetstream](nats-jetstream.md)** | NATS JetStream | NATS Server, Synadia Cloud |
 | **[pulsar](pulsar.md)** | Pulsar Protocol | Apache Pulsar, StreamNative Cloud, DataStax Astra Streaming |
@@ -267,8 +267,8 @@ KETE works with major cloud messaging services through protocol compatibility:
 | **Azure Event Hubs** | `kafka` or `amqp-1` | [Kafka](kafka.md) / [AMQP 1](amqp-1.md) |
 | **Azure Service Bus** | `amqp-1` | [AMQP 1](amqp-1.md) |
 | **Azure Event Grid** | `http` or `mqtt-5` | [HTTP](http.md) / [MQTT 5](mqtt-5.md) |
-| **Azure Cache for Redis** | `redis-pubsub` or `redis-streams` | [Redis Pub/Sub](redis-pubsub.md) / [Redis Streams](redis-streams.md) |
-| **Amazon ElastiCache** | `redis-pubsub` or `redis-streams` | [Redis Pub/Sub](redis-pubsub.md) / [Redis Streams](redis-streams.md) |
+| **Azure Cache for Redis** | `redis-pubsub` or `redis-stream` | [Redis Pub/Sub](redis-pubsub.md) / [Redis Stream](redis-stream.md) |
+| **Amazon ElastiCache** | `redis-pubsub` or `redis-stream` | [Redis Pub/Sub](redis-pubsub.md) / [Redis Stream](redis-stream.md) |
 | **Amazon MSK** | `kafka` | [Kafka](kafka.md) |
 | **Amazon MQ (Artemis)** | `amqp-1` or `stomp` | [AMQP 1](amqp-1.md) / [STOMP](stomp.md) |
 | **Amazon MQ (ActiveMQ)** | `amqp-1` or `stomp` | [AMQP 1](amqp-1.md) / [STOMP](stomp.md) |
@@ -276,9 +276,9 @@ KETE works with major cloud messaging services through protocol compatibility:
 | **Confluent Cloud** | `kafka` | [Kafka](kafka.md) |
 | **AWS IoT Core** | `mqtt-3` | [MQTT 3](mqtt-3.md) |
 | **Azure IoT Hub** | `mqtt-3` | [MQTT 3](mqtt-3.md) |
-| **Google Cloud Memorystore** | `redis-pubsub` or `redis-streams` | [Redis Pub/Sub](redis-pubsub.md) / [Redis Streams](redis-streams.md) |
+| **Google Cloud Memorystore** | `redis-pubsub` or `redis-stream` | [Redis Pub/Sub](redis-pubsub.md) / [Redis Stream](redis-stream.md) |
 | **Google Cloud Pub/Sub** | `gcp-pubsub` | [GCP Pub/Sub](gcp-pubsub.md) |
-| **Upstash** | `redis-pubsub` or `redis-streams` | [Redis Pub/Sub](redis-pubsub.md) / [Redis Streams](redis-streams.md) |
+| **Upstash** | `redis-pubsub` or `redis-stream` | [Redis Pub/Sub](redis-pubsub.md) / [Redis Stream](redis-stream.md) |
 | **Aiven for Kafka** | `kafka` | [Kafka](kafka.md) |
 | **StreamNative Cloud** | `pulsar` | [Pulsar](pulsar.md) |
 | **DataStax Astra Streaming** | `pulsar` | [Pulsar](pulsar.md) |

@@ -1,10 +1,9 @@
 services:
 
-  dragonfly:
-    image: ghcr.io/fortunen/kete/quick-start-dragonfly
+  keydb:
+    image: ghcr.io/fortunen/kete/quick-start-keydb
     ports:
       - 6379:6379
-    command: ["--logtostderr"]
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
@@ -18,11 +17,11 @@ services:
       - 8080:8080
       - 9000:9000
     environment:
-      kete.routes.quick-start.destination.kind: redis-streams
-      kete.routes.quick-start.destination.host: dragonfly
+      kete.routes.quick-start.destination.kind: redis-stream
+      kete.routes.quick-start.destination.host: keydb
       kete.routes.quick-start.destination.port: 6379
       kete.routes.quick-start.destination.stream: keycloak-events
       kete.routes.quick-start.destination.max-len: 10000
     depends_on:
-      dragonfly:
+      keydb:
         condition: service_healthy

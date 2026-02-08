@@ -1,6 +1,6 @@
-# Upstash Redis Streams Quick Start
+# Upstash Redis Stream Quick Start
 
-This quick start demonstrates forwarding Keycloak events to **Upstash** serverless Redis using Redis Streams for persistent, ordered message storage.
+This quick start demonstrates forwarding Keycloak events to **Upstash** serverless Redis using Redis Stream for persistent, ordered message storage.
 
 ## Prerequisites
 
@@ -95,7 +95,7 @@ XINFO STREAM keycloak-events
 
 ### Using Consumer Groups
 
-Redis Streams support consumer groups for load balancing:
+Redis Stream support consumer groups for load balancing:
 
 ```bash
 # Create a consumer group
@@ -108,7 +108,7 @@ XREADGROUP GROUP mygroup consumer1 COUNT 10 STREAMS keycloak-events >
 XACK keycloak-events mygroup <message-id>
 ```
 
-## Redis Streams Features
+## Redis Stream Features
 
 | Feature | Description |
 |---------|-------------|

@@ -25,7 +25,7 @@ Stream Keycloak events to Redis using Pub/Sub messaging.
 | **Microsoft Garnet** | High-performance Redis-compatible cache |
 
 !!! note "Pub/Sub Limitations"
-    Redis Pub/Sub is fire-and-forget. Messages are not persisted and will be lost if no subscribers are connected. For persistent messaging, use [Redis Streams](redis-streams.md) instead.
+    Redis Pub/Sub is fire-and-forget. Messages are not persisted and will be lost if no subscribers are connected. For persistent messaging, use [Redis Stream](redis-stream.md) instead.
 
 
 
@@ -84,7 +84,7 @@ Stream Keycloak events to Redis using Pub/Sub messaging.
 - Dynamic channel names (templating)
 
 !!! warning "No Message Headers"
-    Redis Pub/Sub does not support message headers (this is a protocol limitation). For header support, use [Redis Streams](redis-streams.md).
+    Redis Pub/Sub does not support message headers (this is a protocol limitation). For header support, use [Redis Stream](redis-stream.md).
 
 
 

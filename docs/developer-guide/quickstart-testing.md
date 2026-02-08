@@ -80,7 +80,7 @@ docker compose logs <destination-service>
 docker exec <redis-container> redis-cli SUBSCRIBE keycloak-events
 ```
 
-**Redis Streams:**
+**Redis Stream:**
 ```bash
 docker exec <redis-container> redis-cli XREAD STREAMS keycloak-events 0
 ```
@@ -173,11 +173,11 @@ Total quickstarts: 42
 - redis-pubsub-keydb
 - redis-pubsub-redis
 - redis-pubsub-upstash
-- redis-streams-azure-cache-for-redis
-- redis-streams-dragonfly
-- redis-streams-keydb
-- redis-streams-redis
-- redis-streams-upstash
+- redis-stream-azure-cache-for-redis
+- redis-stream-dragonfly
+- redis-stream-keydb
+- redis-stream-redis
+- redis-stream-upstash
 
 ### STOMP (3)
 - stomp-activemq

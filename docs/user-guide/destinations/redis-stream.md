@@ -1,10 +1,10 @@
-# Redis Streams Destination
+# Redis Stream Destination
 
-Stream Keycloak events to Redis Streams for persistent, ordered message storage.
+Stream Keycloak events to Redis Stream for persistent, ordered message storage.
 
 | Property | Value |
 |----------|-------|
-| **`destination.kind`** | `redis-streams` |
+| **`destination.kind`** | `redis-stream` |
 | **Protocol** | Redis RESP2/RESP3 |
 
 
@@ -31,7 +31,7 @@ Stream Keycloak events to Redis Streams for persistent, ordered message storage.
 === "Redis"
 
     ```bash
-    kete.routes.redis.destination.kind=redis-streams
+    kete.routes.redis.destination.kind=redis-stream
     kete.routes.redis.destination.host=redis.example.com
     kete.routes.redis.destination.port=6379
     kete.routes.redis.destination.stream=keycloak-events
@@ -40,7 +40,7 @@ Stream Keycloak events to Redis Streams for persistent, ordered message storage.
 === "Redis with Trimming"
 
     ```bash
-    kete.routes.redis.destination.kind=redis-streams
+    kete.routes.redis.destination.kind=redis-stream
     kete.routes.redis.destination.host=redis.example.com
     kete.routes.redis.destination.port=6379
     kete.routes.redis.destination.stream=keycloak-events
@@ -51,7 +51,7 @@ Stream Keycloak events to Redis Streams for persistent, ordered message storage.
 === "Amazon ElastiCache"
 
     ```bash
-    kete.routes.elasticache.destination.kind=redis-streams
+    kete.routes.elasticache.destination.kind=redis-stream
     kete.routes.elasticache.destination.host=my-cluster.abc123.cache.amazonaws.com
     kete.routes.elasticache.destination.port=6379
     kete.routes.elasticache.destination.stream=keycloak-events
@@ -61,7 +61,7 @@ Stream Keycloak events to Redis Streams for persistent, ordered message storage.
 === "Azure Cache for Redis"
 
     ```bash
-    kete.routes.azure.destination.kind=redis-streams
+    kete.routes.azure.destination.kind=redis-stream
     kete.routes.azure.destination.host=myredis.redis.cache.windows.net
     kete.routes.azure.destination.port=6380
     kete.routes.azure.destination.stream=keycloak-events
@@ -82,15 +82,15 @@ Stream Keycloak events to Redis Streams for persistent, ordered message storage.
 - Dynamic stream names (templating)
 - Consumer group support (via Redis native features)
 
-!!! tip "When to use Redis Streams vs Pub/Sub"
-    Use **Redis Streams** when you need message persistence, consumer groups, or message headers.
+!!! tip "When to use Redis Stream vs Pub/Sub"
+    Use **Redis Stream** when you need message persistence, consumer groups, or message headers.
     Use **Redis Pub/Sub** for simple, low-latency fire-and-forget messaging.
 
 
 
-## Redis Streams Capabilities
+## Redis Stream Capabilities
 
-Redis Streams provides features not available in Pub/Sub:
+Redis Stream provides features not available in Pub/Sub:
 
 | Feature | Description |
 |---------|-------------|
@@ -192,20 +192,20 @@ Messages are stored as stream entries with the following fields:
 
 ## Configuration Examples
 
-### Basic Redis Streams
+### Basic Redis Stream
 
 ```bash
-kete.routes.redis.destination.kind=redis-streams
+kete.routes.redis.destination.kind=redis-stream
 kete.routes.redis.realm-matchers.realm=list:master
 kete.routes.redis.destination.host=redis.example.com
 kete.routes.redis.destination.port=6379
 kete.routes.redis.destination.stream=keycloak-events
 ```
 
-### Redis Streams with TLS
+### Redis Stream with TLS
 
 ```bash
-kete.routes.secure-redis.destination.kind=redis-streams
+kete.routes.secure-redis.destination.kind=redis-stream
 kete.routes.secure-redis.destination.host=redis.example.com
 kete.routes.secure-redis.destination.port=6380
 kete.routes.secure-redis.destination.stream=keycloak-events
@@ -213,10 +213,10 @@ kete.routes.secure-redis.destination.tls.enabled=true
 kete.routes.secure-redis.destination.password=secret
 ```
 
-### Redis Streams with mTLS
+### Redis Stream with mTLS
 
 ```bash
-kete.routes.mtls-redis.destination.kind=redis-streams
+kete.routes.mtls-redis.destination.kind=redis-stream
 kete.routes.mtls-redis.destination.host=secure-redis.example.com
 kete.routes.mtls-redis.destination.port=6380
 kete.routes.mtls-redis.destination.stream=keycloak-events
@@ -229,10 +229,10 @@ kete.routes.mtls-redis.destination.tls.trust-store.loader.path=/certs/truststore
 kete.routes.mtls-redis.destination.tls.trust-store.password=truststorepass
 ```
 
-### Redis Streams with Trimming
+### Redis Stream with Trimming
 
 ```bash
-kete.routes.trimmed-redis.destination.kind=redis-streams
+kete.routes.trimmed-redis.destination.kind=redis-stream
 kete.routes.trimmed-redis.destination.host=redis.example.com
 kete.routes.trimmed-redis.destination.port=6379
 kete.routes.trimmed-redis.destination.stream=keycloak-events

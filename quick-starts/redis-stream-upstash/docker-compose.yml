@@ -12,7 +12,7 @@ services:
     environment:
       # Upstash Redis configuration
       # Replace these values or use a .env file
-      kete.routes.quick-start.destination.kind: redis-streams
+      kete.routes.quick-start.destination.kind: redis-stream
       kete.routes.quick-start.destination.host: ${UPSTASH_REDIS_HOST:-<YOUR-ENDPOINT>.upstash.io}
       kete.routes.quick-start.destination.port: 6379
       kete.routes.quick-start.destination.stream: keycloak-events
