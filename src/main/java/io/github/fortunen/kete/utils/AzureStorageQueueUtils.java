@@ -1,4 +1,4 @@
-package io.github.fortunen.kete.destinations.azurestoragequeue;
+package io.github.fortunen.kete.utils;
 
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
@@ -7,8 +7,6 @@ import java.util.Map;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
-import io.github.fortunen.kete.utils.Base64Utils;
-import io.github.fortunen.kete.utils.ValidationUtils;
 import lombok.SneakyThrows;
 
 public final class AzureStorageQueueUtils {

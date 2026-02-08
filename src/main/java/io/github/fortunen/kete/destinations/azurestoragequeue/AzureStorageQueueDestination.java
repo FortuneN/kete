@@ -18,6 +18,7 @@ import javax.crypto.spec.SecretKeySpec;
 import io.github.fortunen.kete.Component;
 import io.github.fortunen.kete.Destination;
 import io.github.fortunen.kete.EventMessage;
+import io.github.fortunen.kete.utils.AzureStorageQueueUtils;
 import io.github.fortunen.kete.utils.Base64Utils;
 import io.github.fortunen.kete.utils.TemplateUtils;
 import io.github.fortunen.kete.utils.ValidationUtils;
