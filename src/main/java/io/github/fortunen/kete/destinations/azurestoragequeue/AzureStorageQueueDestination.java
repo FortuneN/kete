@@ -36,6 +36,10 @@ public class AzureStorageQueueDestination extends Destination<AzureStorageQueueD
 	private static final String HMAC_SHA256 = "HmacSHA256";
 	private static final String SIGNATURE_VERB_PART = "POST\n\n\n";
 	private static final String APPLICATION_XML = "application/xml";
+	private static final String HEADER_CONTENT_TYPE = "Content-Type";
+	private static final String HEADER_X_MS_DATE = "x-ms-date";
+	private static final String HEADER_X_MS_VERSION = "x-ms-version";
+	private static final String HEADER_AUTHORIZATION = "Authorization";
 	private static final DateTimeFormatter RFC_1123_FORMATTER = DateTimeFormatter.ofPattern("EEE, dd MMM yyyy HH:mm:ss 'GMT'", Locale.US);
 	private static final String SIGNATURE_CONTENT_TYPE_PART = "\n\n" + APPLICATION_XML + "\n\n\n\n\n\n";
 
@@ -132,10 +136,10 @@ public class AzureStorageQueueDestination extends Destination<AzureStorageQueueD
 		var request = HttpRequest.newBuilder()
 			.uri(ctx.requestUri())
 			.timeout(timeout)
-			.header("Content-Type", APPLICATION_XML)
-			.header("x-ms-date", date)
-			.header("x-ms-version", apiVersion)
-			.header("Authorization", authorizationPrefix + signature)
+			.header(HEADER_CONTENT_TYPE, APPLICATION_XML)
+			.header(HEADER_X_MS_DATE, date)
+			.header(HEADER_X_MS_VERSION, apiVersion)
+			.header(HEADER_AUTHORIZATION, authorizationPrefix + signature)
 			.POST(HttpRequest.BodyPublishers.ofByteArray(bodyBytes))
 			.build();
 
