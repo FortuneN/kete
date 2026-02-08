@@ -5,6 +5,7 @@ import java.time.Duration;
 
 import io.github.fortunen.kete.DestinationConfig;
 import io.github.fortunen.kete.utils.AzureStorageQueueUtils;
+import io.github.fortunen.kete.utils.AzureStorageQueueUtils.ConnectionStringInfo;
 import io.github.fortunen.kete.utils.ValidationUtils;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -22,16 +23,13 @@ public class AzureStorageQueueDestinationConfig extends DestinationConfig {
 	public static final String TIMEOUT_SECONDS = "timeout-seconds";
 	public static final String CONNECTION_STRING = "connection-string";
 
-	private String url;
 	private String queue;
 	private int messageTtl;
-	private String sasToken;
 	private Duration timeout;
-	private String accountKey;
-	private String accountName;
-	private boolean useSasAuth;
 	private int timeoutSeconds;
+	private String connectionString;
 	private HttpClient.Builder clientBuilder;
+	private ConnectionStringInfo connectionStringInfo;
 
 	@Override
 	protected void doInitialize() {
@@ -40,21 +38,8 @@ public class AzureStorageQueueDestinationConfig extends DestinationConfig {
 
 		// connection-string (required)
 
-		var rawConnectionString = ValidationUtils.requireNonBlank(configuration.getString(CONNECTION_STRING, "").trim(), CONNECTION_STRING + " is required");
-
-		var info = AzureStorageQueueUtils.parseConnectionString(rawConnectionString);
-
-		accountName = info.accountName();
-		accountKey = info.accountKey();
-		sasToken = info.sasToken();
-		url = info.url();
-		useSasAuth = info.useSasAuth();
-
-		// strip trailing slash
-
-		if (url.endsWith("/")) {
-			url = url.substring(0, url.length() - 1);
-		}
+		connectionString = ValidationUtils.requireNonBlank(configuration.getString(CONNECTION_STRING, "").trim(), CONNECTION_STRING + " is required");
+		connectionStringInfo = AzureStorageQueueUtils.parseConnectionString(connectionString);
 
 		// queue
 

@@ -83,6 +83,10 @@ public final class AzureStorageQueueUtils {
 			url = csProtocol + "://" + csAccountName + ".queue." + csSuffix;
 		}
 
+		if (url.endsWith("/")) {
+			url = url.substring(0, url.length() - 1);
+		}
+
 		return new ConnectionStringInfo(accountName, accountKey, sasToken, url, useSasAuth);
 	}
 

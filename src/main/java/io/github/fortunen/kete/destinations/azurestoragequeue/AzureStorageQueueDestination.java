@@ -41,9 +41,9 @@ public class AzureStorageQueueDestination extends Destination<AzureStorageQueueD
 	private static final DateTimeFormatter RFC_1123_FORMATTER = DateTimeFormatter.ofPattern("EEE, dd MMM yyyy HH:mm:ss 'GMT'", Locale.US);
 
 	private Duration timeout;
+	private String apiVersion;
 	private boolean useSasAuth;
 	private String querySuffix;
-	private String apiVersion;
 	private HttpClient httpClient;
 	private String messagesUrlPrefix;
 	private String authorizationPrefix;
@@ -59,38 +59,51 @@ public class AzureStorageQueueDestination extends Destination<AzureStorageQueueD
 
 		ValidationUtils.requireNonNull(config, "config is required");
 
-		httpClient = config.getClientBuilder().build();
+		var info = config.getConnectionStringInfo();
+		var url = info.url();
 
+		if (url.endsWith("/")) {
+			url = url.substring(0, url.length() - 1);
+		}
+
+		messagesUrlPrefix = url + "/";
 		timeout = config.getTimeout();
-
-		useSasAuth = config.isUseSasAuth();
-
-		messagesUrlPrefix = config.getUrl() + "/";
+		useSasAuth = info.useSasAuth();
+		httpClient = config.getClientBuilder().build();
 
 		// query suffix (combines message-ttl and sas-token)
 
 		var query = new StringBuilder();
-		if (config.getMessageTtl() != 0) query.append("messagettl=").append(config.getMessageTtl());
-		if (useSasAuth) {
-			if (!query.isEmpty()) query.append('&');
-			query.append(config.getSasToken());
+
+		if (config.getMessageTtl() != 0) {
+			query.append("messagettl=").append(config.getMessageTtl());
 		}
+
+		if (useSasAuth) {
+
+			if (!query.isEmpty()) {
+				query.append('&');
+			}
+
+			query.append(info.sasToken());
+		}
+
 		querySuffix = query.isEmpty() ? "" : "?" + query;
 
 		// shared-key auth precomputation
 
 		if (!useSasAuth) {
 			apiVersion = AzureStorageQueueDestinationConfig.API_VERSION;
-			authorizationPrefix = "SharedKey " + config.getAccountName() + ":";
-			canonicalResourcePrefix = "/" + config.getAccountName();
+			authorizationPrefix = "SharedKey " + info.accountName() + ":";
+			canonicalResourcePrefix = "/" + info.accountName();
 			messageTtlCanonicalSuffix = config.getMessageTtl() != 0 ? "\nmessagettl:" + config.getMessageTtl() : "";
-			secretKeySpec = AzureStorageQueueUtils.buildSecretKeySpec(config.getAccountKey());
+			secretKeySpec = AzureStorageQueueUtils.buildSecretKeySpec(info.accountKey());
 		}
 
 		// verify connection
 
 		var testRequest = HttpRequest.newBuilder()
-			.uri(URI.create(config.getUrl()))
+			.uri(URI.create(url))
 			.timeout(timeout)
 			.GET()
 			.build();
@@ -123,14 +136,15 @@ public class AzureStorageQueueDestination extends Destination<AzureStorageQueueD
 		// request
 
 		var requestBuilder = HttpRequest.newBuilder()
-			.uri(ctx.requestUri())
 			.timeout(timeout)
+			.uri(ctx.requestUri())
 			.header(HEADER_CONTENT_TYPE, APPLICATION_XML)
 			.POST(HttpRequest.BodyPublishers.ofByteArray(bodyBytes));
 
 		// shared-key authorization
 
 		if (!useSasAuth) {
+
 			var date = ZonedDateTime.now(ZoneOffset.UTC).format(RFC_1123_FORMATTER);
 			var stringToSign = AzureStorageQueueUtils.buildStringToSign(bodyBytes.length, date, apiVersion, ctx.canonicalResource());
 			var signature = AzureStorageQueueUtils.computeSignature(secretKeySpec, stringToSign);
@@ -140,6 +154,8 @@ public class AzureStorageQueueDestination extends Destination<AzureStorageQueueD
 				.header(HEADER_X_MS_VERSION, apiVersion)
 				.header(HEADER_AUTHORIZATION, authorizationPrefix + signature);
 		}
+
+		// request
 
 		var response = httpClient.send(requestBuilder.build(), HttpResponse.BodyHandlers.ofString());
 

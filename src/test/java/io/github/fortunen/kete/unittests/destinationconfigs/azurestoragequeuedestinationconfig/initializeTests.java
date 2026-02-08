@@ -359,10 +359,11 @@ public class initializeTests {
 
 		// assert
 
-		assertThat(config.isUseSasAuth()).isFalse();
-		assertThat(config.getAccountName()).isEqualTo("myaccount");
-		assertThat(config.getAccountKey()).isEqualTo(VALID_ACCOUNT_KEY);
-		assertThat(config.getUrl()).isEqualTo("https://myaccount.queue.core.windows.net");
+		var info = config.getConnectionStringInfo();
+		assertThat(info.useSasAuth()).isFalse();
+		assertThat(info.accountName()).isEqualTo("myaccount");
+		assertThat(info.accountKey()).isEqualTo(VALID_ACCOUNT_KEY);
+		assertThat(info.url()).isEqualTo("https://myaccount.queue.core.windows.net");
 	}
 
 	@Test
@@ -383,7 +384,7 @@ public class initializeTests {
 
 		// assert
 
-		assertThat(config.getUrl()).isEqualTo("https://myaccount.queue.core.windows.net");
+		assertThat(config.getConnectionStringInfo().url()).isEqualTo("https://myaccount.queue.core.windows.net");
 	}
 
 	@Test
@@ -404,7 +405,7 @@ public class initializeTests {
 
 		// assert
 
-		assertThat(config.getUrl()).isEqualTo("https://myaccount.queue.core.windows.net");
+		assertThat(config.getConnectionStringInfo().url()).isEqualTo("https://myaccount.queue.core.windows.net");
 	}
 
 	// =========================================================================
@@ -429,9 +430,10 @@ public class initializeTests {
 
 		// assert
 
-		assertThat(config.isUseSasAuth()).isTrue();
-		assertThat(config.getSasToken()).isEqualTo("sv=2024-08-04&ss=q&srt=o&sp=a&se=2026-01-01T00:00:00Z&sig=test");
-		assertThat(config.getUrl()).isEqualTo("https://myaccount.queue.core.windows.net");
+		var info = config.getConnectionStringInfo();
+		assertThat(info.useSasAuth()).isTrue();
+		assertThat(info.sasToken()).isEqualTo("sv=2024-08-04&ss=q&srt=o&sp=a&se=2026-01-01T00:00:00Z&sig=test");
+		assertThat(info.url()).isEqualTo("https://myaccount.queue.core.windows.net");
 	}
 
 	@Test
@@ -452,8 +454,9 @@ public class initializeTests {
 
 		// assert
 
-		assertThat(config.isUseSasAuth()).isTrue();
-		assertThat(config.getUrl()).isEqualTo("https://myaccount.queue.core.windows.net");
+		var info = config.getConnectionStringInfo();
+		assertThat(info.useSasAuth()).isTrue();
+		assertThat(info.url()).isEqualTo("https://myaccount.queue.core.windows.net");
 	}
 
 	// =========================================================================
@@ -587,9 +590,10 @@ public class initializeTests {
 
 		// assert
 
-		assertThat(config.isUseSasAuth()).isFalse();
-		assertThat(config.getAccountName()).isEqualTo("devstoreaccount1");
-		assertThat(config.getUrl()).isEqualTo("http://127.0.0.1:10001/devstoreaccount1");
+		var info = config.getConnectionStringInfo();
+		assertThat(info.useSasAuth()).isFalse();
+		assertThat(info.accountName()).isEqualTo("devstoreaccount1");
+		assertThat(info.url()).isEqualTo("http://127.0.0.1:10001/devstoreaccount1");
 	}
 
 	// =========================================================================
@@ -614,7 +618,7 @@ public class initializeTests {
 
 		// assert
 
-		assertThat(config.getUrl()).isEqualTo("https://myaccount.queue.core.windows.net");
+		assertThat(config.getConnectionStringInfo().url()).isEqualTo("https://myaccount.queue.core.windows.net");
 	}
 
 	@Test
@@ -635,6 +639,6 @@ public class initializeTests {
 
 		// assert
 
-		assertThat(config.getUrl()).isEqualTo("https://myaccount.queue.core.windows.net");
+		assertThat(config.getConnectionStringInfo().url()).isEqualTo("https://myaccount.queue.core.windows.net");
 	}
 }
