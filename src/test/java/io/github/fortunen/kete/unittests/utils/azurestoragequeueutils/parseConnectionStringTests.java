@@ -1,4 +1,4 @@
-package io.github.fortunen.kete.unittests.utils.azurestoragequeueutilsutils;
+package io.github.fortunen.kete.unittests.utils.azurestoragequeueutils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
