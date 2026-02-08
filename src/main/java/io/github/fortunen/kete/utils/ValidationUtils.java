@@ -3,6 +3,7 @@ package io.github.fortunen.kete.utils;
 import java.lang.reflect.Method;
 import java.io.Closeable;
 import java.math.BigDecimal;
+import java.net.URI;
 import java.math.BigInteger;
 import java.time.Duration;
 import java.time.Instant;
@@ -395,6 +396,20 @@ public final class ValidationUtils {
 		}
 
 		return clazz.cast(value);
+	}
+
+	public static String requireValidUrl(String value, String message) {
+
+		requireNonBlank(value, message);
+
+		try {
+			var uri = URI.create(value);
+			requireTrue(uri.isAbsolute(), message);
+		} catch (IllegalArgumentException e) {
+			throw new IllegalStateException(message, e);
+		}
+
+		return value;
 	}
 
 	@SneakyThrows

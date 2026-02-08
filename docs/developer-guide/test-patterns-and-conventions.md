@@ -1368,6 +1368,74 @@ public class sendMessageTests {
 
 **NOTE:** For HTTP destinations, `@BeforeEach` and `@AfterEach` ARE allowed for MockWebServer lifecycle management.
 
+### 21.4 Integration & E2E Test Policy
+
+**MANDATORY RULE:** Tests requiring containers or external services are **expensive**. Strict limits apply per destination.
+
+#### Integration Tests — Exactly 3 Per Destination
+
+Each destination MUST have exactly **3 integration send tests** in a single `sendTests.java` file:
+
+| Test | Purpose |
+|------|---------|
+| `shouldSend_NonTls` | Plain text connection (no TLS) |
+| `shouldSend_Tls` | TLS — server auth only, client trusts server certificate |
+| `shouldSend_mTls` | Mutual TLS — both client and server authenticate each other |
+
+**File structure per destination:**
+
+```
+integrationtests/<destination>/
+    TestBase.java     ← MockWebServer lifecycle, TLS helpers, configureDestination()
+    sendTests.java    ← Exactly 3 tests: shouldSend_NonTls, shouldSend_Tls, shouldSend_mTls
+```
+
+**No other integration test files.** No `initializeTests`, `closeTests`, or extra send tests.
+
+#### TLS Test Pattern
+
+```java
+@Test
+public void shouldSend_Tls() throws Exception {
+
+    // arrange
+
+    var tls = TlsMaterial.builder()
+        .withEnabled(true)
+        .withWriteFiles(true)
+        .withTrustStorePassword("changeit")
+        .withKeyStorePassword("changeit")
+        .withKeyPassword("changeit")
+        .withServerHostNames(new String[] { "localhost", "127.0.0.1" })
+        .build();
+
+    startMockServerWithTls(tls);
+    // ... enqueue responses, configure destination with tls.trust-store properties ...
+
+    // act
+
+    destination.send(message);
+
+    // assert — verify request reached server
+}
+```
+
+#### mTLS Test Pattern
+
+Same as TLS, but additionally configure `tls.key-store.*` properties and call `startMockServerWithMtls(tls)` (which calls `mockServer.requireClientAuth()`).
+
+#### Nginx Proxy Fallback
+
+If the destination broker/server does **NOT** natively support TLS/mTLS, use an **nginx reverse proxy** container to terminate TLS and still run all 3 tests. This ensures every destination has consistent TLS coverage regardless of native support.
+
+#### E2E Tests — Exactly 1 Per Destination
+
+Each destination has exactly **1 E2E test** that verifies the full pipeline: Keycloak → KETE plugin → destination broker → message received.
+
+#### Reference Implementation
+
+See `integrationtests/httpdestination/` for the canonical implementation of this policy.
+
 
 
 ## 22. Edge Case Testing Requirements
