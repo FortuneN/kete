@@ -80,7 +80,7 @@ public class AzureStorageQueueDestinationConfig extends DestinationConfig {
 			ValidationUtils.requireFalse(useSasAuth && useSharedKeyAuth, ACCOUNT_KEY + " and " + SAS_TOKEN + " are mutually exclusive");
 
 			if (useSasAuth) {
-				sasToken = AzureStorageQueueUtils.normalizeSasToken(rawSasToken);
+				sasToken = rawSasToken.startsWith("?") ? rawSasToken.substring(1) : rawSasToken;
 			} else {
 				accountKey = rawAccountKey;
 			}

@@ -32,9 +32,9 @@ import lombok.SneakyThrows;
 @Component(name = "azure-storage-queue")
 public class AzureStorageQueueDestination extends Destination<AzureStorageQueueDestinationConfig> {
 
+	private static final String HEADER_X_MS_DATE = "x-ms-date";
 	private static final String APPLICATION_XML = "application/xml";
 	private static final String HEADER_CONTENT_TYPE = "Content-Type";
-	private static final String HEADER_X_MS_DATE = "x-ms-date";
 	private static final String HEADER_X_MS_VERSION = "x-ms-version";
 	private static final String HEADER_AUTHORIZATION = "Authorization";
 	private static final DateTimeFormatter RFC_1123_FORMATTER = DateTimeFormatter.ofPattern("EEE, dd MMM yyyy HH:mm:ss 'GMT'", Locale.US);
@@ -117,8 +117,7 @@ public class AzureStorageQueueDestination extends Destination<AzureStorageQueueD
 		// body — wrap event in Azure Queue XML envelope with base64-encoded content
 
 		var base64Data = Base64Utils.encode(message.eventBody());
-		var xmlBody = AzureStorageQueueUtils.buildMessageXml(base64Data);
-		var bodyBytes = xmlBody.getBytes(StandardCharsets.UTF_8);
+		var bodyBytes = ("<QueueMessage><MessageText>" + base64Data + "</MessageText></QueueMessage>").getBytes(StandardCharsets.UTF_8);
 
 		// request
 

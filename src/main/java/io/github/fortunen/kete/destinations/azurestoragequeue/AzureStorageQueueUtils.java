@@ -33,7 +33,14 @@ public final class AzureStorageQueueUtils {
 
 		if ("true".equalsIgnoreCase(parts.get("UseDevelopmentStorage"))) {
 			var proxyUri = parts.getOrDefault("DevelopmentStorageProxyUri", "").trim();
-			return new ConnectionStringInfo(EMULATOR_ACCOUNT_NAME, EMULATOR_ACCOUNT_KEY, null, buildEmulatorUrl(proxyUri), false);
+			String emulatorUrl;
+			if (ValidationUtils.isNotBlank(proxyUri)) {
+				if (proxyUri.endsWith("/")) proxyUri = proxyUri.substring(0, proxyUri.length() - 1);
+				emulatorUrl = proxyUri + ":10001/" + EMULATOR_ACCOUNT_NAME;
+			} else {
+				emulatorUrl = DEFAULT_EMULATOR_QUEUE_ENDPOINT;
+			}
+			return new ConnectionStringInfo(EMULATOR_ACCOUNT_NAME, EMULATOR_ACCOUNT_KEY, null, emulatorUrl, false);
 		}
 
 		// extract fields
@@ -59,7 +66,7 @@ public final class AzureStorageQueueUtils {
 		String accountKey = null;
 
 		if (hasSas) {
-			sasToken = normalizeSasToken(csSas);
+			sasToken = csSas.startsWith("?") ? csSas.substring(1) : csSas;
 		} else {
 			accountKey = csAccountKey;
 		}
@@ -88,30 +95,10 @@ public final class AzureStorageQueueUtils {
 
 			ValidationUtils.requireNonBlank(accountName, "connection-string must contain AccountName or QueueEndpoint");
 
-			url = buildQueueUrl(csProtocol, csAccountName, csSuffix);
+			url = csProtocol + "://" + csAccountName + ".queue." + csSuffix;
 		}
 
 		return new ConnectionStringInfo(accountName, accountKey, sasToken, url, useSasAuth);
-	}
-
-	public static String normalizeSasToken(String sasToken) {
-		return sasToken.startsWith("?") ? sasToken.substring(1) : sasToken;
-	}
-
-	public static String buildQueueUrl(String protocol, String accountName, String suffix) {
-		return protocol + "://" + accountName + ".queue." + suffix;
-	}
-
-	public static String buildEmulatorUrl(String proxyUri) {
-		if (ValidationUtils.isNotBlank(proxyUri)) {
-			if (proxyUri.endsWith("/")) proxyUri = proxyUri.substring(0, proxyUri.length() - 1);
-			return proxyUri + ":10001/" + EMULATOR_ACCOUNT_NAME;
-		}
-		return DEFAULT_EMULATOR_QUEUE_ENDPOINT;
-	}
-
-	public static String buildMessageXml(String base64Data) {
-		return "<QueueMessage><MessageText>" + base64Data + "</MessageText></QueueMessage>";
 	}
 
 	public static String buildStringToSign(int contentLength, String date, String apiVersion, String canonicalResource) {
