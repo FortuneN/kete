@@ -78,7 +78,7 @@ public class TestBase {
 
 	protected void configureDestination(String queue, Map<String, Object> extras) {
 		var map = new HashMap<String, Object>();
-		map.put("kind", "azure-storage-queues");
+		map.put("kind", "azure-storage-queue");
 		map.put("account-name", TEST_ACCOUNT_NAME);
 		map.put("account-key", TEST_ACCOUNT_KEY);
 		map.put("queue", queue);
@@ -92,7 +92,7 @@ public class TestBase {
 
 	protected void configureDestinationWithTls(String queue, TlsMaterial tls) {
 		var map = new HashMap<String, Object>();
-		map.put("kind", "azure-storage-queues");
+		map.put("kind", "azure-storage-queue");
 		map.put("account-name", TEST_ACCOUNT_NAME);
 		map.put("account-key", TEST_ACCOUNT_KEY);
 		map.put("queue", queue);
@@ -109,7 +109,7 @@ public class TestBase {
 
 	protected void configureDestinationWithMtls(String queue, TlsMaterial tls) {
 		var map = new HashMap<String, Object>();
-		map.put("kind", "azure-storage-queues");
+		map.put("kind", "azure-storage-queue");
 		map.put("account-name", TEST_ACCOUNT_NAME);
 		map.put("account-key", TEST_ACCOUNT_KEY);
 		map.put("queue", queue);

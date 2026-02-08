@@ -29,7 +29,7 @@ import lombok.SneakyThrows;
 @Data
 @NoArgsConstructor(force = true)
 @EqualsAndHashCode(callSuper = true)
-@Component(name = "azure-storage-queues")
+@Component(name = "azure-storage-queue")
 public class AzureStorageQueueDestination extends Destination<AzureStorageQueueDestinationConfig> {
 
 	private static final String HMAC_SHA256 = "HmacSHA256";

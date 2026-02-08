@@ -31,7 +31,7 @@ services:
       - 8080:8080
       - 9000:9000
     environment:
-      kete.routes.quick-start.destination.kind: azure-storage-queues
+      kete.routes.quick-start.destination.kind: azure-storage-queue
       kete.routes.quick-start.destination.account-name: devstoreaccount1
       kete.routes.quick-start.destination.account-key: Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==
       kete.routes.quick-start.destination.queue: keycloak-events

@@ -2,7 +2,7 @@
 # Uses the queue-setup container (has Python + azure-storage-queue) to peek messages
 # Returns $true if LOGIN event found, $false otherwise
 
-$result = docker exec azure-storage-queues-emulator-queue-setup-1 python -c @"
+$result = docker exec azure-storage-queue-emulator-queue-setup-1 python -c @"
 from azure.storage.queue import QueueServiceClient
 import base64
 conn = 'DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;QueueEndpoint=http://azurite:10001/devstoreaccount1'

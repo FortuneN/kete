@@ -26,7 +26,7 @@ public class initializeTests {
 		// arrange
 
 		var config = new AzureStorageQueueDestinationConfig();
-		config.setConfiguration(new MapConfiguration(Map.of("kind", "azure-storage-queues", "account-key", VALID_ACCOUNT_KEY, "queue", "test-queue")));
+		config.setConfiguration(new MapConfiguration(Map.of("kind", "azure-storage-queue", "account-key", VALID_ACCOUNT_KEY, "queue", "test-queue")));
 
 		// act
 
@@ -43,7 +43,7 @@ public class initializeTests {
 		// arrange
 
 		var config = new AzureStorageQueueDestinationConfig();
-		config.setConfiguration(new MapConfiguration(Map.of("kind", "azure-storage-queues", "account-name", "", "account-key", VALID_ACCOUNT_KEY, "queue", "test-queue")));
+		config.setConfiguration(new MapConfiguration(Map.of("kind", "azure-storage-queue", "account-name", "", "account-key", VALID_ACCOUNT_KEY, "queue", "test-queue")));
 
 		// act
 
@@ -60,7 +60,7 @@ public class initializeTests {
 		// arrange
 
 		var map = new HashMap<String, Object>();
-		map.put("kind", "azure-storage-queues");
+		map.put("kind", "azure-storage-queue");
 		map.put("account-name", "   ");
 		map.put("account-key", VALID_ACCOUNT_KEY);
 		map.put("queue", "test-queue");
@@ -86,7 +86,7 @@ public class initializeTests {
 		// arrange
 
 		var config = new AzureStorageQueueDestinationConfig();
-		config.setConfiguration(new MapConfiguration(Map.of("kind", "azure-storage-queues", "account-name", "myaccount", "queue", "test-queue")));
+		config.setConfiguration(new MapConfiguration(Map.of("kind", "azure-storage-queue", "account-name", "myaccount", "queue", "test-queue")));
 
 		// act
 
@@ -103,7 +103,7 @@ public class initializeTests {
 		// arrange
 
 		var config = new AzureStorageQueueDestinationConfig();
-		config.setConfiguration(new MapConfiguration(Map.of("kind", "azure-storage-queues", "account-name", "myaccount", "account-key", "", "queue", "test-queue")));
+		config.setConfiguration(new MapConfiguration(Map.of("kind", "azure-storage-queue", "account-name", "myaccount", "account-key", "", "queue", "test-queue")));
 
 		// act
 
@@ -124,7 +124,7 @@ public class initializeTests {
 		// arrange
 
 		var config = new AzureStorageQueueDestinationConfig();
-		config.setConfiguration(new MapConfiguration(Map.of("kind", "azure-storage-queues", "account-name", "myaccount", "account-key", VALID_ACCOUNT_KEY)));
+		config.setConfiguration(new MapConfiguration(Map.of("kind", "azure-storage-queue", "account-name", "myaccount", "account-key", VALID_ACCOUNT_KEY)));
 
 		// act
 
@@ -141,7 +141,7 @@ public class initializeTests {
 		// arrange
 
 		var config = new AzureStorageQueueDestinationConfig();
-		config.setConfiguration(new MapConfiguration(Map.of("kind", "azure-storage-queues", "account-name", "myaccount", "account-key", VALID_ACCOUNT_KEY, "queue", "")));
+		config.setConfiguration(new MapConfiguration(Map.of("kind", "azure-storage-queue", "account-name", "myaccount", "account-key", VALID_ACCOUNT_KEY, "queue", "")));
 
 		// act
 
@@ -162,7 +162,7 @@ public class initializeTests {
 		// arrange
 
 		var config = new AzureStorageQueueDestinationConfig();
-		config.setConfiguration(new MapConfiguration(Map.of("kind", "azure-storage-queues", "account-name", "myaccount", "account-key", VALID_ACCOUNT_KEY, "queue", "test-queue")));
+		config.setConfiguration(new MapConfiguration(Map.of("kind", "azure-storage-queue", "account-name", "myaccount", "account-key", VALID_ACCOUNT_KEY, "queue", "test-queue")));
 
 		// act
 
@@ -179,7 +179,7 @@ public class initializeTests {
 		// arrange
 
 		var config = new AzureStorageQueueDestinationConfig();
-		config.setConfiguration(new MapConfiguration(Map.of("kind", "azure-storage-queues", "account-name", "myaccount", "account-key", VALID_ACCOUNT_KEY, "queue", "test-queue")));
+		config.setConfiguration(new MapConfiguration(Map.of("kind", "azure-storage-queue", "account-name", "myaccount", "account-key", VALID_ACCOUNT_KEY, "queue", "test-queue")));
 
 		// act
 
@@ -197,7 +197,7 @@ public class initializeTests {
 		// arrange
 
 		var config = new AzureStorageQueueDestinationConfig();
-		config.setConfiguration(new MapConfiguration(Map.of("kind", "azure-storage-queues", "account-name", "myaccount", "account-key", VALID_ACCOUNT_KEY, "queue", "test-queue")));
+		config.setConfiguration(new MapConfiguration(Map.of("kind", "azure-storage-queue", "account-name", "myaccount", "account-key", VALID_ACCOUNT_KEY, "queue", "test-queue")));
 
 		// act
 
@@ -218,7 +218,7 @@ public class initializeTests {
 		// arrange
 
 		var map = new HashMap<String, Object>();
-		map.put("kind", "azure-storage-queues");
+		map.put("kind", "azure-storage-queue");
 		map.put("account-name", "devstoreaccount1");
 		map.put("account-key", VALID_ACCOUNT_KEY);
 		map.put("queue", "test-queue");
@@ -241,7 +241,7 @@ public class initializeTests {
 		// arrange
 
 		var map = new HashMap<String, Object>();
-		map.put("kind", "azure-storage-queues");
+		map.put("kind", "azure-storage-queue");
 		map.put("account-name", "devstoreaccount1");
 		map.put("account-key", VALID_ACCOUNT_KEY);
 		map.put("queue", "test-queue");
@@ -264,7 +264,7 @@ public class initializeTests {
 		// arrange
 
 		var map = new HashMap<String, Object>();
-		map.put("kind", "azure-storage-queues");
+		map.put("kind", "azure-storage-queue");
 		map.put("account-name", "myaccount");
 		map.put("account-key", VALID_ACCOUNT_KEY);
 		map.put("queue", "test-queue");
@@ -288,7 +288,7 @@ public class initializeTests {
 		// arrange
 
 		var map = new HashMap<String, Object>();
-		map.put("kind", "azure-storage-queues");
+		map.put("kind", "azure-storage-queue");
 		map.put("account-name", "myaccount");
 		map.put("account-key", VALID_ACCOUNT_KEY);
 		map.put("queue", "test-queue");
@@ -315,7 +315,7 @@ public class initializeTests {
 		// arrange
 
 		var map = new HashMap<String, Object>();
-		map.put("kind", "azure-storage-queues");
+		map.put("kind", "azure-storage-queue");
 		map.put("account-name", "myaccount");
 		map.put("account-key", VALID_ACCOUNT_KEY);
 		map.put("queue", "test-queue");
@@ -338,7 +338,7 @@ public class initializeTests {
 		// arrange
 
 		var map = new HashMap<String, Object>();
-		map.put("kind", "azure-storage-queues");
+		map.put("kind", "azure-storage-queue");
 		map.put("account-name", "myaccount");
 		map.put("account-key", VALID_ACCOUNT_KEY);
 		map.put("queue", "test-queue");
@@ -365,7 +365,7 @@ public class initializeTests {
 		// arrange
 
 		var map = new HashMap<String, Object>();
-		map.put("kind", "azure-storage-queues");
+		map.put("kind", "azure-storage-queue");
 		map.put("account-name", "myaccount");
 		map.put("account-key", VALID_ACCOUNT_KEY);
 		map.put("queue", "test-queue");
@@ -392,7 +392,7 @@ public class initializeTests {
 		// arrange
 
 		var map = new HashMap<String, Object>();
-		map.put("kind", "azure-storage-queues");
+		map.put("kind", "azure-storage-queue");
 		map.put("account-name", "myaccount");
 		map.put("account-key", VALID_ACCOUNT_KEY);
 		map.put("queue", "test-queue");
@@ -419,7 +419,7 @@ public class initializeTests {
 		// arrange
 
 		var config = new AzureStorageQueueDestinationConfig();
-		config.setConfiguration(new MapConfiguration(Map.of("kind", "azure-storage-queues", "account-name", "myaccount", "account-key", VALID_ACCOUNT_KEY, "queue", "test-queue")));
+		config.setConfiguration(new MapConfiguration(Map.of("kind", "azure-storage-queue", "account-name", "myaccount", "account-key", VALID_ACCOUNT_KEY, "queue", "test-queue")));
 
 		// act
 
@@ -436,7 +436,7 @@ public class initializeTests {
 		// arrange
 
 		var map = new HashMap<String, Object>();
-		map.put("kind", "azure-storage-queues");
+		map.put("kind", "azure-storage-queue");
 		map.put("account-name", "  myaccount  ");
 		map.put("account-key", VALID_ACCOUNT_KEY);
 		map.put("queue", "test-queue");
@@ -458,7 +458,7 @@ public class initializeTests {
 		// arrange
 
 		var map = new HashMap<String, Object>();
-		map.put("kind", "azure-storage-queues");
+		map.put("kind", "azure-storage-queue");
 		map.put("account-name", "myaccount");
 		map.put("account-key", VALID_ACCOUNT_KEY);
 		map.put("queue", "  test-queue  ");
