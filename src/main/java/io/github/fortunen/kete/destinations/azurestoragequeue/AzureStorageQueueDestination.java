@@ -13,7 +13,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 import java.util.concurrent.ConcurrentHashMap;
 
-import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
 import io.github.fortunen.kete.Component;
@@ -33,23 +32,20 @@ import lombok.SneakyThrows;
 @Component(name = "azure-storage-queue")
 public class AzureStorageQueueDestination extends Destination<AzureStorageQueueDestinationConfig> {
 
-	private static final String HMAC_SHA256 = "HmacSHA256";
-	private static final String SIGNATURE_VERB_PART = "POST\n\n\n";
 	private static final String APPLICATION_XML = "application/xml";
 	private static final String HEADER_CONTENT_TYPE = "Content-Type";
 	private static final String HEADER_X_MS_DATE = "x-ms-date";
 	private static final String HEADER_X_MS_VERSION = "x-ms-version";
 	private static final String HEADER_AUTHORIZATION = "Authorization";
 	private static final DateTimeFormatter RFC_1123_FORMATTER = DateTimeFormatter.ofPattern("EEE, dd MMM yyyy HH:mm:ss 'GMT'", Locale.US);
-	private static final String SIGNATURE_CONTENT_TYPE_PART = "\n\n" + APPLICATION_XML + "\n\n\n\n\n\n";
 
 	private Duration timeout;
+	private boolean useSasAuth;
+	private String querySuffix;
 	private String apiVersion;
 	private HttpClient httpClient;
-	private String xMsVersionLine;
 	private String messagesUrlPrefix;
 	private String authorizationPrefix;
-	private String messageTtlQuerySuffix;
 	private SecretKeySpec secretKeySpec;
 	private String accountResourcePrefix;
 	private String messageTtlCanonicalSuffix;
@@ -66,21 +62,29 @@ public class AzureStorageQueueDestination extends Destination<AzureStorageQueueD
 
 		timeout = config.getTimeout();
 
-		apiVersion = AzureStorageQueueDestinationConfig.API_VERSION;
-
-		xMsVersionLine = "x-ms-version:" + apiVersion + "\n";
-
-		authorizationPrefix = "SharedKey " + config.getAccountName() + ":";
+		useSasAuth = config.isUseSasAuth();
 
 		messagesUrlPrefix = config.getUrl() + "/";
 
-		messageTtlQuerySuffix = config.getMessageTtl() != 0 ? "?messagettl=" + config.getMessageTtl() : "";
+		// query suffix (combines message-ttl and sas-token)
 
-		messageTtlCanonicalSuffix = config.getMessageTtl() != 0 ? "\nmessagettl:" + config.getMessageTtl() : "";
+		var query = new StringBuilder();
+		if (config.getMessageTtl() != 0) query.append("messagettl=").append(config.getMessageTtl());
+		if (useSasAuth) {
+			if (!query.isEmpty()) query.append('&');
+			query.append(config.getSasToken());
+		}
+		querySuffix = query.isEmpty() ? "" : "?" + query;
 
-		accountResourcePrefix = "/" + config.getAccountName() + "/";
+		// shared-key auth precomputation
 
-		secretKeySpec = new SecretKeySpec(Base64Utils.decode(config.getAccountKey()), HMAC_SHA256);
+		if (!useSasAuth) {
+			apiVersion = AzureStorageQueueDestinationConfig.API_VERSION;
+			authorizationPrefix = "SharedKey " + config.getAccountName() + ":";
+			accountResourcePrefix = "/" + config.getAccountName() + "/";
+			messageTtlCanonicalSuffix = config.getMessageTtl() != 0 ? "\nmessagettl:" + config.getMessageTtl() : "";
+			secretKeySpec = AzureStorageQueueUtils.buildSecretKeySpec(config.getAccountKey());
+		}
 
 		// verify connection
 
@@ -105,45 +109,39 @@ public class AzureStorageQueueDestination extends Destination<AzureStorageQueueD
 
 		var ctx = queueContextCache.computeIfAbsent(actualQueue, queue -> {
 			var base = messagesUrlPrefix + queue + "/messages";
-			var uri = URI.create(messageTtlQuerySuffix.isEmpty() ? base : base + messageTtlQuerySuffix);
-			var canonical = accountResourcePrefix + queue + "/messages" + messageTtlCanonicalSuffix;
+			var uri = URI.create(querySuffix.isEmpty() ? base : base + querySuffix);
+			var canonical = useSasAuth ? null : accountResourcePrefix + queue + "/messages" + messageTtlCanonicalSuffix;
 			return new QueueContext(uri, canonical);
 		});
 
 		// body — wrap event in Azure Queue XML envelope with base64-encoded content
 
 		var base64Data = Base64Utils.encode(message.eventBody());
-		var xmlBody = "<QueueMessage><MessageText>" + base64Data + "</MessageText></QueueMessage>";
+		var xmlBody = AzureStorageQueueUtils.buildMessageXml(base64Data);
 		var bodyBytes = xmlBody.getBytes(StandardCharsets.UTF_8);
-
-		// authorization
-
-		var date = ZonedDateTime.now(ZoneOffset.UTC).format(RFC_1123_FORMATTER);
-
-		var stringToSign = SIGNATURE_VERB_PART
-			+ bodyBytes.length               // content-length
-			+ SIGNATURE_CONTENT_TYPE_PART     // content-md5, content-type, date, if-modified-since, if-match, if-none-match, if-unmodified-since, range
-			+ "x-ms-date:" + date + "\n"
-			+ xMsVersionLine
-			+ ctx.canonicalResource();
-
-		var mac = Mac.getInstance(HMAC_SHA256);
-		mac.init(secretKeySpec);
-		var signature = Base64Utils.encode(mac.doFinal(stringToSign.getBytes(StandardCharsets.UTF_8)));
 
 		// request
 
-		var request = HttpRequest.newBuilder()
+		var requestBuilder = HttpRequest.newBuilder()
 			.uri(ctx.requestUri())
 			.timeout(timeout)
 			.header(HEADER_CONTENT_TYPE, APPLICATION_XML)
-			.header(HEADER_X_MS_DATE, date)
-			.header(HEADER_X_MS_VERSION, apiVersion)
-			.header(HEADER_AUTHORIZATION, authorizationPrefix + signature)
-			.POST(HttpRequest.BodyPublishers.ofByteArray(bodyBytes))
-			.build();
+			.POST(HttpRequest.BodyPublishers.ofByteArray(bodyBytes));
 
-		var response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+		// shared-key authorization
+
+		if (!useSasAuth) {
+			var date = ZonedDateTime.now(ZoneOffset.UTC).format(RFC_1123_FORMATTER);
+			var stringToSign = AzureStorageQueueUtils.buildStringToSign(bodyBytes.length, date, apiVersion, ctx.canonicalResource());
+			var signature = AzureStorageQueueUtils.computeSignature(secretKeySpec, stringToSign);
+
+			requestBuilder
+				.header(HEADER_X_MS_DATE, date)
+				.header(HEADER_X_MS_VERSION, apiVersion)
+				.header(HEADER_AUTHORIZATION, authorizationPrefix + signature);
+		}
+
+		var response = httpClient.send(requestBuilder.build(), HttpResponse.BodyHandlers.ofString());
 
 		ValidationUtils.requireTrue(response.statusCode() >= 200 && response.statusCode() < 300, () -> new IOException("Azure Storage Queue put message failed: HTTP " + response.statusCode() + " : " + response.body()));
 	}

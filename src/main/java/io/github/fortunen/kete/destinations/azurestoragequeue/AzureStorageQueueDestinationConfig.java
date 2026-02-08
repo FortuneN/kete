@@ -16,20 +16,24 @@ public class AzureStorageQueueDestinationConfig extends DestinationConfig {
 
 	public static final String URL = "url";
 	public static final String QUEUE = "queue";
-	public static final String ACCOUNT_NAME = "account-name";
-	public static final String ACCOUNT_KEY = "account-key";
-	public static final String MESSAGE_TTL = "message-ttl";
-	public static final String TIMEOUT_SECONDS = "timeout-seconds";
+	public static final String SAS_TOKEN = "sas-token";
 	public static final int DEFAULT_TIMEOUT_SECONDS = 10;
 	public static final String API_VERSION = "2024-08-04";
+	public static final String ACCOUNT_KEY = "account-key";
+	public static final String MESSAGE_TTL = "message-ttl";
+	public static final String ACCOUNT_NAME = "account-name";
+	public static final String TIMEOUT_SECONDS = "timeout-seconds";
+	public static final String CONNECTION_STRING = "connection-string";
 
 	private String url;
 	private String queue;
-	private String accountName;
-	private String accountKey;
 	private int messageTtl;
-	private int timeoutSeconds;
+	private String sasToken;
 	private Duration timeout;
+	private String accountKey;
+	private String accountName;
+	private boolean useSasAuth;
+	private int timeoutSeconds;
 	private HttpClient.Builder clientBuilder;
 
 	@Override
@@ -37,26 +41,76 @@ public class AzureStorageQueueDestinationConfig extends DestinationConfig {
 
 		ValidationUtils.requireNonNull(configuration, "configuration is required");
 
-		// account-name
+		// connection-string (mutually exclusive with account-name, account-key, sas-token, url)
 
-		accountName = ValidationUtils.requireNonBlank(configuration.getString(ACCOUNT_NAME, "").trim(), ACCOUNT_NAME + " is required");
+		var rawConnectionString = configuration.getString(CONNECTION_STRING, "").trim();
+		var hasConnectionString = ValidationUtils.isNotBlank(rawConnectionString);
 
-		// account-key
+		if (hasConnectionString) {
 
-		accountKey = ValidationUtils.requireNonBlank(configuration.getString(ACCOUNT_KEY, "").trim(), ACCOUNT_KEY + " is required");
+			var rawAccountName = configuration.getString(ACCOUNT_NAME, "").trim();
+			var rawAccountKey = configuration.getString(ACCOUNT_KEY, "").trim();
+			var rawSasToken = configuration.getString(SAS_TOKEN, "").trim();
+			var rawUrl = configuration.getString(URL, "").trim(); 
 
-		// queue
+			ValidationUtils.requireFalse(ValidationUtils.isNotBlank(rawAccountName), CONNECTION_STRING + " and " + ACCOUNT_NAME + " are mutually exclusive");
+			ValidationUtils.requireFalse(ValidationUtils.isNotBlank(rawAccountKey), CONNECTION_STRING + " and " + ACCOUNT_KEY + " are mutually exclusive");
+			ValidationUtils.requireFalse(ValidationUtils.isNotBlank(rawSasToken), CONNECTION_STRING + " and " + SAS_TOKEN + " are mutually exclusive");
+			ValidationUtils.requireFalse(ValidationUtils.isNotBlank(rawUrl), CONNECTION_STRING + " and " + URL + " are mutually exclusive");
 
-		queue = ValidationUtils.requireNonBlank(configuration.getString(QUEUE, "").trim(), QUEUE + " is required");
+			var info = AzureStorageQueueUtils.parseConnectionString(rawConnectionString);
 
-		// url (optional — defaults to https://{account-name}.queue.core.windows.net)
+			accountName = info.accountName();
+			accountKey = info.accountKey();
+			sasToken = info.sasToken();
+			url = info.url();
+			useSasAuth = info.useSasAuth();
 
-		var configuredUrl = configuration.getString(URL, "").trim();
-
-		if (ValidationUtils.isNotBlank(configuredUrl)) {
-			url = ValidationUtils.requireValidUrl(configuredUrl, URL + " must be a valid absolute URL");
 		} else {
-			url = "https://" + accountName + ".queue.core.windows.net";
+
+			// authentication — exactly one of account-key or sas-token
+
+			var rawSasToken = configuration.getString(SAS_TOKEN, "").trim();
+			var rawAccountKey = configuration.getString(ACCOUNT_KEY, "").trim();
+
+			useSasAuth = ValidationUtils.isNotBlank(rawSasToken);
+			var useSharedKeyAuth = ValidationUtils.isNotBlank(rawAccountKey);
+
+			ValidationUtils.requireTrue(useSasAuth || useSharedKeyAuth, "either " + ACCOUNT_KEY + ", " + SAS_TOKEN + ", or " + CONNECTION_STRING + " is required");
+			ValidationUtils.requireFalse(useSasAuth && useSharedKeyAuth, ACCOUNT_KEY + " and " + SAS_TOKEN + " are mutually exclusive");
+
+			if (useSasAuth) {
+				sasToken = AzureStorageQueueUtils.normalizeSasToken(rawSasToken);
+			} else {
+				accountKey = rawAccountKey;
+			}
+
+			// account-name (required for shared-key; optional for sas when url is provided)
+
+			accountName = configuration.getString(ACCOUNT_NAME, "").trim();
+
+			if (useSharedKeyAuth) {
+				ValidationUtils.requireNonBlank(accountName, ACCOUNT_NAME + " is required");
+			}
+
+			// url (optional — defaults to https://{account-name}.queue.core.windows.net)
+
+			var configuredUrl = configuration.getString(URL, "").trim();
+
+			if (ValidationUtils.isNotBlank(configuredUrl)) {
+
+				url = ValidationUtils.requireValidUrl(configuredUrl, URL + " must be a valid absolute URL");
+
+				if (ValidationUtils.isNotBlank(accountName)) {
+					ValidationUtils.requireTrue(url.contains(accountName), URL + " must contain the " + ACCOUNT_NAME);
+				}
+
+			} else {
+
+				ValidationUtils.requireNonBlank(accountName, URL + " or " + ACCOUNT_NAME + " is required");
+
+				url = "https://" + accountName + ".queue.core.windows.net";
+			}
 		}
 
 		// strip trailing slash
@@ -64,6 +118,10 @@ public class AzureStorageQueueDestinationConfig extends DestinationConfig {
 		if (url.endsWith("/")) {
 			url = url.substring(0, url.length() - 1);
 		}
+
+		// queue
+
+		queue = ValidationUtils.requireNonBlank(configuration.getString(QUEUE, "").trim(), QUEUE + " is required");
 
 		// message-ttl (optional — -1 means no expiry, 0 means default 7 days)
 
