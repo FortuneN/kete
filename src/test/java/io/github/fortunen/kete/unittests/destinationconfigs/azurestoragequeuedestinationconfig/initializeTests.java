@@ -11,10 +11,11 @@ import org.apache.commons.configuration2.MapConfiguration;
 import org.junit.jupiter.api.Test;
 
 import io.github.fortunen.kete.destinations.azurestoragequeue.AzureStorageQueueDestinationConfig;
+import io.github.fortunen.kete.utils.AzureStorageQueueUtils;
 
 public class initializeTests {
 
-	private static final String VALID_ACCOUNT_KEY = "Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==";
+	private static final String VALID_ACCOUNT_KEY = AzureStorageQueueUtils.WELL_KNOWN_ACCOUNT_KEY;
 
 	// =========================================================================
 	// Required Fields - Account Name

@@ -11,13 +11,14 @@ import io.github.fortunen.kete.EventMessage;
 import io.github.fortunen.kete.TlsMaterial;
 import io.github.fortunen.kete.destinations.azurestoragequeue.AzureStorageQueueDestination;
 import io.github.fortunen.kete.destinations.azurestoragequeue.AzureStorageQueueDestinationConfig;
+import io.github.fortunen.kete.utils.AzureStorageQueueUtils;
 import okhttp3.mockwebserver.MockWebServer;
 
 public class TestBase {
 
 	protected static final byte[] EMPTY_BYTES = new byte[0];
 	protected static final String TEST_ACCOUNT_NAME = "devstoreaccount1";
-	protected static final String TEST_ACCOUNT_KEY = "Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==";
+	protected static final String TEST_ACCOUNT_KEY = AzureStorageQueueUtils.WELL_KNOWN_ACCOUNT_KEY;
 
 	protected MockWebServer mockServer;
 	protected AzureStorageQueueDestination destination;

@@ -5,8 +5,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
-import javax.crypto.spec.SecretKeySpec;
-
 import org.junit.jupiter.api.Test;
 
 import io.github.fortunen.kete.utils.AzureStorageQueueUtils;
@@ -110,8 +108,7 @@ public class computeSignatureTests {
 
 		// arrange
 
-		var testKey = "Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==";
-		var secretKeySpec = AzureStorageQueueUtils.buildSecretKeySpec(testKey);
+		var secretKeySpec = AzureStorageQueueUtils.buildSecretKeySpec(AzureStorageQueueUtils.WELL_KNOWN_ACCOUNT_KEY);
 		var stringToSign = "POST\n\n\n50\n\napplication/xml\n\n\n\n\n\nx-ms-date:Mon, 01 Jan 2024 00:00:00 GMT\nx-ms-version:2024-08-04\n/devstoreaccount1/my-queue/messages";
 
 		// act

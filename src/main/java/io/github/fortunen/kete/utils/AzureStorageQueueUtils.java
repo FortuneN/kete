@@ -11,6 +11,8 @@ import lombok.SneakyThrows;
 
 public final class AzureStorageQueueUtils {
 
+	public static final String WELL_KNOWN_ACCOUNT_KEY = "Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==";
+
 	static final String HMAC_SHA256 = "HmacSHA256";
 
 	private static final String SIGNATURE_VERB_PART = "POST\n\n\n";

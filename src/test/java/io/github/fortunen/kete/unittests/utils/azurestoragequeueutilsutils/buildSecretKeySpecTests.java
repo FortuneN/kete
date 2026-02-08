@@ -61,13 +61,9 @@ public class buildSecretKeySpecTests {
 	@Test
 	public void shouldWorkWithWellKnownTestKey() {
 
-		// arrange
-
-		var wellKnownKey = "Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==";
-
 		// act
 
-		var result = AzureStorageQueueUtils.buildSecretKeySpec(wellKnownKey);
+		var result = AzureStorageQueueUtils.buildSecretKeySpec(AzureStorageQueueUtils.WELL_KNOWN_ACCOUNT_KEY);
 
 		// assert
 
