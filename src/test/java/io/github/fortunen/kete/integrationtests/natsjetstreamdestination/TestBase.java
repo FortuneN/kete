@@ -79,7 +79,6 @@ public class TestBase {
 		return startNatsJetStreamWithTls(tls, true);
 	}
 
-	@SuppressWarnings("resource")
 	private GenericContainer<?> startNatsJetStreamWithTls(TlsMaterial tls, boolean requireClientCert) throws Exception {
 
 		if (tls == null) {

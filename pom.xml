@@ -774,6 +774,56 @@
 									<pattern>com.google.common.util.concurrent.internal</pattern>
 									<shadedPattern>io.github.fortunen.kete.shaded.guava.failureaccess</shadedPattern>
 								</relocation>
+								<!-- Pulsar client -->
+								<relocation>
+									<pattern>org.apache.pulsar</pattern>
+									<shadedPattern>io.github.fortunen.kete.shaded.pulsar</shadedPattern>
+								</relocation>
+								<!-- OpenTelemetry (pulsar-client transitive) -->
+								<relocation>
+									<pattern>io.opentelemetry</pattern>
+									<shadedPattern>io.github.fortunen.kete.shaded.opentelemetry</shadedPattern>
+								</relocation>
+								<!-- Javax Validation (pulsar-client transitive) -->
+								<relocation>
+									<pattern>javax.validation</pattern>
+									<shadedPattern>io.github.fortunen.kete.shaded.javax.validation</shadedPattern>
+								</relocation>
+								<!-- ActiveMQ -->
+								<relocation>
+									<pattern>org.apache.activemq</pattern>
+									<shadedPattern>io.github.fortunen.kete.shaded.activemq</shadedPattern>
+								</relocation>
+								<!-- HawtBuf (activemq-client transitive) -->
+								<relocation>
+									<pattern>org.fusesource.hawtbuf</pattern>
+									<shadedPattern>io.github.fortunen.kete.shaded.hawtbuf</shadedPattern>
+								</relocation>
+								<!-- Jakarta Annotation API (activemq transitive) -->
+								<relocation>
+									<pattern>jakarta.annotation</pattern>
+									<shadedPattern>io.github.fortunen.kete.shaded.jakarta.annotation</shadedPattern>
+								</relocation>
+								<!-- JeroMQ (ZeroMQ) -->
+								<relocation>
+									<pattern>org.zeromq</pattern>
+									<shadedPattern>io.github.fortunen.kete.shaded.zeromq</shadedPattern>
+								</relocation>
+								<!-- jnacl (jeromq transitive) -->
+								<relocation>
+									<pattern>com.neilalexander.jnacl</pattern>
+									<shadedPattern>io.github.fortunen.kete.shaded.jnacl</shadedPattern>
+								</relocation>
+								<!-- Project Reactor (lettuce-core transitive) -->
+								<relocation>
+									<pattern>reactor</pattern>
+									<shadedPattern>io.github.fortunen.kete.shaded.reactor</shadedPattern>
+								</relocation>
+								<!-- Reactive Streams (reactor-core transitive) -->
+								<relocation>
+									<pattern>org.reactivestreams</pattern>
+									<shadedPattern>io.github.fortunen.kete.shaded.reactivestreams</shadedPattern>
+								</relocation>
 							</relocations>
 							<transformers>
 								<transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>

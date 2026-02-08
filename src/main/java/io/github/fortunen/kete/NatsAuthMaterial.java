@@ -1,5 +1,6 @@
 package io.github.fortunen.kete;
 
+import io.github.fortunen.kete.utils.JsonUtils;
 import io.github.fortunen.kete.utils.ValidationUtils;
 import io.nats.client.AuthHandler;
 import io.nats.client.Nats;
@@ -18,9 +19,6 @@ import java.security.GeneralSecurityException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Base64;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Data
 @Slf4j
@@ -44,8 +42,6 @@ public class NatsAuthMaterial {
 	public static final String CREDENTIALS_FILE_BASE64 = "credentials-file-base64";
 
 	public static final int JWT_EXPIRY_WARNING_DAYS = 30;
-
-	private static final ObjectMapper MAPPER = new ObjectMapper();
 
 	private String token;
 	private String username;
@@ -143,13 +139,14 @@ public class NatsAuthMaterial {
 
 			var jwt = credsContent.substring(jwtStart + "-----BEGIN NATS USER JWT-----".length(), jwtEnd).trim();
 			var claimBody = JwtUtils.getClaimBody(jwt);
-			JsonNode claims = MAPPER.readTree(claimBody);
+			var claims = JsonUtils.parseJson(claimBody);
 
-			if (!claims.has("exp")) {
+			var expSeconds = JsonUtils.getLong(claims, "exp");
+
+			if (expSeconds == null) {
 				return;
 			}
 
-			var expSeconds = claims.get("exp").asLong();
 			var expiry = Instant.ofEpochSecond(expSeconds);
 			var daysUntilExpiry = Duration.between(Instant.now(), expiry).toDays();
 
