@@ -199,6 +199,12 @@ public class TestBase {
 		return new EventMessage("test-realm", eventId, eventBody, eventType, contentType, "", "EVENT", "", "");
 	}
 
+	protected String extractMessageText(String xml) {
+		var start = xml.indexOf("<MessageText>") + "<MessageText>".length();
+		var end = xml.indexOf("</MessageText>");
+		return xml.substring(start, end);
+	}
+
 	private void waitForAzuriteReady() {
 		var baseUrl = getAzuriteBaseUrl();
 		await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).until(() -> {

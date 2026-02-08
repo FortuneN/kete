@@ -108,10 +108,4 @@ public class sendTests extends TestBase {
 		var decoded = new String(Base64.getDecoder().decode(messageText), StandardCharsets.UTF_8);
 		assertThat(decoded).isEqualTo("{\"type\":\"LOGIN\"}");
 	}
-
-	private String extractMessageText(String xml) {
-		var start = xml.indexOf("<MessageText>") + "<MessageText>".length();
-		var end = xml.indexOf("</MessageText>");
-		return xml.substring(start, end);
-	}
 }
