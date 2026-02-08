@@ -34,25 +34,23 @@ import lombok.SneakyThrows;
 public class AzureStorageQueueDestination extends Destination<AzureStorageQueueDestinationConfig> {
 
 	private static final String HMAC_SHA256 = "HmacSHA256";
+	private static final String SIGNATURE_VERB_PART = "POST\n\n\n";
 	private static final String APPLICATION_XML = "application/xml";
 	private static final DateTimeFormatter RFC_1123_FORMATTER = DateTimeFormatter.ofPattern("EEE, dd MMM yyyy HH:mm:ss 'GMT'", Locale.US);
-	private static final String SIGNATURE_VERB_PART = "POST\n\n\n";
 	private static final String SIGNATURE_CONTENT_TYPE_PART = "\n\n" + APPLICATION_XML + "\n\n\n\n\n\n";
 
 	private Duration timeout;
 	private String apiVersion;
 	private HttpClient httpClient;
 	private String xMsVersionLine;
-	private String authorizationPrefix;
-	private ThreadLocal<Mac> threadLocalMac;
-	private final ConcurrentHashMap<String, QueueContext> queueContextCache = new ConcurrentHashMap<>();
-
 	private String messagesUrlPrefix;
+	private String authorizationPrefix;
 	private String messageTtlQuerySuffix;
+	private SecretKeySpec secretKeySpec;
 	private String accountResourcePrefix;
 	private String messageTtlCanonicalSuffix;
-
 	private record QueueContext(URI requestUri, String canonicalResource) {}
+	private final ConcurrentHashMap<String, QueueContext> queueContextCache = new ConcurrentHashMap<>();
 
 	@Override
 	@SneakyThrows
@@ -78,17 +76,7 @@ public class AzureStorageQueueDestination extends Destination<AzureStorageQueueD
 
 		accountResourcePrefix = "/" + config.getAccountName() + "/";
 
-		var secretKeySpec = new SecretKeySpec(Base64Utils.decode(config.getAccountKey()), HMAC_SHA256);
-
-		threadLocalMac = ThreadLocal.withInitial(() -> {
-			try {
-				var mac = Mac.getInstance(HMAC_SHA256);
-				mac.init(secretKeySpec);
-				return mac;
-			} catch (Exception e) {
-				throw new RuntimeException(e);
-			}
-		});
+		secretKeySpec = new SecretKeySpec(Base64Utils.decode(config.getAccountKey()), HMAC_SHA256);
 
 		// verify connection
 
@@ -124,7 +112,7 @@ public class AzureStorageQueueDestination extends Destination<AzureStorageQueueD
 		var xmlBody = "<QueueMessage><MessageText>" + base64Data + "</MessageText></QueueMessage>";
 		var bodyBytes = xmlBody.getBytes(StandardCharsets.UTF_8);
 
-		// authorization (ThreadLocal Mac avoids Mac.getInstance + init per call; doFinal resets for reuse)
+		// authorization
 
 		var date = ZonedDateTime.now(ZoneOffset.UTC).format(RFC_1123_FORMATTER);
 
@@ -135,7 +123,9 @@ public class AzureStorageQueueDestination extends Destination<AzureStorageQueueD
 			+ xMsVersionLine
 			+ ctx.canonicalResource();
 
-		var signature = Base64Utils.encode(threadLocalMac.get().doFinal(stringToSign.getBytes(StandardCharsets.UTF_8)));
+		var mac = Mac.getInstance(HMAC_SHA256);
+		mac.init(secretKeySpec);
+		var signature = Base64Utils.encode(mac.doFinal(stringToSign.getBytes(StandardCharsets.UTF_8)));
 
 		// request
 
