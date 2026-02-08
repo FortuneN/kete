@@ -6,6 +6,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -35,16 +36,24 @@ public class AzureStorageQueueDestination extends Destination<AzureStorageQueueD
 	private static final String HMAC_SHA256 = "HmacSHA256";
 	private static final String APPLICATION_XML = "application/xml";
 	private static final DateTimeFormatter RFC_1123_FORMATTER = DateTimeFormatter.ofPattern("EEE, dd MMM yyyy HH:mm:ss 'GMT'", Locale.US);
+	private static final Base64.Encoder BASE64_ENCODER = Base64.getEncoder();
+	private static final String SIGNATURE_VERB_PART = "POST\n\n\n";
+	private static final String SIGNATURE_CONTENT_TYPE_PART = "\n\n" + APPLICATION_XML + "\n\n\n\n\n\n";
 
+	private Duration timeout;
+	private String apiVersion;
 	private HttpClient httpClient;
-	private SecretKeySpec secretKeySpec;
+	private String xMsVersionLine;
+	private String authorizationPrefix;
+	private ThreadLocal<Mac> threadLocalMac;
+	private final ConcurrentHashMap<String, QueueContext> queueContextCache = new ConcurrentHashMap<>();
+
 	private String messagesUrlPrefix;
 	private String messageTtlQuerySuffix;
-	private String messageTtlCanonicalSuffix;
 	private String accountResourcePrefix;
-	private String authorizationPrefix;
-	private String apiVersion;
-	private final ConcurrentHashMap<String, URI> messagesUrlCache = new ConcurrentHashMap<>();
+	private String messageTtlCanonicalSuffix;
+
+	private record QueueContext(URI requestUri, String canonicalResource) {}
 
 	@Override
 	@SneakyThrows
@@ -54,11 +63,15 @@ public class AzureStorageQueueDestination extends Destination<AzureStorageQueueD
 
 		httpClient = config.getClientBuilder().build();
 
-		messagesUrlPrefix = config.getUrl() + "/";
-
-		secretKeySpec = new SecretKeySpec(Base64.getDecoder().decode(config.getAccountKey()), HMAC_SHA256);
+		timeout = config.getTimeout();
 
 		apiVersion = AzureStorageQueueDestinationConfig.API_VERSION;
+
+		xMsVersionLine = "x-ms-version:" + apiVersion + "\n";
+
+		authorizationPrefix = "SharedKey " + config.getAccountName() + ":";
+
+		messagesUrlPrefix = config.getUrl() + "/";
 
 		messageTtlQuerySuffix = config.getMessageTtl() != 0 ? "?messagettl=" + config.getMessageTtl() : "";
 
@@ -66,13 +79,23 @@ public class AzureStorageQueueDestination extends Destination<AzureStorageQueueD
 
 		accountResourcePrefix = "/" + config.getAccountName() + "/";
 
-		authorizationPrefix = "SharedKey " + config.getAccountName() + ":";
+		var secretKeySpec = new SecretKeySpec(Base64.getDecoder().decode(config.getAccountKey()), HMAC_SHA256);
+
+		threadLocalMac = ThreadLocal.withInitial(() -> {
+			try {
+				var mac = Mac.getInstance(HMAC_SHA256);
+				mac.init(secretKeySpec);
+				return mac;
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			}
+		});
 
 		// verify connection
 
 		var testRequest = HttpRequest.newBuilder()
 			.uri(URI.create(config.getUrl()))
-			.timeout(config.getTimeout())
+			.timeout(timeout)
 			.GET()
 			.build();
 
@@ -85,46 +108,41 @@ public class AzureStorageQueueDestination extends Destination<AzureStorageQueueD
 
 		ValidationUtils.requireNonNull(message, "message is required");
 
-		// queue name (supports templating)
+		// queue context (request URI + canonical resource, cached per queue name)
 
 		var actualQueue = TemplateUtils.substitute(config.getQueue(), message);
 
-		// messages url
-
-		var messagesUri = messagesUrlCache.computeIfAbsent(actualQueue, queue -> URI.create(messagesUrlPrefix + queue + "/messages"));
+		var ctx = queueContextCache.computeIfAbsent(actualQueue, queue -> {
+			var base = messagesUrlPrefix + queue + "/messages";
+			var uri = URI.create(messageTtlQuerySuffix.isEmpty() ? base : base + messageTtlQuerySuffix);
+			var canonical = accountResourcePrefix + queue + "/messages" + messageTtlCanonicalSuffix;
+			return new QueueContext(uri, canonical);
+		});
 
 		// body — wrap event in Azure Queue XML envelope with base64-encoded content
 
-		var base64Data = Base64.getEncoder().encodeToString(message.eventBody());
+		var base64Data = BASE64_ENCODER.encodeToString(message.eventBody());
 		var xmlBody = "<QueueMessage><MessageText>" + base64Data + "</MessageText></QueueMessage>";
 		var bodyBytes = xmlBody.getBytes(StandardCharsets.UTF_8);
 
-		// request uri
-
-		var requestUri = messageTtlQuerySuffix.isEmpty() ? messagesUri : URI.create(messagesUri + messageTtlQuerySuffix);
-
-		// authorization
+		// authorization (ThreadLocal Mac avoids Mac.getInstance + init per call; doFinal resets for reuse)
 
 		var date = ZonedDateTime.now(ZoneOffset.UTC).format(RFC_1123_FORMATTER);
 
-		var stringToSign = "POST\n\n\n"  // verb, content-encoding, content-language
-			+ bodyBytes.length + "\n"    // content-length
-			+ "\n"                       // content-md5
-			+ APPLICATION_XML + "\n"     // content-type
-			+ "\n\n\n\n\n"              // date, if-modified-since, if-match, if-none-match, if-unmodified-since, range
+		var stringToSign = SIGNATURE_VERB_PART
+			+ bodyBytes.length               // content-length
+			+ SIGNATURE_CONTENT_TYPE_PART     // content-md5, content-type, date, if-modified-since, if-match, if-none-match, if-unmodified-since, range
 			+ "x-ms-date:" + date + "\n"
-			+ "x-ms-version:" + apiVersion + "\n"
-			+ accountResourcePrefix + actualQueue + "/messages" + messageTtlCanonicalSuffix;
+			+ xMsVersionLine
+			+ ctx.canonicalResource();
 
-		var mac = Mac.getInstance(HMAC_SHA256);
-		mac.init(secretKeySpec);
-		var signature = Base64.getEncoder().encodeToString(mac.doFinal(stringToSign.getBytes(StandardCharsets.UTF_8)));
+		var signature = BASE64_ENCODER.encodeToString(threadLocalMac.get().doFinal(stringToSign.getBytes(StandardCharsets.UTF_8)));
 
 		// request
 
 		var request = HttpRequest.newBuilder()
-			.uri(requestUri)
-			.timeout(config.getTimeout())
+			.uri(ctx.requestUri())
+			.timeout(timeout)
 			.header("Content-Type", APPLICATION_XML)
 			.header("x-ms-date", date)
 			.header("x-ms-version", apiVersion)
