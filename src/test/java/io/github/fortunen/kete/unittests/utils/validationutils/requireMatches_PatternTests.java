@@ -247,4 +247,32 @@ public class requireMatches_PatternTests {
 
 		assertThat(thrown.getMessage()).isEqualTo("Null value error");
 	}
+
+	@Test
+	public void shouldThrowWhenPatternIsNull() {
+
+		// act
+
+		var thrown = catchThrowable(() -> {
+			ValidationUtils.requireMatches("test", (Pattern) null, "Pattern must not be null");
+		});
+
+		// assert
+
+		assertThat(thrown).isInstanceOf(IllegalStateException.class).hasMessage("pattern is required");
+	}
+
+	@Test
+	public void shouldThrowWhenPatternIsNullWithSupplier() {
+
+		// act
+
+		var thrown = catchThrowable(() -> {
+			ValidationUtils.requireMatches("test", (Pattern) null, () -> new IllegalStateException("Custom"));
+		});
+
+		// assert
+
+		assertThat(thrown).isInstanceOf(IllegalStateException.class).hasMessage("pattern is required");
+	}
 }

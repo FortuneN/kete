@@ -1,6 +1,7 @@
 package io.github.fortunen.kete.unittests.utils.azurestoragequeueutils;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
 
 import org.junit.jupiter.api.Test;
 
@@ -90,5 +91,41 @@ public class buildStringToSignTests {
 		// assert
 
 		assertThat(result1).isEqualTo(result2);
+	}
+
+	@Test
+	public void shouldThrowForNullDate() {
+
+		// act
+
+		var thrown = catchThrowable(() -> AzureStorageQueueUtils.buildStringToSign(100, null, "2024-08-04", "/acc/q/messages"));
+
+		// assert
+
+		assertThat(thrown).isInstanceOf(IllegalStateException.class).hasMessage("date is required");
+	}
+
+	@Test
+	public void shouldThrowForNullApiVersion() {
+
+		// act
+
+		var thrown = catchThrowable(() -> AzureStorageQueueUtils.buildStringToSign(100, "Mon, 01 Jan 2024 00:00:00 GMT", null, "/acc/q/messages"));
+
+		// assert
+
+		assertThat(thrown).isInstanceOf(IllegalStateException.class).hasMessage("apiVersion is required");
+	}
+
+	@Test
+	public void shouldThrowForNullCanonicalResource() {
+
+		// act
+
+		var thrown = catchThrowable(() -> AzureStorageQueueUtils.buildStringToSign(100, "Mon, 01 Jan 2024 00:00:00 GMT", "2024-08-04", null));
+
+		// assert
+
+		assertThat(thrown).isInstanceOf(IllegalStateException.class).hasMessage("canonicalResource is required");
 	}
 }

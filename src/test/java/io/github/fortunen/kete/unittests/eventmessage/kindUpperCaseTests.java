@@ -39,4 +39,36 @@ class kindUpperCaseTests {
 
 		assertThat(result).isEqualTo("ADMIN_EVENT");
 	}
+
+	@Test
+	void shouldReturnNullForNullKind() {
+
+		// arrange
+
+		var message = new EventMessage(null, null, null, null, null, null, null, null, null);
+
+		// act
+
+		var result = message.kindUpperCase();
+
+		// assert
+
+		assertThat(result).isNull();
+	}
+
+	@Test
+	void shouldReturnNullForBlankKind() {
+
+		// arrange
+
+		var message = new EventMessage(null, null, null, null, null, null, "   ", null, null);
+
+		// act
+
+		var result = message.kindUpperCase();
+
+		// assert
+
+		assertThat(result).isNull();
+	}
 }

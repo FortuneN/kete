@@ -32,14 +32,29 @@ public record EventMessage(String realm, String eventId, byte[] eventBody, Strin
 	});
 
 	public String kindLowerCase() {
+
+		if (ValidationUtils.isBlank(kind)) {
+			return null;
+		}
+
 		return LOWERCASE_CACHE.computeIfAbsent(kind, String::toLowerCase);
 	}
 
 	public String kindUpperCase() {
+
+		if (ValidationUtils.isBlank(kind)) {
+			return null;
+		}
+
 		return UPPERCASE_CACHE.computeIfAbsent(kind, String::toUpperCase);
 	}
 
 	public byte[] kindBytes() {
+
+		if (ValidationUtils.isBlank(kind)) {
+			return null;
+		}
+
 		return BYTES.computeIfAbsent(kind, String::getBytes);
 	}
 

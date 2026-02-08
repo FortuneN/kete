@@ -28,6 +28,7 @@ public class RegexMatcher extends Matcher {
 	@Override
 	public boolean matches(String eventType) {
 
+		ValidationUtils.requireNonNull(eventType, "eventType is required");
 		ValidationUtils.requireNonNull(regex, "regex is required");
 
 		return regex.matcher(eventType).matches();

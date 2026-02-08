@@ -415,6 +415,8 @@ public final class ValidationUtils {
 	@SneakyThrows
 	public static String requireMatches(String value, Pattern pattern, Supplier<? extends Throwable> exceptionSupplier) {
 
+		requireNonNull(pattern, "pattern is required");
+
 		if (value == null || !pattern.matcher(value).matches()) {
 			throw exceptionSupplier.get();
 		}
@@ -423,6 +425,8 @@ public final class ValidationUtils {
 	}
 
 	public static String requireMatches(String value, Pattern pattern, String message) {
+
+		requireNonNull(pattern, "pattern is required");
 
 		if (value == null || !pattern.matcher(value).matches()) {
 			throw new IllegalStateException(message);
@@ -433,6 +437,9 @@ public final class ValidationUtils {
 
 	@SneakyThrows
 	public static String requireMatches(String value, String regex, Supplier<? extends Throwable> exceptionSupplier) {
+
+		requireNonNull(regex, "regex is required");
+
 		if (value == null || !value.matches(regex)) {
 			throw exceptionSupplier.get();
 		}
@@ -440,6 +447,9 @@ public final class ValidationUtils {
 	}
 
 	public static String requireMatches(String value, String regex, String message) {
+
+		requireNonNull(regex, "regex is required");
+
 		if (value == null || !value.matches(regex)) {
 			throw new IllegalStateException(message);
 		}

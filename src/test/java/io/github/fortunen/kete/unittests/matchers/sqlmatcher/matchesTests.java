@@ -1,6 +1,7 @@
 package io.github.fortunen.kete.unittests.matchers.sqlmatcher;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
 
 import io.github.fortunen.kete.matchers.SqlMatcher;
 import org.junit.jupiter.api.Test;
@@ -144,5 +145,21 @@ class matchesTests {
 		assertThat(matcher.matches("LOGIN")).isTrue();
 		assertThat(matcher.matches("LOGOUT")).isTrue();
 		assertThat(matcher.matches("login")).isTrue();
+	}
+
+	@Test
+	void shouldThrowForNullEventType() {
+
+		// arrange
+
+		var matcher = createAndInitialize("LOGIN");
+
+		// act
+
+		var thrown = catchThrowable(() -> matcher.matches(null));
+
+		// assert
+
+		assertThat(thrown).isInstanceOf(IllegalStateException.class).hasMessage("eventType is required");
 	}
 }

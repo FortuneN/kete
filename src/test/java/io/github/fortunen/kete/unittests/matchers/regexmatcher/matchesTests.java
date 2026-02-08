@@ -180,6 +180,6 @@ class matchesTests {
 
 		// assert
 
-		assertThat(thrown).isInstanceOf(NullPointerException.class);
+		assertThat(thrown).isInstanceOf(IllegalStateException.class).hasMessage("eventType is required");
 	}
 }

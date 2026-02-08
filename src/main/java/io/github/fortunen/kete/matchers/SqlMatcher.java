@@ -29,6 +29,7 @@ public class SqlMatcher extends Matcher {
 	@Override
 	public boolean matches(String eventType) {
 
+		ValidationUtils.requireNonNull(eventType, "eventType is required");
 		ValidationUtils.requireNonNull(matcher, "matcher is required");
 
 		return matcher.matches(eventType);

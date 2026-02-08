@@ -131,7 +131,7 @@ public class computeSignatureTests {
 
 		// assert
 
-		assertThat(thrown).isNotNull();
+		assertThat(thrown).isInstanceOf(IllegalStateException.class).hasMessage("secretKeySpec is required");
 	}
 
 	@Test
@@ -147,7 +147,7 @@ public class computeSignatureTests {
 
 		// assert
 
-		assertThat(thrown).isNotNull();
+		assertThat(thrown).isInstanceOf(IllegalStateException.class).hasMessage("stringToSign is required");
 	}
 
 	@Test

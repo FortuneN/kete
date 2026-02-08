@@ -59,4 +59,36 @@ class kindBytesTests {
 
 		assertThat(result1).isSameAs(result2);
 	}
+
+	@Test
+	void shouldReturnNullForNullKind() {
+
+		// arrange
+
+		var message = new EventMessage(null, null, null, null, null, null, null, null, null);
+
+		// act
+
+		var result = message.kindBytes();
+
+		// assert
+
+		assertThat(result).isNull();
+	}
+
+	@Test
+	void shouldReturnNullForBlankKind() {
+
+		// arrange
+
+		var message = new EventMessage(null, null, null, null, null, null, "   ", null, null);
+
+		// act
+
+		var result = message.kindBytes();
+
+		// assert
+
+		assertThat(result).isNull();
+	}
 }

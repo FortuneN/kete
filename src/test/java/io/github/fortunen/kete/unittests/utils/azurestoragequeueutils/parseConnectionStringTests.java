@@ -262,7 +262,7 @@ public class parseConnectionStringTests {
 
 		// assert
 
-		assertThat(thrown).isNotNull();
+		assertThat(thrown).isInstanceOf(IllegalStateException.class).hasMessage("connectionString is required");
 	}
 
 	@Test
@@ -274,7 +274,7 @@ public class parseConnectionStringTests {
 
 		// assert
 
-		assertThat(thrown).isInstanceOf(IllegalStateException.class);
+		assertThat(thrown).isInstanceOf(IllegalStateException.class).hasMessage("connectionString is required");
 	}
 
 	@Test
@@ -286,6 +286,6 @@ public class parseConnectionStringTests {
 
 		// assert
 
-		assertThat(thrown).isInstanceOf(IllegalStateException.class);
+		assertThat(thrown).isInstanceOf(IllegalStateException.class).hasMessage("connectionString is required");
 	}
 }

@@ -39,4 +39,36 @@ class kindLowerCaseTests {
 
 		assertThat(result).isEqualTo("admin_event");
 	}
+
+	@Test
+	void shouldReturnNullForNullKind() {
+
+		// arrange
+
+		var message = new EventMessage(null, null, null, null, null, null, null, null, null);
+
+		// act
+
+		var result = message.kindLowerCase();
+
+		// assert
+
+		assertThat(result).isNull();
+	}
+
+	@Test
+	void shouldReturnNullForBlankKind() {
+
+		// arrange
+
+		var message = new EventMessage(null, null, null, null, null, null, "   ", null, null);
+
+		// act
+
+		var result = message.kindLowerCase();
+
+		// assert
+
+		assertThat(result).isNull();
+	}
 }

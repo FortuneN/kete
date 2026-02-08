@@ -38,6 +38,7 @@ public class ListMatcher extends Matcher {
 	@Override
 	public boolean matches(String eventType) {
 
+		ValidationUtils.requireNonNull(eventType, "eventType is required");
 		ValidationUtils.requireNonNull(eventTypes, "eventTypes is required");
 
 		return eventTypes.contains(eventType);

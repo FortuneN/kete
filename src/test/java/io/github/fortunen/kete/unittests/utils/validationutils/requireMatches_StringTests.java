@@ -229,4 +229,32 @@ public class requireMatches_StringTests {
 
 		assertThat(thrown.getMessage()).isEqualTo("Null value error");
 	}
+
+	@Test
+	public void shouldThrowWhenRegexIsNull() {
+
+		// act
+
+		var thrown = catchThrowable(() -> {
+			ValidationUtils.requireMatches("test", (String) null, "Regex must not be null");
+		});
+
+		// assert
+
+		assertThat(thrown).isInstanceOf(IllegalStateException.class).hasMessage("regex is required");
+	}
+
+	@Test
+	public void shouldThrowWhenRegexIsNullWithSupplier() {
+
+		// act
+
+		var thrown = catchThrowable(() -> {
+			ValidationUtils.requireMatches("test", (String) null, () -> new IllegalStateException("Custom"));
+		});
+
+		// assert
+
+		assertThat(thrown).isInstanceOf(IllegalStateException.class).hasMessage("regex is required");
+	}
 }

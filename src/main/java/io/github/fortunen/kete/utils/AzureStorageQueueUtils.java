@@ -24,6 +24,8 @@ public final class AzureStorageQueueUtils {
 
 	public static ConnectionStringInfo parseConnectionString(String connectionString) {
 
+		ValidationUtils.requireNonBlank(connectionString, "connectionString is required");
+
 		var parts = parseKeyValuePairs(connectionString);
 
 		// extract fields
@@ -85,6 +87,11 @@ public final class AzureStorageQueueUtils {
 	}
 
 	public static String buildStringToSign(int contentLength, String date, String apiVersion, String canonicalResource) {
+
+		ValidationUtils.requireNonNull(date, "date is required");
+		ValidationUtils.requireNonNull(apiVersion, "apiVersion is required");
+		ValidationUtils.requireNonNull(canonicalResource, "canonicalResource is required");
+
 		return SIGNATURE_VERB_PART
 			+ contentLength
 			+ SIGNATURE_CONTENT_TYPE_PART
@@ -95,6 +102,10 @@ public final class AzureStorageQueueUtils {
 
 	@SneakyThrows
 	public static String computeSignature(SecretKeySpec secretKeySpec, String stringToSign) {
+
+		ValidationUtils.requireNonNull(secretKeySpec, "secretKeySpec is required");
+		ValidationUtils.requireNonNull(stringToSign, "stringToSign is required");
+
 		var mac = Mac.getInstance(HMAC_SHA256);
 		mac.init(secretKeySpec);
 		return Base64Utils.encode(mac.doFinal(stringToSign.getBytes(StandardCharsets.UTF_8)));
