@@ -1,4 +1,4 @@
-package io.github.fortunen.kete.integrationtests.redisstreamsdestination;
+package io.github.fortunen.kete.integrationtests.redisstreamdestination;
 
 import static org.awaitility.Awaitility.await;
 
@@ -17,8 +17,8 @@ import org.testcontainers.utility.DockerImageName;
 import io.github.fortunen.kete.Constants;
 import io.github.fortunen.kete.EventMessage;
 import io.github.fortunen.kete.TlsMaterial;
-import io.github.fortunen.kete.destinations.redisstreams.RedisStreamsDestination;
-import io.github.fortunen.kete.destinations.redisstreams.RedisStreamsDestinationConfig;
+import io.github.fortunen.kete.destinations.redisstream.RedisStreamDestination;
+import io.github.fortunen.kete.destinations.redisstream.RedisStreamDestinationConfig;
 import io.lettuce.core.ClientOptions;
 import io.lettuce.core.Range;
 import io.lettuce.core.RedisClient;
@@ -33,14 +33,14 @@ public class TestBase {
 	protected static final int REDIS_TLS_PORT = 6380;
 
 	protected GenericContainer<?> container;
-	protected RedisStreamsDestination destination;
-	protected RedisStreamsDestinationConfig config;
+	protected RedisStreamDestination destination;
+	protected RedisStreamDestinationConfig config;
 	protected TlsMaterial currentTls;
 
 	@BeforeEach
 	void setUp() {
-		destination = new RedisStreamsDestination();
-		config = new RedisStreamsDestinationConfig();
+		destination = new RedisStreamDestination();
+		config = new RedisStreamDestinationConfig();
 	}
 
 	protected void configureDestination(MapConfiguration mapConfig) {

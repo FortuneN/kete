@@ -1,0 +1,41 @@
+services:
+
+  azurite:
+    image: ghcr.io/fortunen/kete/quick-start-azurite
+    ports:
+      - 10001:10001
+    healthcheck:
+      test: ["CMD-SHELL", "nc -z 127.0.0.1 10001 || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  queue-setup:
+    image: ghcr.io/fortunen/kete/quick-start-azure-queue-setup
+    depends_on:
+      azurite:
+        condition: service_healthy
+    entrypoint: ["python", "-c"]
+    command:
+      - |
+        from azure.storage.queue import QueueServiceClient
+        conn = "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;QueueEndpoint=http://azurite:10001/devstoreaccount1"
+        QueueServiceClient.from_connection_string(conn).create_queue("keycloak-events")
+        print("Queue 'keycloak-events' created successfully")
+        import time; time.sleep(999999)
+
+  keycloak:
+    image: ghcr.io/fortunen/kete/quick-start-keycloak
+    command: start-dev
+    ports:
+      - 8080:8080
+      - 9000:9000
+    environment:
+      kete.routes.quick-start.destination.kind: azure-storage-queues
+      kete.routes.quick-start.destination.account-name: devstoreaccount1
+      kete.routes.quick-start.destination.account-key: Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==
+      kete.routes.quick-start.destination.queue: keycloak-events
+      kete.routes.quick-start.destination.url: http://azurite:10001/devstoreaccount1
+    depends_on:
+      queue-setup:
+        condition: service_started

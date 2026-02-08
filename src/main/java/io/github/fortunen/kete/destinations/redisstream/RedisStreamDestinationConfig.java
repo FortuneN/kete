@@ -1,4 +1,4 @@
-package io.github.fortunen.kete.destinations.redisstreams;
+package io.github.fortunen.kete.destinations.redisstream;
 
 import io.github.fortunen.kete.Constants;
 import io.github.fortunen.kete.DestinationConfig;
@@ -17,7 +17,7 @@ import java.time.Duration;
 @Data
 @NoArgsConstructor(force = true)
 @EqualsAndHashCode(callSuper = true)
-public class RedisStreamsDestinationConfig extends DestinationConfig {
+public class RedisStreamDestinationConfig extends DestinationConfig {
 
 	public static final String HOST = "host";
 	public static final String PORT = "port";

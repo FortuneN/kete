@@ -19,7 +19,7 @@ import io.lettuce.core.StreamMessage;
 
 import java.util.List;
 
-class RedisStreamsDestinationE2ETests extends EndToEndTestBase {
+class RedisStreamDestinationE2ETests extends EndToEndTestBase {
 
 	private static final String REDIS_STREAM_TEMPLATE = "keycloak-events-${realmLowerCase}";
 	private static final String REDIS_STREAM_RESOLVED = "keycloak-events-" + TEST_REALM.toLowerCase();

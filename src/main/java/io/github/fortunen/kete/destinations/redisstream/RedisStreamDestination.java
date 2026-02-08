@@ -1,4 +1,4 @@
-package io.github.fortunen.kete.destinations.redisstreams;
+package io.github.fortunen.kete.destinations.redisstream;
 
 import io.github.fortunen.kete.Component;
 import io.github.fortunen.kete.Constants;
@@ -23,7 +23,7 @@ import java.util.LinkedHashMap;
 @NoArgsConstructor(force = true)
 @Component(name = "redis-streams")
 @EqualsAndHashCode(callSuper = true)
-public class RedisStreamsDestination extends Destination<RedisStreamsDestinationConfig> {
+public class RedisStreamDestination extends Destination<RedisStreamDestinationConfig> {
 
 	public static final String FIELD_BODY = "body";
 
