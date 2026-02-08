@@ -135,7 +135,7 @@ public class TestBase {
 
 	protected String peekMessage(String queue) throws Exception {
 		var url = getAzuriteBaseUrl() + "/" + queue + "/messages?peekonly=true";
-		var request = authenticatedRequest("GET", url, queue + "/messages")
+		var request = authenticatedRequest("GET", url, queue + "/messages\npeekonly:true")
 			.GET()
 			.build();
 		var response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
@@ -227,7 +227,7 @@ public class TestBase {
 		var stringToSign = verb + "\n\n\n\n\n\n\n\n\n\n\n\n"
 			+ "x-ms-date:" + date + "\n"
 			+ "x-ms-version:" + API_VERSION + "\n"
-			+ "/" + ACCOUNT_NAME + "/" + canonicalResource;
+			+ "/" + ACCOUNT_NAME + "/" + ACCOUNT_NAME + "/" + canonicalResource;
 		var signature = AzureStorageQueueUtils.computeSignature(testKeySpec, stringToSign);
 		return HttpRequest.newBuilder()
 			.uri(URI.create(url))

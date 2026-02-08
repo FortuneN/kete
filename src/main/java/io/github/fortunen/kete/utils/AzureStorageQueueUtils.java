@@ -16,7 +16,7 @@ public final class AzureStorageQueueUtils {
 	static final String HMAC_SHA256 = "HmacSHA256";
 
 	private static final String SIGNATURE_VERB_PART = "POST\n\n\n";
-	private static final String SIGNATURE_CONTENT_TYPE_PART = "\n\napplication/xml\n\n\n\n\n\n";
+	private static final String SIGNATURE_CONTENT_TYPE_PART = "\n\napplication/xml\n\n\n\n\n\n\n";
 
 	public record ConnectionStringInfo(String accountName, String accountKey, String sasToken, String url, boolean useSasAuth) {}
 

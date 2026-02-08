@@ -48,7 +48,7 @@ public class AzureStorageQueueDestination extends Destination<AzureStorageQueueD
 	private String messagesUrlPrefix;
 	private String authorizationPrefix;
 	private SecretKeySpec secretKeySpec;
-	private String accountResourcePrefix;
+	private String canonicalResourcePrefix;
 	private String messageTtlCanonicalSuffix;
 	private record QueueContext(URI requestUri, String canonicalResource) {}
 	private final ConcurrentHashMap<String, QueueContext> queueContextCache = new ConcurrentHashMap<>();
@@ -82,7 +82,7 @@ public class AzureStorageQueueDestination extends Destination<AzureStorageQueueD
 		if (!useSasAuth) {
 			apiVersion = AzureStorageQueueDestinationConfig.API_VERSION;
 			authorizationPrefix = "SharedKey " + config.getAccountName() + ":";
-			accountResourcePrefix = "/" + config.getAccountName() + "/";
+			canonicalResourcePrefix = "/" + config.getAccountName();
 			messageTtlCanonicalSuffix = config.getMessageTtl() != 0 ? "\nmessagettl:" + config.getMessageTtl() : "";
 			secretKeySpec = AzureStorageQueueUtils.buildSecretKeySpec(config.getAccountKey());
 		}
@@ -111,7 +111,7 @@ public class AzureStorageQueueDestination extends Destination<AzureStorageQueueD
 		var ctx = queueContextCache.computeIfAbsent(actualQueue, queue -> {
 			var base = messagesUrlPrefix + queue + "/messages";
 			var uri = URI.create(querySuffix.isEmpty() ? base : base + querySuffix);
-			var canonical = useSasAuth ? null : accountResourcePrefix + queue + "/messages" + messageTtlCanonicalSuffix;
+			var canonical = useSasAuth ? null : canonicalResourcePrefix + uri.getPath() + messageTtlCanonicalSuffix;
 			return new QueueContext(uri, canonical);
 		});
 

@@ -28,7 +28,7 @@ public class buildStringToSignTests {
 		assertThat(result).isEqualTo(
 			"POST\n\n\n" +
 			"123" +
-			"\n\napplication/xml\n\n\n\n\n\n" +
+			"\n\napplication/xml\n\n\n\n\n\n\n" +
 			"x-ms-date:Sat, 08 Feb 2026 12:00:00 GMT\n" +
 			"x-ms-version:2024-08-04\n" +
 			"/myaccount/my-queue/messages"
