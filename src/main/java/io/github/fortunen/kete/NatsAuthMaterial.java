@@ -1,5 +1,6 @@
 package io.github.fortunen.kete;
 
+import io.github.fortunen.kete.utils.Base64Utils;
 import io.github.fortunen.kete.utils.JsonUtils;
 import io.github.fortunen.kete.utils.ValidationUtils;
 import io.nats.client.AuthHandler;
@@ -18,7 +19,6 @@ import java.nio.file.Paths;
 import java.security.GeneralSecurityException;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Base64;
 
 @Data
 @Slf4j
@@ -88,7 +88,7 @@ public class NatsAuthMaterial {
 
 			case AUTH_CREDENTIALS_FILE_BASE64:
 				var fileBase64 = ValidationUtils.requireNonBlank(configuration.getString(CREDENTIALS_FILE_BASE64, "").trim(), CREDENTIALS_FILE_BASE64 + " is required when authentication-method is " + AUTH_CREDENTIALS_FILE_BASE64);
-				credentialsFileContent = new String(Base64.getDecoder().decode(fileBase64), StandardCharsets.UTF_8);
+				credentialsFileContent = new String(Base64Utils.decode(fileBase64), StandardCharsets.UTF_8);
 				checkJwtExpiry(credentialsFileContent);
 				break;
 

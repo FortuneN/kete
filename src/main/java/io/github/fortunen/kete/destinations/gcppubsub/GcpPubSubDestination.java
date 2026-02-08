@@ -5,13 +5,13 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.util.Base64;
 import java.util.concurrent.ConcurrentHashMap;
 
 import io.github.fortunen.kete.Component;
 import io.github.fortunen.kete.Constants;
 import io.github.fortunen.kete.Destination;
 import io.github.fortunen.kete.EventMessage;
+import io.github.fortunen.kete.utils.Base64Utils;
 import io.github.fortunen.kete.utils.JsonUtils;
 import io.github.fortunen.kete.utils.TemplateUtils;
 import io.github.fortunen.kete.utils.ValidationUtils;
@@ -79,7 +79,7 @@ public class GcpPubSubDestination extends Destination<GcpPubSubDestinationConfig
 			messageObject.put("orderingKey", config.getOrderingKey());
 		}
 
-		messageObject.put("data", Base64.getEncoder().encodeToString(message.eventBody()));
+		messageObject.put("data", Base64Utils.encode(message.eventBody()));
 
 		var attributes = messageObject.putObject("attributes");
 

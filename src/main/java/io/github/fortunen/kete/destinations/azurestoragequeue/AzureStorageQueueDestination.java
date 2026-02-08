@@ -10,7 +10,6 @@ import java.time.Duration;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Base64;
 import java.util.Locale;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -20,6 +19,7 @@ import javax.crypto.spec.SecretKeySpec;
 import io.github.fortunen.kete.Component;
 import io.github.fortunen.kete.Destination;
 import io.github.fortunen.kete.EventMessage;
+import io.github.fortunen.kete.utils.Base64Utils;
 import io.github.fortunen.kete.utils.TemplateUtils;
 import io.github.fortunen.kete.utils.ValidationUtils;
 import lombok.Data;
@@ -36,7 +36,6 @@ public class AzureStorageQueueDestination extends Destination<AzureStorageQueueD
 	private static final String HMAC_SHA256 = "HmacSHA256";
 	private static final String APPLICATION_XML = "application/xml";
 	private static final DateTimeFormatter RFC_1123_FORMATTER = DateTimeFormatter.ofPattern("EEE, dd MMM yyyy HH:mm:ss 'GMT'", Locale.US);
-	private static final Base64.Encoder BASE64_ENCODER = Base64.getEncoder();
 	private static final String SIGNATURE_VERB_PART = "POST\n\n\n";
 	private static final String SIGNATURE_CONTENT_TYPE_PART = "\n\n" + APPLICATION_XML + "\n\n\n\n\n\n";
 
@@ -79,7 +78,7 @@ public class AzureStorageQueueDestination extends Destination<AzureStorageQueueD
 
 		accountResourcePrefix = "/" + config.getAccountName() + "/";
 
-		var secretKeySpec = new SecretKeySpec(Base64.getDecoder().decode(config.getAccountKey()), HMAC_SHA256);
+		var secretKeySpec = new SecretKeySpec(Base64Utils.decode(config.getAccountKey()), HMAC_SHA256);
 
 		threadLocalMac = ThreadLocal.withInitial(() -> {
 			try {
@@ -121,7 +120,7 @@ public class AzureStorageQueueDestination extends Destination<AzureStorageQueueD
 
 		// body — wrap event in Azure Queue XML envelope with base64-encoded content
 
-		var base64Data = BASE64_ENCODER.encodeToString(message.eventBody());
+		var base64Data = Base64Utils.encode(message.eventBody());
 		var xmlBody = "<QueueMessage><MessageText>" + base64Data + "</MessageText></QueueMessage>";
 		var bodyBytes = xmlBody.getBytes(StandardCharsets.UTF_8);
 
@@ -136,7 +135,7 @@ public class AzureStorageQueueDestination extends Destination<AzureStorageQueueD
 			+ xMsVersionLine
 			+ ctx.canonicalResource();
 
-		var signature = BASE64_ENCODER.encodeToString(threadLocalMac.get().doFinal(stringToSign.getBytes(StandardCharsets.UTF_8)));
+		var signature = Base64Utils.encode(threadLocalMac.get().doFinal(stringToSign.getBytes(StandardCharsets.UTF_8)));
 
 		// request
 
