@@ -13,6 +13,5 @@ services:
       # Azure Storage Queue configuration
       # Replace these values or use a .env file
       kete.routes.quick-start.destination.kind: azure-storage-queue
-      kete.routes.quick-start.destination.account-name: ${AZURE_STORAGE_ACCOUNT_NAME:-<YOUR-STORAGE-ACCOUNT-NAME>}
-      kete.routes.quick-start.destination.account-key: ${AZURE_STORAGE_ACCOUNT_KEY:-<YOUR-STORAGE-ACCOUNT-KEY>}
+      kete.routes.quick-start.destination.connection-string: ${AZURE_STORAGE_CONNECTION_STRING:-<YOUR-AZURE-STORAGE-CONNECTION-STRING>}
       kete.routes.quick-start.destination.queue: keycloak-events

@@ -45,25 +45,24 @@ az storage queue create \
   --account-name <your-storage-account>
 ```
 
-### 4. Get the Account Key
+### 4. Get the Connection String
 
 ```bash
-az storage account keys list \
-  --account-name <your-storage-account> \
+az storage account show-connection-string \
+  --name <your-storage-account> \
   --resource-group keycloak-events-rg \
-  --query "[0].value" -o tsv
+  --query connectionString -o tsv
 ```
 
 ## Configuration
 
 ### Option 1: Edit docker-compose.yml directly
 
-Edit [docker-compose.yml](docker-compose.yml) and replace the placeholders:
+Edit [docker-compose.yml](docker-compose.yml) and replace the placeholder:
 
 | Placeholder | Description | Example |
 |-------------|-------------|---------|
-| `<YOUR-STORAGE-ACCOUNT-NAME>` | Azure Storage account name | `mykeycloakstorage` |
-| `<YOUR-STORAGE-ACCOUNT-KEY>` | Storage account access key | `abc123...` |
+| `<YOUR-AZURE-STORAGE-CONNECTION-STRING>` | Full Azure Storage connection string | `DefaultEndpointsProtocol=https;AccountName=...;AccountKey=...;EndpointSuffix=core.windows.net` |
 
 ### Option 2: Use environment variables
 
@@ -73,11 +72,10 @@ Create a `.env` file from the example:
 cp .env.example .env
 ```
 
-Edit `.env` and fill in your values:
+Edit `.env` and fill in your connection string:
 
 ```env
-AZURE_STORAGE_ACCOUNT_NAME=mykeycloakstorage
-AZURE_STORAGE_ACCOUNT_KEY=your-storage-account-key
+AZURE_STORAGE_CONNECTION_STRING=DefaultEndpointsProtocol=https;AccountName=mykeycloakstorage;AccountKey=your-key;EndpointSuffix=core.windows.net
 ```
 
 ## Running

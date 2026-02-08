@@ -149,10 +149,8 @@ public class TestBase {
 	protected void configureDestination(String queue, Map<String, Object> extras) {
 		var map = new HashMap<String, Object>();
 		map.put("kind", "azure-storage-queue");
-		map.put("account-name", ACCOUNT_NAME);
-		map.put("account-key", ACCOUNT_KEY);
+		map.put("connection-string", buildAzuriteConnectionString());
 		map.put("queue", queue);
-		map.put("url", getAzuriteBaseUrl());
 		map.putAll(extras);
 		config.setConfiguration(new MapConfiguration(map));
 		config.initialize();
@@ -162,10 +160,8 @@ public class TestBase {
 	protected void configureDestinationWithTls(String queue, TlsMaterial tls) {
 		var map = new HashMap<String, Object>();
 		map.put("kind", "azure-storage-queue");
-		map.put("account-name", ACCOUNT_NAME);
-		map.put("account-key", ACCOUNT_KEY);
+		map.put("connection-string", buildNginxConnectionString());
 		map.put("queue", queue);
-		map.put("url", getNginxBaseUrl());
 		map.put("tls.enabled", true);
 		map.put("tls.trust-store.loader.kind", "jks-file-path");
 		map.put("tls.trust-store.loader.path", tls.getTrustStoreFilePath());
@@ -178,10 +174,8 @@ public class TestBase {
 	protected void configureDestinationWithMtls(String queue, TlsMaterial tls) {
 		var map = new HashMap<String, Object>();
 		map.put("kind", "azure-storage-queue");
-		map.put("account-name", ACCOUNT_NAME);
-		map.put("account-key", ACCOUNT_KEY);
+		map.put("connection-string", buildNginxConnectionString());
 		map.put("queue", queue);
-		map.put("url", getNginxBaseUrl());
 		map.put("tls.enabled", true);
 		map.put("tls.trust-store.loader.kind", "jks-file-path");
 		map.put("tls.trust-store.loader.path", tls.getTrustStoreFilePath());
@@ -203,6 +197,14 @@ public class TestBase {
 		var start = xml.indexOf("<MessageText>") + "<MessageText>".length();
 		var end = xml.indexOf("</MessageText>");
 		return xml.substring(start, end);
+	}
+
+	protected String buildAzuriteConnectionString() {
+		return "DefaultEndpointsProtocol=http;AccountName=" + ACCOUNT_NAME + ";AccountKey=" + ACCOUNT_KEY + ";QueueEndpoint=" + getAzuriteBaseUrl();
+	}
+
+	protected String buildNginxConnectionString() {
+		return "DefaultEndpointsProtocol=https;AccountName=" + ACCOUNT_NAME + ";AccountKey=" + ACCOUNT_KEY + ";QueueEndpoint=" + getNginxBaseUrl();
 	}
 
 	private void waitForAzuriteReady() {

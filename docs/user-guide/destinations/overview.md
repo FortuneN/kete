@@ -330,7 +330,6 @@ kete.routes.events.destination.credentials-file-path=/secrets/service-account.js
 **Azure Storage Queue:**
 ```bash
 kete.routes.events.destination.kind=azure-storage-queue
-kete.routes.events.destination.account-name=mystorageaccount
-kete.routes.events.destination.account-key=your-account-key
+kete.routes.events.destination.connection-string=DefaultEndpointsProtocol=https;AccountName=mystorageaccount;AccountKey=your-key;EndpointSuffix=core.windows.net
 kete.routes.events.destination.queue=keycloak-events
 ```

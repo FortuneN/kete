@@ -15,14 +15,10 @@ import lombok.NoArgsConstructor;
 @EqualsAndHashCode(callSuper = true)
 public class AzureStorageQueueDestinationConfig extends DestinationConfig {
 
-	public static final String URL = "url";
 	public static final String QUEUE = "queue";
-	public static final String SAS_TOKEN = "sas-token";
 	public static final int DEFAULT_TIMEOUT_SECONDS = 10;
 	public static final String API_VERSION = "2024-08-04";
-	public static final String ACCOUNT_KEY = "account-key";
 	public static final String MESSAGE_TTL = "message-ttl";
-	public static final String ACCOUNT_NAME = "account-name";
 	public static final String TIMEOUT_SECONDS = "timeout-seconds";
 	public static final String CONNECTION_STRING = "connection-string";
 
@@ -42,77 +38,17 @@ public class AzureStorageQueueDestinationConfig extends DestinationConfig {
 
 		ValidationUtils.requireNonNull(configuration, "configuration is required");
 
-		// connection-string (mutually exclusive with account-name, account-key, sas-token, url)
+		// connection-string (required)
 
-		var rawConnectionString = configuration.getString(CONNECTION_STRING, "").trim();
-		var hasConnectionString = ValidationUtils.isNotBlank(rawConnectionString);
+		var rawConnectionString = ValidationUtils.requireNonBlank(configuration.getString(CONNECTION_STRING, "").trim(), CONNECTION_STRING + " is required");
 
-		if (hasConnectionString) {
+		var info = AzureStorageQueueUtils.parseConnectionString(rawConnectionString);
 
-			var rawAccountName = configuration.getString(ACCOUNT_NAME, "").trim();
-			var rawAccountKey = configuration.getString(ACCOUNT_KEY, "").trim();
-			var rawSasToken = configuration.getString(SAS_TOKEN, "").trim();
-			var rawUrl = configuration.getString(URL, "").trim(); 
-
-			ValidationUtils.requireFalse(ValidationUtils.isNotBlank(rawAccountName), CONNECTION_STRING + " and " + ACCOUNT_NAME + " are mutually exclusive");
-			ValidationUtils.requireFalse(ValidationUtils.isNotBlank(rawAccountKey), CONNECTION_STRING + " and " + ACCOUNT_KEY + " are mutually exclusive");
-			ValidationUtils.requireFalse(ValidationUtils.isNotBlank(rawSasToken), CONNECTION_STRING + " and " + SAS_TOKEN + " are mutually exclusive");
-			ValidationUtils.requireFalse(ValidationUtils.isNotBlank(rawUrl), CONNECTION_STRING + " and " + URL + " are mutually exclusive");
-
-			var info = AzureStorageQueueUtils.parseConnectionString(rawConnectionString);
-
-			accountName = info.accountName();
-			accountKey = info.accountKey();
-			sasToken = info.sasToken();
-			url = info.url();
-			useSasAuth = info.useSasAuth();
-
-		} else {
-
-			// authentication — exactly one of account-key or sas-token
-
-			var rawSasToken = configuration.getString(SAS_TOKEN, "").trim();
-			var rawAccountKey = configuration.getString(ACCOUNT_KEY, "").trim();
-
-			useSasAuth = ValidationUtils.isNotBlank(rawSasToken);
-			var useSharedKeyAuth = ValidationUtils.isNotBlank(rawAccountKey);
-
-			ValidationUtils.requireTrue(useSasAuth || useSharedKeyAuth, "either " + ACCOUNT_KEY + ", " + SAS_TOKEN + ", or " + CONNECTION_STRING + " is required");
-			ValidationUtils.requireFalse(useSasAuth && useSharedKeyAuth, ACCOUNT_KEY + " and " + SAS_TOKEN + " are mutually exclusive");
-
-			if (useSasAuth) {
-				sasToken = rawSasToken.startsWith("?") ? rawSasToken.substring(1) : rawSasToken;
-			} else {
-				accountKey = rawAccountKey;
-			}
-
-			// account-name (required for shared-key; optional for sas when url is provided)
-
-			accountName = configuration.getString(ACCOUNT_NAME, "").trim();
-
-			if (useSharedKeyAuth) {
-				ValidationUtils.requireNonBlank(accountName, ACCOUNT_NAME + " is required");
-			}
-
-			// url (optional — defaults to https://{account-name}.queue.core.windows.net)
-
-			var configuredUrl = configuration.getString(URL, "").trim();
-
-			if (ValidationUtils.isNotBlank(configuredUrl)) {
-
-				url = ValidationUtils.requireValidUrl(configuredUrl, URL + " must be a valid absolute URL");
-
-				if (ValidationUtils.isNotBlank(accountName)) {
-					ValidationUtils.requireTrue(url.contains(accountName), URL + " must contain the " + ACCOUNT_NAME);
-				}
-
-			} else {
-
-				ValidationUtils.requireNonBlank(accountName, URL + " or " + ACCOUNT_NAME + " is required");
-
-				url = "https://" + accountName + ".queue.core.windows.net";
-			}
-		}
+		accountName = info.accountName();
+		accountKey = info.accountKey();
+		sasToken = info.sasToken();
+		url = info.url();
+		useSasAuth = info.useSasAuth();
 
 		// strip trailing slash
 

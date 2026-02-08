@@ -70,9 +70,7 @@ class AzureStorageQueueDestinationE2ETests extends EndToEndTestBase {
 		envVars.put("kete.enabled", "true");
 		envVars.put("kete.routes.asq-test.realm-matchers.filter", "list:" + TEST_REALM);
 		envVars.put("kete.routes.asq-test.destination.kind", "azure-storage-queue");
-		envVars.put("kete.routes.asq-test.destination.account-name", ACCOUNT_NAME);
-		envVars.put("kete.routes.asq-test.destination.account-key", ACCOUNT_KEY);
-		envVars.put("kete.routes.asq-test.destination.url", "http://azurite:" + QUEUE_PORT + "/" + ACCOUNT_NAME);
+		envVars.put("kete.routes.asq-test.destination.connection-string", "DefaultEndpointsProtocol=http;AccountName=" + ACCOUNT_NAME + ";AccountKey=" + ACCOUNT_KEY + ";QueueEndpoint=http://azurite:" + QUEUE_PORT + "/" + ACCOUNT_NAME);
 		envVars.put("kete.routes.asq-test.destination.queue", "test-queue");
 		envVars.put("kete.routes.asq-test.serializer.kind", "json");
 

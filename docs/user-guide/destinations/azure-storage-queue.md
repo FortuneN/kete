@@ -20,16 +20,7 @@ Stream Keycloak events to Azure Storage Queue.
 
 ## Example Configurations
 
-=== "Shared Key (Account Name + Key)"
-
-    ```bash
-    kete.routes.asq.destination.kind=azure-storage-queue
-    kete.routes.asq.destination.account-name=mystorageaccount
-    kete.routes.asq.destination.account-key=your-account-key
-    kete.routes.asq.destination.queue=keycloak-events
-    ```
-
-=== "Connection String"
+=== "Azure Cloud"
 
     ```bash
     kete.routes.asq.destination.kind=azure-storage-queue
@@ -41,8 +32,7 @@ Stream Keycloak events to Azure Storage Queue.
 
     ```bash
     kete.routes.asq.destination.kind=azure-storage-queue
-    kete.routes.asq.destination.account-name=mystorageaccount
-    kete.routes.asq.destination.sas-token=sv=2024-08-04&ss=q&srt=sco&sp=wau&se=...&sig=...
+    kete.routes.asq.destination.connection-string=QueueEndpoint=https://mystorageaccount.queue.core.windows.net;SharedAccessSignature=sv=2024-08-04&ss=q&srt=sco&sp=wau&se=...&sig=...
     kete.routes.asq.destination.queue=keycloak-events
     ```
 
@@ -50,20 +40,8 @@ Stream Keycloak events to Azure Storage Queue.
 
     ```bash
     kete.routes.asq.destination.kind=azure-storage-queue
-    kete.routes.asq.destination.account-name=devstoreaccount1
-    kete.routes.asq.destination.account-key=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==
+    kete.routes.asq.destination.connection-string=DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;QueueEndpoint=http://azurite:10001/devstoreaccount1
     kete.routes.asq.destination.queue=keycloak-events
-    kete.routes.asq.destination.url=http://azurite:10001/devstoreaccount1
-    ```
-
-=== "Custom Endpoint"
-
-    ```bash
-    kete.routes.asq.destination.kind=azure-storage-queue
-    kete.routes.asq.destination.account-name=mystorageaccount
-    kete.routes.asq.destination.account-key=your-account-key
-    kete.routes.asq.destination.queue=keycloak-events
-    kete.routes.asq.destination.url=https://mystorageaccount.queue.core.windows.net
     ```
 
 
@@ -71,13 +49,12 @@ Stream Keycloak events to Azure Storage Queue.
 ## Features
 
 - Azure Storage Queue REST API integration (no Azure SDK dependency)
-- Three authentication methods: Shared Key, Connection String, SAS Token
+- Authentication via connection string (Shared Key or SAS Token)
 - Emulator support via Azurite for local development and testing
 - Queue name templating with variables
 - Configurable message TTL
 - Messages encoded as Base64
 - TLS/mTLS support
-- Custom endpoint URL support
 
 
 
@@ -88,13 +65,13 @@ Stream Keycloak events to Azure Storage Queue.
 | Property | Description | Example |
 |----------|-------------|---------|
 | `destination.kind` | Must be `azure-storage-queue` | `azure-storage-queue` |
+| `destination.connection-string` | Azure Storage connection string | `DefaultEndpointsProtocol=https;AccountName=...;AccountKey=...;EndpointSuffix=core.windows.net` |
 | `destination.queue` | Queue name (supports templating) | `keycloak-events` |
 
 ### Optional Properties
 
 | Property | Default | Description | Example |
 |----------|---------|-------------|---------|
-| `destination.url` | `https://{account-name}.queue.core.windows.net` | Custom endpoint URL | `http://azurite:10001/devstoreaccount1` |
 | `destination.message-ttl` | `0` | Message TTL in seconds (`0` = Azure default 7 days, `-1` = no expiry) | `3600` |
 | `destination.timeout-seconds` | `10` | HTTP connect and request timeout in seconds | `30` |
 
@@ -114,37 +91,37 @@ Available variables: `${realmLowerCase}`, `${realmUpperCase}`, `${eventTypeLower
 
 ### Authentication
 
-Exactly **one** of the following authentication methods must be used:
+Authentication is configured entirely through the `connection-string` property. The connection string is parsed to extract `AccountName`, `AccountKey` or `SharedAccessSignature`, `QueueEndpoint`, `DefaultEndpointsProtocol`, and `EndpointSuffix`.
 
-#### Connection String
+#### Shared Key Connection String
 
-| Property | Description |
-|----------|-------------|
-| `destination.connection-string` | Full Azure Storage connection string |
+```bash
+# Standard Azure connection string
+DefaultEndpointsProtocol=https;AccountName=myaccount;AccountKey=your-key;EndpointSuffix=core.windows.net
 
-The connection string is parsed to extract `AccountName`, `AccountKey` or `SharedAccessSignature`, `QueueEndpoint`, `DefaultEndpointsProtocol`, and `EndpointSuffix`. Mutually exclusive with individual credential properties.
-
-#### Shared Key (Account Name + Account Key)
-
-| Property | Description |
-|----------|-------------|
-| `destination.account-name` | Azure Storage account name |
-| `destination.account-key` | Azure Storage account access key |
+# With explicit QueueEndpoint
+AccountName=myaccount;AccountKey=your-key;QueueEndpoint=https://myaccount.queue.core.windows.net
+```
 
 Uses HMAC-SHA256 signing per the Azure Storage REST API specification.
 
-#### SAS Token
+#### SAS Token Connection String
 
-| Property | Description |
-|----------|-------------|
-| `destination.sas-token` | Shared Access Signature token |
-| `destination.account-name` | _(optional)_ Storage account name |
-| `destination.url` | _(optional)_ Custom queue endpoint URL |
+```bash
+# SAS with explicit endpoint
+QueueEndpoint=https://myaccount.queue.core.windows.net;SharedAccessSignature=sv=2024-08-04&ss=q&srt=sco&sp=wau&se=...&sig=...
+
+# SAS with account name (endpoint derived)
+AccountName=myaccount;SharedAccessSignature=sv=2024-08-04&ss=q&sig=...
+```
 
 The SAS token is appended as query parameters to each request. No signing is needed.
 
 !!! note "Emulator Mode"
-    When using Azurite, set `destination.url` to the emulator endpoint (e.g., `http://azurite:10001/devstoreaccount1`) and use the well-known Azurite development credentials.
+    When using Azurite, use the well-known Azurite development connection string with an explicit `QueueEndpoint` pointing to the emulator:
+    ```
+    DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;QueueEndpoint=http://azurite:10001/devstoreaccount1
+    ```
 
 ### TLS Properties
 
@@ -169,8 +146,7 @@ See [TLS & mTLS](overview.md#tls-mtls) for full details on TLS options.
 kete.routes.prod.destination.kind=azure-storage-queue
 kete.routes.prod.realm-matchers.realm=list:master
 kete.routes.prod.event-matchers.filter=glob:*
-kete.routes.prod.destination.account-name=prodstorageaccount
-kete.routes.prod.destination.account-key=your-production-account-key
+kete.routes.prod.destination.connection-string=DefaultEndpointsProtocol=https;AccountName=prodstorageaccount;AccountKey=your-production-account-key;EndpointSuffix=core.windows.net
 kete.routes.prod.destination.queue=keycloak-events
 kete.routes.prod.destination.message-ttl=86400
 kete.routes.prod.destination.timeout-seconds=30
@@ -181,8 +157,7 @@ kete.routes.prod.destination.timeout-seconds=30
 ```bash
 # Route events to different queues per realm
 kete.routes.events.destination.kind=azure-storage-queue
-kete.routes.events.destination.account-name=mystorageaccount
-kete.routes.events.destination.account-key=your-account-key
+kete.routes.events.destination.connection-string=DefaultEndpointsProtocol=https;AccountName=mystorageaccount;AccountKey=your-key;EndpointSuffix=core.windows.net
 kete.routes.events.destination.queue=keycloak-${realmLowerCase}-events
 ```
 
@@ -192,10 +167,8 @@ kete.routes.events.destination.queue=keycloak-${realmLowerCase}-events
 kete.routes.local.destination.kind=azure-storage-queue
 kete.routes.local.realm-matchers.realm=list:master
 kete.routes.local.event-matchers.filter=glob:*
-kete.routes.local.destination.account-name=devstoreaccount1
-kete.routes.local.destination.account-key=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==
+kete.routes.local.destination.connection-string=DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;QueueEndpoint=http://localhost:10001/devstoreaccount1
 kete.routes.local.destination.queue=keycloak-events
-kete.routes.local.destination.url=http://localhost:10001/devstoreaccount1
 ```
 
 ### Example 4: Connection String from Environment Variable
