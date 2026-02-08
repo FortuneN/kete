@@ -166,4 +166,18 @@ public class getCertificateLoaderTests {
 			.as("Should return different instances for transient certificate loaders")
 			.isNotSameAs(second);
 	}
+
+	@Test
+	public void shouldReturnNullForUnknownLoaderKey() {
+
+		// act
+
+		var result = IocUtils.get("unknown-loader", CertificateLoader.class);
+
+		// assert
+
+		assertThat(result)
+			.as("Should return null for unknown certificate loader key")
+			.isNull();
+	}
 }

@@ -1,6 +1,7 @@
 package io.github.fortunen.kete.unittests.utils.certificateutils;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
 
 import io.github.fortunen.kete.utils.CertificateUtils;
 import okhttp3.tls.HeldCertificate;
@@ -84,5 +85,19 @@ public class parsePemCertificatesTests {
 		assertThat(result)
 			.as("Should return empty list for empty content")
 			.isEmpty();
+	}
+
+	@Test
+	public void shouldThrowForNullContent() {
+
+		// act
+
+		var thrown = catchThrowable(() -> CertificateUtils.parsePemCertificates(null));
+
+		// assert
+
+		assertThat(thrown)
+			.isInstanceOf(IllegalStateException.class)
+			.hasMessage("pemContent is required");
 	}
 }

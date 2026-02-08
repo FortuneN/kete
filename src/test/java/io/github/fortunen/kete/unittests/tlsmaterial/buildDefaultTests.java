@@ -58,4 +58,23 @@ assertThat(tls.getKeyStoreAndTrustStoreSSLContext())
 			.as("TLS should be enabled by default")
 			.isTrue();
 	}
+
+	@Test
+	void shouldReturnMaterialWithNullSSLContextWhenDisabled() {
+
+		// act
+
+		var tls = TlsMaterial.builder()
+			.withEnabled(false)
+			.build();
+
+		// assert
+
+		assertThat(tls.isEnabled())
+			.as("TLS should be disabled")
+			.isFalse();
+		assertThat(tls.getKeyStoreAndTrustStoreSSLContext())
+			.as("SSL context should be null when disabled")
+			.isNull();
+	}
 }

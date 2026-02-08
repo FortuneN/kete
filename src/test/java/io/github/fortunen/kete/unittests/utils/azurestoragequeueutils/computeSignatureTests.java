@@ -1,6 +1,7 @@
 package io.github.fortunen.kete.unittests.utils.azurestoragequeueutils;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
@@ -114,6 +115,51 @@ public class computeSignatureTests {
 		// act
 
 		var result = AzureStorageQueueUtils.computeSignature(secretKeySpec, stringToSign);
+
+		// assert
+
+		assertThat(result).isNotNull().isNotBlank();
+		assertThat(Base64.getDecoder().decode(result)).hasSize(32);
+	}
+
+	@Test
+	public void shouldThrowForNullSecretKeySpec() {
+
+		// act
+
+		var thrown = catchThrowable(() -> AzureStorageQueueUtils.computeSignature(null, "test-content"));
+
+		// assert
+
+		assertThat(thrown).isNotNull();
+	}
+
+	@Test
+	public void shouldThrowForNullStringToSign() {
+
+		// arrange
+
+		var secretKeySpec = AzureStorageQueueUtils.buildSecretKeySpec(TEST_KEY_BASE64);
+
+		// act
+
+		var thrown = catchThrowable(() -> AzureStorageQueueUtils.computeSignature(secretKeySpec, null));
+
+		// assert
+
+		assertThat(thrown).isNotNull();
+	}
+
+	@Test
+	public void shouldComputeSignatureForEmptyStringToSign() {
+
+		// arrange
+
+		var secretKeySpec = AzureStorageQueueUtils.buildSecretKeySpec(TEST_KEY_BASE64);
+
+		// act
+
+		var result = AzureStorageQueueUtils.computeSignature(secretKeySpec, "");
 
 		// assert
 

@@ -126,4 +126,16 @@ public class tryParseLocalDate_FormatterTests {
 
 		assertThat(result).isEmpty();
 	}
+
+	@Test
+	public void shouldReturnEmptyForNullFormatter() {
+
+		// act
+
+		var result = ValidationUtils.tryParseLocalDate("2024-01-15", null);
+
+		// assert
+
+		assertThat(result).isEmpty();
+	}
 }

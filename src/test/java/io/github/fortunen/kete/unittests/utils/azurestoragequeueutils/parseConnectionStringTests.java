@@ -252,4 +252,40 @@ public class parseConnectionStringTests {
 
 		assertThat(thrown).isInstanceOf(IllegalStateException.class).hasMessage("connection-string must contain AccountName or QueueEndpoint");
 	}
+
+	@Test
+	public void shouldThrowForNullConnectionString() {
+
+		// act
+
+		var thrown = catchThrowable(() -> AzureStorageQueueUtils.parseConnectionString(null));
+
+		// assert
+
+		assertThat(thrown).isNotNull();
+	}
+
+	@Test
+	public void shouldThrowForEmptyConnectionString() {
+
+		// act
+
+		var thrown = catchThrowable(() -> AzureStorageQueueUtils.parseConnectionString(""));
+
+		// assert
+
+		assertThat(thrown).isInstanceOf(IllegalStateException.class);
+	}
+
+	@Test
+	public void shouldThrowForBlankConnectionString() {
+
+		// act
+
+		var thrown = catchThrowable(() -> AzureStorageQueueUtils.parseConnectionString("   "));
+
+		// assert
+
+		assertThat(thrown).isInstanceOf(IllegalStateException.class);
+	}
 }

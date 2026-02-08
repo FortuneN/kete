@@ -186,4 +186,39 @@ class registerInternalClientTests {
 			.as("Should mark as registered when client already exists")
 			.isTrue();
 	}
+
+	@Test
+	void shouldReturnFalseWhenClientCreationFails() {
+
+		// arrange
+
+		var map = new HashMap<String, Object>();
+		map.put("enabled", "true");
+		map.put("mode", "internal");
+		map.put("realm", "test-realm");
+		var config = new MapConfiguration(map);
+
+		var oauth = OAuthMaterial.builder()
+			.withConfiguration(config)
+			.build();
+
+		var session = mock(KeycloakSession.class);
+		var realmProvider = mock(RealmProvider.class);
+		var realmModel = mock(RealmModel.class);
+
+		when(session.realms()).thenReturn(realmProvider);
+		when(realmProvider.getRealmByName("test-realm")).thenReturn(realmModel);
+		when(realmModel.getClientByClientId("kete-oauth-client")).thenReturn(null);
+		when(realmModel.addClient("kete-oauth-client")).thenThrow(new RuntimeException("creation failed"));
+
+		// act
+
+		var result = oauth.registerInternalClient(session);
+
+		// assert
+
+		assertThat(result)
+			.as("Should return false when client creation throws")
+			.isFalse();
+	}
 }

@@ -630,11 +630,47 @@ public class initializePoolPropertiesTests {
 	}
 
 	@Test
+	public void shouldThrowWhenPoolMaxIdleIsNegative() {
+
+		// arrange
+
+		var config = createConfigWithPoolProperty("max-idle", -5);
+		var destinationConfig = createTestDestinationConfig(config);
+
+		// act
+
+		var thrown = catchThrowable(() -> destinationConfig.initialize());
+
+		// assert
+
+		assertThat(thrown).isInstanceOf(IllegalStateException.class);
+		assertThat(thrown.getMessage()).isEqualTo("max-idle must be greater than 0");
+	}
+
+	@Test
 	public void shouldThrowWhenPoolMaxTotalIsZero() {
 
 		// arrange
 
 		var config = createConfigWithPoolProperty("max-total", 0);
+		var destinationConfig = createTestDestinationConfig(config);
+
+		// act
+
+		var thrown = catchThrowable(() -> destinationConfig.initialize());
+
+		// assert
+
+		assertThat(thrown).isInstanceOf(IllegalStateException.class);
+		assertThat(thrown.getMessage()).isEqualTo("max-total must be greater than 0");
+	}
+
+	@Test
+	public void shouldThrowWhenPoolMaxTotalIsNegative() {
+
+		// arrange
+
+		var config = createConfigWithPoolProperty("max-total", -5);
 		var destinationConfig = createTestDestinationConfig(config);
 
 		// act

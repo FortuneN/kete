@@ -126,4 +126,14 @@ public class parsePemPrivateKeyTests {
 			.as("Should throw for encrypted private key")
 			.isInstanceOf(Exception.class);
 	}
+
+	@Test
+	public void shouldThrowForNullContent() {
+
+		// act & assert
+
+		assertThatThrownBy(() -> CertificateUtils.parsePemPrivateKey(null))
+			.isInstanceOf(IllegalStateException.class)
+			.hasMessage("pemContent is required");
+	}
 }

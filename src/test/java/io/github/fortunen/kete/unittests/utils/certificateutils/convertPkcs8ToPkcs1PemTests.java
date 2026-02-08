@@ -205,4 +205,18 @@ public class convertPkcs8ToPkcs1PemTests {
 
 		assertThat(result1).isNotEqualTo(result2);
 	}
+
+	@Test
+	public void shouldThrowForNullPrivateKey() {
+
+		// act
+
+		var thrown = catchThrowable(() -> CertificateUtils.convertPkcs8ToPkcs1Pem(null));
+
+		// assert
+
+		assertThat(thrown)
+			.isInstanceOf(IllegalStateException.class)
+			.hasMessage("privateKey is required");
+	}
 }

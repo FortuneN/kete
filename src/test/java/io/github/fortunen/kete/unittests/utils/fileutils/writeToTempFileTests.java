@@ -1,6 +1,7 @@
 package io.github.fortunen.kete.unittests.utils.fileutils;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
 
 import io.github.fortunen.kete.utils.FileUtils;
 import java.io.IOException;
@@ -180,5 +181,19 @@ public class writeToTempFileTests {
 		// assert
 
 		assertThat(Files.readString(Path.of(path))).isEqualTo(content);
+	}
+
+	@Test
+	public void shouldThrowForNullContent() {
+
+		// act
+
+		var thrown = catchThrowable(() -> FileUtils.writeToTempFile(null, ".txt"));
+
+		// assert
+
+		assertThat(thrown)
+			.isInstanceOf(IllegalStateException.class)
+			.hasMessage("content is required");
 	}
 }

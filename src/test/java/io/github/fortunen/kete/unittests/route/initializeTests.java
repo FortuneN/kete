@@ -19,6 +19,25 @@ import io.github.fortunen.kete.Serializer;
 public class initializeTests extends TestBase {
 
 	@Test
+	public void shouldThrowWhenSessionIsNull() {
+
+		// arrange
+
+		route = new Route();
+		route.setSerializer(mock(Serializer.class));
+		route.setDestinationConfig(mock(DestinationConfig.class));
+
+		// act
+
+		var thrown = catchThrowable(() -> route.initialize(null));
+
+		// assert
+
+		assertThat(thrown).isInstanceOf(IllegalStateException.class);
+		assertThat(thrown.getMessage()).isEqualTo("session is required");
+	}
+
+	@Test
 	public void shouldThrowWhenSerializerIsNull() {
 
 		// arrange

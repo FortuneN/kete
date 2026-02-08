@@ -179,6 +179,23 @@ public class initializeTests {
 		assertThat(thrown).isInstanceOf(IllegalStateException.class).hasMessage("queue is required");
 	}
 
+	@Test
+	public void shouldThrowWhenQueueIsBlank() {
+
+		// arrange
+
+		var config = new AzureStorageQueueDestinationConfig();
+		config.setConfiguration(new MapConfiguration(Map.of("kind", "azure-storage-queue", "account-name", "myaccount", "account-key", VALID_ACCOUNT_KEY, "queue", "   ")));
+
+		// act
+
+		var thrown = catchThrowable(() -> config.initialize());
+
+		// assert
+
+		assertThat(thrown).isInstanceOf(IllegalStateException.class).hasMessage("queue is required");
+	}
+
 	// =========================================================================
 	// Defaults
 	// =========================================================================

@@ -1,6 +1,7 @@
 package io.github.fortunen.kete.unittests.matchers.regexmatcher;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
 
 import io.github.fortunen.kete.matchers.RegexMatcher;
 import org.junit.jupiter.api.Test;
@@ -164,5 +165,21 @@ class matchesTests {
 		assertThat(matcher.matches("EVENT_123")).isTrue();
 		assertThat(matcher.matches("EVENT_1")).isTrue();
 		assertThat(matcher.matches("EVENT_ABC")).isFalse();
+	}
+
+	@Test
+	void shouldThrowForNullEventType() {
+
+		// arrange
+
+		var matcher = createAndInitialize("LOGIN");
+
+		// act
+
+		var thrown = catchThrowable(() -> matcher.matches(null));
+
+		// assert
+
+		assertThat(thrown).isInstanceOf(NullPointerException.class);
 	}
 }

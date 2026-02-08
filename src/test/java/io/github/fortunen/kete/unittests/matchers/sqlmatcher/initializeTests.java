@@ -38,4 +38,21 @@ class initializeTests {
 
 		assertThat(matcher.getMatcher()).isNotNull();
 	}
+
+	@Test
+	void shouldCompileEmptyPattern() {
+
+		// arrange
+
+		var matcher = new SqlMatcher();
+		matcher.setPattern("");
+
+		// act
+
+		matcher.initialize();
+
+		// assert
+
+		assertThat(matcher.getMatcher()).isNotNull();
+	}
 }

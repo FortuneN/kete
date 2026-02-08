@@ -135,6 +135,29 @@ public class initializeTests {
 			.hasMessage("topic is required");
 	}
 
+	@Test
+	public void shouldThrowWhenTopicIsBlank() {
+
+		// arrange
+
+		var config = new GcpPubSubDestinationConfig();
+		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "gcp-pubsub",
+			"project", "my-project",
+			"topic", "   "
+		)));
+
+		// act
+
+		var thrown = catchThrowable(() -> config.initialize());
+
+		// assert
+
+		assertThat(thrown)
+			.isInstanceOf(IllegalStateException.class)
+			.hasMessage("topic is required");
+	}
+
 	// =========================================================================
 	// Defaults
 	// =========================================================================

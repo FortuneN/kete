@@ -1,6 +1,7 @@
 package io.github.fortunen.kete.unittests.utils.matcherutils;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -251,5 +252,51 @@ class matchWithModeTests {
 		// assert
 
 		assertThat(result).isFalse();
+	}
+
+	// =========================================================================
+	// Null inputs
+	// =========================================================================
+
+	@Test
+	void shouldThrowForNullValue() {
+
+		// act
+
+		var thrown = catchThrowable(() -> MatcherUtils.matchWithMode(null, new Matcher[0], MatchMode.ANY));
+
+		// assert
+
+		assertThat(thrown)
+			.isInstanceOf(IllegalStateException.class)
+			.hasMessage("value is required");
+	}
+
+	@Test
+	void shouldThrowForNullMatchers() {
+
+		// act
+
+		var thrown = catchThrowable(() -> MatcherUtils.matchWithMode("test", null, MatchMode.ANY));
+
+		// assert
+
+		assertThat(thrown)
+			.isInstanceOf(IllegalStateException.class)
+			.hasMessage("matchers is required");
+	}
+
+	@Test
+	void shouldThrowForNullMode() {
+
+		// act
+
+		var thrown = catchThrowable(() -> MatcherUtils.matchWithMode("test", new Matcher[0], null));
+
+		// assert
+
+		assertThat(thrown)
+			.isInstanceOf(IllegalStateException.class)
+			.hasMessage("mode is required");
 	}
 }
