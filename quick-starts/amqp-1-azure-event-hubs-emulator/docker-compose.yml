@@ -1,12 +1,16 @@
 # Azure Event Hubs Emulator (AMQP 1.0)
 # Local development emulator - no Azure subscription required
 # See: https://github.com/Azure/azure-event-hubs-emulator-installer
+#
+# NOTE: Event Hubs uses CBS (Claims Based Security) over AMQP, so a generic
+# AMQP 1.0 subscriber cannot receive messages. We use a Kafka subscriber for
+# reception verification since the emulator also exposes a Kafka endpoint.
+# KETE still sends via AMQP 1.0 — only the verification uses Kafka.
 
 services:
 
   azurite:
     image: ghcr.io/fortunen/kete/quick-start-azurite
-    command: ["azurite", "--blobHost", "0.0.0.0", "--queueHost", "0.0.0.0", "--tableHost", "0.0.0.0", "--skipApiVersionCheck"]
     ports:
       - 10000:10000
       - 10001:10001
@@ -21,6 +25,7 @@ services:
     image: ghcr.io/fortunen/kete/quick-start-eventhubs-emulator
     ports:
       - 5672:5672
+      - 9092:9092
       - 5300:5300
     volumes:
       - ./Config.json:/Eventhubs_Emulator/ConfigFiles/Config.json:ro
@@ -32,29 +37,36 @@ services:
       azurite:
         condition: service_healthy
 
-  # Wait for the emulator AMQP port to be ready before starting Keycloak
+  # Wait for both AMQP and Kafka ports to be ready before starting Keycloak
   wait-for-emulator:
     image: ghcr.io/fortunen/kete/quick-start-alpine
     command: >
       sh -c "
-        echo 'Waiting for Event Hubs emulator AMQP port to be ready...';
+        echo 'Waiting for Event Hubs emulator ports to be ready...';
         while ! nc -z eventhubs-emulator 5672 2>/dev/null; do
           sleep 2;
         done;
-        echo 'Event Hubs emulator AMQP port is ready!'
+        echo 'Event Hubs emulator AMQP port is ready!';
+        while ! nc -z eventhubs-emulator 9092 2>/dev/null; do
+          sleep 2;
+        done;
+        echo 'Event Hubs emulator Kafka port is ready!'
       "
     depends_on:
       - eventhubs-emulator
 
-  # AMQP 1.0 subscriber to verify event reception
+  # Kafka subscriber to verify event reception
+  # (Event Hubs emulator exposes Kafka protocol alongside AMQP)
   subscriber:
-    image: ghcr.io/fortunen/kete/quick-start-amqp1-subscriber
+    image: ghcr.io/fortunen/kete/quick-start-kafka-subscriber
     environment:
-      AMQP_HOST: eventhubs-emulator
-      AMQP_PORT: 5672
-      AMQP_USERNAME: RootManageSharedAccessKey
-      AMQP_PASSWORD: SAS_KEY_VALUE
-      AMQP_ADDRESS: keycloak-events
+      KAFKA_BOOTSTRAP_SERVERS: eventhubs-emulator:9092
+      KAFKA_TOPIC: keycloak-events
+      KAFKA_GROUP_ID: event-checker
+      KAFKA_SECURITY_PROTOCOL: SASL_PLAINTEXT
+      KAFKA_SASL_MECHANISM: PLAIN
+      KAFKA_SASL_USERNAME: $$ConnectionString
+      KAFKA_SASL_PASSWORD: Endpoint=sb://eventhubs-emulator;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=SAS_KEY_VALUE;UseDevelopmentEmulator=true;
     depends_on:
       wait-for-emulator:
         condition: service_completed_successfully
