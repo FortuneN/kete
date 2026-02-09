@@ -248,7 +248,7 @@ For detailed information about each loader and their properties, see **[Certific
 | **[amqp-1](amqp-1.md)** | AMQP 1 | ActiveMQ Artemis, Azure Service Bus, Azure Event Hubs, Qpid, RabbitMQ 4.0+ |
 | **[mqtt-3](mqtt-3.md)** | MQTT 3 | Mosquitto, HiveMQ, EMQX, VerneMQ, NanoMQ, RabbitMQ, AWS IoT, Azure IoT Hub |
 | **[mqtt-5](mqtt-5.md)** | MQTT 5 | HiveMQ, EMQX, VerneMQ, NanoMQ, Mosquitto 2.0+, RabbitMQ, Azure Event Grid |
-| **[redis-pubsub](redis-pubsub.md)** | Redis RESP | Redis, Valkey, Dragonfly, KeyDB, ElastiCache, Azure Cache for Redis, Upstash |
+| **[redis-pubsub](redis-pubsub.md)** | Redis RESP | Redis, Valkey, Dragonfly, KeyDB, Garnet, ElastiCache, Azure Cache for Redis, Upstash |
 | **[redis-stream](redis-stream.md)** | Redis RESP | Redis 5.0+, Valkey, Dragonfly, KeyDB, ElastiCache, Azure Cache for Redis, Upstash |
 | **[nats](nats.md)** | NATS Protocol | NATS Server, Synadia Cloud |
 | **[nats-jetstream](nats-jetstream.md)** | NATS JetStream | NATS Server, Synadia Cloud |

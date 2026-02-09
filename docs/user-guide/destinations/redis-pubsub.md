@@ -186,3 +186,27 @@ kete.routes.auth-redis.destination.username=keycloak
 kete.routes.auth-redis.destination.password=secret
 kete.routes.auth-redis.destination.client-name=keycloak-events
 ```
+
+
+
+## Quick Starts
+
+| Broker | Quickstart |
+|--------|------------|
+| Redis | [redis-pubsub-redis](../../quick-starts/redis-pubsub-redis/) |
+| Valkey | [redis-pubsub-valkey](../../quick-starts/redis-pubsub-valkey/) |
+| Dragonfly | [redis-pubsub-dragonfly](../../quick-starts/redis-pubsub-dragonfly/) |
+| KeyDB | [redis-pubsub-keydb](../../quick-starts/redis-pubsub-keydb/) |
+| Microsoft Garnet | [redis-pubsub-garnet](../../quick-starts/redis-pubsub-garnet/) |
+| Azure Cache for Redis | [redis-pubsub-azure-cache-for-redis](../../quick-starts/redis-pubsub-azure-cache-for-redis/) |
+| Upstash | [redis-pubsub-upstash](../../quick-starts/redis-pubsub-upstash/) |
+
+
+
+## See Also
+
+- [Redis Stream Destination](redis-stream.md) — Persistent alternative with consumer groups
+- [Serializers](../serializers/overview.md)
+- [Matchers](../matchers/overview.md)
+- [Event Types](../event-types.md)
+- [Certificate Loaders](../certificate-loaders/overview.md)

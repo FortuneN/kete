@@ -12,7 +12,7 @@ This page provides a comprehensive cross-reference of message brokers and the de
 | **Valkey** | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
 | **Dragonfly** | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
 | **KeyDB** | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
-| **Microsoft Garnet** | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| **Microsoft Garnet** | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ Pub/Sub only | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
 | **Amazon ElastiCache** | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
 | **Azure Cache for Redis** | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
 | **Google Cloud Memorystore** | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
@@ -233,7 +233,7 @@ Use `destination.kind=redis-pubsub` or `destination.kind=redis-stream`:
 - **Valkey** - Redis fork, fully compatible
 - **Dragonfly** - Redis-compatible, multi-threaded
 - **KeyDB** - Redis-compatible, multi-threaded
-- **Microsoft Garnet** - Redis-compatible, .NET-based
+- **Microsoft Garnet** - Redis-compatible, .NET-based (Pub/Sub only, no Streams)
 - **Amazon ElastiCache** - AWS-managed Redis
 - **Azure Cache for Redis** - Azure-managed Redis
 - **Google Cloud Memorystore** - GCP-managed Redis
@@ -241,7 +241,10 @@ Use `destination.kind=redis-pubsub` or `destination.kind=redis-stream`:
 
 **Quickstarts available (Pub/Sub):** [redis-pubsub-redis](../../quick-starts/redis-pubsub-redis/), [redis-pubsub-valkey](../../quick-starts/redis-pubsub-valkey/), [redis-pubsub-dragonfly](../../quick-starts/redis-pubsub-dragonfly/), [redis-pubsub-keydb](../../quick-starts/redis-pubsub-keydb/), [redis-pubsub-garnet](../../quick-starts/redis-pubsub-garnet/), [redis-pubsub-azure-cache-for-redis](../../quick-starts/redis-pubsub-azure-cache-for-redis/), [redis-pubsub-upstash](../../quick-starts/redis-pubsub-upstash/)
 
-**Quickstarts available (Streams):** [redis-stream-redis](../../quick-starts/redis-stream-redis/), [redis-stream-valkey](../../quick-starts/redis-stream-valkey/), [redis-stream-dragonfly](../../quick-starts/redis-stream-dragonfly/), [redis-stream-keydb](../../quick-starts/redis-stream-keydb/), [redis-stream-garnet](../../quick-starts/redis-stream-garnet/), [redis-stream-azure-cache-for-redis](../../quick-starts/redis-stream-azure-cache-for-redis/), [redis-stream-upstash](../../quick-starts/redis-stream-upstash/)
+**Quickstarts available (Streams):** [redis-stream-redis](../../quick-starts/redis-stream-redis/), [redis-stream-valkey](../../quick-starts/redis-stream-valkey/), [redis-stream-dragonfly](../../quick-starts/redis-stream-dragonfly/), [redis-stream-keydb](../../quick-starts/redis-stream-keydb/), [redis-stream-azure-cache-for-redis](../../quick-starts/redis-stream-azure-cache-for-redis/), [redis-stream-upstash](../../quick-starts/redis-stream-upstash/)
+
+!!! warning "Microsoft Garnet"
+    Garnet supports Redis Pub/Sub but does **not** support Redis Streams (`XADD`). See [github.com/microsoft/garnet/issues/64](https://github.com/microsoft/garnet/issues/64).
 
 See: [Redis Pub/Sub Destination](redis-pubsub.md), [Redis Stream Destination](redis-stream.md)
 
@@ -423,7 +426,6 @@ All quickstarts are in the `quick-starts/` directory:
 | Redis Stream | Valkey | `redis-stream-valkey/` |
 | Redis Stream | Dragonfly | `redis-stream-dragonfly/` |
 | Redis Stream | KeyDB | `redis-stream-keydb/` |
-| Redis Stream | Microsoft Garnet | `redis-stream-garnet/` |
 | Redis Stream | Azure Cache for Redis | `redis-stream-azure-cache-for-redis/` |
 | Redis Stream | Upstash | `redis-stream-upstash/` |
 | NATS | NATS Server | `nats-nats-server/` |

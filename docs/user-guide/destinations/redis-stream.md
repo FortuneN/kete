@@ -22,7 +22,9 @@ Stream Keycloak events to Redis Stream for persistent, ordered message storage.
 | **Upstash** | Serverless Redis with Streams |
 | **Dragonfly** | Redis-compatible, multi-threaded |
 | **KeyDB** | Redis-compatible, multi-threaded |
-| **Microsoft Garnet** | High-performance Redis-compatible cache |
+
+!!! warning "Microsoft Garnet"
+    Garnet does **not** support Redis Streams (`XADD` command). Use [Redis Pub/Sub](redis-pubsub.md) with Garnet instead. See [github.com/microsoft/garnet/issues/64](https://github.com/microsoft/garnet/issues/64).
 
 
 
@@ -239,3 +241,26 @@ kete.routes.trimmed-redis.destination.stream=keycloak-events
 kete.routes.trimmed-redis.destination.max-len=50000
 kete.routes.trimmed-redis.destination.approximate-trimming=true
 ```
+
+
+
+## Quick Starts
+
+| Broker | Quickstart |
+|--------|------------|
+| Redis | [redis-stream-redis](../../quick-starts/redis-stream-redis/) |
+| Valkey | [redis-stream-valkey](../../quick-starts/redis-stream-valkey/) |
+| Dragonfly | [redis-stream-dragonfly](../../quick-starts/redis-stream-dragonfly/) |
+| KeyDB | [redis-stream-keydb](../../quick-starts/redis-stream-keydb/) |
+| Azure Cache for Redis | [redis-stream-azure-cache-for-redis](../../quick-starts/redis-stream-azure-cache-for-redis/) |
+| Upstash | [redis-stream-upstash](../../quick-starts/redis-stream-upstash/) |
+
+
+
+## See Also
+
+- [Redis Pub/Sub Destination](redis-pubsub.md) — Fire-and-forget alternative
+- [Serializers](../serializers/overview.md)
+- [Matchers](../matchers/overview.md)
+- [Event Types](../event-types.md)
+- [Certificate Loaders](../certificate-loaders/overview.md)
