@@ -90,7 +90,7 @@ Apache ActiveMQ Artemis is a high-performance multi-protocol broker:
 | MQTT 5 | `mqtt-5` | 1883 | Native support |
 | STOMP | `stomp` | 61613/61616 | Requires `anycastPrefix` config (see [STOMP docs](stomp.md#artemis-configuration)) |
 
-**Quickstarts available:** [amqp-1-activemq](https://github.com/FortuneN/kete/tree/release/quick-starts/amqp-1-activemq/), [mqtt-3-activemq-artemis](https://github.com/FortuneN/kete/tree/release/quick-starts/mqtt-3-activemq-artemis/), [mqtt-5-activemq-artemis](https://github.com/FortuneN/kete/tree/release/quick-starts/mqtt-5-activemq-artemis/), [stomp-activemq](https://github.com/FortuneN/kete/tree/release/quick-starts/stomp-activemq/), [stomp-artemis](https://github.com/FortuneN/kete/tree/release/quick-starts/stomp-artemis/)
+**Quickstarts available:** [amqp-1-activemq](https://github.com/FortuneN/kete/tree/release/quick-starts/amqp-1-activemq/), [mqtt-3-activemq-artemis](https://github.com/FortuneN/kete/tree/release/quick-starts/mqtt-3-activemq-artemis/), [mqtt-5-activemq-artemis](https://github.com/FortuneN/kete/tree/release/quick-starts/mqtt-5-activemq-artemis/), [stomp-artemis](https://github.com/FortuneN/kete/tree/release/quick-starts/stomp-artemis/)
 
 
 ### EMQX
