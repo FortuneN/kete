@@ -190,9 +190,9 @@ kete.routes.events.destination.tls.key-store.password=changeit
 
 ## Quick Starts
 
-| Target | Quickstart Folder |
-|--------|-------------------|
-| gRPC Echo Server | `grpc/` |
+| Target | Quick Start |
+|--------|-------------|
+| gRPC Echo Server | [grpc](https://github.com/FortuneN/kete/tree/release/quick-starts/grpc/) |
 
 
 

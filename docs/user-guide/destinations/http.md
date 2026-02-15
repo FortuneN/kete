@@ -125,6 +125,8 @@ Instead of `url`, you can configure each component separately:
 | `destination.path-and-query` | `/` | URL path and query string | `/api/v1/events?source=keycloak` |
 | `destination.method` | `POST` | HTTP method (POST or PUT) | `PUT` |
 | `destination.timeout-seconds` | `10` | Request timeout in seconds | `60` |
+| `destination.content-encoding` | _(empty)_ | Compress body (e.g., `gzip`, `deflate`). Sets `Content-Encoding` header. | `gzip` |
+| `destination.content-transfer-encoding` | _(empty)_ | Encode body (e.g., `base64`). Sets `Content-Transfer-Encoding` header. | `base64` |
 | `destination.pool.min-idle` | `1` | Minimum idle connections in pool | `5` |
 | `destination.pool.max-idle` | `10` | Maximum idle connections in pool | `20` |
 | `destination.pool.max-total` | `20` | Maximum total connections in pool | `50` |

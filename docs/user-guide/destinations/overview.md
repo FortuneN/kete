@@ -17,6 +17,8 @@ All destinations support:
 - **TLS Encryption** - Secure connections with optional mutual TLS (mTLS) - see [TLS & mTLS](#tls-mtls) below
 - **Dynamic Routing (Templating)** - Use variables in topic names, URLs, routing keys, etc. (see below)
 - **Message Headers** - Event metadata sent with each message (see below)
+- **Content Encoding** - Compress payload with gzip or deflate - see [Content Encodings](../content-encodings/overview.md)
+- **Content Transfer Encoding** - Encode payload with base64 - see [Content Transfer Encodings](../content-transfer-encodings/overview.md)
 
 ## Destination Pool
 

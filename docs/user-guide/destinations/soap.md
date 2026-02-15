@@ -207,9 +207,9 @@ kete.routes.compressed.destination.content-transfer-encoding=base64
 
 ## Quick Starts
 
-| Target | Quickstart Folder |
-|--------|-------------------|
-| HTTP Echo (Webhook) | `soap-webhook/` |
+| Target | Quick Start |
+|--------|-------------|
+| HTTP Echo (Webhook) | [soap-webhook](https://github.com/FortuneN/kete/tree/release/quick-starts/soap-webhook/) |
 
 
 

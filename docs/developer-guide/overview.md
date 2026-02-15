@@ -16,8 +16,8 @@ Keycloak Event → Route → Matcher → Serializer → Destination
 
 - **Routes** — Named pipelines connecting matchers → serializers → destinations
 - **Matchers** — Filter events by type (list, glob, regex, SQL)
-- **Serializers** — Convert events to bytes (JSON, XML, YAML, CBOR, CSV, TOML, Smile, Properties, Template)
-- **Destinations** — Send bytes to external systems (Kafka, AMQP, MQTT, HTTP, NATS, Redis, Pulsar, WebSocket, AWS, Azure, GCP, and more)
+- **Serializers** — Convert events to bytes (JSON, XML, YAML, CBOR, CSV, TOML, Smile, Properties, Avro, Protobuf, Multipart Form, URL-Encoded Form, Template)
+- **Destinations** — Send bytes to external systems (Kafka, AMQP, MQTT, HTTP, NATS, Redis, Pulsar, WebSocket, gRPC, SOAP, AWS, Azure, GCP, and more)
 
 ---
 
@@ -105,7 +105,7 @@ See [Component Scopes](component-scopes.md) for details.
 
 ## Current Capabilities
 
-### Destinations (27)
+### Destinations (29)
 
 | Kind | Protocol | Description |
 |------|----------|-------------|
@@ -125,6 +125,8 @@ See [Component Scopes](component-scopes.md) for details.
 | `zeromq` | ZeroMQ | High-performance distributed messaging |
 | `signalr` | SignalR | Real-time web (ASP.NET hubs) |
 | `socketio` | Socket.IO | Real-time web (Node.js) |
+| `grpc` | gRPC (HTTP/2) | Unary RPC calls |
+| `soap` | SOAP (HTTP) | SOAP/XML web services |
 | `aws-sns` | AWS SNS | Amazon notification service |
 | `aws-sqs` | AWS SQS | Amazon message queue |
 | `aws-kinesis` | AWS Kinesis | Amazon data streaming |
@@ -137,7 +139,7 @@ See [Component Scopes](component-scopes.md) for details.
 | `azure-servicebus` | Azure Service Bus | Azure enterprise messaging |
 | `azure-eventgrid` | Azure Event Grid | Azure event routing |
 
-### Serializers (9)
+### Serializers (13)
 
 | Kind | Content Type | Use Case |
 |------|--------------|----------|
@@ -150,6 +152,10 @@ See [Component Scopes](component-scopes.md) for details.
 | `smile` | `application/x-jackson-smile` | High-performance binary JSON |
 | `properties` | `text/plain` | Java applications |
 | `template` | `text/plain` | Custom text templates with variables |
+| `avro` | `application/avro` | Big data, schema evolution |
+| `protobuf` | `application/protobuf` | High-performance binary serialization |
+| `multipart-form` | `multipart/form-data` | Form uploads |
+| `url-encoded-form` | `application/x-www-form-urlencoded` | Form submissions |
 
 ### Matchers (4)
 

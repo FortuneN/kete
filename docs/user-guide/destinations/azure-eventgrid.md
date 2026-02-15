@@ -65,6 +65,8 @@ Stream Keycloak events to Azure Event Grid.
 | `destination.kind` | Must be `azure-eventgrid` | `azure-eventgrid` |
 | `destination.endpoint` | Event Grid topic endpoint URL | `https://my-topic.westus2-1.eventgrid.azure.net/api/events` |
 
+One of the following authentication configurations is also required — see [Authentication](#authentication).
+
 ### Optional Properties
 
 | Property | Default | Description | Example |

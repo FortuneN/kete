@@ -180,7 +180,15 @@ kete.routes.pulsar.destination.topic=persistent://public/default/keycloak-${even
 
 Available variables: `${realmLowerCase}`, `${realmUpperCase}`, `${realmKebabCase}`, `${realmPascalCase}`, `${realmCamelCase}`, `${eventTypeLowerCase}`, `${eventTypeUpperCase}`, `${eventTypeKebabCase}`, `${eventTypePascalCase}`, `${eventTypeCamelCase}`, `${kindLowerCase}`, `${kindUpperCase}`, `${kindKebabCase}`, `${kindPascalCase}`, `${kindCamelCase}`, `${resourceTypeLowerCase}`, `${resourceTypeUpperCase}`, `${resourceTypeKebabCase}`, `${resourceTypePascalCase}`, `${resourceTypeCamelCase}`, `${operationTypeLowerCase}`, `${operationTypeUpperCase}`, `${operationTypeKebabCase}`, `${operationTypePascalCase}`, `${operationTypeCamelCase}`, `${resultLowerCase}`, `${resultUpperCase}`, `${resultKebabCase}`, `${resultPascalCase}`, `${resultCamelCase}`
 
-### TLS Configuration
+### TLS Properties
+
+See [TLS & mTLS](overview.md#tls-mtls) for full details on TLS options.
+
+| Property | Default | Description |
+|----------|---------|-------------|
+| `destination.tls.enabled` | `false` | Enable TLS |
+| `destination.tls.key-store.*` | - | Client certificate for mTLS |
+| `destination.tls.trust-store.*` | - | CA certificates |
 
 For TLS/mTLS connections:
 

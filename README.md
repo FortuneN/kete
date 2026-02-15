@@ -52,9 +52,11 @@
 ## Features
 
 - **29 destination kinds** — stream events to messaging, cloud, and custom endpoints
-- **12 serializers** — JSON, XML, YAML, CSV, TOML, Properties, CBOR, Protobuf, Smile, URL-Encoded Form, Multipart Form, Template
+- **13 serializers** — JSON, XML, YAML, CSV, TOML, Properties, CBOR, Protobuf, Avro, Smile, URL-Encoded Form, Multipart Form, Template
 - **4 matchers** — Glob, List, Regex, SQL — to filter which events reach which destinations
 - **11 certificate loaders** — PEM, PKCS12, PKCS7, DER, JKS (file path, base64, and text variants)
+- **2 content encodings** — Gzip, Deflate
+- **1 content transfer encoding** — Base64
 - **Multi-route** — send different event types to different destinations simultaneously
 - **TLS / mTLS** — full TLS and mutual TLS support across all destinations
 - **Retry** — configurable retry via Resilience4j
@@ -64,16 +66,16 @@
 
 | Category | Compatible Services |
 |----------|---------------------|
-| **Kafka** | Apache Kafka, Confluent, Redpanda, AWS MSK, Aiven, CloudKarafka |
-| **AMQP 1.0** | Apache ActiveMQ, Apache Artemis, Apache Qpid, RabbitMQ, Solace PubSub+ |
+| **Kafka** | Apache Kafka, Confluent, Redpanda, AWS MSK, Azure Event Hubs, Aiven, CloudKarafka |
+| **AMQP 1.0** | Apache ActiveMQ, Apache Artemis, Apache Qpid, RabbitMQ, Solace PubSub+, Amazon MQ, Azure Event Hubs, Azure Service Bus |
 | **AMQP 0-9-1** | RabbitMQ, LavinMQ, CloudAMQP, Amazon MQ |
-| **MQTT 3.1.1** | Eclipse Mosquitto, EMQX, HiveMQ, VerneMQ, NanoMQ, RabbitMQ |
-| **MQTT 5.0** | Eclipse Mosquitto, EMQX, HiveMQ, VerneMQ, NanoMQ, RabbitMQ |
+| **MQTT 3.1.1** | Eclipse Mosquitto, EMQX, HiveMQ, VerneMQ, NanoMQ, RabbitMQ, ActiveMQ Artemis, Solace |
+| **MQTT 5.0** | Eclipse Mosquitto, EMQX, HiveMQ, VerneMQ, NanoMQ, RabbitMQ, ActiveMQ Artemis, Solace, Azure Event Grid |
 | **Redis** | Redis, Valkey, Dragonfly, KeyDB, Garnet, Upstash, AWS ElastiCache, Azure Cache, Google Memorystore (Pub/Sub & Streams) |
 | **NATS** | NATS Server, Synadia Cloud (NATS Core & JetStream) |
-| **Pulsar** | Apache Pulsar, StreamNative Cloud |
+| **Pulsar** | Apache Pulsar, StreamNative Cloud, DataStax Astra Streaming |
 | **HTTP** | Webhooks, REST APIs, Custom HTTP Endpoints |
-| **STOMP** | Apache ActiveMQ, Apache Artemis, RabbitMQ, EMQX |
+| **STOMP** | Apache ActiveMQ, Apache Artemis, RabbitMQ, EMQX, Amazon MQ |
 | **WebSocket** | Custom WebSocket Servers |
 | **ZeroMQ** | Any ZeroMQ peer — brokerless, 40+ language bindings |
 | **AWS** | EventBridge, Kinesis Data Streams, SNS, SQS |
@@ -217,3 +219,5 @@ docker compose up -d
 | [AssertJ](https://assertj.github.io/doc/) | Fluent assertions for tests |
 | [Awaitility](https://github.com/awaitility/awaitility) | Asynchronous readiness probes for tests |
 | [Testcontainers](https://testcontainers.com/) | Docker-based integration testing |
+| [Apache Avro](https://avro.apache.org/) | Avro serialization format |
+| [Google Protobuf](https://protobuf.dev/) | Protocol Buffers serialization |

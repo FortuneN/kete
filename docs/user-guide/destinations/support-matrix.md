@@ -663,6 +663,7 @@ All quickstarts are in the `quick-starts/` directory:
 | AMQP 1.0 | Apache Qpid | `amqp-1-qpid/` |
 | AMQP 1.0 | RabbitMQ | `amqp-1-rabbitmq/` |
 | AMQP 1.0 | Amazon MQ (ActiveMQ) | `amqp-1-amazon-mq/` |
+| AMQP 1.0 | Solace PubSub+ | `amqp-1-solace/` |
 | MQTT 3 | Mosquitto | `mqtt-3-mosquitto/` |
 | MQTT 3 | EMQX | `mqtt-3-emqx/` |
 | MQTT 3 | RabbitMQ | `mqtt-3-rabbitmq/` |
@@ -670,6 +671,7 @@ All quickstarts are in the `quick-starts/` directory:
 | MQTT 3 | VerneMQ | `mqtt-3-vernemq/` |
 | MQTT 3 | NanoMQ | `mqtt-3-nanomq/` |
 | MQTT 3 | ActiveMQ Artemis | `mqtt-3-activemq-artemis/` |
+| MQTT 3 | Solace | `mqtt-3-solace/` |
 | MQTT 5 | Mosquitto | `mqtt-5-mosquitto/` |
 | MQTT 5 | EMQX | `mqtt-5-emqx/` |
 | MQTT 5 | HiveMQ | `mqtt-5-hivemq/` |
@@ -678,6 +680,7 @@ All quickstarts are in the `quick-starts/` directory:
 | MQTT 5 | VerneMQ | `mqtt-5-vernemq/` |
 | MQTT 5 | NanoMQ | `mqtt-5-nanomq/` |
 | MQTT 5 | ActiveMQ Artemis | `mqtt-5-activemq-artemis/` |
+| MQTT 5 | Solace | `mqtt-5-solace/` |
 | STOMP | ActiveMQ | `stomp-activemq/` |
 | STOMP | Artemis | `stomp-artemis/` |
 | STOMP | RabbitMQ | `stomp-rabbitmq/` |
@@ -711,6 +714,7 @@ All quickstarts are in the `quick-starts/` directory:
 | NATS | Synadia Cloud | `nats-synadia-cloud/` |
 | NATS JetStream | Synadia Cloud | `nats-jetstream-synadia-cloud/` |
 | Pulsar | Apache Pulsar | `pulsar-apache/` |
+| Pulsar | DataStax Astra Streaming | `pulsar-datastax/` |
 | HTTP | Azure Event Grid | `http-azure-event-grid/` |
 | HTTP | Webhook | `http-webhook/` |
 | WebSocket | Echo Server | `websocket-echo/` |
