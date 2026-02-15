@@ -1250,132 +1250,71 @@ public void shouldSerializeAndDeserializeEventWithAllFields() {
 
 ## 21. Destination Testing Requirements
 
-### 21.1 Unit Test Scope for Destinations
+### 21.1 Zero-IO Destination Unit Tests (CRITICAL)
 
-**UNDERSTANDING:** Integration tests achieve maximum effect for destinations, but unit tests MUST cover:
+**MANDATORY RULE:** Destination unit tests under `unittests/destinations/<destination>/` are **STRICTLY ZERO IO**. No containers, no servers, no server processes, no network connections, no Docker, no Testcontainers, no MockWebServer, no WireMock — nothing that performs any form of IO whatsoever.
 
-| Scenario | Unit Testable | Approach |
-|----------|:-------------:|----------|
-| Configuration validation |  | Test setConfiguration with invalid/missing values |
-| Constructor behavior |  | Verify dependencies are set |
-| Connection failure handling |  | Mock connection factories to throw |
-| Message send when disconnected |  | Mock clients in error state |
-| Resource cleanup on close |  | Verify close methods called on mocks |
-| Retry behavior |  | Mock failures, verify retry invocation |
+**Why?** These tests validate message-building logic, header construction, template substitution, and payload encoding — all pure in-memory operations that do not need a live broker.
 
-### 21.2 Unconnected Destination Behavior
+**How it works:**
 
-**RULE:** Test behavior when destinations cannot connect (no RabbitMQ, Kafka, etc.)
+1. Create the real `Destination` instance (e.g., `new NatsDestination()`)
+2. Inject a **mock transport client** via the Lombok-generated setter (e.g., `destination.setConnection(mock(Connection.class))`)
+3. Set fields directly to skip `doInitialize()` (which would attempt real IO)
+4. Mock the config to return `null` for content encoding/transfer encoding (unless testing those)
+5. Call `send(message)` and verify the mock client received the correct API calls
+
+**Test files per destination:**
+
+```
+unittests/destinations/<destination>/
+    sendTests.java   ← tests send() → doSend() (message building, headers, template substitution, payload encoding)
+    closeTests.java  ← tests close() (verifies client cleanup on mocks)
+```
+
+**NEVER in these tests:**
+
+- Start a container
+- Open a socket or network connection
+- Make an HTTP call
+- Connect to a broker
+- Use MockWebServer or WireMock
+- Perform any operation that requires a running external process
+
+**Example (NatsDestination):**
 
 ```java
 @Test
-public void shouldThrowWhenBrokerUnreachable() {
+public void shouldSendMessageToSubject() throws Exception {
 
     // arrange
 
-    var destination = new KafkaDestination(templateUtils, configUtils);
-    var config = new MapConfiguration(Map.of(
-        "bootstrap.servers", "unreachable:9092",
-        "topic", "test-topic"
-    ));
-    destination.setConfiguration(config);
+    var destination = new NatsDestination();
+    var mockConnection = mock(Connection.class);
+    destination.setConnection(mockConnection);
+    destination.setSubject("test-subject");
+    destination.setSubjectTemplated(false);
+    destination.setCustomHeadersEntrySet(Set.of());
+
+    var config = mock(NatsDestinationConfig.class);
+    when(config.getContentEncoding()).thenReturn(null);
+    when(config.getContentTransferEncoding()).thenReturn(null);
+    destination.setConfig(config);
+
+    var message = createMessage("test-event-id", "test-realm", false, "LOGIN",
+        "application/json", "{\"type\":\"LOGIN\"}".getBytes(StandardCharsets.UTF_8), null, null);
 
     // act
 
-    var thrown = catchThrowable(() -> destination.initialize());
+    destination.send(message);
 
     // assert
 
-    assertThat(thrown)
-        .isInstanceOf(KafkaException.class)
-        .hasMessageContaining("Failed to connect");
+    verify(mockConnection).publish(eq("test-subject"), any(Headers.class), eq(message.eventBody()));
 }
 ```
 
-### 21.3 HTTP Destination - WireMock Testing
-
-**RULE:** Use MockWebServer or WireMock for full HTTP destination testing in unit tests.
-
-```java
-import okhttp3.mockwebserver.MockWebServer;
-import okhttp3.mockwebserver.MockResponse;
-import okhttp3.mockwebserver.RecordedRequest;
-
-public class sendTests {
-
-    private MockWebServer mockServer;
-
-    @BeforeEach
-    void setUp() throws Exception {
-        mockServer = new MockWebServer();
-        mockServer.start();
-    }
-
-    @AfterEach
-    void tearDown() throws Exception {
-        mockServer.shutdown();
-    }
-
-    @Test
-    public void shouldSendPostRequestWithEventBody() throws Exception {
-
-        // arrange
-
-        mockServer.enqueue(new MockResponse().setResponseCode(200));
-
-        var destination = new HttpDestination(templateUtils, configUtils);
-        var config = new MapConfiguration(Map.of(
-            "url", mockServer.url("/events").toString(),
-            "method", "POST"
-        ));
-        destination.setConfiguration(config);
-        destination.initialize();
-
-        var message = new EventMessage("master", "test-id",
-            "{\"type\":\"LOGIN\"}".getBytes(), "LOGIN",
-            "application/json", null, Constants.EVENT, null, Constants.SUCCESS);
-
-        // act
-
-        destination.send(message);
-
-        // assert
-
-        RecordedRequest request = mockServer.takeRequest();
-        assertThat(request.getMethod()).isEqualTo("POST");
-        assertThat(request.getPath()).isEqualTo("/events");
-        assertThat(request.getBody().readUtf8()).isEqualTo("{\"type\":\"LOGIN\"}");
-        assertThat(request.getHeader("Content-Type")).isEqualTo("application/json");
-        assertThat(request.getHeader("EventId")).isEqualTo("test-id");
-        assertThat(request.getHeader("EventType")).isEqualTo("LOGIN");
-    }
-
-    @Test
-    public void shouldHandleServerError() throws Exception {
-
-        // arrange
-
-        mockServer.enqueue(new MockResponse().setResponseCode(500).setBody("Internal Error"));
-
-        var destination = new HttpDestination(templateUtils, configUtils);
-        // ... setup ...
-
-        // act
-
-        var thrown = catchThrowable(() -> destination.send(message));
-
-        // assert
-
-        assertThat(thrown)
-            .isInstanceOf(HttpResponseException.class)
-            .hasMessage("HTTP 500: Internal Error");
-    }
-}
-```
-
-**NOTE:** For HTTP destinations, `@BeforeEach` and `@AfterEach` ARE allowed for MockWebServer lifecycle management.
-
-### 21.4 Integration & E2E Test Policy
+### 21.2 Integration & E2E Test Policy
 
 **MANDATORY RULE:** Tests requiring containers or external services are **expensive**. Strict limits apply per destination.
 

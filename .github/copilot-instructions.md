@@ -88,6 +88,24 @@ This applies to:
 
 **NEVER**: Remove relocations from the Maven Shade Plugin configuration without understanding multi-version Keycloak compatibility impact.
 
+### Destination Unit Tests (CRITICAL)
+
+**MANDATORY RULE**: Destination unit tests under `unittests/destinations/<destination>/` are **STRICTLY ZERO IO**. No containers, no servers, no server processes, no network connections, no Docker, no Testcontainers, no MockWebServer, no WireMock — nothing that performs any form of IO whatsoever.
+
+These tests work by:
+
+1. Creating the real `Destination` instance (e.g., `new NatsDestination()`)
+2. Injecting a **mock transport client** via the Lombok-generated setter (e.g., `destination.setConnection(mock(Connection.class))`)
+3. Setting fields directly to skip `doInitialize()` (which would attempt real IO)
+4. Calling `send(message)` and verifying the mock client received the correct API calls (correct topic/subject, headers, payload)
+
+**Test files per destination:**
+
+- `sendTests.java` — tests `send()` → `doSend()` (message building, headers, template substitution, payload encoding)
+- `closeTests.java` — tests `close()` (verifies client cleanup on mocks)
+
+**NEVER** in these tests: start a container, open a socket, make an HTTP call, connect to a broker, or perform any operation that requires a running external process.
+
 ### Integration & E2E Test Policy (CRITICAL)
 
 **MANDATORY RULE**: Tests requiring containers or external services are **expensive**. Strict limits apply per destination:
