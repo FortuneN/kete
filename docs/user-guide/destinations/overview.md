@@ -319,13 +319,13 @@ For detailed information about each loader and their properties, see **[Certific
 
 | `destination.kind` | Protocol | Compatible Systems |
 |--------------------|----------|-------------------|
-| **[kafka](kafka.md)** | Kafka Protocol | Kafka, Redpanda, Confluent, Azure Event Hubs, Amazon MSK |
-| **[amqp-0.9.1](amqp-0.9.1.md)** | AMQP 0-9-1 | RabbitMQ, LavinMQ |
-| **[amqp-1](amqp-1.md)** | AMQP 1 | ActiveMQ Artemis, Azure Service Bus, Azure Event Hubs, Qpid, RabbitMQ 4.0+, Solace PubSub+ |
-| **[mqtt-3](mqtt-3.md)** | MQTT 3 | Mosquitto, HiveMQ, EMQX, VerneMQ, NanoMQ, RabbitMQ, ActiveMQ Artemis, Solace PubSub+, Apache RocketMQ, AWS IoT, Azure IoT Hub |
+| **[kafka](kafka.md)** | Kafka Protocol | Kafka, Redpanda, Confluent, Azure Event Hubs, Amazon MSK, Aiven, Strimzi, WarpStream, Instaclustr |
+| **[amqp-0.9.1](amqp-0.9.1.md)** | AMQP 0-9-1 | RabbitMQ, LavinMQ, CloudAMQP, Amazon MQ |
+| **[amqp-1](amqp-1.md)** | AMQP 1 | ActiveMQ Artemis, Azure Service Bus, Azure Event Hubs, Qpid, RabbitMQ 4.0+, Solace PubSub+, Amazon MQ |
+| **[mqtt-3](mqtt-3.md)** | MQTT 3 | Mosquitto, HiveMQ, EMQX, VerneMQ, NanoMQ, RabbitMQ, ActiveMQ Artemis, Solace PubSub+, Azure Event Grid, Apache RocketMQ, AWS IoT Core, Azure IoT Hub |
 | **[mqtt-5](mqtt-5.md)** | MQTT 5 | HiveMQ, EMQX, VerneMQ, NanoMQ, Mosquitto 2.0+, RabbitMQ, ActiveMQ Artemis, Solace PubSub+, Azure Event Grid |
-| **[redis-pubsub](redis-pubsub.md)** | Redis RESP | Redis, Valkey, Dragonfly, KeyDB, Garnet, ElastiCache, Azure Cache for Redis, Upstash |
-| **[redis-stream](redis-stream.md)** | Redis RESP | Redis 5.0+, Valkey, Dragonfly, KeyDB, ElastiCache, Azure Cache for Redis, Upstash |
+| **[redis-pubsub](redis-pubsub.md)** | Redis RESP | Redis, Valkey, Dragonfly, KeyDB, Garnet, ElastiCache, Azure Cache for Redis, Google Memorystore, Upstash |
+| **[redis-stream](redis-stream.md)** | Redis RESP | Redis 5.0+, Valkey, Dragonfly, KeyDB, ElastiCache, Azure Cache for Redis, Google Memorystore, Upstash |
 | **[nats](nats.md)** | NATS Protocol | NATS Server, Synadia Cloud |
 | **[nats-jetstream](nats-jetstream.md)** | NATS JetStream | NATS Server, Synadia Cloud |
 | **[pulsar](pulsar.md)** | Pulsar Protocol | Apache Pulsar, StreamNative Cloud, DataStax Astra Streaming, DataStax Luna Streaming |

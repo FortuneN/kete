@@ -153,7 +153,7 @@ See [Component Scopes](component-scopes.md) for details.
 | `properties` | `text/plain` | Java applications |
 | `template` | `text/plain` | Custom text templates with variables |
 | `avro` | `application/avro` | Big data, schema evolution |
-| `protobuf` | `application/protobuf` | High-performance binary serialization |
+| `protobuf` | `application/x-protobuf` | High-performance binary serialization |
 | `multipart-form` | `multipart/form-data` | Form uploads |
 | `url-encoded-form` | `application/x-www-form-urlencoded` | Form submissions |
 

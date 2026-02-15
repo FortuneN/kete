@@ -66,14 +66,14 @@
 
 | Category | Compatible Services |
 |----------|---------------------|
-| **Kafka** | Apache Kafka, Confluent, Redpanda, AWS MSK, Azure Event Hubs, Aiven, CloudKarafka |
+| **Kafka** | Apache Kafka, Confluent, Redpanda, AWS MSK, Azure Event Hubs, Aiven, Strimzi, WarpStream, Instaclustr |
 | **AMQP 1.0** | Apache ActiveMQ, Apache Artemis, Apache Qpid, RabbitMQ, Solace PubSub+, Amazon MQ, Azure Event Hubs, Azure Service Bus |
 | **AMQP 0-9-1** | RabbitMQ, LavinMQ, CloudAMQP, Amazon MQ |
-| **MQTT 3.1.1** | Eclipse Mosquitto, EMQX, HiveMQ, VerneMQ, NanoMQ, RabbitMQ, ActiveMQ Artemis, Solace |
+| **MQTT 3.1.1** | Eclipse Mosquitto, EMQX, HiveMQ, VerneMQ, NanoMQ, RabbitMQ, ActiveMQ Artemis, Solace, Azure Event Grid, AWS IoT Core, Azure IoT Hub |
 | **MQTT 5.0** | Eclipse Mosquitto, EMQX, HiveMQ, VerneMQ, NanoMQ, RabbitMQ, ActiveMQ Artemis, Solace, Azure Event Grid |
 | **Redis** | Redis, Valkey, Dragonfly, KeyDB, Garnet, Upstash, AWS ElastiCache, Azure Cache, Google Memorystore (Pub/Sub & Streams) |
 | **NATS** | NATS Server, Synadia Cloud (NATS Core & JetStream) |
-| **Pulsar** | Apache Pulsar, StreamNative Cloud, DataStax Astra Streaming |
+| **Pulsar** | Apache Pulsar, StreamNative Cloud, DataStax Astra Streaming, DataStax Luna Streaming |
 | **HTTP** | Webhooks, REST APIs, Custom HTTP Endpoints |
 | **STOMP** | Apache ActiveMQ, Apache Artemis, RabbitMQ, EMQX, Amazon MQ |
 | **WebSocket** | Custom WebSocket Servers |
