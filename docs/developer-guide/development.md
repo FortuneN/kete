@@ -93,7 +93,7 @@ kete/
 │   │   │   │   ├── Pkcs12FilePathCertificateLoader.java
 │   │   │   │   ├── Pkcs7FileBase64CertificateLoader.java
 │   │   │   │   └── Pkcs7FilePathCertificateLoader.java
-│   │   │   ├── destinations/                     # Destination implementations (27 destinations)
+│   │   │   ├── destinations/                     # Destination implementations (29 destinations)
 │   │   │   │   ├── amqp091/                      # AMQP 0-9-1 (RabbitMQ)
 │   │   │   │   ├── amqp1/                        # AMQP 1.0 (Qpid JMS)
 │   │   │   │   ├── awseventbridge/               # AWS EventBridge
@@ -107,6 +107,7 @@ kete/
 │   │   │   │   ├── azurewebpubsub/               # Azure Web PubSub
 │   │   │   │   ├── gcpcloudtasks/                # GCP Cloud Tasks
 │   │   │   │   ├── gcppubsub/                    # GCP Pub/Sub
+│   │   │   │   ├── grpc/                         # gRPC
 │   │   │   │   ├── http/                         # HTTP webhook
 │   │   │   │   ├── kafka/                        # Apache Kafka
 │   │   │   │   ├── mqtt3/                        # MQTT 3.1.1
@@ -117,6 +118,7 @@ kete/
 │   │   │   │   ├── redispubsub/                  # Redis Pub/Sub
 │   │   │   │   ├── redisstream/                  # Redis Streams
 │   │   │   │   ├── signalr/                      # SignalR
+│   │   │   │   ├── soap/                         # SOAP
 │   │   │   │   ├── socketio/                     # Socket.IO
 │   │   │   │   ├── stomp/                        # STOMP
 │   │   │   │   ├── websocket/                    # WebSocket
@@ -130,13 +132,17 @@ kete/
 │   │   │   │   ├── RegexMatcher.java
 │   │   │   │   └── SqlMatcher.java
 │   │   │   ├── serializers/                      # Serializer implementations
+│   │   │   │   ├── AvroSerializer.java
 │   │   │   │   ├── CborSerializer.java
 │   │   │   │   ├── CsvSerializer.java
 │   │   │   │   ├── JsonSerializer.java
+│   │   │   │   ├── MultipartFormSerializer.java
 │   │   │   │   ├── PropertiesSerializer.java
+│   │   │   │   ├── ProtobufSerializer.java
 │   │   │   │   ├── SmileSerializer.java
 │   │   │   │   ├── TemplateSerializer.java
 │   │   │   │   ├── TomlSerializer.java
+│   │   │   │   ├── UrlEncodedFormSerializer.java
 │   │   │   │   ├── XmlSerializer.java
 │   │   │   │   └── YamlSerializer.java
 │   │   │   └── utils/                            # Utility classes
@@ -180,7 +186,7 @@ kete/
 │       │   │   ├── serializers/
 │       │   │   ├── tlsmaterial/
 │       │   │   └── utils/
-│       │   ├── integrationtests/                 # Integration tests (27 destinations)
+│       │   ├── integrationtests/                 # Integration tests (29 destinations)
 │       │   │   ├── amqp091destination/
 │       │   │   ├── amqp1destination/
 │       │   │   ├── awseventbridgedestination/
@@ -194,6 +200,7 @@ kete/
 │       │   │   ├── azurewebpubsubdestination/
 │       │   │   ├── gcpcloudtasksdestination/
 │       │   │   ├── gcppubsubdestination/
+│       │   │   ├── grpcdestination/
 │       │   │   ├── httpdestination/
 │       │   │   ├── kafkadestination/
 │       │   │   ├── mqtt3destination/
@@ -204,6 +211,7 @@ kete/
 │       │   │   ├── redispubsubdestination/
 │       │   │   ├── redisstreamdestination/
 │       │   │   ├── signalrdestination/
+│       │   │   ├── soapdestination/
 │       │   │   ├── socketiodestination/
 │       │   │   ├── stompdestination/
 │       │   │   ├── websocketdestination/

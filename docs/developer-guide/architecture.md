@@ -53,7 +53,7 @@ If a destination's requirements cannot be met within its own package (`Destinati
 
 **Why this matters:**
 
-- KETE has 27 destinations (and counting). If one gets a shared-code exception, every future destination will argue "just this one thing." The shared code becomes a graveyard of special cases.
+- KETE has 29 destinations (and counting). If one gets a shared-code exception, every future destination will argue "just this one thing." The shared code becomes a graveyard of special cases.
 - Every shared-code change is a regression risk across ALL destinations. A tweak for one could break any of the others.
 - The principle is already proven — destinations with complex auth, custom signing, and credential lifecycle all work today without touching shared code. No destination is different.
 - This is the same constraint every serious plugin system enforces: VS Code extensions can't modify VS Code core, browser extensions can't modify the engine, Keycloak providers can't modify Keycloak internals. KETE destinations can't modify the KETE pipeline.
@@ -120,7 +120,7 @@ This ensures events are only processed for **successful operations**.
 
 ### 3. Serializer Singletons
 
-- 8 of 9 serializers are SINGLETON scoped (TemplateSerializer is TRANSIENT)
+- 10 of 13 serializers are SINGLETON scoped (TemplateSerializer, MultipartFormSerializer, and UrlEncodedFormSerializer are TRANSIENT)
 - ObjectWriter instances are thread-safe
 - One serializer instance shared across routes (except TemplateSerializer)
 
@@ -163,7 +163,7 @@ kete.routes.myroute.destination.pool.max-total=20   # Default: 20
 
 #### Pooled Objects by Destination
 
-All 27 destinations use Apache Commons Pool2. Each destination pools its primary client/connection object:
+All 29 destinations use Apache Commons Pool2. Each destination pools its primary client/connection object:
 
 | Destination(s) | Pooled Object | Notes |
 |----------------|---------------|-------|
@@ -182,6 +182,8 @@ All 27 destinations use Apache Commons Pool2. Each destination pools its primary
 | AWS (SNS, SQS, Kinesis, EventBridge) | SDK client | AWS service clients |
 | Azure (Event Hubs, Service Bus, Event Grid, Storage Queue, Web PubSub) | SDK client | Azure service clients |
 | GCP (Pub/Sub, Cloud Tasks) | SDK client | GCP service clients |
+| gRPC | `ManagedChannel` | gRPC channel instances |
+| SOAP | `HttpClient` | Java HTTP client instances |
 
 #### Usage Pattern
 

@@ -15,6 +15,7 @@ Stream Keycloak events to Apache Pulsar.
 |--------|-------|
 | **Apache Pulsar** | Primary target, all features supported |
 | **DataStax Luna Streaming** | Pulsar-compatible managed service |
+| **DataStax Astra Streaming** | Pulsar-compatible managed service |
 | **StreamNative Cloud** | Pulsar-compatible managed service |
 
 
