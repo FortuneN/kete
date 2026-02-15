@@ -134,9 +134,6 @@ These properties are explicitly configured by KETE via `putIfAbsent` (can be ove
 | `compression.type` | `lz4` |
 | `key.serializer` | StringSerializer |
 | `value.serializer` | ByteArraySerializer |
-| `pool.min-idle` | `1` |
-| `pool.max-idle` | `10` |
-| `pool.max-total` | `20` |
 
 #### Kafka Client Defaults
 

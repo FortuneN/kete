@@ -312,7 +312,7 @@ public class TlsMaterial {
 
 				material.trustStorePassword = trustStoreConfiguration.getString(PASSWORD, "").trim();
 				material.trustStoreType = trustStoreConfiguration.getString(TYPE, TRUST_STORE_DEFAULT_TYPE).trim();
-				material.trustManagerAlgorithm = trustStoreConfiguration.getString(TRUST_MANAGER_ALGORITHM, KEY_MANAGER_DEFAULT_ALGORITHM).trim();
+				material.trustManagerAlgorithm = trustStoreConfiguration.getString(TRUST_MANAGER_ALGORITHM, TRUST_MANAGER_DEFAULT_ALGORITHM).trim();
 				material.trustStore = KeyStore.getInstance(material.trustStoreType);
 
 				var trustStoreLoaderConfiguration = ConfigurationUtils.getSubSet(trustStoreConfiguration, LOADER);

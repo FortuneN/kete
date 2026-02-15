@@ -49,6 +49,8 @@ message Event {
 syntax = "proto3";
 package io.github.fortunen.kete.events;
 
+import "auth_details.proto";
+
 message AdminEvent {
   string id = 1;
   int64 time = 2;
