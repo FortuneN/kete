@@ -116,6 +116,8 @@ Solace supports multiple open protocols:
 | MQTT 3.1.1 | `mqtt-3` | 1883 | Native support |
 | MQTT 5 | `mqtt-5` | 1883 | Native support |
 
+**Quickstarts available:** [amqp-1-solace](https://github.com/FortuneN/kete/tree/release/quick-starts/amqp-1-solace/), [mqtt-3-solace](https://github.com/FortuneN/kete/tree/release/quick-starts/mqtt-3-solace/), [mqtt-5-solace](https://github.com/FortuneN/kete/tree/release/quick-starts/mqtt-5-solace/)
+
 
 ## By Destination
 
@@ -160,6 +162,7 @@ Use `destination.kind=mqtt-3`:
 - **VerneMQ** - Distributed
 - **NanoMQ** - Lightweight
 - **RabbitMQ** - Via plugin
+- **ActiveMQ Artemis** - Multi-protocol broker
 - **Azure Event Grid** - MQTT Broker feature
 - **Solace PubSub+** - Native
 - **Apache RocketMQ** - Via rocketmq-mqtt gateway
@@ -181,6 +184,7 @@ Use `destination.kind=mqtt-5`:
 - **VerneMQ** - Full MQTT 5
 - **NanoMQ** - Lightweight
 - **RabbitMQ** - Via plugin (3.13+)
+- **ActiveMQ Artemis** - Multi-protocol broker (v2.28+)
 - **Azure Event Grid** - MQTT Broker
 - **Solace PubSub+** - Native
 
