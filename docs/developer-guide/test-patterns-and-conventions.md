@@ -100,7 +100,7 @@ destinations/setConfigurationTests.java        ← WRONG: Parent-level test for 
 ### 1.1 Root Test Directory
 
 ```
-src/tests/unit-tests/java/io/github/fortunen/kete/
+src/test/java/io/github/fortunen/kete/unittests/
 ```
 
 ### 1.2 Package Organization Pattern
@@ -109,15 +109,15 @@ src/tests/unit-tests/java/io/github/fortunen/kete/
 
 ```
 Main Source:                                    Test Location:
-src/main/.../ProviderFactory.java       →       src/tests/unit-tests/.../providerfactory/
-src/main/.../Provider.java              →       src/tests/unit-tests/.../provider/
-src/main/.../Configuration.java         →       src/tests/unit-tests/.../configuration/configuration/
-src/main/.../Route.java                 →       src/tests/unit-tests/.../routes/route/
-src/main/.../utils/ValidationUtils.java →       src/tests/unit-tests/.../utils/validationutils/
-src/main/.../utils/RouteUtils.java      →       src/tests/unit-tests/.../routes/routeutils/
-src/main/.../destinations/HttpDestination.java → src/tests/unit-tests/.../destinations/httpdestination/
-src/main/.../serializers/JsonSerializer.java   → src/tests/unit-tests/.../serializers/jsonserializer/
-src/main/.../matchers/GlobMatcher.java          → src/tests/unit-tests/.../matchers/globmatcher/
+src/main/.../ProviderFactory.java       →       src/test/.../unittests/.../providerfactory/
+src/main/.../Provider.java              →       src/test/.../unittests/.../provider/
+src/main/.../Configuration.java         →       src/test/.../unittests/.../configuration/configuration/
+src/main/.../Route.java                 →       src/test/.../unittests/.../routes/route/
+src/main/.../utils/ValidationUtils.java →       src/test/.../unittests/.../utils/validationutils/
+src/main/.../utils/RouteUtils.java      →       src/test/.../unittests/.../routes/routeutils/
+src/main/.../destinations/HttpDestination.java → src/test/.../unittests/.../destinations/httpdestination/
+src/main/.../serializers/JsonSerializer.java   → src/test/.../unittests/.../serializers/jsonserializer/
+src/main/.../matchers/GlobMatcher.java          → src/test/.../unittests/.../matchers/globmatcher/
 ```
 
 ### 1.3 Folder Naming Rules
@@ -131,7 +131,7 @@ src/main/.../matchers/GlobMatcher.java          → src/tests/unit-tests/.../mat
 ### 1.4 Complete Folder Structure
 
 ```
-src/tests/unit-tests/java/io/github/fortunen/kete/
+src/test/java/io/github/fortunen/kete/unittests/
 ├── configuration/
 │   ├── configuration/
 │   │   └── constructorTests.java
@@ -322,6 +322,8 @@ import static org.mockito.ArgumentMatchers.argThat;
 ### 4.3 Regular Imports
 
 **RULE:** Standard imports follow static imports. Group by: project classes → external libraries → JDK.
+
+**RULE:** Never use fully-qualified class names inline in code. Always use import statements. Write `new MqttClient(...)` not `new org.eclipse.paho.client.mqttv3.MqttClient(...)`. The only exception is when two classes share the same simple name from different packages and disambiguation is required.
 
 ```java
 // Project imports
@@ -744,17 +746,17 @@ doThrow(new RuntimeException("init failed")).when(route).initialize();
 
 ```java
 // Verify called once
-verify(destination).sendMessage(any(EventMessage.class));
+verify(destination).send(any(EventMessage.class));
 
 // Verify called specific times
-verify(destination, times(1)).sendMessage(any());
+verify(destination, times(1)).send(any());
 verify(mockTransaction, times(3)).addEvent(any(Event.class));
 
 // Verify never called
-verify(destination, never()).sendMessage(any(EventMessage.class));
+verify(destination, never()).send(any(EventMessage.class));
 
 // Verify with argument matcher
-verify(destination, times(1)).sendMessage(argThat(m ->
+verify(destination, times(1)).send(argThat(m ->
     "eventId".equals(m.eventId()) &&
     "LOGIN".equals(m.eventType())));
 
@@ -808,18 +810,19 @@ var config = new MapConfiguration(map);
 **RULE:** Private helper methods within test class for complex or repeated setup.
 
 ```java
-private EventMessage createMessage(String eventId, String realm, boolean isAdminEvent, 
-        String eventType, String contentType, byte[] eventBody, 
+private EventMessage createMessage(String eventId, String realm, String kind,
+        String eventType, String contentType, byte[] eventBody,
         String resourceType, String operationType) {
-    return EventMessage.get()
-        .eventId(eventId != null ? eventId : "")
-        .realm(realm != null ? realm : "")
-        .isAdminEvent(isAdminEvent)
-        .eventType(eventType != null ? eventType : "")
-        .contentType(contentType != null ? contentType : "")
-        .eventBody(eventBody != null ? eventBody : EMPTY_BYTES)
-        .resourceType(resourceType != null ? resourceType : "")
-        .operationType(operationType != null ? operationType : "");
+    return new EventMessage(
+        realm != null ? realm : "",
+        eventId != null ? eventId : "",
+        eventBody != null ? eventBody : EMPTY_BYTES,
+        eventType != null ? eventType : "",
+        contentType != null ? contentType : "",
+        resourceType != null ? resourceType : "",
+        kind,
+        operationType != null ? operationType : "",
+        Constants.SUCCESS);
 }
 ```
 
@@ -1059,6 +1062,12 @@ public class {methodName}Tests {
 | Testing abstract classes directly | Test concrete implementations instead |
 | Testing Lombok-generated constructors | Only test manually-written constructors with logic |
 | Testing Lombok-generated getters/setters | Only test manually-written accessors with logic |
+| Fully-qualified class names inline | Use import statements instead |
+| Testcontainers `waitingFor()` / `withStartupTimeout()` | Use Awaitility-based readiness probes |
+| Testcontainers `Wait.forLogMessage()` / `Wait.forHttp()` / any `WaitStrategy` | Use SDK/HTTP/Socket readiness probes via Awaitility |
+| Setting `kete.enabled=true` in tests | `true` is the default; only set when testing `false` |
+| Calling `.getMappedPort()` before `.start()` | Unstarted containers have no port mappings |
+| Calling `destination.send()` without `destination.initialize()` first | Initialize sets up the connection and catches config errors early |
 
 
 
@@ -1292,7 +1301,7 @@ import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.RecordedRequest;
 
-public class sendMessageTests {
+public class sendTests {
 
     private MockWebServer mockServer;
 
@@ -1322,15 +1331,13 @@ public class sendMessageTests {
         destination.setConfiguration(config);
         destination.initialize();
 
-        var message = EventMessage.get()
-            .eventId("test-id")
-            .eventType("LOGIN")
-            .contentType("application/json")
-            .eventBody("{\"type\":\"LOGIN\"}".getBytes());
+        var message = new EventMessage("master", "test-id",
+            "{\"type\":\"LOGIN\"}".getBytes(), "LOGIN",
+            "application/json", null, Constants.EVENT, null, Constants.SUCCESS);
 
         // act
 
-        destination.sendMessage(message);
+        destination.send(message);
 
         // assert
 
@@ -1355,7 +1362,7 @@ public class sendMessageTests {
 
         // act
 
-        var thrown = catchThrowable(() -> destination.sendMessage(message));
+        var thrown = catchThrowable(() -> destination.send(message));
 
         // assert
 

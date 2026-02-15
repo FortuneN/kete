@@ -16,11 +16,11 @@ regex:<pattern>
 # Match LOGIN or LOGOUT exactly
 kete.routes.kafka.event-matchers.auth=regex:^(LOGIN|LOGOUT)$
 
-# Events starting with LOGIN
-kete.routes.kafka.event-matchers.login=regex:^LOGIN
+# Events starting with LOGIN (LOGIN, LOGIN_ERROR, etc.)
+kete.routes.kafka.event-matchers.login=regex:LOGIN.*
 
-# Events ending with ERROR
-kete.routes.kafka.event-matchers.errors=regex:ERROR$
+# Events ending with ERROR (LOGIN_ERROR, REGISTER_ERROR, etc.)
+kete.routes.kafka.event-matchers.errors=regex:.*ERROR
 ```
 
 ### Character Classes
@@ -58,7 +58,7 @@ kete.routes.kafka.event-matchers.no-refresh=regex:not:.*REFRESH.*
 
 ```bash
 # Match login events OR user create events
-kete.routes.kafka.event-matchers.login=regex:^LOGIN
+kete.routes.kafka.event-matchers.login=regex:LOGIN.*
 kete.routes.kafka.event-matchers.user-create=regex:^USER_CREATE$
 ```
 
@@ -85,6 +85,14 @@ All matchers in KETE are **case-insensitive**:
 - `regex:^LOGIN$` matches `LOGIN`, `login`, `Login`
 - `regex:^login$` matches `LOGIN`, `login`
 
+## Full-String Matching
+
+The regex matcher uses **full-string matching** — the entire event type must match the pattern. This means `^` and `$` anchors are implicit. To match a prefix or suffix, use `.*`:
+
+- `regex:LOGIN` matches only `LOGIN` (not `LOGIN_ERROR`)
+- `regex:LOGIN.*` matches `LOGIN`, `LOGIN_ERROR`, etc.
+- `regex:.*ERROR` matches `LOGIN_ERROR`, `REGISTER_ERROR`, etc.
+
 ## Regex Reference
 
 ### Metacharacters
@@ -92,8 +100,8 @@ All matchers in KETE are **case-insensitive**:
 | Character | Meaning | Example |
 |-----------|---------|---------|
 | `.` | Any character | `L.GIN` matches `LOGIN`, `LAGIN` |
-| `^` | Start of string | `^LOGIN` matches `LOGIN_ERROR` |
-| `$` | End of string | `ERROR$` matches `LOGIN_ERROR` |
+| `^` | Start of string | `^LOGIN$` matches `LOGIN` only |
+| `$` | End of string | `^ERROR$` matches `ERROR` only |
 | `*` | Zero or more | `LOGIN.*` matches `LOGIN`, `LOGIN_ERROR` |
 | `+` | One or more | `LOGIN.+` matches `LOGIN_ERROR` (not `LOGIN`) |
 | `?` | Zero or one | `LOGIN_?ERROR` matches `LOGINERROR`, `LOGIN_ERROR` |

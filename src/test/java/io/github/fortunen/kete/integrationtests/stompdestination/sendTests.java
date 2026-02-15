@@ -24,7 +24,7 @@ public class sendTests extends TestBase {
 		startActiveMq();
 		var stompDestination = "/queue/test-events";
 		var map = new HashMap<String, Object>();
-		map.put("host", container.getHost());
+		map.put("host", "127.0.0.1");
 		map.put("port", String.valueOf(getStompPort()));
 		map.put("destination", stompDestination);
 		var mapConfig = new MapConfiguration(map);
@@ -73,7 +73,6 @@ public class sendTests extends TestBase {
 
 		var tls = TlsMaterial.builder()
 			.withEnabled(true)
-			.withWriteFiles(true)
 			.withTrustStorePassword("changeit")
 			.withKeyStorePassword("changeit")
 			.withKeyPassword("changeit")
@@ -83,7 +82,7 @@ public class sendTests extends TestBase {
 		startWithServerOnlyTLS(tls);
 		var stompDestination = "/queue/test-events";
 		var map = new HashMap<String, Object>();
-		map.put("host", container.getHost());
+		map.put("host", "127.0.0.1");
 		map.put("port", String.valueOf(getStompsPort()));
 		map.put("destination", stompDestination);
 		map.put("tls.enabled", true);
@@ -136,7 +135,6 @@ public class sendTests extends TestBase {
 
 		var tls = TlsMaterial.builder()
 			.withEnabled(true)
-			.withWriteFiles(true)
 			.withTrustStorePassword("changeit")
 			.withKeyStorePassword("changeit")
 			.withKeyPassword("changeit")
@@ -146,15 +144,15 @@ public class sendTests extends TestBase {
 		startWithClientAndServerTLS(tls);
 		var stompDestination = "/queue/test-events";
 		var map = new HashMap<String, Object>();
-		map.put("host", container.getHost());
+		map.put("host", "127.0.0.1");
 		map.put("port", String.valueOf(getStompsPort()));
 		map.put("destination", stompDestination);
 		map.put("tls.enabled", true);
-		map.put("tls.trust-store.loader.kind", "jks-file-path");
-		map.put("tls.trust-store.loader.path", tls.getTrustStoreFilePath());
+		map.put("tls.trust-store.loader.kind", "jks-file-base64");
+		map.put("tls.trust-store.loader.base64", tls.getTrustStoreBase64());
 		map.put("tls.trust-store.password", tls.getTrustStorePassword());
-		map.put("tls.key-store.loader.kind", "jks-file-path");
-		map.put("tls.key-store.loader.path", tls.getKeyStoreFilePath());
+		map.put("tls.key-store.loader.kind", "jks-file-base64");
+		map.put("tls.key-store.loader.base64", tls.getKeyStoreBase64());
 		map.put("tls.key-store.password", tls.getKeyStorePassword());
 		map.put("tls.key-store.key-password", tls.getKeyPassword());
 		var mapConfig = new MapConfiguration(map);

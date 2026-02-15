@@ -1,19 +1,21 @@
 package io.github.fortunen.kete.destinations.gcppubsub;
 
-import java.net.http.HttpClient;
 import java.time.Duration;
 
+import com.google.api.client.http.HttpTransport;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.auth.oauth2.GoogleCredentials;
+
 import io.github.fortunen.kete.DestinationConfig;
-import io.github.fortunen.kete.GcpAuthMaterial;
+import io.github.fortunen.kete.utils.GcpUtils;
+import io.github.fortunen.kete.utils.TemplateUtils;
 import io.github.fortunen.kete.utils.ValidationUtils;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
 
 @Data
-@Slf4j
 @NoArgsConstructor(force = true)
 @EqualsAndHashCode(callSuper = true)
 public class GcpPubSubDestinationConfig extends DestinationConfig {
@@ -25,19 +27,21 @@ public class GcpPubSubDestinationConfig extends DestinationConfig {
 	public static final String ORDERING_KEY = "ordering-key";
 	public static final String TIMEOUT_SECONDS = "timeout-seconds";
 	public static final String DEFAULT_URL = "https://pubsub.googleapis.com";
-	public static final String CREDENTIALS_FILE_PATH = "credentials-file-path";
-	public static final String CREDENTIALS_FILE_TEXT = "credentials-file-text";
-	public static final String CREDENTIALS_FILE_BASE64 = "credentials-file-base64";
+	public static final String PUBSUB_SCOPE = "https://www.googleapis.com/auth/pubsub";
 
 	private String url;
 	private String topic;
 	private String project;
+	private Duration timeout;
 	private String orderingKey;
 	private int timeoutSeconds;
-	private Duration timeout;
 	private boolean authenticated;
-	private GcpAuthMaterial auth;
-	private HttpClient.Builder clientBuilder;
+	private boolean hasOrderingKey;
+	private boolean isTopicTemplated;
+	private String publishTopicPrefix;
+	private HttpTransport httpTransport;
+	private GoogleCredentials credentials;
+	private boolean isOrderingKeyTemplated;
 
 	@Override
 	@SneakyThrows
@@ -57,25 +61,10 @@ public class GcpPubSubDestinationConfig extends DestinationConfig {
 
 		url = ValidationUtils.requireValidUrl(configuration.getString(URL, DEFAULT_URL).trim(), URL + " must be a valid absolute URL");
 
-		// credentials (optional — omit for emulator / no-auth mode, enforce at most one)
+		// credentials
 
-		var credentialsFilePath = configuration.getString(CREDENTIALS_FILE_PATH, "").trim();
-		var credentialsFileText = configuration.getString(CREDENTIALS_FILE_TEXT, "").trim();
-		var credentialsFileBase64 = configuration.getString(CREDENTIALS_FILE_BASE64, "").trim();
-
-		var credentialsSources = (ValidationUtils.isNotBlank(credentialsFilePath) ? 1 : 0) + (ValidationUtils.isNotBlank(credentialsFileText) ? 1 : 0) + (ValidationUtils.isNotBlank(credentialsFileBase64) ? 1 : 0);
-
-		ValidationUtils.requireFalse(credentialsSources > 1, CREDENTIALS_FILE_PATH + ", " + CREDENTIALS_FILE_TEXT + ", and " + CREDENTIALS_FILE_BASE64 + " are mutually exclusive");
-
-		if (ValidationUtils.isNotBlank(credentialsFilePath)) {
-			auth = GcpAuthMaterial.fromCredentialsFilePath(credentialsFilePath);
-		} else if (ValidationUtils.isNotBlank(credentialsFileText)) {
-			auth = GcpAuthMaterial.fromCredentialsText(credentialsFileText);
-		} else if (ValidationUtils.isNotBlank(credentialsFileBase64)) {
-			auth = GcpAuthMaterial.fromCredentialsBase64(credentialsFileBase64);
-		}
-
-		authenticated = ValidationUtils.isNotNull(auth);
+		credentials = GcpUtils.configureAuthentication(authenticationType, configuration, PUBSUB_SCOPE);
+		authenticated = ValidationUtils.isNotNull(credentials);
 
 		ValidationUtils.requireFalse(!authenticated && DEFAULT_URL.equalsIgnoreCase(url), "credentials are required for " + DEFAULT_URL);
 
@@ -91,12 +80,19 @@ public class GcpPubSubDestinationConfig extends DestinationConfig {
 
 		timeout = Duration.ofSeconds(timeoutSeconds);
 
-		// clientBuilder
+		// precomputed fields
 
-		clientBuilder = HttpClient.newBuilder().connectTimeout(timeout);
+		isTopicTemplated = TemplateUtils.containsTemplate(topic);
+		hasOrderingKey = ValidationUtils.isNotBlank(orderingKey);
+		isOrderingKeyTemplated = TemplateUtils.containsTemplate(orderingKey);
+		publishTopicPrefix = "projects/" + project + "/topics/";
+
+		// HTTP transport (with optional TLS)
 
 		if (tls.isEnabled()) {
-			clientBuilder.sslContext(tls.getKeyStoreAndTrustStoreSSLContext());
+			httpTransport = new NetHttpTransport.Builder().setSslSocketFactory(tls.getKeyStoreAndTrustStoreSSLContext().getSocketFactory()).build();
+		} else {
+			httpTransport = new NetHttpTransport();
 		}
 	}
 }

@@ -1,0 +1,23 @@
+# CloudAMQP (Managed RabbitMQ - AMQP 0.9.1)
+# See GUIDE.md for setup instructions
+
+services:
+
+  keycloak:
+    image: ghcr.io/fortunen/kete/quick-start-keycloak
+    command: start-dev
+    ports:
+      - 8080:8080
+      - 9000:9000
+    environment:
+      # CloudAMQP configuration
+      # Replace these values or use a .env file
+      kete.routes.quick-start.destination.kind: amqp-0.9.1
+      kete.routes.quick-start.destination.host: ${CLOUDAMQP_HOST:-<YOUR-INSTANCE>.rmq.cloudamqp.com}
+      kete.routes.quick-start.destination.port: 5671
+      kete.routes.quick-start.destination.tls.enabled: true
+      kete.routes.quick-start.destination.username: ${CLOUDAMQP_USERNAME:-<YOUR-USERNAME>}
+      kete.routes.quick-start.destination.password: ${CLOUDAMQP_PASSWORD:-<YOUR-PASSWORD>}
+      kete.routes.quick-start.destination.virtual-host: ${CLOUDAMQP_VHOST:-<YOUR-VHOST>}
+      kete.routes.quick-start.destination.exchange: amq.direct
+      kete.routes.quick-start.destination.routing-key: keycloak-events

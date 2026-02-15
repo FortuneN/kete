@@ -1,6 +1,7 @@
 package io.github.fortunen.kete.destinations.amqp091;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Channel;
@@ -23,14 +24,35 @@ import lombok.SneakyThrows;
 @EqualsAndHashCode(callSuper = true)
 public class Amqp091Destination extends Destination<Amqp091DestinationConfig> {
 
+	private int priority;
 	private Channel channel;
+	private String exchange;
+	private int deliveryMode;
+	private String routingKey;
 	private Connection connection;
+	private boolean hasPriority;
+	private String timeToLiveExpiration;
+	private boolean isExchangeTemplated;
+	private boolean isRoutingKeyTemplated;
+	private Map<String, Object> staticHeaders;
 
 	@Override
 	@SneakyThrows
 	public void doInitialize() {
 
 		ValidationUtils.requireNonNull(config, "config is required");
+
+		exchange = config.getExchange();
+		priority = config.getPriority();
+		routingKey = config.getRoutingKey();
+		deliveryMode = config.getDeliveryMode();
+		hasPriority = config.isHasPriority();
+		staticHeaders = config.getStaticHeaders();
+		isExchangeTemplated = config.isExchangeTemplated();
+		isRoutingKeyTemplated = config.isRoutingKeyTemplated();
+		timeToLiveExpiration = config.getTimeToLiveExpiration();
+
+		// verify connection
 
 		connection = config.getConnectionFactory().newConnection();
 		channel = connection.createChannel();
@@ -43,18 +65,14 @@ public class Amqp091Destination extends Destination<Amqp091DestinationConfig> {
 		ValidationUtils.requireNonNull(message, "message is required");
 
 		var builder = new AMQP.BasicProperties.Builder();
-		var actualExchange = TemplateUtils.substitute(config.getExchange(), message);
-		var actualRoutingKey = TemplateUtils.substitute(config.getRoutingKey(), message);
+		var actualExchange = isExchangeTemplated ? TemplateUtils.substitute(exchange, message) : exchange;
+		var actualRoutingKey = isRoutingKeyTemplated ? TemplateUtils.substitute(routingKey, message) : routingKey;
 
-		// headers
+		// headers (start from precomputed static headers)
 
 		builder.contentType(message.contentType());
 
-		var headers = new HashMap<String, Object>();
-
-		for (var entry : config.getCustomHeadersEntrySet()) {
-			headers.put(entry.getKey(), entry.getValue());
-		}
+		var headers = new HashMap<>(staticHeaders);
 
 		headers.put(Constants.MESSAGE_HEADER_EVENT_KIND, message.kind());
 		headers.put(Constants.MESSAGE_HEADER_EVENT_TYPE, message.eventType());
@@ -63,16 +81,18 @@ public class Amqp091Destination extends Destination<Amqp091DestinationConfig> {
 
 		// deliveryMode
 
-		builder.deliveryMode(config.getDeliveryMode());
+		builder.deliveryMode(deliveryMode);
 
 		// priority
 
-		builder.priority(config.getPriority());
+		if (hasPriority) {
+			builder.priority(priority);
+		}
 
 		// timeToLiveSeconds
 
-		if (config.isHasTimeToLiveSeconds() && config.getTimeToLiveSeconds() > 0) {
-			builder.expiration(String.valueOf(config.getTimeToLiveSeconds() * 1000));
+		if (ValidationUtils.isNotNull(timeToLiveExpiration)) {
+			builder.expiration(timeToLiveExpiration);
 		}
 
 		// publish

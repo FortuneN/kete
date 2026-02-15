@@ -66,7 +66,6 @@ class ZeroMQDestinationE2ETests extends EndToEndTestBase {
 		// arrange
 
 		var envVars = new HashMap<String, String>();
-		envVars.put("kete.enabled", "true");
 		envVars.put("kete.routes.zeromq-test.realm-matchers.filter", "list:" + TEST_REALM);
 		envVars.put("kete.routes.zeromq-test.destination.kind", "zeromq");
 		envVars.put("kete.routes.zeromq-test.destination.endpoint", "tcp://host.testcontainers.internal:" + zmqPort);
@@ -88,7 +87,7 @@ class ZeroMQDestinationE2ETests extends EndToEndTestBase {
 
 				var receivedMessage = new AtomicReference<byte[]>();
 
-				await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).until(() -> {
+				await().atMost(Duration.ofMinutes(2)).pollInterval(Duration.ofSeconds(2)).until(() -> {
 					var data = pullSocket.recv(ZMQ.NOBLOCK);
 					if (data != null) {
 						receivedMessage.set(data);

@@ -50,6 +50,7 @@ public final class MetricsUtils {
 		Metrics.counter(Constants.ID + ".events.failed.total", "route", route, "event_type", eventType, "realm", realm, "error_type", errorType).increment();
 	}
 
+	@SuppressWarnings("null")
 	public static void timeForward(String route, Runnable operation) {
 
 		ValidationUtils.requireNonNull(route, "route is required");
@@ -63,7 +64,7 @@ public final class MetricsUtils {
 
 		operation.run();
 
-		if (sample == null) {
+		if (ValidationUtils.isNull(sample)) {
 			return;
 		}
 

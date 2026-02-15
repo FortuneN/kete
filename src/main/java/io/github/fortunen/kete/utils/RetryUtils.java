@@ -24,7 +24,7 @@ public final class RetryUtils {
 
 		ValidationUtils.requireNonNull(configuration, "configuration is required");
 
-		if (!configuration.getBoolean(ENABLED, false)) {
+		if (!configuration.getBoolean(ENABLED, true)) {
 			return null;
 		}
 

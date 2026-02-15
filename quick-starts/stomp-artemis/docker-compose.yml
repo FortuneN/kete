@@ -4,7 +4,7 @@ services:
     image: ghcr.io/fortunen/kete/quick-start-activemq-artemis
     ports:
       - 8161:8161
-      - 61613:61613
+      - 36613:61613
     environment:
       ARTEMIS_USER: admin
       ARTEMIS_PASSWORD: admin

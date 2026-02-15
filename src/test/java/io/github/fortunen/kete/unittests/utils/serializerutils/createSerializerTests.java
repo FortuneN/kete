@@ -8,6 +8,7 @@ import io.github.fortunen.kete.serializers.CsvSerializer;
 import io.github.fortunen.kete.serializers.JsonSerializer;
 import io.github.fortunen.kete.serializers.PropertiesSerializer;
 import io.github.fortunen.kete.serializers.SmileSerializer;
+import io.github.fortunen.kete.serializers.TemplateSerializer;
 import io.github.fortunen.kete.serializers.TomlSerializer;
 import io.github.fortunen.kete.serializers.XmlSerializer;
 import io.github.fortunen.kete.serializers.YamlSerializer;
@@ -241,6 +242,26 @@ class createSerializerTests {
 
 		assertThat(result).isNotNull();
 		assertThat(result).isInstanceOf(PropertiesSerializer.class);
+	}
+
+	@Test
+	void shouldCreateTemplateSerializer() {
+
+		// arrange
+
+		var map = new HashMap<String, Object>();
+		map.put("kind", "template");
+		map.put("template-file-text", "Hello ${userId}");
+		var config = new MapConfiguration(map);
+
+		// act
+
+		var result = SerializerUtils.createSerializer(config);
+
+		// assert
+
+		assertThat(result).isNotNull();
+		assertThat(result).isInstanceOf(TemplateSerializer.class);
 	}
 
 	@Test

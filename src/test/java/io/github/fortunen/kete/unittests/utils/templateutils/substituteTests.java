@@ -552,4 +552,371 @@ class substituteTests {
 
 		assertThat(result).isEqualTo("master/login_error/error");
 	}
+
+	// kebab-case
+
+	@Test
+	void shouldSubstituteEventTypeKebabCase() {
+
+		// arrange
+
+		TemplateUtils.clearCache();
+
+		var message = createMessage(null, null, null, "LOGIN_ERROR", null, null, false, null, null);
+		var template = "events/${eventTypeKebabCase}";
+
+		// act
+
+		var result = TemplateUtils.substitute(template, message);
+
+		// assert
+
+		assertThat(result).isEqualTo("events/login-error");
+	}
+
+	@Test
+	void shouldSubstituteKindKebabCaseForAdminEvent() {
+
+		// arrange
+
+		TemplateUtils.clearCache();
+
+		var message = createMessage(null, null, null, null, null, null, true, null, null);
+		var template = "keycloak/${kindKebabCase}";
+
+		// act
+
+		var result = TemplateUtils.substitute(template, message);
+
+		// assert
+
+		assertThat(result).isEqualTo("keycloak/admin-event");
+	}
+
+	@Test
+	void shouldSubstituteRealmKebabCase() {
+
+		// arrange
+
+		TemplateUtils.clearCache();
+
+		var message = createMessage("MY_REALM", null, null, null, null, null, false, null, null);
+		var template = "realms/${realmKebabCase}/events";
+
+		// act
+
+		var result = TemplateUtils.substitute(template, message);
+
+		// assert
+
+		assertThat(result).isEqualTo("realms/my-realm/events");
+	}
+
+	@Test
+	void shouldSubstituteResourceTypeKebabCase() {
+
+		// arrange
+
+		TemplateUtils.clearCache();
+
+		var message = createMessage(null, null, null, null, null, "REALM_ROLE", false, null, null);
+		var template = "admin/${resourceTypeKebabCase}";
+
+		// act
+
+		var result = TemplateUtils.substitute(template, message);
+
+		// assert
+
+		assertThat(result).isEqualTo("admin/realm-role");
+	}
+
+	@Test
+	void shouldSubstituteOperationTypeKebabCase() {
+
+		// arrange
+
+		TemplateUtils.clearCache();
+
+		var message = createMessage(null, null, null, null, null, null, false, "CREATE", null);
+		var template = "operations/${operationTypeKebabCase}";
+
+		// act
+
+		var result = TemplateUtils.substitute(template, message);
+
+		// assert
+
+		assertThat(result).isEqualTo("operations/create");
+	}
+
+	@Test
+	void shouldSubstituteResultKebabCase() {
+
+		// arrange
+
+		TemplateUtils.clearCache();
+
+		var message = createMessage(null, null, null, null, null, null, false, null, Constants.SUCCESS);
+		var template = "events/${resultKebabCase}";
+
+		// act
+
+		var result = TemplateUtils.substitute(template, message);
+
+		// assert
+
+		assertThat(result).isEqualTo("events/success");
+	}
+
+	// PascalCase
+
+	@Test
+	void shouldSubstituteEventTypePascalCase() {
+
+		// arrange
+
+		TemplateUtils.clearCache();
+
+		var message = createMessage(null, null, null, "LOGIN_ERROR", null, null, false, null, null);
+		var template = "events/${eventTypePascalCase}";
+
+		// act
+
+		var result = TemplateUtils.substitute(template, message);
+
+		// assert
+
+		assertThat(result).isEqualTo("events/LoginError");
+	}
+
+	@Test
+	void shouldSubstituteKindPascalCaseForAdminEvent() {
+
+		// arrange
+
+		TemplateUtils.clearCache();
+
+		var message = createMessage(null, null, null, null, null, null, true, null, null);
+		var template = "keycloak/${kindPascalCase}";
+
+		// act
+
+		var result = TemplateUtils.substitute(template, message);
+
+		// assert
+
+		assertThat(result).isEqualTo("keycloak/AdminEvent");
+	}
+
+	@Test
+	void shouldSubstituteRealmPascalCase() {
+
+		// arrange
+
+		TemplateUtils.clearCache();
+
+		var message = createMessage("MY_REALM", null, null, null, null, null, false, null, null);
+		var template = "realms/${realmPascalCase}/events";
+
+		// act
+
+		var result = TemplateUtils.substitute(template, message);
+
+		// assert
+
+		assertThat(result).isEqualTo("realms/MyRealm/events");
+	}
+
+	@Test
+	void shouldSubstituteResourceTypePascalCase() {
+
+		// arrange
+
+		TemplateUtils.clearCache();
+
+		var message = createMessage(null, null, null, null, null, "REALM_ROLE", false, null, null);
+		var template = "admin/${resourceTypePascalCase}";
+
+		// act
+
+		var result = TemplateUtils.substitute(template, message);
+
+		// assert
+
+		assertThat(result).isEqualTo("admin/RealmRole");
+	}
+
+	@Test
+	void shouldSubstituteOperationTypePascalCase() {
+
+		// arrange
+
+		TemplateUtils.clearCache();
+
+		var message = createMessage(null, null, null, null, null, null, false, "CREATE", null);
+		var template = "operations/${operationTypePascalCase}";
+
+		// act
+
+		var result = TemplateUtils.substitute(template, message);
+
+		// assert
+
+		assertThat(result).isEqualTo("operations/Create");
+	}
+
+	@Test
+	void shouldSubstituteResultPascalCase() {
+
+		// arrange
+
+		TemplateUtils.clearCache();
+
+		var message = createMessage(null, null, null, null, null, null, false, null, Constants.SUCCESS);
+		var template = "events/${resultPascalCase}";
+
+		// act
+
+		var result = TemplateUtils.substitute(template, message);
+
+		// assert
+
+		assertThat(result).isEqualTo("events/Success");
+	}
+
+	// camelCase
+
+	@Test
+	void shouldSubstituteEventTypeCamelCase() {
+
+		// arrange
+
+		TemplateUtils.clearCache();
+
+		var message = createMessage(null, null, null, "LOGIN_ERROR", null, null, false, null, null);
+		var template = "events/${eventTypeCamelCase}";
+
+		// act
+
+		var result = TemplateUtils.substitute(template, message);
+
+		// assert
+
+		assertThat(result).isEqualTo("events/loginError");
+	}
+
+	@Test
+	void shouldSubstituteKindCamelCaseForAdminEvent() {
+
+		// arrange
+
+		TemplateUtils.clearCache();
+
+		var message = createMessage(null, null, null, null, null, null, true, null, null);
+		var template = "keycloak/${kindCamelCase}";
+
+		// act
+
+		var result = TemplateUtils.substitute(template, message);
+
+		// assert
+
+		assertThat(result).isEqualTo("keycloak/adminEvent");
+	}
+
+	@Test
+	void shouldSubstituteRealmCamelCase() {
+
+		// arrange
+
+		TemplateUtils.clearCache();
+
+		var message = createMessage("MY_REALM", null, null, null, null, null, false, null, null);
+		var template = "realms/${realmCamelCase}/events";
+
+		// act
+
+		var result = TemplateUtils.substitute(template, message);
+
+		// assert
+
+		assertThat(result).isEqualTo("realms/myRealm/events");
+	}
+
+	@Test
+	void shouldSubstituteResourceTypeCamelCase() {
+
+		// arrange
+
+		TemplateUtils.clearCache();
+
+		var message = createMessage(null, null, null, null, null, "REALM_ROLE", false, null, null);
+		var template = "admin/${resourceTypeCamelCase}";
+
+		// act
+
+		var result = TemplateUtils.substitute(template, message);
+
+		// assert
+
+		assertThat(result).isEqualTo("admin/realmRole");
+	}
+
+	@Test
+	void shouldSubstituteOperationTypeCamelCase() {
+
+		// arrange
+
+		TemplateUtils.clearCache();
+
+		var message = createMessage(null, null, null, null, null, null, false, "CREATE", null);
+		var template = "operations/${operationTypeCamelCase}";
+
+		// act
+
+		var result = TemplateUtils.substitute(template, message);
+
+		// assert
+
+		assertThat(result).isEqualTo("operations/create");
+	}
+
+	@Test
+	void shouldSubstituteResultCamelCase() {
+
+		// arrange
+
+		TemplateUtils.clearCache();
+
+		var message = createMessage(null, null, null, null, null, null, false, null, Constants.SUCCESS);
+		var template = "events/${resultCamelCase}";
+
+		// act
+
+		var result = TemplateUtils.substitute(template, message);
+
+		// assert
+
+		assertThat(result).isEqualTo("events/success");
+	}
+
+	@Test
+	void shouldSubstituteComplexTemplateWithAllCases() {
+
+		// arrange
+
+		TemplateUtils.clearCache();
+
+		var message = createMessage("PRODUCTION", null, null, "LOGIN_ERROR", null, "REALM_ROLE", true, "CREATE", Constants.SUCCESS);
+		var template = "${kindKebabCase}/${realmPascalCase}/${eventTypeCamelCase}/${resourceTypeKebabCase}";
+
+		// act
+
+		var result = TemplateUtils.substitute(template, message);
+
+		// assert
+
+		assertThat(result).isEqualTo("admin-event/Production/loginError/realm-role");
+	}
 }

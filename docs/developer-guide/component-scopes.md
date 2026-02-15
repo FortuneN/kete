@@ -32,7 +32,7 @@ Inspired by .NET Core DI concepts (Transient/Scoped/Singleton):
 - Stateless services
 - Request-scoped operations
 - Operations that should not share state
-- Most destinations and serializers
+- Most destinations (all 27 are TRANSIENT)\n- TemplateSerializer (the only TRANSIENT serializer; the other 8 are SINGLETON)
 
 **Lifecycle**:
 ```
@@ -236,14 +236,14 @@ public class JsonSerializer extends Serializer { }
 public class XmlSerializer extends Serializer { }
 
 // Matchers: Unique per configuration (each has own pattern)
-@Component(name = "glob", scope = Component.TRANSIENT)
+@Component(name = "glob")
 public class GlobMatcher extends Matcher { }
 
 // Destinations: Unique per configuration (each has own connection)
-@Component(name = "http", scope = Component.TRANSIENT)
+@Component(name = "http")
 public class HttpDestination extends Destination { }
 
-@Component(name = "kafka", scope = Component.TRANSIENT)
+@Component(name = "kafka")
 public class KafkaDestination extends Destination { }
 ```
 

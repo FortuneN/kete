@@ -16,15 +16,15 @@ Load Base64-encoded PKCS#12 content.
 ## Example
 
 ```bash
-kete.routes.myroute.destination.tls=true
+kete.routes.myroute.destination.tls.enabled=true
 
 # Key store (client certificate + private key)
-kete.routes.myroute.destination.key-store.loader.kind=pkcs12-file-base64
-kete.routes.myroute.destination.key-store.loader.base64=MIIKegIBAzCCCj4GCSqGSIb3...
-kete.routes.myroute.destination.key-store.password=changeit
+kete.routes.myroute.destination.tls.key-store.loader.kind=pkcs12-file-base64
+kete.routes.myroute.destination.tls.key-store.loader.base64=MIIKegIBAzCCCj4GCSqGSIb3...
+kete.routes.myroute.destination.tls.key-store.password=changeit
 
 # Trust store (CA certificates)
-kete.routes.myroute.destination.trust-store.loader.kind=pkcs12-file-base64
-kete.routes.myroute.destination.trust-store.loader.base64=MIIFgTCCBGmgAwIBAgIQ...
-kete.routes.myroute.destination.trust-store.password=changeit
+kete.routes.myroute.destination.tls.trust-store.loader.kind=pkcs12-file-base64
+kete.routes.myroute.destination.tls.trust-store.loader.base64=MIIFgTCCBGmgAwIBAgIQ...
+kete.routes.myroute.destination.tls.trust-store.password=changeit
 ```

@@ -1,0 +1,44 @@
+package io.github.fortunen.kete.integrationtests.azureservicebusdestination;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
+
+import java.nio.charset.StandardCharsets;
+import java.time.Duration;
+
+import org.junit.jupiter.api.Test;
+
+public class sendTests extends TestBase {
+
+	@Test
+	public void shouldSend_NonTls() throws Exception {
+
+		// arrange
+
+		startEmulator();
+		configureDestination();
+		destination.initialize();
+
+		var message = createMessage(
+			"test-event-id", "LOGIN", "application/json",
+			"{\"type\":\"LOGIN\"}".getBytes(StandardCharsets.UTF_8)
+		);
+
+		// act
+
+		destination.send(message);
+
+		// assert — read from emulator queue to verify delivery
+
+		await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).untilAsserted(() -> {
+			var body = receiveMessage();
+			assertThat(body).isNotNull();
+			assertThat(body).isEqualTo("{\"type\":\"LOGIN\"}");
+		});
+	}
+
+	// TLS and mTLS tests are not applicable for Azure Service Bus.
+	// The Azure SDK AMQP transport manages TLS internally — ServiceBusClientBuilder
+	// does not expose SSLContext, HttpClient, or any TLS configuration API.
+	// The emulator requires UseDevelopmentEmulator=true which disables TLS.
+}

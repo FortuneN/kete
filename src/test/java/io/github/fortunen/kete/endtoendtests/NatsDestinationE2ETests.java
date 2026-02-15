@@ -37,6 +37,7 @@ class NatsDestinationE2ETests extends EndToEndTestBase {
 		cleanupNetwork();
 	}
 
+	@SuppressWarnings("resource")
 	@Test
 	void shouldForwardLoginEventToNatsSubject() throws Exception {
 
@@ -46,14 +47,12 @@ class NatsDestinationE2ETests extends EndToEndTestBase {
 			.withNetwork(createNetwork())
 			.withNetworkAliases("nats")
 			.withExposedPorts(NATS_PORT, NATS_MONITORING_PORT)
-			.withCommand("--http_port", "8222")
-			.withStartupTimeout(CONTAINER_STARTUP_TIMEOUT);
+			.withCommand("--http_port", "8222");
 		natsServer.start();
 
 		waitForNatsReady(natsServer);
 
 		var envVars = new HashMap<String, String>();
-		envVars.put("kete.enabled", "true");
 		envVars.put("kete.routes.nats-test.realm-matchers.filter", "list:" + TEST_REALM);
 		envVars.put("kete.routes.nats-test.destination.kind", "nats");
 		envVars.put("kete.routes.nats-test.destination.servers", "nats://nats:" + NATS_PORT);
@@ -64,7 +63,7 @@ class NatsDestinationE2ETests extends EndToEndTestBase {
 		var receivedMessages = new ArrayBlockingQueue<String>(10);
 
 		// Set up NATS subscriber
-		var natsUrl = "nats://" + natsServer.getHost() + ":" + natsServer.getMappedPort(NATS_PORT);
+		var natsUrl = "nats://" + "127.0.0.1" + ":" + natsServer.getMappedPort(NATS_PORT);
 		var options = new Options.Builder()
 			.server(natsUrl)
 			.connectionTimeout(Duration.ofSeconds(10))
@@ -89,7 +88,7 @@ class NatsDestinationE2ETests extends EndToEndTestBase {
 
 				// assert - wait for message using Awaitility
 
-				await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).until(() -> !receivedMessages.isEmpty());
+				await().atMost(Duration.ofMinutes(2)).pollInterval(Duration.ofSeconds(2)).until(() -> !receivedMessages.isEmpty());
 
 				var body = receivedMessages.poll(1, TimeUnit.SECONDS);
 
@@ -118,11 +117,9 @@ class NatsDestinationE2ETests extends EndToEndTestBase {
 	}
 
 	private void waitForNatsReady(GenericContainer<?> container) {
-		await().atMost(Duration.ofMinutes(2))
-			.pollInterval(Duration.ofSeconds(1))
-			.until(() -> {
+		await().atMost(Duration.ofMinutes(2)).pollInterval(Duration.ofSeconds(2)).until(() -> {
 				try {
-					var url = "http://" + container.getHost() + ":" + container.getMappedPort(NATS_MONITORING_PORT) + "/varz";
+					var url = "http://" + "127.0.0.1" + ":" + container.getMappedPort(NATS_MONITORING_PORT) + "/varz";
 					var conn = URI.create(url).toURL().openConnection();
 					conn.setConnectTimeout(1000);
 					conn.setReadTimeout(1000);

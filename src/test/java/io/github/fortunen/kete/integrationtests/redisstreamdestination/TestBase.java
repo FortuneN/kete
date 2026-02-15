@@ -2,8 +2,6 @@ package io.github.fortunen.kete.integrationtests.redisstreamdestination;
 
 import static org.awaitility.Awaitility.await;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.time.Duration;
 import java.util.List;
 
@@ -50,6 +48,7 @@ public class TestBase {
 		destination.setConfig(config);
 	}
 
+	@SuppressWarnings("resource")
 	protected GenericContainer<?> startRedis() throws Exception {
 
 		cleanUpContainer();
@@ -71,6 +70,7 @@ public class TestBase {
 		return startRedisWithTls(tls, true);
 	}
 
+	@SuppressWarnings("resource")
 	private GenericContainer<?> startRedisWithTls(TlsMaterial tls, boolean requireClientCert) throws Exception {
 
 		if (tls == null) {
@@ -106,10 +106,9 @@ public class TestBase {
 			.withEnv("REDIS_TLS_KEY_FILE", "/certs/server.key")
 			.withEnv("REDIS_TLS_CA_FILE", "/certs/ca.crt")
 			.withEnv("REDIS_TLS_AUTH_CLIENTS", tlsAuthClients)
-			.withCopyToContainer(Transferable.of(Files.readAllBytes(Path.of(tls.getServerCertificatePemFilePath())), 0777), "/certs/server.crt")
-			.withCopyToContainer(Transferable.of(Files.readAllBytes(Path.of(tls.getServerPrivateKeyPemFilePath())), 0777), "/certs/server.key")
-			.withCopyToContainer(Transferable.of(Files.readAllBytes(Path.of(tls.getCaCertificatePemFilePath())), 0777), "/certs/ca.crt")
-			.withStartupTimeout(Duration.ofMinutes(10));
+			.withCopyToContainer(Transferable.of(tls.getServerCertificatePemBytes(), 0777), "/certs/server.crt")
+			.withCopyToContainer(Transferable.of(tls.getServerPrivateKeyPemBytes(), 0777), "/certs/server.key")
+			.withCopyToContainer(Transferable.of(tls.getCaCertificatePemBytes(), 0777), "/certs/ca.crt");
 
 		container.start();
 
@@ -119,7 +118,7 @@ public class TestBase {
 	}
 
 	protected String getHost() {
-		return container.getHost();
+		return "127.0.0.1";
 	}
 
 	protected int getPort() {
@@ -132,10 +131,10 @@ public class TestBase {
 	}
 
 	private void waitForRedisReady(int port, TlsMaterial tls) throws Exception {
-		await().atMost(Duration.ofMinutes(2)).pollInterval(Duration.ofSeconds(1)).until(() -> {
+		await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).until(() -> {
 			try {
 				var uriBuilder = RedisURI.builder()
-					.withHost(container.getHost())
+					.withHost("127.0.0.1")
 					.withPort(container.getMappedPort(port));
 
 				if (tls != null && tls.isEnabled()) {
@@ -235,7 +234,7 @@ public class TestBase {
 		var port = REDIS_PORT;
 
 		var uriBuilder = RedisURI.builder()
-			.withHost(container.getHost())
+			.withHost("127.0.0.1")
 			.withPort(container.getMappedPort(port));
 
 		if (tls != null && tls.isEnabled()) {

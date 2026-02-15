@@ -52,11 +52,13 @@ flowchart TD
     subgraph Startup
         A["Keycloak starts"] --> B["ProviderFactory.init()"]
         B --> C["ProviderFactory.postInit()"]
-        C --> D["Scan for @Component classes"]
-        D --> E["Parse configuration"]
-        E --> F["Initialize routes"]
-        F --> G["Initialize destinations"]
-        G --> H["Register event listener"]
+        C --> C2["Store session factory & self-register"]
+        C2 --> D["PostMigrationEvent triggers run()"]
+        D --> E["Scan for @Component classes"]
+        E --> F["Parse configuration"]
+        F --> G["Initialize routes"]
+        G --> H["Initialize destinations"]
+        H --> I["Register event listener on realms"]
     end
     
     subgraph Runtime
@@ -118,8 +120,9 @@ flowchart LR
 ```
 
 Pool sizes are configurable per route:
-- `min-pool-size`: Default 5
-- `max-pool-size`: Default 20
+- `pool.min-idle`: Default 1
+- `pool.max-idle`: Default 10
+- `pool.max-total`: Default 20
 
 ---
 
@@ -131,7 +134,7 @@ Pool sizes are configurable per route:
 | **Virtual threads** | Parallel destination delivery without blocking |
 | **Destination pooling** | Predictable resource usage, virtual thread compatibility |
 | **Matcher caching** | O(1) lookup after first match per event type |
-| **Serializer singletons** | One instance shared across routes |
+| **Serializer singletons** | One instance shared across routes (except TemplateSerializer, which is transient) |
 
 ---
 

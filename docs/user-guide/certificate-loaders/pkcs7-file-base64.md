@@ -16,9 +16,9 @@ Load Base64-encoded PKCS#7 content.
 ## Example
 
 ```bash
-kete.routes.myroute.destination.tls=true
+kete.routes.myroute.destination.tls.enabled=true
 
 # Trust store only (PKCS#7 cannot contain private keys)
-kete.routes.myroute.destination.trust-store.loader.kind=pkcs7-file-base64
-kete.routes.myroute.destination.trust-store.loader.base64=MIIHxgYJKoZIhvcNAQcCoIIHtzCCB7M...
+kete.routes.myroute.destination.tls.trust-store.loader.kind=pkcs7-file-base64
+kete.routes.myroute.destination.tls.trust-store.loader.base64=MIIHxgYJKoZIhvcNAQcCoIIHtzCCB7M...
 ```

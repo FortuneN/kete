@@ -3,7 +3,6 @@ package io.github.fortunen.kete.integrationtests.azurestoragequeuedestination;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Base64;
 
 import org.junit.jupiter.api.Test;
 
@@ -32,11 +31,8 @@ public class sendTests extends TestBase {
 
 		// assert
 
-		var response = peekMessage("my-queue");
-		assertThat(response).contains("<QueueMessage>");
-		var messageText = extractMessageText(response);
-		var decoded = new String(Base64.getDecoder().decode(messageText), StandardCharsets.UTF_8);
-		assertThat(decoded).isEqualTo("{\"type\":\"LOGIN\"}");
+		var body = peekMessage("my-queue");
+		assertThat(body).isEqualTo("{\"type\":\"LOGIN\"}");
 	}
 
 	@Test
@@ -45,13 +41,12 @@ public class sendTests extends TestBase {
 		// arrange
 
 		var tls = TlsMaterial.builder()
-			.withEnabled(true).withWriteFiles(true)
+			.withEnabled(true)
 			.withTrustStorePassword("changeit").withKeyStorePassword("changeit").withKeyPassword("changeit")
 			.withServerHostNames(new String[] { "localhost", "127.0.0.1", "host.docker.internal", "kubernetes.docker.internal" })
 			.build();
 
-		startAzuriteOnNetwork();
-		startNginxTlsProxy(tls, false);
+		startAzuriteWithTls(tls);
 		createQueue("my-queue");
 		configureDestinationWithTls("my-queue", tls);
 		destination.initialize();
@@ -67,11 +62,8 @@ public class sendTests extends TestBase {
 
 		// assert — read directly from Azurite (plain HTTP) to verify
 
-		var response = peekMessage("my-queue");
-		assertThat(response).contains("<QueueMessage>");
-		var messageText = extractMessageText(response);
-		var decoded = new String(Base64.getDecoder().decode(messageText), StandardCharsets.UTF_8);
-		assertThat(decoded).isEqualTo("{\"type\":\"LOGIN\"}");
+		var body = peekMessage("my-queue");
+		assertThat(body).isEqualTo("{\"type\":\"LOGIN\"}");
 	}
 
 	@Test
@@ -80,13 +72,12 @@ public class sendTests extends TestBase {
 		// arrange
 
 		var tls = TlsMaterial.builder()
-			.withEnabled(true).withWriteFiles(true)
+			.withEnabled(true)
 			.withTrustStorePassword("changeit").withKeyStorePassword("changeit").withKeyPassword("changeit")
 			.withServerHostNames(new String[] { "localhost", "127.0.0.1", "host.docker.internal", "kubernetes.docker.internal" })
 			.build();
 
-		startAzuriteOnNetwork();
-		startNginxTlsProxy(tls, true);
+		startAzuriteWithTls(tls);
 		createQueue("my-queue");
 		configureDestinationWithMtls("my-queue", tls);
 		destination.initialize();
@@ -102,10 +93,7 @@ public class sendTests extends TestBase {
 
 		// assert — read directly from Azurite (plain HTTP) to verify
 
-		var response = peekMessage("my-queue");
-		assertThat(response).contains("<QueueMessage>");
-		var messageText = extractMessageText(response);
-		var decoded = new String(Base64.getDecoder().decode(messageText), StandardCharsets.UTF_8);
-		assertThat(decoded).isEqualTo("{\"type\":\"LOGIN\"}");
+		var body = peekMessage("my-queue");
+		assertThat(body).isEqualTo("{\"type\":\"LOGIN\"}");
 	}
 }

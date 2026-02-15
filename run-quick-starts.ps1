@@ -16,11 +16,11 @@
     Wildcard filter for quickstart names (default: "*")
 
 .PARAMETER TimeoutSeconds
-    Timeout for event reception check (default: 120)
+    Timeout for event reception check (default: 60)
 
 .EXAMPLE
-    ./run-all-quickstarts.ps1
-    ./run-all-quickstarts.ps1 -Filter "kafka-*"
+    ./run-quick-starts.ps1
+    ./run-quick-starts.ps1 -Filter "kafka-*"
 #>
 
 param(
@@ -355,7 +355,7 @@ function Test-QuickStart {
 
         # Step 3: Wait for Keycloak
         Write-Step "Waiting for Keycloak readiness..." "running"
-        if (-not (Wait-ForKeycloak -TimeoutSeconds 60)) {
+        if (-not (Wait-ForKeycloak -TimeoutSeconds 180)) {
             Write-Step "Keycloak not ready (timeout)" "failed"
             return $false
         }
@@ -374,13 +374,25 @@ function Test-QuickStart {
         Write-Host "`r" -NoNewline
         Write-Step "Login event triggered" "success"
 
-        # Give event time to propagate and check metrics
-        Start-Sleep -Seconds 2
-
-        # Step 4a: Verify event was sent via metrics
+        # Step 4a: Verify event was sent via metrics (retry loop for SDK init overhead)
         Write-Step "Verifying event was sent..." "running"
-        $afterCount = Get-EventsSentCount
-        $eventsSent = $afterCount - $beforeCount
+        $metricsDeadline = (Get-Date).AddSeconds(15)
+        $eventsSent = 0
+        $spinnerIdx = 0
+
+        while ((Get-Date) -lt $metricsDeadline) {
+            Start-Sleep -Seconds 2
+            $afterCount = Get-EventsSentCount
+            $eventsSent = $afterCount - $beforeCount
+            if ($eventsSent -gt 0) { break }
+
+            $frame = $script:SpinnerFrames[$spinnerIdx % $script:SpinnerFrames.Length]
+            $spinnerIdx++
+            $remaining = [math]::Ceiling(($metricsDeadline - (Get-Date)).TotalSeconds)
+            $remainingStr = Format-Duration -Seconds $remaining
+            $message = "    $frame Waiting for metrics... ($remainingStr left)".PadRight(80)
+            Write-Host "`r$message" -NoNewline -ForegroundColor $script:Colors.Muted
+        }
 
         if ($eventsSent -gt 0) {
             Write-Host "`r" -NoNewline
@@ -456,7 +468,8 @@ function Test-QuickStart {
     } finally {
         # Cleanup with spinner
         Write-Step "Cleaning up containers..." "running"
-        docker compose -f "$Path/docker-compose.yml" down -v 2>&1 | Out-Null
+        docker compose -f "$Path/docker-compose.yml" down -v --remove-orphans 2>&1 | Out-Null
+        Start-Sleep -Seconds 5
         Write-Host "`r" -NoNewline
         Write-Step "Cleanup complete" "info"
     }
@@ -507,12 +520,6 @@ foreach ($qs in $quickstarts) {
     $name = $qs.Name
     $path = $qs.FullName
 
-    # Check if cloud-only and should skip
-    if ($SkipCloudOnly -and $name -in $script:CloudOnlyQuickstarts) {
-        [void]$script:Results.Skipped.Add($name)
-        continue
-    }
-
     Write-TestHeader -Name $name -Current $current -Total $total
 
     $success = Test-QuickStart -Name $name -Path $path -TimeoutSeconds $TimeoutSeconds
@@ -524,6 +531,17 @@ foreach ($qs in $quickstarts) {
         break
     }
 }
+
+# Summary and total duration
+$totalDuration = (Get-Date) - $totalStartTime
+$totalDurationStr = "{0:mm\:ss}" -f $totalDuration
+
+Write-SectionHeader "Test Summary"
+Write-Host "  Passed:  $($script:Results.Passed.Count)" -ForegroundColor $script:Colors.Success
+Write-Host "  Failed:  $($script:Results.Failed.Count)" -ForegroundColor $(if ($script:Results.Failed.Count -gt 0) { $script:Colors.Error } else { $script:Colors.Success })
+Write-Host "  Skipped: $($script:Results.Skipped.Count)" -ForegroundColor $script:Colors.Warning
+Write-Host "  Total Duration: $totalDurationStr" -ForegroundColor $script:Colors.Muted
+Write-Host ""
 
 # Exit code
 if ($script:Results.Failed.Count -gt 0) {

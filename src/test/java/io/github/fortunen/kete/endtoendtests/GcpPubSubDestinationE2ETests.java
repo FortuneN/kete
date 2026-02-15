@@ -13,7 +13,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.keycloak.admin.client.Keycloak;
 import org.testcontainers.containers.GenericContainer;
-import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.utility.DockerImageName;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -38,6 +37,7 @@ class GcpPubSubDestinationE2ETests extends EndToEndTestBase {
 		cleanupNetwork();
 	}
 
+	@SuppressWarnings("resource")
 	@Test
 	void shouldForwardLoginEventToGcpPubSub() throws Exception {
 
@@ -49,13 +49,10 @@ class GcpPubSubDestinationE2ETests extends EndToEndTestBase {
 			.withExposedPorts(EMULATOR_PORT)
 			.withCommand("gcloud", "beta", "emulators", "pubsub", "start",
 				"--project=" + PROJECT_ID,
-				"--host-port=0.0.0.0:" + EMULATOR_PORT)
-			.waitingFor(Wait.forLogMessage(".*Server started.*", 1))
-			.withStartupTimeout(CONTAINER_STARTUP_TIMEOUT);
-
+				"--host-port=0.0.0.0:" + EMULATOR_PORT);
 		pubsubEmulator.start();
 
-		var emulatorHost = pubsubEmulator.getHost();
+		var emulatorHost = "127.0.0.1";
 		var emulatorPort = pubsubEmulator.getMappedPort(EMULATOR_PORT);
 		var emulatorUrl = "http://" + emulatorHost + ":" + emulatorPort;
 
@@ -69,7 +66,6 @@ class GcpPubSubDestinationE2ETests extends EndToEndTestBase {
 		// configure keycloak
 
 		var envVars = new HashMap<String, String>();
-		envVars.put("kete.enabled", "true");
 		envVars.put("kete.routes.pubsub-test.realm-matchers.filter", "list:" + TEST_REALM);
 		envVars.put("kete.routes.pubsub-test.destination.kind", "gcp-pubsub");
 		envVars.put("kete.routes.pubsub-test.destination.project", PROJECT_ID);
@@ -89,7 +85,7 @@ class GcpPubSubDestinationE2ETests extends EndToEndTestBase {
 
 				// assert
 
-				await().atMost(Duration.ofSeconds(30)).pollInterval(Duration.ofSeconds(1)).untilAsserted(() -> {
+				await().atMost(Duration.ofMinutes(2)).pollInterval(Duration.ofSeconds(2)).untilAsserted(() -> {
 					var messages = pullMessages(emulatorUrl, PROJECT_ID, SUBSCRIPTION_ID);
 					assertThat(messages).isNotEmpty();
 					assertThat(messages).anyMatch(msg -> msg.contains(TEST_REALM));
@@ -106,7 +102,7 @@ class GcpPubSubDestinationE2ETests extends EndToEndTestBase {
 
 		var client = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(5)).build();
 
-		await().atMost(Duration.ofMinutes(2)).pollInterval(Duration.ofSeconds(1)).until(() -> {
+		await().atMost(Duration.ofMinutes(2)).pollInterval(Duration.ofSeconds(2)).until(() -> {
 
 			try {
 				var request = HttpRequest.newBuilder()

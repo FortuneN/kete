@@ -10,19 +10,16 @@ Load a certificate from a DER file on the filesystem.
 ## Notes
 
 - DER is the binary form of PEM (same data, different encoding)
-- Contains a single certificate
+- Contains a single certificate (no private keys)
 - Common extensions: `.der`, `.cer`
+- Trust stores only — DER cannot hold private keys, so it cannot be used as a key store for mTLS
 
 ## Example
 
 ```bash
-kete.routes.myroute.destination.tls=true
+kete.routes.myroute.destination.tls.enabled=true
 
 # Trust store (CA certificate)
-kete.routes.myroute.destination.trust-store.loader.kind=der-file-path
-kete.routes.myroute.destination.trust-store.loader.path=/certs/ca.der
-
-# Key store (client certificate)
-kete.routes.myroute.destination.key-store.loader.kind=der-file-path
-kete.routes.myroute.destination.key-store.loader.path=/certs/client.der
+kete.routes.myroute.destination.tls.trust-store.loader.kind=der-file-path
+kete.routes.myroute.destination.tls.trust-store.loader.path=/certs/ca.der
 ```

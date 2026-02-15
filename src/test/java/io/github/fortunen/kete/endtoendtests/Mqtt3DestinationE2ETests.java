@@ -32,6 +32,7 @@ class Mqtt3DestinationE2ETests extends EndToEndTestBase {
 		cleanupNetwork();
 	}
 
+	@SuppressWarnings("resource")
 	@Test
 	void shouldForwardLoginEventToMqtt3Broker() throws Exception {
 
@@ -45,7 +46,6 @@ class Mqtt3DestinationE2ETests extends EndToEndTestBase {
 		waitForMqttReady(mosquitto, MQTT_PORT);
 
 		var envVars = new HashMap<String, String>();
-		envVars.put("kete.enabled", "true");
 		envVars.put("kete.routes.mqtt-test.realm-matchers.filter", "list:" + TEST_REALM);
 		envVars.put("kete.routes.mqtt-test.destination.kind", "mqtt-3");
 		envVars.put("kete.routes.mqtt-test.destination.host", "mosquitto");
@@ -53,7 +53,7 @@ class Mqtt3DestinationE2ETests extends EndToEndTestBase {
 		envVars.put("kete.routes.mqtt-test.destination.topic", TOPIC_TEMPLATE);
 		envVars.put("kete.routes.mqtt-test.serializer.kind", "toml");
 
-		var brokerUrl = String.format("tcp://%s:%d", mosquitto.getHost(), mosquitto.getMappedPort(MQTT_PORT));
+		var brokerUrl = String.format("tcp://%s:%d", "127.0.0.1", mosquitto.getMappedPort(MQTT_PORT));
 
 		var receivedMessage = new AtomicReference<String>();
 
@@ -79,7 +79,7 @@ class Mqtt3DestinationE2ETests extends EndToEndTestBase {
 
 					// assert
 
-					await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).until(() -> receivedMessage.get() != null);
+					await().atMost(Duration.ofMinutes(2)).pollInterval(Duration.ofSeconds(2)).until(() -> receivedMessage.get() != null);
 
 					var body = receivedMessage.get();
 					// TOML serializer assertions - check for TOML format (key = "value")

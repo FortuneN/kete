@@ -1,343 +1,261 @@
-# docker-compose.yml Reference
+# Docker Compose Reference
 
-Complete Docker Compose configuration for infrastructure services.
+Docker Compose patterns used across quickstart configurations.
 
 
 
 ## Overview
 
-This file defines the infrastructure services needed for testing and running Keycloak Events to Everywhere:
-- **Kafka** - Event streaming platform
-- **RabbitMQ** - Message broker with management UI
+There is no root-level `docker-compose.yml`. Each quickstart has its own self-contained `docker-compose.yml` at `quick-starts/<name>/docker-compose.yml`. All quickstarts follow a common pattern.
 
 
 
-## Services
+## Common Structure
 
-### Kafka Service
-
-**Image:** `confluentinc/cp-kafka:7.8.0`  
-**Container Name:** `keycloak-kafka`  
-**Mode:** KRaft (no ZooKeeper required)
-
-#### Ports
-
-| Port | Protocol | Purpose |
-|------|----------|---------|
-| 9092 | PLAINTEXT_HOST | External access from host |
-| 29092 | PLAINTEXT | Internal broker communication |
-| 29093 | CONTROLLER | KRaft controller |
-| 9101 | JMX | Metrics and monitoring |
-
-#### Environment Variables
-
-**KRaft Configuration:**
-```yaml
-KAFKA_NODE_ID: 1
-KAFKA_PROCESS_ROLES: 'broker,controller'
-KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka:29093'
-CLUSTER_ID: 'MkU3OEVBNTcwNTJENDM2Qk'
-```
-
-**Listeners:**
-```yaml
-KAFKA_LISTENERS: 'PLAINTEXT://kafka:29092,CONTROLLER://kafka:29093,PLAINTEXT_HOST://0.0.0.0:9092'
-KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092'
-KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT'
-```
-
-**Replication (Single-Node):**
-```yaml
-KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
-KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
-```
-
-#### Health Check
+Every quickstart docker-compose file follows this pattern:
 
 ```yaml
-test: ["CMD", "kafka-broker-api-versions", "--bootstrap-server", "localhost:9092"]
-interval: 10s
-timeout: 10s
-retries: 5
-start_period: 30s
+services:
+
+  <broker>:
+    image: ghcr.io/fortunen/kete/quick-start-<broker>
+    ports:
+      - <host-port>:<container-port>
+    healthcheck:
+      test: [...]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  keycloak:
+    image: ghcr.io/fortunen/kete/quick-start-keycloak
+    command: start-dev
+    ports:
+      - 8080:8080
+      - 9000:9000
+    environment:
+      kete.routes.quick-start.destination.kind: <kind>
+      kete.routes.quick-start.destination.<property>: <value>
+    depends_on:
+      <broker>:
+        condition: service_healthy
 ```
 
-#### Volume
+Key conventions:
 
-Persistent storage for Kafka data:
+- **Custom images**: All services use pre-built images from `ghcr.io/fortunen/kete/quick-start-<name>` (built from `quick-starts/$images/<name>/Dockerfile`)
+- **Health checks**: Every broker service defines a health check with `interval: 5s`, `timeout: 5s`, `retries: 30`
+- **Dependency ordering**: Keycloak depends on the broker becoming healthy before starting
+- **Route name**: All quickstarts use `quick-start` as the route name
+- **Ports**: Keycloak always exposes `8080` (HTTP) and `9000` (health/metrics)
+
+
+
+## Image Sources
+
+All Docker images are built from Dockerfiles in `quick-starts/$images/`:
+
+### Core
+
+| Image | Dockerfile | Description |
+|-------|-----------|-------------|
+| `quick-start-keycloak` | `quick-starts/$images/keycloak/Dockerfile` | Keycloak with KETE pre-installed |
+| `quick-start-curl` | `quick-starts/$images/curl/Dockerfile` | Lightweight curl client for init containers |
+| `quick-start-alpine` | `quick-starts/$images/alpine/Dockerfile` | Minimal Alpine base image |
+| `quick-start-python-alpine` | `quick-starts/$images/python-alpine/Dockerfile` | Python on Alpine for utility scripts |
+
+### Messaging Brokers
+
+| Image | Dockerfile | Description |
+|-------|-----------|-------------|
+| `quick-start-activemq-artemis` | `quick-starts/$images/activemq-artemis/Dockerfile` | ActiveMQ Artemis (AMQP 1 / MQTT / STOMP) |
+| `quick-start-activemq-classic` | `quick-starts/$images/activemq-classic/Dockerfile` | ActiveMQ Classic |
+| `quick-start-dragonfly` | `quick-starts/$images/dragonfly/Dockerfile` | Dragonfly (Redis-compatible) |
+| `quick-start-emqx` | `quick-starts/$images/emqx/Dockerfile` | EMQX MQTT broker |
+| `quick-start-garnet` | `quick-starts/$images/garnet/Dockerfile` | Microsoft Garnet (Redis-compatible) |
+| `quick-start-hivemq` | `quick-starts/$images/hivemq/Dockerfile` | HiveMQ CE MQTT broker |
+| `quick-start-kafka` | `quick-starts/$images/kafka/Dockerfile` | Apache Kafka |
+| `quick-start-keydb` | `quick-starts/$images/keydb/Dockerfile` | KeyDB (Redis-compatible) |
+| `quick-start-lavinmq` | `quick-starts/$images/lavinmq/Dockerfile` | LavinMQ (AMQP 0-9-1) |
+| `quick-start-mosquitto` | `quick-starts/$images/mosquitto/Dockerfile` | Eclipse Mosquitto MQTT broker |
+| `quick-start-nanomq` | `quick-starts/$images/nanomq/Dockerfile` | NanoMQ MQTT broker |
+| `quick-start-nanomq-mqtt5` | `quick-starts/$images/nanomq-mqtt5/Dockerfile` | NanoMQ configured for MQTT 5 |
+| `quick-start-nats` | `quick-starts/$images/nats/Dockerfile` | NATS server |
+| `quick-start-pulsar` | `quick-starts/$images/pulsar/Dockerfile` | Apache Pulsar |
+| `quick-start-qpid` | `quick-starts/$images/qpid/Dockerfile` | Apache Qpid Broker-J (AMQP 1) |
+| `quick-start-solace` | `quick-starts/$images/solace/Dockerfile` | Solace PubSub+ Standard (AMQP, MQTT) |
+| `quick-start-rabbitmq` | `quick-starts/$images/rabbitmq/Dockerfile` | RabbitMQ with management plugin |
+| `quick-start-redis` | `quick-starts/$images/redis/Dockerfile` | Redis |
+| `quick-start-redpanda` | `quick-starts/$images/redpanda/Dockerfile` | Redpanda (Kafka-compatible) |
+| `quick-start-datastax-luna` | `quick-starts/$images/datastax-luna/Dockerfile` | DataStax Luna Streaming (Pulsar-compatible) |
+| `quick-start-stomp-emqx` | `quick-starts/$images/stomp-emqx/Dockerfile` | EMQX configured for STOMP |
+| `quick-start-valkey` | `quick-starts/$images/valkey/Dockerfile` | Valkey (Redis fork) |
+| `quick-start-vernemq` | `quick-starts/$images/vernemq/Dockerfile` | VerneMQ MQTT broker |
+
+### Subscribers / Consumers
+
+| Image | Dockerfile | Description |
+|-------|-----------|-------------|
+| `quick-start-amqp1-subscriber` | `quick-starts/$images/amqp1-subscriber/Dockerfile` | AMQP 1.0 subscriber (Python) |
+| `quick-start-kafka-subscriber` | `quick-starts/$images/kafka-subscriber/Dockerfile` | Kafka consumer (Python) |
+| `quick-start-mqtt-subscriber` | `quick-starts/$images/mqtt-subscriber/Dockerfile` | MQTT subscriber (Mosquitto client) |
+| `quick-start-nats-subscriber` | `quick-starts/$images/nats-subscriber/Dockerfile` | NATS subscriber (nats-box) |
+| `quick-start-redis-subscriber` | `quick-starts/$images/redis-subscriber/Dockerfile` | Redis Pub/Sub subscriber |
+| `quick-start-stomp-subscriber` | `quick-starts/$images/stomp-subscriber/Dockerfile` | STOMP subscriber (Python) |
+| `quick-start-zeromq-subscriber` | `quick-starts/$images/zeromq-subscriber/Dockerfile` | ZeroMQ subscriber (Python) |
+
+### Cloud Emulators
+
+| Image | Dockerfile | Description |
+|-------|-----------|-------------|
+| `quick-start-azurite` | `quick-starts/$images/azurite/Dockerfile` | Azurite (Azure Storage emulator) |
+| `quick-start-eventhubs-emulator` | `quick-starts/$images/eventhubs-emulator/Dockerfile` | Azure Event Hubs emulator |
+| `quick-start-gcp-cloud-tasks-emulator` | `quick-starts/$images/gcp-cloud-tasks-emulator/Dockerfile` | GCP Cloud Tasks emulator |
+| `quick-start-gcp-pubsub-emulator` | `quick-starts/$images/gcp-pubsub-emulator/Dockerfile` | GCP Pub/Sub emulator |
+| `quick-start-localstack` | `quick-starts/$images/localstack/Dockerfile` | LocalStack (AWS emulator) |
+| `quick-start-servicebus-emulator` | `quick-starts/$images/servicebus-emulator/Dockerfile` | Azure Service Bus emulator |
+| `quick-start-sql-edge` | `quick-starts/$images/sql-edge/Dockerfile` | Azure SQL Edge (Azure emulator dependency) |
+
+### UI / Management
+
+| Image | Dockerfile | Description |
+|-------|-----------|-------------|
+| `quick-start-kafka-ui` | `quick-starts/$images/kafka-ui/Dockerfile` | Kafka UI web interface |
+| `quick-start-nats-box` | `quick-starts/$images/nats-box/Dockerfile` | NATS CLI toolbox |
+| `quick-start-redpanda-console` | `quick-starts/$images/redpanda-console/Dockerfile` | Redpanda Console web interface |
+
+### Utility
+
+| Image | Dockerfile | Description |
+|-------|-----------|-------------|
+| `quick-start-azure-queue-setup` | `quick-starts/$images/azure-queue-setup/Dockerfile` | Azure Storage Queue provisioning (Python) |
+| `quick-start-http-echo` | `quick-starts/$images/http-echo/Dockerfile` | HTTP echo server |
+| `quick-start-signalr-echo` | `quick-starts/$images/signalr-echo/Dockerfile` | SignalR echo server (.NET) |
+| `quick-start-socketio-echo` | `quick-starts/$images/socketio-echo/Dockerfile` | Socket.IO echo server (Node.js) |
+| `quick-start-websocket-echo` | `quick-starts/$images/websocket-echo/Dockerfile` | WebSocket echo server |
+
+The `quick-starts/$images/artemis/` directory is an unused remnant — quickstarts use `activemq-artemis` instead.
+
+The keycloak image uses the root project directory as its build context (to include the built JAR), while all other images use their own `$images/<name>/` directory.
+
+
+
+## Init Containers
+
+Some quickstarts require broker-side setup (creating queues, exchanges, topics) before Keycloak connects. This is done with init containers:
+
 ```yaml
-volumes:
-  - kafka-data:/var/lib/kafka/data
+  rabbitmq-init:
+    image: ghcr.io/fortunen/kete/quick-start-curl
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    entrypoint: >
+      sh -c '
+        curl -s -u guest:guest -X PUT http://rabbitmq:15672/api/queues/%2f/keycloak-events ...
+      '
+
+  keycloak:
+    depends_on:
+      rabbitmq-init:
+        condition: service_completed_successfully
 ```
 
+When init containers are used, Keycloak depends on `service_completed_successfully` instead of `service_healthy`.
 
 
-### RabbitMQ Service
 
-**Image:** `rabbitmq:4.0-management-alpine`  
-**Container Name:** `keycloak-rabbitmq`  
-**Features:** AMQP 0-9-1 + Management UI
+## Examples
 
-#### Ports
-
-| Port | Protocol | Purpose |
-|------|----------|---------|
-| 5672 | AMQP | Message broker |
-| 15672 | HTTP | Management UI |
-
-#### Environment Variables
+### Kafka (quick-starts/kafka-apache/)
 
 ```yaml
-RABBITMQ_DEFAULT_USER: admin
-RABBITMQ_DEFAULT_PASS: admin
-RABBITMQ_DEFAULT_VHOST: /
+services:
+  kafka:
+    image: ghcr.io/fortunen/kete/quick-start-kafka
+    ports:
+      - 9092:9092
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      CLUSTER_ID: MkU3OEVBNTcwNTJENDM2Qk
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/kafka/bin/kafka-topics.sh --bootstrap-server localhost:9092 --list"]
+
+  keycloak:
+    image: ghcr.io/fortunen/kete/quick-start-keycloak
+    command: start-dev
+    ports:
+      - 8080:8080
+      - 9000:9000
+    environment:
+      kete.routes.quick-start.destination.kind: kafka
+      kete.routes.quick-start.destination.bootstrap.servers: kafka:9092
+      kete.routes.quick-start.destination.topic: keycloak-events
+    depends_on:
+      kafka:
+        condition: service_healthy
 ```
 
-#### Health Check
+### RabbitMQ (quick-starts/amqp-0.9.1-rabbitmq/)
 
 ```yaml
-test: ["CMD", "rabbitmq-diagnostics", "ping"]
-interval: 10s
-timeout: 10s
-retries: 5
-start_period: 30s
-```
+services:
+  rabbitmq:
+    image: ghcr.io/fortunen/kete/quick-start-rabbitmq
+    ports:
+      - 5672:5672
+      - 15672:15672
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
 
-#### Volume
+  rabbitmq-init:
+    image: ghcr.io/fortunen/kete/quick-start-curl
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    entrypoint: >
+      sh -c '...'
 
-Persistent storage for RabbitMQ data:
-```yaml
-volumes:
-  - rabbitmq-data:/var/lib/rabbitmq
-```
-
-
-
-## Networks
-
-### keycloak-network
-
-Bridge network for service communication:
-
-```yaml
-networks:
-  keycloak-network:
-    driver: bridge
-```
-
-**Connected services:**
-- kafka
-- rabbitmq
-- keycloak (when run with `--network keycloak-network`)
-
-
-
-## Volumes
-
-### Persistent Volumes
-
-```yaml
-volumes:
-  kafka-data:
-    driver: local
-  rabbitmq-data:
-    driver: local
-```
-
-**Location (Linux/Mac):**
-```
-/var/lib/docker/volumes/kete_kafka-data
-/var/lib/docker/volumes/kete_rabbitmq-data
-```
-
-**Location (Windows):**
-```
-\\wsl$\docker-desktop-data\data\docker\volumes\...
+  keycloak:
+    image: ghcr.io/fortunen/kete/quick-start-keycloak
+    command: start-dev
+    ports:
+      - 8080:8080
+      - 9000:9000
+    environment:
+      kete.routes.quick-start.destination.kind: amqp-0.9.1
+      kete.routes.quick-start.destination.host: rabbitmq
+      kete.routes.quick-start.destination.username: guest
+      kete.routes.quick-start.destination.password: guest
+      kete.routes.quick-start.destination.exchange: amq.direct
+      kete.routes.quick-start.destination.routing-key: keycloak-events
+    depends_on:
+      rabbitmq-init:
+        condition: service_completed_successfully
 ```
 
 
 
 ## Usage
 
-### Start All Services
+### Start a Quickstart
 
 ```bash
-docker-compose up -d
+cd quick-starts/kafka-apache
+docker compose up -d
 ```
 
-### Start Specific Service
+### Stop and Clean Up
 
 ```bash
-docker-compose up -d kafka
-docker-compose up -d rabbitmq
-```
-
-### Stop Services
-
-```bash
-docker-compose down
-```
-
-### Stop and Remove Volumes
-
-```bash
-docker-compose down -v
+docker compose down -v
 ```
 
 ### View Logs
 
 ```bash
-# All services
-docker-compose logs -f
-
-# Specific service
-docker-compose logs -f kafka
-docker-compose logs -f rabbitmq
-```
-
-### Check Status
-
-```bash
-docker-compose ps
-```
-
-
-
-## Connecting from Keycloak
-
-### From Host (Development)
-
-```bash
-# Kafka
-kete.routes.kafka-example.destination.bootstrap.servers=localhost:9092
-
-# RabbitMQ
-kete.routes.rabbitmq-example.destination.host=localhost
-kete.routes.rabbitmq-example.destination.port=5672
-```
-
-### From Container (Same Network)
-
-```bash
-# Kafka
-kete.routes.kafka-example.destination.bootstrap.servers=kafka:29092
-
-# RabbitMQ
-kete.routes.rabbitmq-example.destination.host=rabbitmq
-kete.routes.rabbitmq-example.destination.port=5672
-```
-
-
-
-## Management UIs
-
-### RabbitMQ Management
-
-**URL:** http://localhost:15672  
-**Username:** admin  
-**Password:** admin
-
-**Features:**
-- Queue/exchange management
-- Message monitoring
-- Connection tracking
-- Virtual host management
-
-
-
-## Customization
-
-### Change Kafka Port
-
-```yaml
-ports:
-  - "19092:9092"  # Host:Container
-
-# Update advertised listeners
-KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:19092'
-```
-
-### Change RabbitMQ Credentials
-
-```yaml
-environment:
-  RABBITMQ_DEFAULT_USER: myuser
-  RABBITMQ_DEFAULT_PASS: mypassword
-```
-
-### Add More Kafka Brokers
-
-For multi-node cluster:
-
-```yaml
-kafka-1:
-  # ... config for node 1
-  environment:
-    KAFKA_NODE_ID: 1
-    KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka-1:29093,2@kafka-2:29093,3@kafka-3:29093'
-
-kafka-2:
-  # ... config for node 2
-  environment:
-    KAFKA_NODE_ID: 2
-    KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka-1:29093,2@kafka-2:29093,3@kafka-3:29093'
-```
-
-
-
-## Troubleshooting
-
-### Kafka Won't Start
-
-**Check logs:**
-```bash
-docker-compose logs kafka
-```
-
-**Common issues:**
-- Port 9092 in use
-- Invalid CLUSTER_ID
-- Volume permission issues
-
-**Solution:**
-```bash
-# Stop and remove
-docker-compose down -v
-
-# Restart
-docker-compose up -d kafka
-```
-
-### RabbitMQ Connection Refused
-
-**Check status:**
-```bash
-docker-compose ps rabbitmq
-docker-compose logs rabbitmq
-```
-
-**Test connection:**
-```bash
-# From host
-telnet localhost 5672
-
-# Management UI
-curl http://localhost:15672
-```
-
-### Volumes Full
-
-**Check disk usage:**
-```bash
-docker system df -v
-```
-
-**Clean up:**
-```bash
-# Remove unused volumes
-docker volume prune
-
-# Remove specific volumes
-docker-compose down -v
+docker compose logs -f keycloak
 ```

@@ -3,6 +3,7 @@ package io.github.fortunen.kete.destinations.nats;
 import io.github.fortunen.kete.Constants;
 import io.github.fortunen.kete.DestinationConfig;
 import io.github.fortunen.kete.NatsAuthMaterial;
+import io.github.fortunen.kete.utils.TemplateUtils;
 import io.github.fortunen.kete.utils.ValidationUtils;
 import io.nats.client.Options;
 import lombok.Data;
@@ -31,6 +32,7 @@ public class NatsDestinationConfig extends DestinationConfig {
 	private Options natsOptions;
 	private String connectionName;
 	private int pingIntervalSeconds;
+	private boolean isSubjectTemplated;
 	private int connectionTimeoutSeconds;
 	private NatsAuthMaterial authMaterial;
 
@@ -65,6 +67,10 @@ public class NatsDestinationConfig extends DestinationConfig {
 		authMaterial = new NatsAuthMaterial();
 		authMaterial.initialize(configuration);
 
+		// precomputed fields
+
+		isSubjectTemplated = TemplateUtils.containsTemplate(subject);
+
 		// natsOptions
 
 		var builder = new Options.Builder()
@@ -75,7 +81,7 @@ public class NatsDestinationConfig extends DestinationConfig {
 			.maxReconnects(-1);
 
 		if (tls.isEnabled()) {
-			builder.sslContext(tls.getKeyStoreAndTrustStoreSSLContext());
+			builder.sslContext(tls.isVerifyHostname() ? tls.getHostnameVerifyingSSLContext() : tls.getKeyStoreAndTrustStoreSSLContext());
 		}
 
 		authMaterial.applyTo(builder);

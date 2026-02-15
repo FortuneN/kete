@@ -3,8 +3,6 @@ package io.github.fortunen.kete.integrationtests.mqtt5destination;
 import static org.awaitility.Awaitility.await;
 
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.time.Duration;
 import java.util.UUID;
 
@@ -50,6 +48,7 @@ public class TestBase {
 		destination.setConfig(config);
 	}
 
+	@SuppressWarnings("resource")
 	protected HiveMQContainer startMqtt() throws Exception {
 
 		cleanUpContainer();
@@ -80,6 +79,7 @@ public class TestBase {
 		return startMqttWithTls(tls, true);
 	}
 
+	@SuppressWarnings("resource")
 	private HiveMQContainer startMqttWithTls(TlsMaterial tls, boolean requireClientCert) throws Exception {
 
 		if (tls == null) {
@@ -117,8 +117,8 @@ public class TestBase {
 		);
 
 		// Read certificate files into memory
-		var keystoreBytes = Files.readAllBytes(Path.of(tls.getServerKeyStoreFilePath()));
-		var truststoreBytes = Files.readAllBytes(Path.of(tls.getTrustStoreFilePath()));
+		var keystoreBytes = tls.getServerKeyStoreBytes();
+		var truststoreBytes = tls.getTrustStoreBytes();
 
 		container = new HiveMQContainer(DockerImageName.parse("hivemq/hivemq-ce:2024.3"))
 			.withCopyToContainer(Transferable.of(configXml.getBytes(StandardCharsets.UTF_8), 0777), "/opt/hivemq/conf/config.xml")
@@ -205,7 +205,7 @@ public class TestBase {
 			try {
 
 				var clientId = "readiness-probe-" + UUID.randomUUID().toString().substring(0, 8);
-				var client = new MqttClient("tcp://" + container.getHost() + ":" + container.getMqttPort(), clientId, new MemoryPersistence());
+				var client = new MqttClient("tcp://" + "127.0.0.1" + ":" + container.getMqttPort(), clientId, new MemoryPersistence());
 				var options = new MqttConnectionOptions();
 
 				options.setCleanStart(true);
@@ -280,7 +280,7 @@ public class TestBase {
 	protected AutoCloseable createSubscriber(String topic, int qos, MessageCallback callback) throws Exception {
 
 		var clientId = "test-subscriber-" + UUID.randomUUID().toString().substring(0, 8);
-		var client = new MqttClient("tcp://" + container.getHost() + ":" + container.getMqttPort(), clientId, new MemoryPersistence());
+		var client = new MqttClient("tcp://" + "127.0.0.1" + ":" + container.getMqttPort(), clientId, new MemoryPersistence());
 		var options = new MqttConnectionOptions();
 
 		options.setCleanStart(true);
@@ -306,7 +306,7 @@ public class TestBase {
 
 	protected AutoCloseable createSubscriberWithTls(String topic, int qos, TlsMaterial tls, MessageCallback callback) throws Exception {
 		var clientId = "test-subscriber-tls-" + UUID.randomUUID().toString().substring(0, 8);
-		var client = new MqttClient("ssl://" + container.getHost() + ":" + getMqttTlsPort(), clientId, new MemoryPersistence());
+		var client = new MqttClient("ssl://" + "127.0.0.1" + ":" + getMqttTlsPort(), clientId, new MemoryPersistence());
 		var options = new MqttConnectionOptions();
 		options.setCleanStart(true);
 		options.setConnectionTimeout(10);

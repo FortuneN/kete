@@ -1,0 +1,28 @@
+services:
+
+  webhook:
+    image: ghcr.io/fortunen/kete/quick-start-python-alpine
+    ports:
+      - 8090:8090
+    volumes:
+      - ./mock-server.py:/app/mock-server.py:ro
+    command: ["python", "/app/mock-server.py"]
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8090/')\""]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  keycloak:
+    image: ghcr.io/fortunen/kete/quick-start-keycloak
+    command: start-dev
+    ports:
+      - 8080:8080
+      - 9000:9000
+    environment:
+      kete.routes.quick-start.destination.kind: azure-webpubsub
+      kete.routes.quick-start.destination.connection-string: Endpoint=http://webhook:8090;AccessKey=AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=;Version=1.0;
+      kete.routes.quick-start.destination.hub: keycloak-events
+    depends_on:
+      webhook:
+        condition: service_healthy

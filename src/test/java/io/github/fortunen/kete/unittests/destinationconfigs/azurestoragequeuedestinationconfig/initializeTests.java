@@ -11,13 +11,11 @@ import org.apache.commons.configuration2.MapConfiguration;
 import org.junit.jupiter.api.Test;
 
 import io.github.fortunen.kete.destinations.azurestoragequeue.AzureStorageQueueDestinationConfig;
-import io.github.fortunen.kete.utils.AzureStorageQueueUtils;
 
 public class initializeTests {
 
-	private static final String VALID_ACCOUNT_KEY = AzureStorageQueueUtils.WELL_KNOWN_ACCOUNT_KEY;
+	private static final String VALID_ACCOUNT_KEY = "Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==";
 	private static final String SHARED_KEY_CONNECTION_STRING = "DefaultEndpointsProtocol=https;AccountName=myaccount;AccountKey=" + VALID_ACCOUNT_KEY + ";EndpointSuffix=core.windows.net";
-	private static final String EMULATOR_CONNECTION_STRING = "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=" + VALID_ACCOUNT_KEY + ";QueueEndpoint=http://127.0.0.1:10001/devstoreaccount1";
 
 	// =========================================================================
 	// Required Fields - Connection String
@@ -37,7 +35,7 @@ public class initializeTests {
 
 		// assert
 
-		assertThat(thrown).isInstanceOf(IllegalStateException.class).hasMessage("connection-string is required");
+		assertThat(thrown).isInstanceOf(IllegalStateException.class).hasMessage("'connection-string' or 'authentication-type' must be set");
 	}
 
 	@Test
@@ -54,7 +52,7 @@ public class initializeTests {
 
 		// assert
 
-		assertThat(thrown).isInstanceOf(IllegalStateException.class).hasMessage("connection-string is required");
+		assertThat(thrown).isInstanceOf(IllegalStateException.class).hasMessage("'connection-string' or 'authentication-type' must be set");
 	}
 
 	@Test
@@ -75,7 +73,7 @@ public class initializeTests {
 
 		// assert
 
-		assertThat(thrown).isInstanceOf(IllegalStateException.class).hasMessage("connection-string is required");
+		assertThat(thrown).isInstanceOf(IllegalStateException.class).hasMessage("'connection-string' or 'authentication-type' must be set");
 	}
 
 	// =========================================================================
@@ -300,7 +298,7 @@ public class initializeTests {
 	// =========================================================================
 
 	@Test
-	public void shouldSetClientBuilder() {
+	public void shouldSetHttpClient() {
 
 		// arrange
 
@@ -313,7 +311,24 @@ public class initializeTests {
 
 		// assert
 
-		assertThat(config.getClientBuilder()).isNotNull();
+		assertThat(config.getHttpClient()).isNotNull();
+	}
+
+	@Test
+	public void shouldSetConnectionString() {
+
+		// arrange
+
+		var config = new AzureStorageQueueDestinationConfig();
+		config.setConfiguration(new MapConfiguration(Map.of("kind", "azure-storage-queue", "connection-string", SHARED_KEY_CONNECTION_STRING, "queue", "test-queue")));
+
+		// act
+
+		config.initialize();
+
+		// assert
+
+		assertThat(config.getConnectionString()).isEqualTo(SHARED_KEY_CONNECTION_STRING);
 	}
 
 	@Test
@@ -338,17 +353,215 @@ public class initializeTests {
 	}
 
 	// =========================================================================
-	// Connection String - Shared Key
+	// Pre-computed Fields — Templating
 	// =========================================================================
 
 	@Test
-	public void shouldAcceptSharedKeyConnectionString() {
+	public void shouldDetectTemplatedQueue() {
+
+		// arrange
+
+		var config = new AzureStorageQueueDestinationConfig();
+		config.setConfiguration(new MapConfiguration(Map.of("kind", "azure-storage-queue", "connection-string", SHARED_KEY_CONNECTION_STRING, "queue", "events-${realm}")));
+
+		// act
+
+		config.initialize();
+
+		// assert
+
+		assertThat(config.isQueueTemplated()).isTrue();
+	}
+
+	@Test
+	public void shouldDetectNonTemplatedQueue() {
+
+		// arrange
+
+		var config = new AzureStorageQueueDestinationConfig();
+		config.setConfiguration(new MapConfiguration(Map.of("kind", "azure-storage-queue", "connection-string", SHARED_KEY_CONNECTION_STRING, "queue", "test-queue")));
+
+		// act
+
+		config.initialize();
+
+		// assert
+
+		assertThat(config.isQueueTemplated()).isFalse();
+	}
+
+	// =========================================================================
+	// Pre-computed Fields — Message TTL Duration
+	// =========================================================================
+
+	@Test
+	public void shouldSetMessageTtlDurationToNullWhenDefault() {
+
+		// arrange
+
+		var config = new AzureStorageQueueDestinationConfig();
+		config.setConfiguration(new MapConfiguration(Map.of("kind", "azure-storage-queue", "connection-string", SHARED_KEY_CONNECTION_STRING, "queue", "test-queue")));
+
+		// act
+
+		config.initialize();
+
+		// assert
+
+		assertThat(config.getMessageTtlDuration()).isNull();
+	}
+
+	@Test
+	public void shouldSetMessageTtlDurationWhenMinusOne() {
 
 		// arrange
 
 		var map = new HashMap<String, Object>();
 		map.put("kind", "azure-storage-queue");
-		map.put("connection-string", "DefaultEndpointsProtocol=https;AccountName=myaccount;AccountKey=" + VALID_ACCOUNT_KEY + ";EndpointSuffix=core.windows.net");
+		map.put("connection-string", SHARED_KEY_CONNECTION_STRING);
+		map.put("queue", "test-queue");
+		map.put("message-ttl", -1);
+		var config = new AzureStorageQueueDestinationConfig();
+		config.setConfiguration(new MapConfiguration(map));
+
+		// act
+
+		config.initialize();
+
+		// assert
+
+		assertThat(config.getMessageTtlDuration()).isEqualTo(Duration.ofSeconds(-1));
+	}
+
+	@Test
+	public void shouldSetMessageTtlDurationWhenPositive() {
+
+		// arrange
+
+		var map = new HashMap<String, Object>();
+		map.put("kind", "azure-storage-queue");
+		map.put("connection-string", SHARED_KEY_CONNECTION_STRING);
+		map.put("queue", "test-queue");
+		map.put("message-ttl", 3600);
+		var config = new AzureStorageQueueDestinationConfig();
+		config.setConfiguration(new MapConfiguration(map));
+
+		// act
+
+		config.initialize();
+
+		// assert
+
+		assertThat(config.getMessageTtlDuration()).isEqualTo(Duration.ofSeconds(3600));
+	}
+
+	// =========================================================================
+	// Pre-computed Fields — Queue Client Builder
+	// =========================================================================
+
+	@Test
+	public void shouldSetQueueClientBuilder() {
+
+		// arrange
+
+		var config = new AzureStorageQueueDestinationConfig();
+		config.setConfiguration(new MapConfiguration(Map.of("kind", "azure-storage-queue", "connection-string", SHARED_KEY_CONNECTION_STRING, "queue", "test-queue")));
+
+		// act
+
+		config.initialize();
+
+		// assert
+
+		assertThat(config.getQueueClientBuilder()).isNotNull();
+	}
+
+	// =========================================================================
+	// Pre-computed Fields — Queue Service Endpoint
+	// =========================================================================
+
+	@Test
+	public void shouldDeriveQueueServiceEndpointFromAccountName() {
+
+		// arrange
+
+		var config = new AzureStorageQueueDestinationConfig();
+		config.setConfiguration(new MapConfiguration(Map.of("kind", "azure-storage-queue", "connection-string", SHARED_KEY_CONNECTION_STRING, "queue", "test-queue")));
+
+		// act
+
+		config.initialize();
+
+		// assert
+
+		assertThat(config.getQueueServiceEndpoint()).isEqualTo("https://myaccount.queue.core.windows.net");
+	}
+
+	@Test
+	public void shouldUseExplicitQueueEndpoint() {
+
+		// arrange
+
+		var config = new AzureStorageQueueDestinationConfig();
+		config.setConfiguration(new MapConfiguration(Map.of("kind", "azure-storage-queue", "connection-string", "QueueEndpoint=http://127.0.0.1:10001/devstoreaccount1;AccountName=devstoreaccount1;AccountKey=" + VALID_ACCOUNT_KEY, "queue", "test-queue")));
+
+		// act
+
+		config.initialize();
+
+		// assert
+
+		assertThat(config.getQueueServiceEndpoint()).isEqualTo("http://127.0.0.1:10001/devstoreaccount1");
+	}
+
+	@Test
+	public void shouldDeriveQueueServiceEndpointWithCustomSuffix() {
+
+		// arrange
+
+		var connectionString = "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=" + VALID_ACCOUNT_KEY + ";EndpointSuffix=localhost:10001";
+		var config = new AzureStorageQueueDestinationConfig();
+		config.setConfiguration(new MapConfiguration(Map.of("kind", "azure-storage-queue", "connection-string", connectionString, "queue", "test-queue")));
+
+		// act
+
+		config.initialize();
+
+		// assert
+
+		assertThat(config.getQueueServiceEndpoint()).isEqualTo("http://devstoreaccount1.queue.localhost:10001");
+	}
+
+	@Test
+	public void shouldThrowWhenConnectionStringMissingAccountNameAndQueueEndpoint() {
+
+		// arrange
+
+		var connectionString = "DefaultEndpointsProtocol=https;SharedAccessSignature=sv=2019-07-07&ss=q&srt=sco&sp=rwdlacup&se=2030-01-01T00:00:00Z&st=2020-01-01T00:00:00Z&spr=https&sig=AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA%3D";
+		var config = new AzureStorageQueueDestinationConfig();
+		config.setConfiguration(new MapConfiguration(Map.of("kind", "azure-storage-queue", "connection-string", connectionString, "queue", "test-queue")));
+
+		// act
+
+		var thrown = catchThrowable(() -> config.initialize());
+
+		// assert (Azure SDK validates connection string before our endpoint parsing)
+
+		assertThat(thrown).isNotNull();
+	}
+
+	// =========================================================================
+	// Trimming — Connection String
+	// =========================================================================
+
+	@Test
+	public void shouldTrimConnectionString() {
+
+		// arrange
+
+		var map = new HashMap<String, Object>();
+		map.put("kind", "azure-storage-queue");
+		map.put("connection-string", "  " + SHARED_KEY_CONNECTION_STRING + "  ");
 		map.put("queue", "test-queue");
 		var config = new AzureStorageQueueDestinationConfig();
 		config.setConfiguration(new MapConfiguration(map));
@@ -359,22 +572,41 @@ public class initializeTests {
 
 		// assert
 
-		var info = config.getConnectionStringInfo();
-		assertThat(info.useSasAuth()).isFalse();
-		assertThat(info.accountName()).isEqualTo("myaccount");
-		assertThat(info.accountKey()).isEqualTo(VALID_ACCOUNT_KEY);
-		assertThat(info.url()).isEqualTo("https://myaccount.queue.core.windows.net");
+		assertThat(config.getConnectionString()).isEqualTo(SHARED_KEY_CONNECTION_STRING);
+	}
+
+	// =========================================================================
+	// content-transfer-encoding
+	// =========================================================================
+
+	@Test
+	public void shouldDefaultContentTransferEncodingToNull() {
+
+		// arrange
+
+		var config = new AzureStorageQueueDestinationConfig();
+		config.setConfiguration(new MapConfiguration(Map.of("kind", "azure-storage-queue", "connection-string", SHARED_KEY_CONNECTION_STRING, "queue", "test-queue")));
+
+		// act
+
+		config.initialize();
+
+		// assert
+
+		assertThat(config.getContentTransferEncoding()).isNull();
+		assertThat(config.getContentTransferEncodingName()).isNull();
 	}
 
 	@Test
-	public void shouldAcceptSharedKeyConnectionStringWithExplicitQueueEndpoint() {
+	public void shouldResolveContentTransferEncoding() {
 
 		// arrange
 
 		var map = new HashMap<String, Object>();
 		map.put("kind", "azure-storage-queue");
-		map.put("connection-string", "AccountName=myaccount;AccountKey=" + VALID_ACCOUNT_KEY + ";QueueEndpoint=https://myaccount.queue.core.windows.net");
+		map.put("connection-string", SHARED_KEY_CONNECTION_STRING);
 		map.put("queue", "test-queue");
+		map.put("content-transfer-encoding", "base64");
 		var config = new AzureStorageQueueDestinationConfig();
 		config.setConfiguration(new MapConfiguration(map));
 
@@ -384,94 +616,20 @@ public class initializeTests {
 
 		// assert
 
-		assertThat(config.getConnectionStringInfo().url()).isEqualTo("https://myaccount.queue.core.windows.net");
+		assertThat(config.getContentTransferEncoding()).isNotNull();
+		assertThat(config.getContentTransferEncodingName()).isEqualTo("base64");
 	}
 
 	@Test
-	public void shouldDefaultProtocolToHttpsInConnectionString() {
+	public void shouldThrowWhenContentTransferEncodingIsUnknown() {
 
 		// arrange
 
 		var map = new HashMap<String, Object>();
 		map.put("kind", "azure-storage-queue");
-		map.put("connection-string", "AccountName=myaccount;AccountKey=" + VALID_ACCOUNT_KEY);
+		map.put("connection-string", SHARED_KEY_CONNECTION_STRING);
 		map.put("queue", "test-queue");
-		var config = new AzureStorageQueueDestinationConfig();
-		config.setConfiguration(new MapConfiguration(map));
-
-		// act
-
-		config.initialize();
-
-		// assert
-
-		assertThat(config.getConnectionStringInfo().url()).isEqualTo("https://myaccount.queue.core.windows.net");
-	}
-
-	// =========================================================================
-	// Connection String - SAS
-	// =========================================================================
-
-	@Test
-	public void shouldAcceptSasConnectionString() {
-
-		// arrange
-
-		var map = new HashMap<String, Object>();
-		map.put("kind", "azure-storage-queue");
-		map.put("connection-string", "QueueEndpoint=https://myaccount.queue.core.windows.net;SharedAccessSignature=sv=2024-08-04&ss=q&srt=o&sp=a&se=2026-01-01T00:00:00Z&sig=test");
-		map.put("queue", "test-queue");
-		var config = new AzureStorageQueueDestinationConfig();
-		config.setConfiguration(new MapConfiguration(map));
-
-		// act
-
-		config.initialize();
-
-		// assert
-
-		var info = config.getConnectionStringInfo();
-		assertThat(info.useSasAuth()).isTrue();
-		assertThat(info.sasToken()).isEqualTo("sv=2024-08-04&ss=q&srt=o&sp=a&se=2026-01-01T00:00:00Z&sig=test");
-		assertThat(info.url()).isEqualTo("https://myaccount.queue.core.windows.net");
-	}
-
-	@Test
-	public void shouldAcceptSasConnectionStringWithAccountName() {
-
-		// arrange
-
-		var map = new HashMap<String, Object>();
-		map.put("kind", "azure-storage-queue");
-		map.put("connection-string", "AccountName=myaccount;SharedAccessSignature=sv=2024-08-04&ss=q&sig=test");
-		map.put("queue", "test-queue");
-		var config = new AzureStorageQueueDestinationConfig();
-		config.setConfiguration(new MapConfiguration(map));
-
-		// act
-
-		config.initialize();
-
-		// assert
-
-		var info = config.getConnectionStringInfo();
-		assertThat(info.useSasAuth()).isTrue();
-		assertThat(info.url()).isEqualTo("https://myaccount.queue.core.windows.net");
-	}
-
-	// =========================================================================
-	// Connection String - Validation
-	// =========================================================================
-
-	@Test
-	public void shouldThrowWhenConnectionStringHasNeitherKeyNorSas() {
-
-		// arrange
-
-		var map = new HashMap<String, Object>();
-		map.put("kind", "azure-storage-queue");
-		map.put("connection-string", "AccountName=myaccount");
-		map.put("queue", "test-queue");
+		map.put("content-transfer-encoding", "unknown");
 		var config = new AzureStorageQueueDestinationConfig();
 		config.setConfiguration(new MapConfiguration(map));
 
@@ -481,106 +639,43 @@ public class initializeTests {
 
 		// assert
 
-		assertThat(thrown).isInstanceOf(IllegalStateException.class).hasMessage("connection-string must contain AccountKey or SharedAccessSignature");
-	}
-
-	@Test
-	public void shouldThrowWhenConnectionStringHasBothKeyAndSas() {
-
-		// arrange
-
-		var map = new HashMap<String, Object>();
-		map.put("kind", "azure-storage-queue");
-		map.put("connection-string", "AccountName=myaccount;AccountKey=" + VALID_ACCOUNT_KEY + ";SharedAccessSignature=sv=2024-08-04&sig=test");
-		map.put("queue", "test-queue");
-		var config = new AzureStorageQueueDestinationConfig();
-		config.setConfiguration(new MapConfiguration(map));
-
-		// act
-
-		var thrown = catchThrowable(() -> config.initialize());
-
-		// assert
-
-		assertThat(thrown).isInstanceOf(IllegalStateException.class).hasMessage("connection-string must not contain both AccountKey and SharedAccessSignature");
-	}
-
-	@Test
-	public void shouldThrowWhenConnectionStringMissingAccountNameForSharedKey() {
-
-		// arrange
-
-		var map = new HashMap<String, Object>();
-		map.put("kind", "azure-storage-queue");
-		map.put("connection-string", "AccountKey=" + VALID_ACCOUNT_KEY);
-		map.put("queue", "test-queue");
-		var config = new AzureStorageQueueDestinationConfig();
-		config.setConfiguration(new MapConfiguration(map));
-
-		// act
-
-		var thrown = catchThrowable(() -> config.initialize());
-
-		// assert
-
-		assertThat(thrown).isInstanceOf(IllegalStateException.class).hasMessage("connection-string must contain AccountName for shared-key auth");
-	}
-
-	@Test
-	public void shouldThrowWhenConnectionStringQueueEndpointMismatchesAccountName() {
-
-		// arrange
-
-		var map = new HashMap<String, Object>();
-		map.put("kind", "azure-storage-queue");
-		map.put("connection-string", "AccountName=myaccount;AccountKey=" + VALID_ACCOUNT_KEY + ";QueueEndpoint=https://otheraccount.queue.core.windows.net");
-		map.put("queue", "test-queue");
-		var config = new AzureStorageQueueDestinationConfig();
-		config.setConfiguration(new MapConfiguration(map));
-
-		// act
-
-		var thrown = catchThrowable(() -> config.initialize());
-
-		// assert
-
-		assertThat(thrown).isInstanceOf(IllegalStateException.class).hasMessage("connection-string QueueEndpoint must contain the AccountName");
-	}
-
-	@Test
-	public void shouldThrowWhenSasConnectionStringMissingEndpointAndAccountName() {
-
-		// arrange
-
-		var map = new HashMap<String, Object>();
-		map.put("kind", "azure-storage-queue");
-		map.put("connection-string", "SharedAccessSignature=sv=2024-08-04&sig=test");
-		map.put("queue", "test-queue");
-		var config = new AzureStorageQueueDestinationConfig();
-		config.setConfiguration(new MapConfiguration(map));
-
-		// act
-
-		var thrown = catchThrowable(() -> config.initialize());
-
-		// assert
-
-		assertThat(thrown).isInstanceOf(IllegalStateException.class).hasMessage("connection-string must contain AccountName or QueueEndpoint");
+		assertThat(thrown)
+			.isInstanceOf(IllegalStateException.class)
+			.hasMessage("unknown content-transfer-encoding: unknown");
 	}
 
 	// =========================================================================
-	// Connection String - Emulator
+	// content-encoding
 	// =========================================================================
 
 	@Test
-	public void shouldAcceptEmulatorFullConnectionString() {
+	public void shouldDefaultContentEncodingToNull() {
+
+		// arrange
+
+		var config = new AzureStorageQueueDestinationConfig();
+		config.setConfiguration(new MapConfiguration(Map.of("kind", "azure-storage-queue", "connection-string", SHARED_KEY_CONNECTION_STRING, "queue", "test-queue")));
+
+		// act
+
+		config.initialize();
+
+		// assert
+
+		assertThat(config.getContentEncoding()).isNull();
+		assertThat(config.getContentEncodingName()).isNull();
+	}
+
+	@Test
+	public void shouldResolveContentEncoding() {
 
 		// arrange
 
 		var map = new HashMap<String, Object>();
 		map.put("kind", "azure-storage-queue");
-		map.put("connection-string", EMULATOR_CONNECTION_STRING);
+		map.put("connection-string", SHARED_KEY_CONNECTION_STRING);
 		map.put("queue", "test-queue");
+		map.put("content-encoding", "gzip");
 		var config = new AzureStorageQueueDestinationConfig();
 		config.setConfiguration(new MapConfiguration(map));
 
@@ -590,55 +685,31 @@ public class initializeTests {
 
 		// assert
 
-		var info = config.getConnectionStringInfo();
-		assertThat(info.useSasAuth()).isFalse();
-		assertThat(info.accountName()).isEqualTo("devstoreaccount1");
-		assertThat(info.url()).isEqualTo("http://127.0.0.1:10001/devstoreaccount1");
+		assertThat(config.getContentEncoding()).isNotNull();
+		assertThat(config.getContentEncodingName()).isEqualTo("gzip");
 	}
 
-	// =========================================================================
-	// URL Handling
-	// =========================================================================
-
 	@Test
-	public void shouldStripTrailingSlashFromUrl() {
+	public void shouldThrowWhenContentEncodingIsUnknown() {
 
 		// arrange
 
 		var map = new HashMap<String, Object>();
 		map.put("kind", "azure-storage-queue");
-		map.put("connection-string", "AccountName=myaccount;AccountKey=" + VALID_ACCOUNT_KEY + ";QueueEndpoint=https://myaccount.queue.core.windows.net/");
+		map.put("connection-string", SHARED_KEY_CONNECTION_STRING);
 		map.put("queue", "test-queue");
+		map.put("content-encoding", "unknown");
 		var config = new AzureStorageQueueDestinationConfig();
 		config.setConfiguration(new MapConfiguration(map));
 
 		// act
 
-		config.initialize();
+		var thrown = catchThrowable(() -> config.initialize());
 
 		// assert
 
-		assertThat(config.getConnectionStringInfo().url()).isEqualTo("https://myaccount.queue.core.windows.net");
-	}
-
-	@Test
-	public void shouldDeriveUrlFromConnectionStringAccountName() {
-
-		// arrange
-
-		var map = new HashMap<String, Object>();
-		map.put("kind", "azure-storage-queue");
-		map.put("connection-string", "DefaultEndpointsProtocol=https;AccountName=myaccount;AccountKey=" + VALID_ACCOUNT_KEY);
-		map.put("queue", "test-queue");
-		var config = new AzureStorageQueueDestinationConfig();
-		config.setConfiguration(new MapConfiguration(map));
-
-		// act
-
-		config.initialize();
-
-		// assert
-
-		assertThat(config.getConnectionStringInfo().url()).isEqualTo("https://myaccount.queue.core.windows.net");
+		assertThat(thrown)
+			.isInstanceOf(IllegalStateException.class)
+			.hasMessage("unknown content-encoding: unknown");
 	}
 }

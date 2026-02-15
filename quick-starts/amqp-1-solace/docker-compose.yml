@@ -1,0 +1,45 @@
+services:
+
+  solace:
+    image: ghcr.io/fortunen/kete/quick-start-solace
+    shm_size: 1g
+    ports:
+      - 5672:5672
+      - 8180:8080
+    environment:
+      username_admin_globalaccesslevel: admin
+      username_admin_password: admin
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:5550/health-check/guaranteed-active || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
+
+  subscriber:
+    image: ghcr.io/fortunen/kete/quick-start-amqp1-subscriber
+    environment:
+      AMQP_HOST: solace
+      AMQP_PORT: 5672
+      AMQP_ADDRESS: topic://keycloak-events
+    depends_on:
+      solace:
+        condition: service_healthy
+
+  keycloak:
+    image: ghcr.io/fortunen/kete/quick-start-keycloak
+    command: start-dev
+    ports:
+      - 8080:8080
+      - 9000:9000
+    environment:
+      kete.routes.quick-start.destination.kind: amqp-1
+      kete.routes.quick-start.destination.host: solace
+      kete.routes.quick-start.destination.port: 5672
+      kete.routes.quick-start.destination.destination-name: keycloak-events
+      kete.routes.quick-start.destination.destination-type: topic
+    depends_on:
+      solace:
+        condition: service_healthy
+      subscriber:
+        condition: service_started

@@ -120,7 +120,7 @@ kete.routes.nats.destination.subject=keycloak.${realmLowerCase}.events
 kete.routes.nats.destination.subject=keycloak.events.${eventTypeLowerCase}
 ```
 
-Available variables: `${realmLowerCase}`, `${realmUpperCase}`, `${eventTypeLowerCase}`, `${eventTypeUpperCase}`, `${kindLowerCase}`, `${kindUpperCase}`, `${resourceTypeLowerCase}`, `${resourceTypeUpperCase}`, `${operationTypeLowerCase}`, `${operationTypeUpperCase}`, `${resultLowerCase}`, `${resultUpperCase}`
+Available variables: `${realmLowerCase}`, `${realmUpperCase}`, `${realmKebabCase}`, `${realmPascalCase}`, `${realmCamelCase}`, `${eventTypeLowerCase}`, `${eventTypeUpperCase}`, `${eventTypeKebabCase}`, `${eventTypePascalCase}`, `${eventTypeCamelCase}`, `${kindLowerCase}`, `${kindUpperCase}`, `${kindKebabCase}`, `${kindPascalCase}`, `${kindCamelCase}`, `${resourceTypeLowerCase}`, `${resourceTypeUpperCase}`, `${resourceTypeKebabCase}`, `${resourceTypePascalCase}`, `${resourceTypeCamelCase}`, `${operationTypeLowerCase}`, `${operationTypeUpperCase}`, `${operationTypeKebabCase}`, `${operationTypePascalCase}`, `${operationTypeCamelCase}`, `${resultLowerCase}`, `${resultUpperCase}`, `${resultKebabCase}`, `${resultPascalCase}`, `${resultCamelCase}`
 
 ### Custom Headers
 
@@ -291,3 +291,22 @@ kete.routes.dynamic.destination.servers=nats://localhost:4222
 kete.routes.dynamic.destination.subject=keycloak.${realmLowerCase}.events
 kete.routes.dynamic.destination.authentication-method=none
 ```
+
+
+
+## Quick Starts
+
+| System | Quick Start |
+|--------|-------------|
+| NATS Server | [nats-nats-server](https://github.com/FortuneN/kete/tree/release/quick-starts/nats-nats-server/) |
+| Synadia Cloud | [nats-synadia-cloud](https://github.com/FortuneN/kete/tree/release/quick-starts/nats-synadia-cloud/) |
+
+
+
+## See Also
+
+- [NATS JetStream Destination](nats-jetstream.md) — Persistent alternative with acknowledgments
+- [Serializers](../serializers/overview.md)
+- [Matchers](../matchers/overview.md)
+- [Event Types](../event-types.md)
+- [Certificate Loaders](../certificate-loaders/overview.md)

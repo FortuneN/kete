@@ -7,9 +7,12 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.security.cert.X509Certificate;
+
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Base64;
@@ -22,7 +25,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.Network;
-import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.images.builder.Transferable;
 import org.testcontainers.utility.DockerImageName;
 
@@ -76,18 +78,18 @@ public class TestBase {
 		}
 	}
 
+	@SuppressWarnings("resource")
 	protected void startEmulator() {
 		emulator = new GenericContainer<>(DockerImageName.parse(EMULATOR_IMAGE))
 			.withExposedPorts(EMULATOR_PORT)
 			.withCommand("gcloud", "beta", "emulators", "pubsub", "start",
 				"--project=" + PROJECT_ID,
-				"--host-port=0.0.0.0:" + EMULATOR_PORT)
-			.waitingFor(Wait.forLogMessage(".*Server started.*", 1))
-			.withStartupTimeout(Duration.ofMinutes(2));
+				"--host-port=0.0.0.0:" + EMULATOR_PORT);
 		emulator.start();
 		waitForEmulatorReady(getEmulatorBaseUrl());
 	}
 
+	@SuppressWarnings("resource")
 	protected void startEmulatorOnNetwork() {
 		network = Network.newNetwork();
 		emulator = new GenericContainer<>(DockerImageName.parse(EMULATOR_IMAGE))
@@ -96,33 +98,31 @@ public class TestBase {
 			.withExposedPorts(EMULATOR_PORT)
 			.withCommand("gcloud", "beta", "emulators", "pubsub", "start",
 				"--project=" + PROJECT_ID,
-				"--host-port=0.0.0.0:" + EMULATOR_PORT)
-			.waitingFor(Wait.forLogMessage(".*Server started.*", 1))
-			.withStartupTimeout(Duration.ofMinutes(2));
+				"--host-port=0.0.0.0:" + EMULATOR_PORT);
 		emulator.start();
 		waitForEmulatorReady(getEmulatorBaseUrl());
 	}
 
+	@SuppressWarnings("resource")
 	protected void startNginxTlsProxy(TlsMaterial tls, boolean requireClientAuth) throws Exception {
 		var nginxConf = createNginxConfig(requireClientAuth);
 		nginxProxy = new GenericContainer<>(DockerImageName.parse(NGINX_IMAGE))
 			.withNetwork(network)
 			.withExposedPorts(NGINX_TLS_PORT)
 			.withCopyToContainer(Transferable.of(nginxConf, 0777), "/etc/nginx/nginx.conf")
-			.withCopyToContainer(Transferable.of(Files.readAllBytes(Path.of(tls.getServerCertificatePemFilePath())), 0777), "/etc/nginx/server.crt")
-			.withCopyToContainer(Transferable.of(Files.readAllBytes(Path.of(tls.getServerPrivateKeyPemFilePath())), 0777), "/etc/nginx/server.key")
-			.withCopyToContainer(Transferable.of(Files.readAllBytes(Path.of(tls.getCaCertificatePemFilePath())), 0777), "/etc/nginx/ca.crt")
-			.waitingFor(Wait.forListeningPort())
-			.withStartupTimeout(Duration.ofMinutes(2));
+			.withCopyToContainer(Transferable.of(tls.getServerCertificatePemBytes(), 0777), "/etc/nginx/server.crt")
+			.withCopyToContainer(Transferable.of(tls.getServerPrivateKeyPemBytes(), 0777), "/etc/nginx/server.key")
+			.withCopyToContainer(Transferable.of(tls.getCaCertificatePemBytes(), 0777), "/etc/nginx/ca.crt");
 		nginxProxy.start();
+		waitForNginxReady();
 	}
 
 	protected String getEmulatorBaseUrl() {
-		return "http://" + emulator.getHost() + ":" + emulator.getMappedPort(EMULATOR_PORT);
+		return "http://" + "127.0.0.1" + ":" + emulator.getMappedPort(EMULATOR_PORT);
 	}
 
 	protected String getNginxBaseUrl() {
-		return "https://" + nginxProxy.getHost() + ":" + nginxProxy.getMappedPort(NGINX_TLS_PORT);
+		return "https://" + "127.0.0.1" + ":" + nginxProxy.getMappedPort(NGINX_TLS_PORT);
 	}
 
 	protected void createTopicAndSubscription() throws Exception {
@@ -190,7 +190,7 @@ public class TestBase {
 
 	private void waitForEmulatorReady(String emulatorUrl) {
 		var client = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(5)).build();
-		await().atMost(Duration.ofMinutes(2)).pollInterval(Duration.ofSeconds(1)).until(() -> {
+		await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).until(() -> {
 			try {
 				var request = HttpRequest.newBuilder()
 					.uri(URI.create(emulatorUrl))
@@ -203,6 +203,38 @@ public class TestBase {
 				return false;
 			}
 		});
+	}
+
+	private void waitForNginxReady() {
+		var client = buildTrustAllHttpClient();
+		var url = getNginxBaseUrl();
+		await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).until(() -> {
+			try {
+				var request = HttpRequest.newBuilder()
+					.uri(URI.create(url))
+					.timeout(Duration.ofSeconds(3))
+					.GET()
+					.build();
+				client.send(request, HttpResponse.BodyHandlers.discarding());
+				return true;
+			} catch (Exception e) {
+				return false;
+			}
+		});
+	}
+
+	private static HttpClient buildTrustAllHttpClient() {
+		try {
+			var sslContext = SSLContext.getInstance("TLS");
+			sslContext.init(null, new TrustManager[]{new X509TrustManager() {
+				public X509Certificate[] getAcceptedIssuers() { return new X509Certificate[0]; }
+				public void checkClientTrusted(X509Certificate[] c, String t) {}
+				public void checkServerTrusted(X509Certificate[] c, String t) {}
+			}}, null);
+			return HttpClient.newBuilder().sslContext(sslContext).connectTimeout(Duration.ofSeconds(5)).build();
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	private void createTopic(String emulatorUrl, String projectId, String topicId) throws Exception {

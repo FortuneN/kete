@@ -27,4 +27,17 @@ public abstract class Destination<TConfig extends DestinationConfig> implements 
 		ValidationUtils.requireNonNull(message, "message is required");
 		doSend(message);
 	}
+
+	protected byte[] encodePayload(byte[] payload) {
+
+		if (config.getContentEncoding() != null) {
+			payload = config.getContentEncoding().encode(payload);
+		}
+
+		if (config.getContentTransferEncoding() != null) {
+			payload = config.getContentTransferEncoding().encode(payload);
+		}
+
+		return payload;
+	}
 }

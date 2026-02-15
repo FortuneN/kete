@@ -99,21 +99,21 @@ kete.routes.amqp.destination.destination-name=keycloak.${realmLowerCase}.events
 kete.routes.amqp.destination.destination-name=keycloak.events.${eventTypeLowerCase}
 ```
 
-Available variables: `${realmLowerCase}`, `${realmUpperCase}`, `${eventTypeLowerCase}`, `${eventTypeUpperCase}`, `${kindLowerCase}`, `${kindUpperCase}`, `${resourceTypeLowerCase}`, `${resourceTypeUpperCase}`, `${operationTypeLowerCase}`, `${operationTypeUpperCase}`, `${resultLowerCase}`, `${resultUpperCase}`
+Available variables: `${realmLowerCase}`, `${realmUpperCase}`, `${realmKebabCase}`, `${realmPascalCase}`, `${realmCamelCase}`, `${eventTypeLowerCase}`, `${eventTypeUpperCase}`, `${eventTypeKebabCase}`, `${eventTypePascalCase}`, `${eventTypeCamelCase}`, `${kindLowerCase}`, `${kindUpperCase}`, `${kindKebabCase}`, `${kindPascalCase}`, `${kindCamelCase}`, `${resourceTypeLowerCase}`, `${resourceTypeUpperCase}`, `${resourceTypeKebabCase}`, `${resourceTypePascalCase}`, `${resourceTypeCamelCase}`, `${operationTypeLowerCase}`, `${operationTypeUpperCase}`, `${operationTypeKebabCase}`, `${operationTypePascalCase}`, `${operationTypeCamelCase}`, `${resultLowerCase}`, `${resultUpperCase}`, `${resultKebabCase}`, `${resultPascalCase}`, `${resultCamelCase}`
 
 ### Optional Properties
 
 | Property | Default | Description | Example |
 |----------|---------|-------------|---------|
-| `port` | `5672` (TCP) / `5671` (TLS) | AMQP broker port | `5671` |
+| `port` | `5672` (TCP) / `5671` (TLS) / `443` (WebSocket) | AMQP broker port | `5671` |
 | `destination-type` | `queue` | Destination type: `queue` or `topic` | `topic` |
 | `transport-type` | `amqp` | Transport: `amqp` or `amqp-web-sockets` | `amqp-web-sockets` |
 | `username` | `""` | AMQP username | `admin` |
 | `password` | `""` | AMQP password | `secret123` |
 | `delivery-mode` | `persistent` | Message durability: `persistent` or `non-persistent` | `persistent` |
-| `priority` | `4` | Message priority (0-9) | `7` |
+| `priority` | _(none)_ | Message priority (0-9, only applied when explicitly set) | `7` |
 | `time-to-live-seconds` | `0` | Message TTL in seconds (0 = never expires) | `60` |
-| `idle-timeout-seconds` | `60` | Connection idle timeout in seconds for keep-alive (0 = disabled) | `30` |
+| `idle-timeout-seconds` | _(none)_ | Connection idle timeout in seconds — only applied when explicitly set (0 = disabled) | `30` |
 | `pool.min-idle` | `1` | Minimum idle connections in pool | `5` |
 | `pool.max-idle` | `10` | Maximum idle connections in pool | `20` |
 | `pool.max-total` | `20` | Maximum total connections in pool | `50` |
@@ -162,7 +162,6 @@ kete.routes.artemis.destination.destination-type=queue
 ```bash
 kete.routes.azure-sb.destination.kind=amqp-1
 kete.routes.azure-sb.realm-matchers.realm=list:master
-kete.routes.azure-sb.retry.enabled=true
 kete.routes.azure-sb.retry.max-attempts=3
 kete.routes.azure-sb.retry.wait-duration=PT1S
 kete.routes.azure-sb.destination.host=your-namespace.servicebus.windows.net
@@ -342,3 +341,29 @@ kete.routes.azure-ws.destination.transport-type=amqp-web-sockets
 2. Navigate to **Shared access policies**
 3. Select or create a policy with **Send** permission
 4. Use **Policy Name** as `username` and **Primary Key** as `password`
+
+
+
+## Quick Starts
+
+| Broker | Quick Start |
+|--------|-------------|
+| ActiveMQ Artemis | [amqp-1-activemq](https://github.com/FortuneN/kete/tree/release/quick-starts/amqp-1-activemq/) |
+| RabbitMQ | [amqp-1-rabbitmq](https://github.com/FortuneN/kete/tree/release/quick-starts/amqp-1-rabbitmq/) |
+| Apache Qpid | [amqp-1-qpid](https://github.com/FortuneN/kete/tree/release/quick-starts/amqp-1-qpid/) |
+| Azure Event Hubs | [amqp-1-azure-event-hubs](https://github.com/FortuneN/kete/tree/release/quick-starts/amqp-1-azure-event-hubs/) |
+| Azure Event Hubs Emulator | [amqp-1-azure-event-hubs-emulator](https://github.com/FortuneN/kete/tree/release/quick-starts/amqp-1-azure-event-hubs-emulator/) |
+| Azure Service Bus | [amqp-1-azure-service-bus](https://github.com/FortuneN/kete/tree/release/quick-starts/amqp-1-azure-service-bus/) |
+| Azure Service Bus Emulator | [amqp-1-azure-service-bus-emulator](https://github.com/FortuneN/kete/tree/release/quick-starts/amqp-1-azure-service-bus-emulator/) |
+| Amazon MQ (ActiveMQ) | [amqp-1-amazon-mq](https://github.com/FortuneN/kete/tree/release/quick-starts/amqp-1-amazon-mq/) |
+| Solace PubSub+ | [amqp-1-solace](https://github.com/FortuneN/kete/tree/release/quick-starts/amqp-1-solace/) |
+
+
+
+## See Also
+
+- [AMQP 0.9.1 Destination](amqp-0.9.1.md) — RabbitMQ native protocol with exchanges and routing
+- [Serializers](../serializers/overview.md)
+- [Matchers](../matchers/overview.md)
+- [Event Types](../event-types.md)
+- [Certificate Loaders](../certificate-loaders/overview.md)

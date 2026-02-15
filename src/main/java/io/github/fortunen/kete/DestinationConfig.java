@@ -8,6 +8,7 @@ import org.apache.commons.configuration2.MapConfiguration;
 import org.keycloak.models.KeycloakSession;
 
 import io.github.fortunen.kete.utils.ConfigurationUtils;
+import io.github.fortunen.kete.utils.IocUtils;
 import io.github.fortunen.kete.utils.ValidationUtils;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -25,6 +26,8 @@ public abstract class DestinationConfig {
 	public static final String POOL = "pool";
 	public static final String POOL_LIFO = "lifo";
 	public static final String HEADERS = "headers";
+	public static final String CONTENT_ENCODING = "content-encoding";
+	public static final String CONTENT_TRANSFER_ENCODING = "content-transfer-encoding";
 	public static final String POOL_MIN_IDLE = "min-idle";
 	public static final String POOL_MAX_IDLE = "max-idle";
 	public static final String POOL_FAIRNESS = "fairness";
@@ -32,8 +35,9 @@ public abstract class DestinationConfig {
 	public static final String POOL_TEST_ON_CREATE = "test-on-create";
 	public static final String POOL_TEST_ON_BORROW = "test-on-borrow";
 	public static final String POOL_TEST_ON_RETURN = "test-on-return";
-	public static final String POOL_MAX_WAIT_SECONDS = "max-wait-seconds";
 	public static final String POOL_TEST_WHILE_IDLE = "test-while-idle";
+	public static final String POOL_MAX_WAIT_SECONDS = "max-wait-seconds";
+	public static final String AUTHENTICATION_TYPE = "authentication-type";
 	public static final String POOL_BLOCK_WHEN_EXHAUSTED = "block-when-exhausted";
 	public static final String POOL_NUM_TESTS_PER_EVICTION_RUN = "num-tests-per-eviction-run";
 	public static final String POOL_MIN_EVICTABLE_IDLE_TIME_SECONDS = "min-evictable-idle-time-seconds";
@@ -52,14 +56,20 @@ public abstract class DestinationConfig {
 	public static final boolean DEFAULT_POOL_TEST_WHILE_IDLE = false;
 	public static final int DEFAULT_POOL_NUM_TESTS_PER_EVICTION_RUN = 3;
 	public static final boolean DEFAULT_POOL_BLOCK_WHEN_EXHAUSTED = true;
+	public static final long DEFAULT_POOL_MIN_EVICTABLE_IDLE_TIME_SECONDS = 1800;
 	public static final long DEFAULT_POOL_TIME_BETWEEN_EVICTION_RUNS_SECONDS = -1;
 	public static final long DEFAULT_POOL_SOFT_MIN_EVICTABLE_IDLE_TIME_SECONDS = -1;
-	public static final long DEFAULT_POOL_MIN_EVICTABLE_IDLE_TIME_SECONDS = 1800;
 
 	protected TlsMaterial tls;
 	protected String keycloakRealm;
 	protected String destinationKind;
+	protected String authenticationType;
+	protected boolean hasAuthenticationType;
 	protected MapConfiguration configuration;
+	protected ContentEncoding contentEncoding;
+	protected String contentEncodingName;
+	protected ContentTransferEncoding contentTransferEncoding;
+	protected String contentTransferEncodingName;
 	protected boolean poolLifo = DEFAULT_POOL_LIFO;
 	protected int poolMinIdle = DEFAULT_POOL_MIN_IDLE;
 	protected int poolMaxIdle = DEFAULT_POOL_MAX_IDLE;
@@ -67,10 +77,10 @@ public abstract class DestinationConfig {
 	protected boolean poolFairness = DEFAULT_POOL_FAIRNESS;
 	protected Map<String, String> customHeaders = new HashMap<>();
 	protected Set<Map.Entry<String, String>> customHeadersEntrySet;
-	protected long poolMaxWaitSeconds = DEFAULT_POOL_MAX_WAIT_SECONDS;
 	protected boolean poolTestOnCreate = DEFAULT_POOL_TEST_ON_CREATE;
 	protected boolean poolTestOnBorrow = DEFAULT_POOL_TEST_ON_BORROW;
 	protected boolean poolTestOnReturn = DEFAULT_POOL_TEST_ON_RETURN;
+	protected long poolMaxWaitSeconds = DEFAULT_POOL_MAX_WAIT_SECONDS;
 	protected boolean poolTestWhileIdle = DEFAULT_POOL_TEST_WHILE_IDLE;
 	protected boolean poolBlockWhenExhausted = DEFAULT_POOL_BLOCK_WHEN_EXHAUSTED;
 	protected int poolNumTestsPerEvictionRun = DEFAULT_POOL_NUM_TESTS_PER_EVICTION_RUN;
@@ -100,10 +110,10 @@ public abstract class DestinationConfig {
 		poolMaxIdle = poolConfig.getInt(POOL_MAX_IDLE, DEFAULT_POOL_MAX_IDLE);
 		poolMaxTotal = poolConfig.getInt(POOL_MAX_TOTAL, DEFAULT_POOL_MAX_TOTAL);
 		poolFairness = poolConfig.getBoolean(POOL_FAIRNESS, DEFAULT_POOL_FAIRNESS);
-		poolMaxWaitSeconds = poolConfig.getLong(POOL_MAX_WAIT_SECONDS, DEFAULT_POOL_MAX_WAIT_SECONDS);
 		poolTestOnCreate = poolConfig.getBoolean(POOL_TEST_ON_CREATE, DEFAULT_POOL_TEST_ON_CREATE);
 		poolTestOnBorrow = poolConfig.getBoolean(POOL_TEST_ON_BORROW, DEFAULT_POOL_TEST_ON_BORROW);
 		poolTestOnReturn = poolConfig.getBoolean(POOL_TEST_ON_RETURN, DEFAULT_POOL_TEST_ON_RETURN);
+		poolMaxWaitSeconds = poolConfig.getLong(POOL_MAX_WAIT_SECONDS, DEFAULT_POOL_MAX_WAIT_SECONDS);
 		poolTestWhileIdle = poolConfig.getBoolean(POOL_TEST_WHILE_IDLE, DEFAULT_POOL_TEST_WHILE_IDLE);
 		poolBlockWhenExhausted = poolConfig.getBoolean(POOL_BLOCK_WHEN_EXHAUSTED, DEFAULT_POOL_BLOCK_WHEN_EXHAUSTED);
 		poolNumTestsPerEvictionRun = poolConfig.getInt(POOL_NUM_TESTS_PER_EVICTION_RUN, DEFAULT_POOL_NUM_TESTS_PER_EVICTION_RUN);
@@ -122,6 +132,11 @@ public abstract class DestinationConfig {
 		tls = TlsMaterial.builder()
 			.withConfiguration(ConfigurationUtils.getSubSet(configuration, TLS))
 			.build();
+
+		// authentication-type
+
+		authenticationType = configuration.getString(AUTHENTICATION_TYPE, "").trim().toLowerCase();
+		hasAuthenticationType = ValidationUtils.isNotBlank(authenticationType);
 
 		// headers (filter out reserved message header keys - message headers always take priority)
 
@@ -143,6 +158,26 @@ public abstract class DestinationConfig {
 		});
 
 		customHeadersEntrySet = customHeaders.entrySet();
+
+		// content-transfer-encoding (optional)
+
+		var cteValue = configuration.getString(CONTENT_TRANSFER_ENCODING, "").trim().toLowerCase();
+
+		if (ValidationUtils.isNotBlank(cteValue)) {
+			contentTransferEncoding = IocUtils.get(cteValue, ContentTransferEncoding.class);
+			ValidationUtils.requireNonNull(contentTransferEncoding, "unknown " + CONTENT_TRANSFER_ENCODING + ": " + cteValue);
+			contentTransferEncodingName = cteValue;
+		}
+
+		// content-encoding (optional)
+
+		var ceValue = configuration.getString(CONTENT_ENCODING, "").trim().toLowerCase();
+
+		if (ValidationUtils.isNotBlank(ceValue)) {
+			contentEncoding = IocUtils.get(ceValue, ContentEncoding.class);
+			ValidationUtils.requireNonNull(contentEncoding, "unknown " + CONTENT_ENCODING + ": " + ceValue);
+			contentEncodingName = ceValue;
+		}
 
 		// initialize subclass
 

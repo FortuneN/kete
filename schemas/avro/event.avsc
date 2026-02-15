@@ -1,0 +1,18 @@
+{
+  "type": "record",
+  "name": "Event",
+  "namespace": "io.github.fortunen.kete.events",
+  "fields": [
+    { "name": "id",         "type": ["null", "string"], "default": null },
+    { "name": "time",       "type": ["null", "long"],   "default": null },
+    { "name": "type",       "type": ["null", "string"], "default": null },
+    { "name": "realm_id",   "type": ["null", "string"], "default": null },
+    { "name": "realm_name", "type": ["null", "string"], "default": null },
+    { "name": "client_id",  "type": ["null", "string"], "default": null },
+    { "name": "user_id",    "type": ["null", "string"], "default": null },
+    { "name": "session_id", "type": ["null", "string"], "default": null },
+    { "name": "ip_address", "type": ["null", "string"], "default": null },
+    { "name": "error",      "type": ["null", "string"], "default": null },
+    { "name": "details",    "type": ["null", { "type": "map", "values": "string" }], "default": null }
+  ]
+}

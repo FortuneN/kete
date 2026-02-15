@@ -55,9 +55,9 @@ connectionFactory = factory;
 
 ### Solace PubSub+ (`solace-jms`)
 
-Solace provides a JMS API for their PubSub+ platform.
+Solace provides a JMS API for their PubSub+ platform. Solace is already reachable via AMQP 1.0, MQTT 3, and MQTT 5 destinations (quickstarts available). A dedicated JMS destination would provide access to Solace-specific features not available through standard protocols.
 
-**Priority:** Low (niche enterprise)
+**Priority:** Low (already reachable via standard protocols)
 
 **Potential Configuration:**
 
@@ -96,79 +96,7 @@ kete.routes.tibco.destination.password=admin
 
 ---
 
-## Protocol-Based Destinations (One Client, Many Brokers)
-
-These destinations use open standard protocols, providing wide broker compatibility with a single client library—similar to how KETE's `amqp-1` destination works with any AMQP 1.0 broker.
-
-### SignalR (`signalr`)
-
-Stream events to Microsoft SignalR hubs for real-time web applications.
-
-**Priority:** Medium (Microsoft ecosystem, ASP.NET applications)
-
-**Protocol:** SignalR (WebSocket-based with fallbacks)
-
-**Compatible Systems:**
-
-| System | Notes |
-|--------|-------|
-| **Azure SignalR Service** | Managed SignalR in Azure |
-| **Self-hosted SignalR** | ASP.NET Core apps |
-| **Blazor Server** | Real-time Blazor applications |
-
-**Potential Configuration:**
-
-```properties
-kete.routes.signalr.destination.kind=signalr
-kete.routes.signalr.destination.hub-url=https://app.example.com/eventshub
-kete.routes.signalr.destination.method=ReceiveKeycloakEvent
-kete.routes.signalr.destination.access-token=...
-```
-
-**Dependencies Required:**
-- `com.microsoft.signalr:signalr` (official Java client)
-
-**Use Cases:**
-- Real-time dashboards showing login activity
-- Live user session monitoring
-- Browser-based admin consoles
-
----
-
 ## Cloud Destinations (Native SDK Required)
-
-### Google Cloud Tasks (`gcp-cloudtasks`)
-
-Enqueue Keycloak events as Cloud Tasks for reliable, rate-controlled asynchronous processing.
-
-**Priority:** 🥉 Low (niche, task-queue pattern)
-
-**Potential Configuration:**
-
-```properties
-kete.routes.gcp.destination.kind=gcp-cloudtasks
-kete.routes.gcp.destination.project-id=my-gcp-project
-kete.routes.gcp.destination.location=us-central1
-kete.routes.gcp.destination.queue=keycloak-events
-kete.routes.gcp.destination.target-url=https://my-service.run.app/handle-event
-kete.routes.gcp.destination.credentials-file=/path/to/service-account.json
-# Or use GOOGLE_APPLICATION_CREDENTIALS environment variable
-```
-
-**Dependencies Required:**
-- `com.google.cloud:google-cloud-tasks`
-
-**Authentication Options:**
-- Service account JSON key file
-- Workload Identity (GKE)
-- Application Default Credentials
-
-**Use Cases:**
-- Rate-limited event processing with automatic retries
-- Deferred/scheduled event handling
-- Offloading event processing to Cloud Run or Cloud Functions
-
----
 
 ### Google Cloud Workflows (`gcp-workflows`)
 
@@ -235,99 +163,6 @@ kete.routes.gcp.destination.credentials-file=/path/to/service-account.json
 
 ---
 
-### AWS SNS (`aws-sns`)
-
-Publish events to Amazon Simple Notification Service topics.
-
-**Potential Configuration:**
-
-```properties
-kete.routes.aws.destination.kind=aws-sns
-kete.routes.aws.destination.topic-arn=arn:aws:sns:us-east-1:123456789:keycloak-events
-kete.routes.aws.destination.region=us-east-1
-# Authentication via environment variables or IAM role
-# AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY
-```
-
-**Dependencies Required:**
-- `software.amazon.awssdk:sns`
-
-**Authentication Options:**
-- Environment variables (AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY)
-- IAM instance profile (EC2/ECS)
-- IRSA (EKS)
-
----
-
-### AWS SQS (`aws-sqs`)
-
-Send events directly to Amazon Simple Queue Service queues.
-
-**Potential Configuration:**
-
-```properties
-kete.routes.aws.destination.kind=aws-sqs
-kete.routes.aws.destination.queue-url=https://sqs.us-east-1.amazonaws.com/123456789/keycloak-events
-kete.routes.aws.destination.region=us-east-1
-kete.routes.aws.destination.message-group-id=${realm}  # For FIFO queues
-```
-
-**Dependencies Required:**
-- `software.amazon.awssdk:sqs`
-
----
-
-### AWS Kinesis (`aws-kinesis`)
-
-Stream events to Amazon Kinesis Data Streams for real-time analytics.
-
-**Potential Configuration:**
-
-```properties
-kete.routes.aws.destination.kind=aws-kinesis
-kete.routes.aws.destination.stream-name=keycloak-events
-kete.routes.aws.destination.region=us-east-1
-kete.routes.aws.destination.partition-key=${realm}
-```
-
-**Dependencies Required:**
-- `software.amazon.awssdk:kinesis`
-
----
-
-### AWS EventBridge (`aws-eventbridge`)
-
-Publish Keycloak events to Amazon EventBridge for event-driven routing across AWS services and SaaS integrations.
-
-**Priority:** 🥈 Medium (AWS serverless ecosystem, event routing)
-
-**Potential Configuration:**
-
-```properties
-kete.routes.aws.destination.kind=aws-eventbridge
-kete.routes.aws.destination.event-bus-name=keycloak-events
-kete.routes.aws.destination.region=us-east-1
-kete.routes.aws.destination.source=keycloak
-kete.routes.aws.destination.detail-type=${event-type}
-# Authentication via environment variables or IAM role
-```
-
-**Dependencies Required:**
-- `software.amazon.awssdk:eventbridge`
-
-**Authentication Options:**
-- Environment variables (AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY)
-- IAM instance profile (EC2/ECS)
-- IRSA (EKS)
-
-**Use Cases:**
-- Fan-out Keycloak events to multiple AWS services via EventBridge rules
-- Routing events to Lambda, Step Functions, SQS, SNS, or API destinations
-- Cross-account event distribution
-- SaaS integration via EventBridge partner event sources
-
----
-
 ## Database Destinations
 
 ### JDBC Tables (`jdbc-tables`)
@@ -368,50 +203,6 @@ kete.routes.sproc.destination.jdbc.password=secret
 kete.routes.sproc.destination.jdbc.procedure=CALL usp_ProcessKeycloakEvent(?, ?, ?, ?)
 # Parameters: event_id, event_type, realm, payload
 ```
-
----
-
-## Additional Serializers
-
-### Avro (`avro`)
-
-Serialize events using Apache Avro with Schema Registry support.
-
-**Potential Configuration:**
-
-```properties
-kete.routes.avro.serializer.kind=avro
-kete.routes.avro.serializer.schema-registry-url=http://schema-registry:8081
-kete.routes.avro.serializer.auto-register-schemas=true
-```
-
-**Dependencies Required:**
-- `org.apache.avro:avro`
-- `io.confluent:kafka-avro-serializer`
-
-**Use Cases:**
-- Kafka consumers requiring Avro format
-- Schema evolution and compatibility
-
----
-
-### Protocol Buffers (`protobuf`)
-
-Serialize events using Google Protocol Buffers.
-
-**Potential Configuration:**
-
-```properties
-kete.routes.proto.serializer.kind=protobuf
-kete.routes.proto.serializer.schema-file=/path/to/event.proto
-```
-
-**Dependencies Required:**
-- `com.google.protobuf:protobuf-java`
-
-**Use Cases:**
-- gRPC-based consumers
-- Size-efficient binary format
 
 ---
 
@@ -506,42 +297,52 @@ kete.routes.sse.destination.retry=3000
 
 ### gRPC Streaming (`grpc`)
 
-Stream events to gRPC servers using bidirectional or server streaming.
+Unary gRPC is implemented — see [gRPC Destination docs](../user-guide/destinations/grpc.md). Streaming modes (bidirectional, server-streaming) remain potential future enhancements.
 
-**Priority:** 🥉 Low (high effort, niche use case)
+**Priority:** Low (niche use case beyond unary)
 
-**Protocol:** gRPC over HTTP/2
+---
 
-**Compatible Systems:**
+## Uncovered Protocols & Systems
 
-| System | Notes |
-|--------|-------|
-| **Custom gRPC servers** | Any language with gRPC support |
-| **Envoy Proxy** | gRPC routing and load balancing |
-| **Google Cloud Run** | Serverless gRPC |
-| **Kubernetes services** | Native gRPC support |
-| **Istio** | Service mesh with gRPC |
+Systems that cannot be reached by any existing KETE destination because they use proprietary or unsupported protocols.
 
-**Potential Configuration:**
+| System | Container | Protocol | Notes |
+|--------|-----------|----------|-------|
+| Beanstalkd | `schickling/beanstalkd` | Custom text protocol | Lightweight work queue |
+| Pravega | `pravega/pravega` | Custom protocol | Dell streaming storage |
+
+!!! note "Apache RocketMQ"
+    RocketMQ supports MQTT 3.1.1 via the [rocketmq-mqtt](https://github.com/apache/rocketmq-mqtt) gateway extension and is reachable via KETE's `mqtt-3` destination. The gateway requires separate deployment alongside the RocketMQ broker (RocketMQ >= 4.9.3, <= 5.1.4).
+
+### Protocol Categories Not Covered
+
+- **gRPC** (generic) — Unary implemented (see [gRPC Destination docs](../user-guide/destinations/grpc.md)). Streaming modes remain future.
+- **Server-Sent Events (SSE)** — one-way HTTP streaming
+- **Database-as-queue** — PostgreSQL LISTEN/NOTIFY, Oracle AQ
+- **JMS** (directly) — covered indirectly via AMQP 1.0 and STOMP for brokers that support both
+
+---
+
+## Cross-Cutting Enhancements
+
+### Dynamic Header Values (Template Processing)
+
+Custom headers are currently static `Map<String, String>` — values are set at configuration time and never change. Template processing would allow header values to reference event fields:
 
 ```properties
-kete.routes.grpc.destination.kind=grpc
-kete.routes.grpc.destination.target=grpc-server.example.com:9090
-kete.routes.grpc.destination.service=keycloak.EventService
-kete.routes.grpc.destination.method=StreamEvents
-kete.routes.grpc.destination.tls.enabled=true
+kete.routes.myroute.destination.headers.x-correlation-id=${event.id}
+kete.routes.myroute.destination.headers.x-realm=${event.realmId}
+kete.routes.myroute.destination.headers.x-event-type=${event.type}
 ```
 
-**Dependencies Required:**
-- `io.grpc:grpc-netty-shaded`
-- `io.grpc:grpc-protobuf`
-- `io.grpc:grpc-stub`
-- Protobuf schema for events
+**Scope:** All destinations that support custom headers (HTTP, SOAP, gRPC metadata, Kafka, MQTT user properties, AMQP properties, NATS, Pulsar, etc.)
 
-**Implementation Notes:**
-- Requires defining a `.proto` schema for Keycloak events
-- Higher complexity than HTTP/WebSocket
-- Best for microservices architectures already using gRPC
+**Considerations:**
+- Template syntax: `${event.field}` or `{{event.field}}`?
+- Which event fields are available? All top-level fields? Nested `details` map?
+- Performance: resolve per-message vs. cache static headers and only resolve templated ones
+- Applies to common KETE headers too, or custom headers only?
 
 ---
 

@@ -6,7 +6,7 @@
 #     • All tests (unit, integration, end-to-end)
 #     • Package JAR with version imprinted in manifest
 #     • Push Docker images with version tag + :latest
-#     • Deploy documentation site to GitHub Pages
+#     • Build documentation site
 #     • Create Git tag and GitHub Release
 #
 #   Version format: yyyy.MM.dd.HH.mm (e.g., 2026.01.31.18.45)
@@ -171,10 +171,10 @@ Write-Host "  Commit:   $(git rev-parse --short HEAD 2>$null)" -ForegroundColor 
 # Step 1: Run All Tests
 # =============================================================================
 
-Write-StepHeader 1 "Run All Tests"
+Write-StepHeader 1 "Run All Tests (with Coverage)"
 
 $stepStart = Get-Date
-Write-Task "Executing test suites (unit, integration, end-to-end)..."
+Write-Task "Executing test suites (unit, integration, end-to-end) with JaCoCo coverage..."
 Write-Host ""
 
 & .\run-all-tests.ps1
@@ -184,6 +184,25 @@ $duration = Format-Duration((Get-Date) - $stepStart)
 Write-Host ""
 Write-TaskResult "Test execution complete" $testsPassed $duration
 $script:Results["1. Tests"] = $testsPassed
+
+if ($testsPassed) {
+    Write-Task "Generating coverage badge..."
+    $coveragePercent = 0
+    $csvPath = "target/site/jacoco/jacoco.csv"
+    if (Test-Path $csvPath) {
+        $csv = Import-Csv $csvPath
+        $totalMissed = ($csv | Measure-Object -Property LINE_MISSED -Sum).Sum
+        $totalCovered = ($csv | Measure-Object -Property LINE_COVERED -Sum).Sum
+        $total = $totalMissed + $totalCovered
+        if ($total -gt 0) {
+            $coveragePercent = [math]::Round(($totalCovered / $total) * 100, 1)
+        }
+    }
+    $color = if ($coveragePercent -ge 80) { "brightgreen" } elseif ($coveragePercent -ge 60) { "green" } elseif ($coveragePercent -ge 40) { "yellow" } else { "red" }
+    $badgeJson = @{ schemaVersion = 1; label = "coverage"; message = "$coveragePercent%"; color = $color } | ConvertTo-Json
+    Set-Content -Path "coverage-badge.json" -Value $badgeJson -Encoding UTF8
+    Write-TaskResult "Coverage: $coveragePercent% (badge updated)" $true
+}
 
 if (-not $testsPassed) {
     Write-Host ""

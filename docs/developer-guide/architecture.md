@@ -36,6 +36,31 @@ This approach keeps the plugin lightweight while still providing clean component
 
 
 
+## Design Principles
+
+### Destination Isolation
+
+No destination may force architectural changes beyond its own boundaries. The shared architecture — base classes, pipeline, serializers, matchers, pooling, DI, config loading — exists to serve all destinations equally.
+
+If a destination's requirements cannot be met within its own package (`Destination.java`, `DestinationConfig.java`, and destination-specific utilities), then that destination is not supported. We would sooner drop a destination than allow it to pollute the shared architecture.
+
+**Rules:**
+
+- No shared class modifications to accommodate a single destination
+- No `if destination is X` branches in shared code — if you're writing conditional logic in a base class for one destination's quirk, the design is wrong
+- Utility classes shared between related destinations are fine (e.g., a signing utility shared between two destinations from the same vendor), but they live in `utils/` and have zero knowledge of the destination classes that call them
+- This applies to all layers: source code, config validation, serialization, test infrastructure, documentation tooling
+
+**Why this matters:**
+
+- KETE has 27 destinations (and counting). If one gets a shared-code exception, every future destination will argue "just this one thing." The shared code becomes a graveyard of special cases.
+- Every shared-code change is a regression risk across ALL destinations. A tweak for one could break any of the others.
+- The principle is already proven — destinations with complex auth, custom signing, and credential lifecycle all work today without touching shared code. No destination is different.
+- This is the same constraint every serious plugin system enforces: VS Code extensions can't modify VS Code core, browser extensions can't modify the engine, Keycloak providers can't modify Keycloak internals. KETE destinations can't modify the KETE pipeline.
+- "We'd sooner drop a destination" sounds harsh in isolation, but it's the only statement strong enough to prevent erosion. A softer version like "try to avoid" becomes "well, just this once" on the first hard case. If a destination genuinely can't work within its own boundary, that's a signal it doesn't belong — not a reason to weaken the architecture for everything else.
+
+
+
 ## Event Processing
 
 ### Transaction Support
@@ -67,7 +92,7 @@ This ensures events are only processed for **successful operations**.
 | Event Reception | Keycloak transaction thread | Event received from Keycloak |
 | Transaction Commit | Same thread | Triggers event processing |
 | Event Processing | Virtual thread per route | Parallel destination delivery |
-| Destination Pooling | ThreadLocal | Thread-safe client reuse |
+| Destination Pooling | Apache Commons Pool2 | Thread-safe client reuse |
 
 ### Virtual Threads
 
@@ -81,9 +106,9 @@ This ensures events are only processed for **successful operations**.
 
 ### 1. Matcher Result Caching
 
-- Cache in `Route.accept()`
-- Max 1,000 entries per route
-- Cache key: eventType string
+- Two caches in `Route.accept()`: `acceptRealmCache` and `acceptEventCache`
+- Max 1,000 entries per cache per route
+- Cache key: realm name or event type string
 - O(1) lookup after first match
 
 ### 2. Template Result Caching
@@ -95,9 +120,9 @@ This ensures events are only processed for **successful operations**.
 
 ### 3. Serializer Singletons
 
-- All serializers are SINGLETON scoped
+- 8 of 9 serializers are SINGLETON scoped (TemplateSerializer is TRANSIENT)
 - ObjectWriter instances are thread-safe
-- One serializer instance shared across routes
+- One serializer instance shared across routes (except TemplateSerializer)
 
 ### 4. Destination Pooling
 
@@ -112,37 +137,51 @@ This ensures events are only processed for **successful operations**.
 
 #### Pool Configuration
 
-Pool sizes are configurable per route via `min-pool-size` and `max-pool-size` properties:
+Pool sizes are configurable per route via `pool.*` properties:
 
 ```bash
-kete.routes.myroute.destination.min-pool-size=5   # Default: 5
-kete.routes.myroute.destination.max-pool-size=20  # Default: 20
+kete.routes.myroute.destination.pool.min-idle=1     # Default: 1
+kete.routes.myroute.destination.pool.max-idle=10    # Default: 10
+kete.routes.myroute.destination.pool.max-total=20   # Default: 20
 ```
 
 | Setting | Default | Configurable | Rationale |
-|---------|---------|:------------:|-----------|
-| `min-pool-size` | 5 |  | Warm pool for typical workloads |
-| `max-pool-size` | 20 |  | Prevent broker overload |
+|---------|---------|:------------:|----------|
+| `pool.min-idle` | 1 |  | Warm pool for typical workloads |
+| `pool.max-idle` | 10 |  | Limit idle connections |
+| `pool.max-total` | 20 |  | Prevent broker overload |
 | Block on Exhaustion | true |  | Wait rather than fail |
-| Borrow Timeout | 30 seconds |  | Fail fast if pool starved |
-| Test on Borrow | true |  | Validate before use |
-| Test on Return | true |  | Validate after use |
+| `pool.max-wait-seconds` | -1 (infinite) |  | Wait indefinitely for available object |
+| `pool.test-on-borrow` | false |  | Skip validation on borrow |
+| `pool.test-on-return` | false |  | Skip validation on return |
 
 **Constraints:**
-- `min-pool-size` must be > 0
-- `max-pool-size` must be > 0
-- `max-pool-size` must be >= `min-pool-size`
+- `pool.min-idle` must be > 0
+- `pool.max-idle` must be > 0
+- `pool.max-total` must be > 0
+- `pool.max-total` must be >= `pool.min-idle`
 
 #### Pooled Objects by Destination
 
-| Destination | Pooled Object | Notes |
-|-------------|---------------|-------|
+All 27 destinations use Apache Commons Pool2. Each destination pools its primary client/connection object:
+
+| Destination(s) | Pooled Object | Notes |
+|----------------|---------------|-------|
 | MQTT 3 | `MqttClient` (Paho v3) | Individual client instances |
 | MQTT 5 | `MqttClient` (Paho v5) | Individual client instances |
 | AMQP 0.9.1 | `Channel` | Channels from shared Connection |
 | AMQP 1.0 | `JMSContext` | JMS connections via Qpid |
 | Kafka | `KafkaProducer` | Producer instances |
 | HTTP | `HttpClient` | HTTP client instances |
+| WebSocket, Socket.io, SignalR | Client session | Persistent connection instances |
+| Redis Pub/Sub, Redis Stream | `StatefulRedisConnection` (Lettuce) | Redis client instances |
+| NATS, NATS JetStream | `Connection` | NATS connections |
+| Pulsar | `Producer` | Pulsar producer instances |
+| STOMP | `StompSession` | STOMP WebSocket sessions |
+| ZeroMQ | `ZMQ.Socket` | ZeroMQ socket instances |
+| AWS (SNS, SQS, Kinesis, EventBridge) | SDK client | AWS service clients |
+| Azure (Event Hubs, Service Bus, Event Grid, Storage Queue, Web PubSub) | SDK client | Azure service clients |
+| GCP (Pub/Sub, Cloud Tasks) | SDK client | GCP service clients |
 
 #### Usage Pattern
 
@@ -167,7 +206,8 @@ try {
 
 ### 5. EventMessage Caching
 
-- Cached lowercase/uppercase transformations
+- 6 LRU caches: BYTES, LOWERCASE, UPPERCASE, KEBAB, PASCAL, CAMEL
+- Cached case transformations (lower, upper, kebab, pascal, camel) for all fields
 - Cached byte[] conversions for headers
 - Reduces repeated string operations
 
@@ -183,7 +223,7 @@ try {
 
 ### Message Delivery Errors
 
-- **With retry**: Retry mechanism handles retries with exponential backoff
+- **With retry** (default): Retry mechanism handles retries with configurable wait duration
 - **Without retry**: Exception logged and swallowed
 - Does not block other routes or events
 
@@ -194,7 +234,7 @@ try {
 | MQTT | Automatic reconnect enabled |
 | RabbitMQ | Automatic recovery enabled |
 | Kafka | Producer retries built-in |
-| HTTP | Configurable retry with backoff |
+| HTTP | Configurable route-level retry |
 
 
 
@@ -255,10 +295,18 @@ record EventMessage(
 EventMessage provides cached transformations for performance:
 
 - `kindLowerCase()`, `kindUpperCase()` - Cached kind transformations
+- `kindKebabCase()`, `kindPascalCase()`, `kindCamelCase()` - Cached kind case conversions
 - `realmLowerCase()`, `realmUpperCase()` - Cached realm transformations
+- `realmKebabCase()`, `realmPascalCase()`, `realmCamelCase()` - Cached realm case conversions
 - `eventTypeLowerCase()`, `eventTypeUpperCase()` - Cached event type transformations
+- `eventTypeKebabCase()`, `eventTypePascalCase()`, `eventTypeCamelCase()` - Cached event type case conversions
 - `resourceTypeLowerCase()`, `resourceTypeUpperCase()` - Cached resource type transformations
+- `resourceTypeKebabCase()`, `resourceTypePascalCase()`, `resourceTypeCamelCase()` - Cached resource type case conversions
 - `operationTypeLowerCase()`, `operationTypeUpperCase()` - Cached operation type transformations
+- `operationTypeKebabCase()`, `operationTypePascalCase()`, `operationTypeCamelCase()` - Cached operation type case conversions
 - `resultLowerCase()`, `resultUpperCase()` - Cached result transformations
-- `eventTypeBytes()`, `contentTypeBytes()` - UTF-8 byte arrays for headers
+- `resultKebabCase()`, `resultPascalCase()`, `resultCamelCase()` - Cached result case conversions
+- `kindBytes()`, `eventTypeBytes()`, `contentTypeBytes()` - UTF-8 byte arrays for headers
+
+Case conversions assume `UPPER_UNDERSCORE` input (Keycloak's native format). For example, `LOGIN_ERROR` becomes `login-error` (kebab), `LoginError` (pascal), `loginError` (camel).
 

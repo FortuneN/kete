@@ -74,6 +74,8 @@ Stream Keycloak events to ZeroMQ peers using JeroMQ (pure Java implementation).
 - Brokerless peer-to-peer messaging (no broker required)
 - PUB/SUB and PUSH/PULL messaging patterns
 - BIND or CONNECT connection modes
+- PUB/SUB envelope filtering with template variable support
+- CurveZMQ encryption and authentication
 - Pure Java implementation (JeroMQ) — no native libraries
 - Ultra-low latency, high throughput
 - Configurable linger time for pending messages on close
@@ -96,6 +98,8 @@ Stream Keycloak events to ZeroMQ peers using JeroMQ (pure Java implementation).
 | `socket-type` | `PUBLISH` | Socket pattern: `PUBLISH` (PUB/SUB) or `PUSH` (PUSH/PULL) | `PUSH` |
 | `connection-mode` | `CONNECT` | Connection mode: `BIND` (listen) or `CONNECT` (dial) | `BIND` |
 | `linger` | `1000` | Milliseconds to wait for pending messages on close. `-1` = wait forever, `0` = discard immediately | `5000` |
+| `envelope` | _(empty)_ | Multipart message envelope prefix (PUB only, supports templating) | `keycloak-events` |
+| `send-high-water-mark` | `1000` | Maximum number of outstanding messages in send queue | `5000` |
 
 ### Socket Types
 
@@ -114,6 +118,25 @@ Stream Keycloak events to ZeroMQ peers using JeroMQ (pure Java implementation).
 !!! tip "BIND vs CONNECT"
     The general rule: the **stable** node (the one that stays up longer) should `BIND`, and the **transient** node should `CONNECT`. In most KETE deployments, Keycloak is the stable node, so use `BIND`. If your subscribers are long-running services and Keycloak may restart, use `CONNECT`.
 
+### Envelope (PUB/SUB Topic Filtering)
+
+When using the `PUBLISH` socket type, the `envelope` property sets the multipart message envelope (prefix frame). Subscribers use this envelope to filter messages:
+
+```bash
+# Static envelope
+kete.routes.zmq.destination.envelope=keycloak-events
+
+# Dynamic envelope per realm
+kete.routes.zmq.destination.envelope=keycloak-${realmLowerCase}
+
+# Dynamic envelope per event type
+kete.routes.zmq.destination.envelope=${eventTypeLowerCase}
+```
+
+Available variables: `${realmLowerCase}`, `${realmUpperCase}`, `${realmKebabCase}`, `${realmPascalCase}`, `${realmCamelCase}`, `${eventTypeLowerCase}`, `${eventTypeUpperCase}`, `${eventTypeKebabCase}`, `${eventTypePascalCase}`, `${eventTypeCamelCase}`, `${kindLowerCase}`, `${kindUpperCase}`, `${kindKebabCase}`, `${kindPascalCase}`, `${kindCamelCase}`, `${resourceTypeLowerCase}`, `${resourceTypeUpperCase}`, `${resourceTypeKebabCase}`, `${resourceTypePascalCase}`, `${resourceTypeCamelCase}`, `${operationTypeLowerCase}`, `${operationTypeUpperCase}`, `${operationTypeKebabCase}`, `${operationTypePascalCase}`, `${operationTypeCamelCase}`, `${resultLowerCase}`, `${resultUpperCase}`, `${resultKebabCase}`, `${resultPascalCase}`, `${resultCamelCase}`
+
+When `envelope` is set, messages are sent as two-frame multipart messages: `[envelope, body]`. Subscribers can filter on the envelope prefix. When empty (default), messages are sent as single-frame.
+
 ### Endpoint Formats
 
 ZeroMQ supports several transport protocols:
@@ -127,14 +150,59 @@ ZeroMQ supports several transport protocols:
 !!! note "TCP Bind Address"
     When using `BIND` mode with TCP, use `tcp://*:<port>` to listen on all interfaces, or `tcp://0.0.0.0:<port>` for the same effect. Use a specific IP address to bind to a particular interface.
 
+### Authentication
+
+ZeroMQ supports CurveZMQ encryption and authentication using elliptic-curve cryptography (Curve25519). This provides both confidentiality and authentication without TLS.
+
+Set `authentication-type=curve` and provide the server's public key plus the client's key pair:
+
+| Property | Required | Description |
+|----------|:--------:|-------------|
+| `authentication-type` | ✓ | `curve` |
+| `curve.loader.kind` | ✓ | Key format: `z85-inline`, `z85-file-path`, or `binary-file-path` |
+| `curve.server-key` | ✓ | Server's public key (Z85 string or file path, depending on loader) |
+| `curve.public-key` | ✓ | Client's public key (Z85 string or file path, depending on loader) |
+| `curve.secret-key` | ✓ | Client's secret key (Z85 string or file path, depending on loader) |
+
+#### Key Loader Kinds
+
+| Loader Kind | Description |
+|-------------|-------------|
+| `z85-inline` | Z85-encoded keys provided directly in configuration (40 characters each) |
+| `z85-file-path` | Z85-encoded keys read from files on the filesystem |
+| `binary-file-path` | Raw 32-byte binary keys read from files |
+
+#### CurveZMQ with Inline Keys
+
+```bash
+kete.routes.zmq.destination.kind=zeromq
+kete.routes.zmq.destination.endpoint=tcp://secure-peer:5556
+kete.routes.zmq.destination.authentication-type=curve
+kete.routes.zmq.destination.curve.loader.kind=z85-inline
+kete.routes.zmq.destination.curve.server-key=rq:rM>}U?@Lns47E1%kR.o@n%FcMhhx#4-Mf+U{o
+kete.routes.zmq.destination.curve.public-key=Yne@$w-vo<fVvi]a<NY6T1ed:M$fCG*[IaLV{hID
+kete.routes.zmq.destination.curve.secret-key=D:)Q[IlAW!ahhC2ac:9*A}h:p?([4%wOTJ%%JR%6
+```
+
+#### CurveZMQ with File-Based Keys
+
+```bash
+kete.routes.zmq.destination.kind=zeromq
+kete.routes.zmq.destination.endpoint=tcp://secure-peer:5556
+kete.routes.zmq.destination.authentication-type=curve
+kete.routes.zmq.destination.curve.loader.kind=z85-file-path
+kete.routes.zmq.destination.curve.server-key=/certs/server.key
+kete.routes.zmq.destination.curve.public-key=/certs/client-public.key
+kete.routes.zmq.destination.curve.secret-key=/certs/client-secret.key
+```
+
 
 
 ## Limitations
 
-- **No TLS** — ZeroMQ uses CurveZMQ for encryption (not implemented in KETE). Use network-level security (VPN, mTLS proxy) for encrypted transport.
-- **No authentication** — ZeroMQ's PLAIN and CURVE authentication mechanisms are not supported. Use network-level security.
+- **No TLS** — ZeroMQ does not use TLS. Use [CurveZMQ](#authentication) for encryption, or network-level security (VPN, mTLS proxy) for encrypted transport.
 - **No message headers** — ZeroMQ sends raw message bytes. Event metadata (type, kind, content type) is not sent as separate headers.
-- **No dynamic endpoint templating** — The endpoint is static (not variable-substituted per event).
+- **No dynamic endpoint templating** — The endpoint is static (not variable-substituted per event). The `envelope` property does support templating.
 - **Fire-and-forget** — PUB/SUB drops messages when no subscribers are connected. PUSH/PULL queues messages but provides no delivery acknowledgment.
 
 
@@ -183,3 +251,21 @@ kete.routes.zmq.destination.kind=zeromq
 kete.routes.zmq.destination.endpoint=tcp://subscriber.example.com:5556
 # Defaults: socket-type=PUBLISH, connection-mode=CONNECT, linger=1000ms
 ```
+
+
+
+## Quick Starts
+
+| Pattern | Quick Start |
+|---------|-------------|
+| PUB/SUB | [zeromq-publish](https://github.com/FortuneN/kete/tree/release/quick-starts/zeromq-publish/) |
+| PUSH/PULL | [zeromq-push](https://github.com/FortuneN/kete/tree/release/quick-starts/zeromq-push/) |
+
+
+
+## See Also
+
+- [Serializers](../serializers/overview.md)
+- [Matchers](../matchers/overview.md)
+- [Event Types](../event-types.md)
+- [Certificate Loaders](../certificate-loaders/overview.md)

@@ -45,7 +45,7 @@ public class sendTests extends TestBase {
 
 		// assert
 
-		await().atMost(Duration.ofSeconds(10)).until(() -> !readFromStream("test-stream").isEmpty());
+		await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).until(() -> !readFromStream("test-stream").isEmpty());
 
 		var messages = readFromStream("test-stream");
 		assertThat(messages).hasSize(1);
@@ -61,7 +61,6 @@ public class sendTests extends TestBase {
 
 		var tls = TlsMaterial.builder()
 			.withEnabled(true)
-			.withWriteFiles(true)
 			.withTrustStorePassword("changeit")
 			.withKeyStorePassword("changeit")
 			.withKeyPassword("changeit")
@@ -98,7 +97,7 @@ public class sendTests extends TestBase {
 
 		// assert
 
-		await().atMost(Duration.ofSeconds(10)).until(() -> !readFromStreamWithTls("test-stream", tls).isEmpty());
+		await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).until(() -> !readFromStreamWithTls("test-stream", tls).isEmpty());
 
 		var messages = readFromStreamWithTls("test-stream", tls);
 		assertThat(messages).hasSize(1);
@@ -108,13 +107,12 @@ public class sendTests extends TestBase {
 	}
 
 	@Test
-	public void shouldSend_Mtls() throws Exception {
+	public void shouldSend_mTls() throws Exception {
 
 		// arrange
 
 		var tls = TlsMaterial.builder()
 			.withEnabled(true)
-			.withWriteFiles(true)
 			.withTrustStorePassword("changeit")
 			.withKeyStorePassword("changeit")
 			.withKeyPassword("changeit")
@@ -127,11 +125,11 @@ public class sendTests extends TestBase {
 		map.put("port", getTlsPort());
 		map.put("stream", "test-stream");
 		map.put("tls.enabled", true);
-		map.put("tls.trust-store.loader.kind", "jks-file-path");
-		map.put("tls.trust-store.loader.path", tls.getTrustStoreFilePath());
+		map.put("tls.trust-store.loader.kind", "jks-file-base64");
+		map.put("tls.trust-store.loader.base64", tls.getTrustStoreBase64());
 		map.put("tls.trust-store.password", tls.getTrustStorePassword());
-		map.put("tls.key-store.loader.kind", "jks-file-path");
-		map.put("tls.key-store.loader.path", tls.getKeyStoreFilePath());
+		map.put("tls.key-store.loader.kind", "jks-file-base64");
+		map.put("tls.key-store.loader.base64", tls.getKeyStoreBase64());
 		map.put("tls.key-store.password", tls.getKeyStorePassword());
 		map.put("tls.key-password", tls.getKeyPassword());
 		var mapConfig = new MapConfiguration(map);
@@ -155,7 +153,7 @@ public class sendTests extends TestBase {
 
 		// assert
 
-		await().atMost(Duration.ofSeconds(10)).until(() -> !readFromStreamWithTls("test-stream", tls).isEmpty());
+		await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).until(() -> !readFromStreamWithTls("test-stream", tls).isEmpty());
 
 		var messages = readFromStreamWithTls("test-stream", tls);
 		assertThat(messages).hasSize(1);

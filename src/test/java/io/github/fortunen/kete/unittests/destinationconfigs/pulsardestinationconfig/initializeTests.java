@@ -180,9 +180,11 @@ public class initializeTests {
 
 		assertThat(config.getServiceUrl()).isEqualTo("pulsar://localhost:6650");
 		assertThat(config.getTopic()).isEqualTo("persistent://public/default/events");
-		assertThat(config.getSendTimeoutSeconds()).isEqualTo(PulsarDestinationConfig.DEFAULT_SEND_TIMEOUT_SECONDS);
+		assertThat(config.getSendTimeoutSeconds()).isEqualTo(0);
+		assertThat(config.isHasSendTimeout()).isFalse();
 		assertThat(config.getMaxPendingMessages()).isEqualTo(PulsarDestinationConfig.DEFAULT_MAX_PENDING_MESSAGES);
-		assertThat(config.getBatchingMaxMessages()).isEqualTo(PulsarDestinationConfig.DEFAULT_BATCHING_MAX_MESSAGES);
+		assertThat(config.getBatchingMaxMessages()).isEqualTo(0);
+		assertThat(config.isHasBatchingMaxMessages()).isFalse();
 		assertThat(config.isBlockIfQueueFull()).isEqualTo(PulsarDestinationConfig.DEFAULT_BLOCK_IF_QUEUE_FULL);
 		assertThat(config.getOperationTimeoutSeconds()).isEqualTo(PulsarDestinationConfig.DEFAULT_OPERATION_TIMEOUT_SECONDS);
 		assertThat(config.getConnectionTimeoutSeconds()).isEqualTo(PulsarDestinationConfig.DEFAULT_CONNECTION_TIMEOUT_SECONDS);
@@ -406,7 +408,7 @@ public class initializeTests {
 	// =========================================================================
 
 	@Test
-	public void shouldDefaultToEmptyUsername() {
+	public void shouldThrowWhenUsernameIsMissingWithBasicAuth() {
 
 		// arrange
 
@@ -414,16 +416,19 @@ public class initializeTests {
 		config.setConfiguration(new MapConfiguration(Map.of(
 			"kind", "pulsar",
 			"service-url", "pulsar://localhost:6650",
-			"topic", "persistent://public/default/events"
+			"topic", "persistent://public/default/events",
+			"authentication-type", "basic"
 		)));
 
 		// act
 
-		config.initialize();
+		var thrown = catchThrowable(config::initialize);
 
 		// assert
 
-		assertThat(config.getUsername()).isEmpty();
+		assertThat(thrown)
+			.isInstanceOf(IllegalStateException.class)
+			.hasMessage("username is required when authentication-type is 'basic'");
 	}
 
 	@Test
@@ -435,7 +440,9 @@ public class initializeTests {
 		config.setConfiguration(new MapConfiguration(Map.of(
 			"kind", "pulsar",
 			"service-url", "pulsar://localhost:6650",
-			"topic", "persistent://public/default/events"
+			"topic", "persistent://public/default/events",
+			"authentication-type", "basic",
+			"username", "pulsaruser"
 		)));
 
 		// act
@@ -457,6 +464,7 @@ public class initializeTests {
 			"kind", "pulsar",
 			"service-url", "pulsar://localhost:6650",
 			"topic", "persistent://public/default/events",
+			"authentication-type", "basic",
 			"username", "pulsaruser",
 			"password", "pulsarpass"
 		)));
@@ -481,6 +489,7 @@ public class initializeTests {
 			"kind", "pulsar",
 			"service-url", "pulsar://localhost:6650",
 			"topic", "persistent://public/default/events",
+			"authentication-type", "basic",
 			"username", "  pulsaruser  "
 		)));
 
@@ -503,6 +512,8 @@ public class initializeTests {
 			"kind", "pulsar",
 			"service-url", "pulsar://localhost:6650",
 			"topic", "persistent://public/default/events",
+			"authentication-type", "basic",
+			"username", "pulsaruser",
 			"password", "  pulsarpass  "
 		)));
 
@@ -520,7 +531,7 @@ public class initializeTests {
 	// =========================================================================
 
 	@Test
-	public void shouldDefaultToEmptyToken() {
+	public void shouldThrowWhenTokenIsMissingWithTokenAuth() {
 
 		// arrange
 
@@ -528,16 +539,19 @@ public class initializeTests {
 		config.setConfiguration(new MapConfiguration(Map.of(
 			"kind", "pulsar",
 			"service-url", "pulsar://localhost:6650",
-			"topic", "persistent://public/default/events"
+			"topic", "persistent://public/default/events",
+			"authentication-type", "token"
 		)));
 
 		// act
 
-		config.initialize();
+		var thrown = catchThrowable(config::initialize);
 
 		// assert
 
-		assertThat(config.getToken()).isEmpty();
+		assertThat(thrown)
+			.isInstanceOf(IllegalStateException.class)
+			.hasMessage("token is required when authentication-type is 'token'");
 	}
 
 	@Test
@@ -550,6 +564,7 @@ public class initializeTests {
 			"kind", "pulsar",
 			"service-url", "pulsar://localhost:6650",
 			"topic", "persistent://public/default/events",
+			"authentication-type", "token",
 			"token", "eyJhbGciOiJIUzI1NiJ9.test"
 		)));
 
@@ -572,6 +587,7 @@ public class initializeTests {
 			"kind", "pulsar",
 			"service-url", "pulsar://localhost:6650",
 			"topic", "persistent://public/default/events",
+			"authentication-type", "token",
 			"token", "  eyJhbGciOiJIUzI1NiJ9.test  "
 		)));
 

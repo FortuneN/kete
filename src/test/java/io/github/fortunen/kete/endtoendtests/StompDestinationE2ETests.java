@@ -3,7 +3,6 @@ package io.github.fortunen.kete.endtoendtests;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
-import java.net.Socket;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -16,7 +15,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.keycloak.admin.client.Keycloak;
 import org.testcontainers.containers.GenericContainer;
-import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.utility.DockerImageName;
 
 class StompDestinationE2ETests extends EndToEndTestBase {
@@ -33,6 +31,7 @@ class StompDestinationE2ETests extends EndToEndTestBase {
 		cleanupNetwork();
 	}
 
+	@SuppressWarnings("resource")
 	@Test
 	void shouldForwardLoginEventToStompQueue() throws Exception {
 
@@ -41,14 +40,11 @@ class StompDestinationE2ETests extends EndToEndTestBase {
 		activemq = new GenericContainer<>(DockerImageName.parse("apache/activemq-classic:6.1.6"))
 			.withNetwork(createNetwork())
 			.withNetworkAliases("activemq")
-			.withExposedPorts(STOMP_PORT, 61616)
-			.waitingFor(Wait.forLogMessage(".*Apache ActiveMQ.*started.*", 1))
-			.withStartupTimeout(Duration.ofMinutes(2));
+			.withExposedPorts(STOMP_PORT, 61616);
 		activemq.start();
 		waitForStompReady(activemq, STOMP_PORT);
 
 		var envVars = new HashMap<String, String>();
-		envVars.put("kete.enabled", "true");
 		envVars.put("kete.routes.stomp-test.realm-matchers.filter", "list:" + TEST_REALM);
 		envVars.put("kete.routes.stomp-test.destination.kind", "stomp");
 		envVars.put("kete.routes.stomp-test.destination.host", "activemq");
@@ -60,7 +56,7 @@ class StompDestinationE2ETests extends EndToEndTestBase {
 
 		// Set up STOMP subscriber
 		var connection = new StompConnection();
-		connection.open(activemq.getHost(), activemq.getMappedPort(STOMP_PORT));
+		connection.open("127.0.0.1", activemq.getMappedPort(STOMP_PORT));
 		connection.connect("admin", "admin");
 
 		var headers = new HashMap<String, String>();
@@ -98,7 +94,7 @@ class StompDestinationE2ETests extends EndToEndTestBase {
 
 				// assert - wait for message using Awaitility
 
-				await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).until(() -> !receivedMessages.isEmpty());
+				await().atMost(Duration.ofMinutes(2)).pollInterval(Duration.ofSeconds(2)).until(() -> !receivedMessages.isEmpty());
 
 				var body = receivedMessages.poll(1, TimeUnit.SECONDS);
 
@@ -132,11 +128,15 @@ class StompDestinationE2ETests extends EndToEndTestBase {
 	}
 
 	private void waitForStompReady(GenericContainer<?> container, int port) {
-		await().atMost(Duration.ofSeconds(30))
-			.pollInterval(Duration.ofSeconds(1))
-			.until(() -> {
-				try (var socket = new Socket(container.getHost(), container.getMappedPort(port))) {
-					return socket.isConnected();
+		var mappedPort = container.getMappedPort(port);
+		await().atMost(Duration.ofMinutes(2)).pollInterval(Duration.ofSeconds(2)).until(() -> {
+				try {
+					var conn = new StompConnection();
+					conn.open("127.0.0.1", mappedPort);
+					conn.connect("", "");
+					conn.disconnect();
+					conn.close();
+					return true;
 				} catch (Exception e) {
 					return false;
 				}

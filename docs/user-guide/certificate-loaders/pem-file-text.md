@@ -16,13 +16,13 @@ Embed raw PEM content directly in configuration.
 ## Example
 
 ```bash
-kete.routes.myroute.destination.tls=true
+kete.routes.myroute.destination.tls.enabled=true
 
 # Trust store (CA certificates)
-kete.routes.myroute.destination.trust-store.loader.kind=pem-file-text
-kete.routes.myroute.destination.trust-store.loader.text=-----BEGIN CERTIFICATE-----\nMIID...
+kete.routes.myroute.destination.tls.trust-store.loader.kind=pem-file-text
+kete.routes.myroute.destination.tls.trust-store.loader.text=-----BEGIN CERTIFICATE-----\nMIID...
 
 # Key store (client certificate + private key)
-kete.routes.myroute.destination.key-store.loader.kind=pem-file-text
-kete.routes.myroute.destination.key-store.loader.text=-----BEGIN PRIVATE KEY-----\nMIIE...
+kete.routes.myroute.destination.tls.key-store.loader.kind=pem-file-text
+kete.routes.myroute.destination.tls.key-store.loader.text=-----BEGIN PRIVATE KEY-----\nMIIE...
 ```

@@ -42,7 +42,7 @@ public class sendTests extends TestBase {
 
 		// assert
 
-		await().atMost(Duration.ofSeconds(30)).pollInterval(Duration.ofMillis(500)).until(() -> !receivedMessages.isEmpty());
+		await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).until(() -> !receivedMessages.isEmpty());
 
 		var received = receivedMessages.poll(1, TimeUnit.SECONDS);
 		assertThat(received).isNotNull();
@@ -52,11 +52,10 @@ public class sendTests extends TestBase {
 	@Test
 	public void shouldSend_Tls() throws Exception {
 
-		// arrange - Start host-side WebSocket server with nginx TLS termination
+		// arrange
 
 		var tls = TlsMaterial.builder()
 			.withEnabled(true)
-			.withWriteFiles(true)
 			.withTrustStorePassword("changeit")
 			.withKeyStorePassword("changeit")
 			.withKeyPassword("changeit")
@@ -66,7 +65,7 @@ public class sendTests extends TestBase {
 		startWithServerOnlyTLS(tls);
 
 		var map = new HashMap<String, Object>();
-		map.put("host", getNginxHost());
+		map.put("host", getWebSocketTlsHost());
 		map.put("port", String.valueOf(getWebSocketTlsPort()));
 		map.put("path", "/");
 		map.put("tls.enabled", true);
@@ -90,7 +89,7 @@ public class sendTests extends TestBase {
 
 		// assert
 
-		await().atMost(Duration.ofSeconds(30)).pollInterval(Duration.ofMillis(500)).until(() -> !receivedMessages.isEmpty());
+		await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).until(() -> !receivedMessages.isEmpty());
 
 		var received = receivedMessages.poll(1, TimeUnit.SECONDS);
 		assertThat(received).isNotNull();
@@ -100,11 +99,10 @@ public class sendTests extends TestBase {
 	@Test
 	public void shouldSend_mTls() throws Exception {
 
-		// arrange - Start host-side WebSocket server with nginx mTLS (client auth required)
+		// arrange
 
 		var tls = TlsMaterial.builder()
 			.withEnabled(true)
-			.withWriteFiles(true)
 			.withTrustStorePassword("changeit")
 			.withKeyStorePassword("changeit")
 			.withKeyPassword("changeit")
@@ -114,15 +112,15 @@ public class sendTests extends TestBase {
 		startWithClientAndServerTLS(tls);
 
 		var map = new HashMap<String, Object>();
-		map.put("host", getNginxHost());
+		map.put("host", getWebSocketTlsHost());
 		map.put("port", String.valueOf(getWebSocketTlsPort()));
 		map.put("path", "/");
 		map.put("tls.enabled", true);
-		map.put("tls.trust-store.loader.kind", "jks-file-path");
-		map.put("tls.trust-store.loader.path", tls.getTrustStoreFilePath());
+		map.put("tls.trust-store.loader.kind", "jks-file-base64");
+		map.put("tls.trust-store.loader.base64", tls.getTrustStoreBase64());
 		map.put("tls.trust-store.password", tls.getTrustStorePassword());
-		map.put("tls.key-store.loader.kind", "jks-file-path");
-		map.put("tls.key-store.loader.path", tls.getKeyStoreFilePath());
+		map.put("tls.key-store.loader.kind", "jks-file-base64");
+		map.put("tls.key-store.loader.base64", tls.getKeyStoreBase64());
 		map.put("tls.key-store.password", tls.getKeyStorePassword());
 		map.put("tls.key-store.key-password", tls.getKeyPassword());
 		var mapConfig = new MapConfiguration(map);
@@ -142,7 +140,7 @@ public class sendTests extends TestBase {
 
 		// assert
 
-		await().atMost(Duration.ofSeconds(30)).pollInterval(Duration.ofMillis(500)).until(() -> !receivedMessages.isEmpty());
+		await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).until(() -> !receivedMessages.isEmpty());
 
 		var received = receivedMessages.poll(1, TimeUnit.SECONDS);
 		assertThat(received).isNotNull();

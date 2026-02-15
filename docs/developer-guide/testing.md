@@ -8,7 +8,7 @@ Complete guide to testing Keycloak Events to Everywhere.
 
 ### Unit Tests
 
-**Location:** `src/tests/java/io/github/fortunen/kete/`  
+**Location:** `src/test/java/io/github/fortunen/kete/unittests/`  
 **Framework:** JUnit 5 + AssertJ + Mockito  
 **Purpose:** Test individual components in isolation
 
@@ -29,13 +29,13 @@ mvn verify
 
 ### End-to-End Tests
 
-**Location:** `src/tests/java/io/github/fortunen/kete/e2e/`  
+**Location:** `src/test/java/io/github/fortunen/kete/endtoendtests/`  
 **Purpose:** Test full event flow from serialization to destination delivery
 **Uses:** Testcontainers with actual brokers
 
 **Run:**
 ```bash
-mvn test -Dtest="io.github.fortunen.kete.e2e.*"
+mvn test -Dtest="io.github.fortunen.kete.endtoendtests.*"
 ```
 
 
@@ -80,7 +80,7 @@ mvn clean package -DskipTests
 Each test file tests exactly ONE method from the source class:
 
 ```
-src/tests/java/io/github/fortunen/kete/
+src/test/java/io/github/fortunen/kete/unittests/
 ├── provider/
 │   ├── constructorTests.java       # Tests Provider constructor
 │   ├── onEventTests.java           # Tests Provider.onEvent()
@@ -179,7 +179,7 @@ public void shouldThrowWhenConfigurationIsNull() {
 
 ### testcontainers.properties
 
-**Location:** `src/tests/resources/testcontainers.properties`
+**Location:** `src/test/resources/testcontainers.properties`
 
 ```properties
 # Testcontainers configuration
@@ -214,7 +214,7 @@ mvn test
 ```powershell
 # Stop all
 .\docker-infra.ps1 stop
-docker stop keycloak-hephaestus
+docker stop keycloak-kete
 
 # Clean volumes
 .\docker-infra.ps1 clean

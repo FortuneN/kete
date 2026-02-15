@@ -123,21 +123,30 @@ kete.routes.main-kafka.destination.topic=keycloak-events
 
 Any property under `kete.routes.<NAME>.destination.*` is passed directly to the Kafka producer, except for `topic` which is used internally.
 
-#### Built-in Defaults
+#### Defaults Set by KETE
+
+These properties are explicitly configured by KETE via `putIfAbsent` (can be overridden):
 
 | Property | Default |
 |----------|---------|
-| `acks` | `all` |
 | `linger.ms` | `5` |
 | `batch.size` | `32768` |
 | `compression.type` | `lz4` |
-| `enable.idempotence` | `true` |
-| `max.in.flight.requests.per.connection` | `5` |
 | `key.serializer` | StringSerializer |
 | `value.serializer` | ByteArraySerializer |
 | `pool.min-idle` | `1` |
 | `pool.max-idle` | `10` |
 | `pool.max-total` | `20` |
+
+#### Kafka Client Defaults
+
+These are not set by KETE but are the Kafka client's own defaults (since Kafka 3.0+):
+
+| Property | Default |
+|----------|---------|
+| `acks` | `all` |
+| `enable.idempotence` | `true` |
+| `max.in.flight.requests.per.connection` | `5` |
 
 #### Common Properties
 
@@ -180,7 +189,7 @@ kete.routes.kafka.destination.topic=keycloak-events-${realmLowerCase}
 kete.routes.kafka.destination.topic=keycloak-${eventTypeLowerCase}
 ```
 
-Available variables: `${realmLowerCase}`, `${realmUpperCase}`, `${eventTypeLowerCase}`, `${eventTypeUpperCase}`, `${kindLowerCase}`, `${kindUpperCase}`, `${resourceTypeLowerCase}`, `${resourceTypeUpperCase}`, `${operationTypeLowerCase}`, `${operationTypeUpperCase}`, `${resultLowerCase}`, `${resultUpperCase}`
+Available variables: `${realmLowerCase}`, `${realmUpperCase}`, `${realmKebabCase}`, `${realmPascalCase}`, `${realmCamelCase}`, `${eventTypeLowerCase}`, `${eventTypeUpperCase}`, `${eventTypeKebabCase}`, `${eventTypePascalCase}`, `${eventTypeCamelCase}`, `${kindLowerCase}`, `${kindUpperCase}`, `${kindKebabCase}`, `${kindPascalCase}`, `${kindCamelCase}`, `${resourceTypeLowerCase}`, `${resourceTypeUpperCase}`, `${resourceTypeKebabCase}`, `${resourceTypePascalCase}`, `${resourceTypeCamelCase}`, `${operationTypeLowerCase}`, `${operationTypeUpperCase}`, `${operationTypeKebabCase}`, `${operationTypePascalCase}`, `${operationTypeCamelCase}`, `${resultLowerCase}`, `${resultUpperCase}`, `${resultKebabCase}`, `${resultPascalCase}`, `${resultCamelCase}`
 
 ### Configuration Examples
 
@@ -287,3 +296,25 @@ kete.routes.dev-example.event-matchers.filter=glob:*
 kete.routes.dev-example.destination.bootstrap.servers=kafka:9092
 kete.routes.dev-example.destination.topic=dev-events
 ```
+
+
+
+## Quick Starts
+
+| Broker | Quick Start |
+|--------|-------------|
+| Apache Kafka | [kafka-apache](https://github.com/FortuneN/kete/tree/release/quick-starts/kafka-apache/) |
+| Redpanda | [kafka-redpanda](https://github.com/FortuneN/kete/tree/release/quick-starts/kafka-redpanda/) |
+| Confluent Cloud | [kafka-confluent](https://github.com/FortuneN/kete/tree/release/quick-starts/kafka-confluent/) |
+| Azure Event Hubs | [kafka-azure-event-hubs](https://github.com/FortuneN/kete/tree/release/quick-starts/kafka-azure-event-hubs/) |
+| Azure Event Hubs Emulator | [kafka-azure-event-hubs-emulator](https://github.com/FortuneN/kete/tree/release/quick-starts/kafka-azure-event-hubs-emulator/) |
+| Amazon MSK | [kafka-amazon-msk](https://github.com/FortuneN/kete/tree/release/quick-starts/kafka-amazon-msk/) |
+
+
+
+## See Also
+
+- [Serializers](../serializers/overview.md)
+- [Matchers](../matchers/overview.md)
+- [Event Types](../event-types.md)
+- [Certificate Loaders](../certificate-loaders/overview.md)

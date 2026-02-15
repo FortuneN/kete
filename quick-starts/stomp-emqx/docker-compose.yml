@@ -17,7 +17,7 @@ services:
       - 8083:8083
       - 8084:8084
       - 18083:18083
-      - 61613:61613
+      - 36613:61613
     environment:
       EMQX_GATEWAY__STOMP__LISTENERS__TCP__DEFAULT__BIND: 61613
       EMQX_GATEWAY__STOMP__ENABLE: true

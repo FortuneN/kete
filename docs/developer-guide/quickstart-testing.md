@@ -112,84 +112,132 @@ docker compose down -v
 
 ## Known Issues
 
-### Pulsar
-
-❌ **Pulsar quickstart is not yet available**
-
-The Pulsar destination exists in the code but is not included in the `quick-start-keycloak` Docker image yet. It will be added in a future release.
-
 ### Quickstart Port Conflicts
 
 If you're running multiple quickstarts simultaneously, you may encounter port conflicts. Make sure to stop one quickstart before starting another, or modify the port mappings in `docker-compose.yml`.
 
 ## Quickstart Inventory
 
-Total quickstarts: 42
+Total quickstarts: 83
 
-### AMQP 0.9.1 (2)
+### AMQP 0.9.1 (4)
+- amqp-0.9.1-amazon-mq
+- amqp-0.9.1-cloudamqp
 - amqp-0.9.1-lavinmq
 - amqp-0.9.1-rabbitmq
 
-### AMQP 1.0 (5)
+### AMQP 1.0 (8)
 - amqp-1-activemq
+- amqp-1-amazon-mq
 - amqp-1-azure-event-hubs
+- amqp-1-azure-event-hubs-emulator
 - amqp-1-azure-service-bus
+- amqp-1-azure-service-bus-emulator
 - amqp-1-qpid
 - amqp-1-rabbitmq
+
+### AWS (8)
+- aws-eventbridge
+- aws-eventbridge-emulator
+- aws-kinesis
+- aws-kinesis-emulator
+- aws-sns
+- aws-sns-emulator
+- aws-sqs
+- aws-sqs-emulator
+
+### Azure (4)
+- azure-storage-queue
+- azure-storage-queue-emulator
+- azure-webpubsub
+- azure-webpubsub-emulator
+
+### GCP (4)
+- gcp-cloud-tasks
+- gcp-cloud-tasks-emulator
+- gcp-pubsub
+- gcp-pubsub-emulator
 
 ### HTTP (2)
 - http-azure-event-grid
 - http-webhook
 
-### Kafka (5)
+### Kafka (6)
+- kafka-amazon-msk
 - kafka-apache
 - kafka-azure-event-hubs
 - kafka-azure-event-hubs-emulator
 - kafka-confluent
 - kafka-redpanda
 
-### MQTT 3 (5)
+### MQTT 3 (7)
+- mqtt-3-activemq-artemis
 - mqtt-3-emqx
 - mqtt-3-hivemq
 - mqtt-3-mosquitto
+- mqtt-3-nanomq
 - mqtt-3-rabbitmq
 - mqtt-3-vernemq
 
-### MQTT 5 (6)
+### MQTT 5 (8)
+- mqtt-5-activemq-artemis
 - mqtt-5-azure-event-grid
 - mqtt-5-emqx
 - mqtt-5-hivemq
 - mqtt-5-mosquitto
+- mqtt-5-nanomq
 - mqtt-5-rabbitmq
 - mqtt-5-vernemq
 
-### NATS (2)
+### NATS (4)
 - nats-jetstream-nats-server
+- nats-jetstream-synadia-cloud
 - nats-nats-server
+- nats-synadia-cloud
 
-### Redis (10)
+### Pulsar (1)
+- pulsar-apache
+
+### Redis Pub/Sub (9)
+- redis-pubsub-amazon-elasticache
 - redis-pubsub-azure-cache-for-redis
 - redis-pubsub-dragonfly
+- redis-pubsub-garnet
+- redis-pubsub-google-memorystore
 - redis-pubsub-keydb
 - redis-pubsub-redis
 - redis-pubsub-upstash
+- redis-pubsub-valkey
+
+### Redis Stream (8)
+- redis-stream-amazon-elasticache
 - redis-stream-azure-cache-for-redis
 - redis-stream-dragonfly
+- redis-stream-google-memorystore
 - redis-stream-keydb
 - redis-stream-redis
 - redis-stream-upstash
+- redis-stream-valkey
 
-### STOMP (3)
+### SignalR (1)
+- signalr
+
+### Socket.IO (1)
+- socketio
+
+### STOMP (5)
 - stomp-activemq
+- stomp-amazon-mq
 - stomp-artemis
+- stomp-emqx
 - stomp-rabbitmq
 
 ### WebSocket (1)
 - websocket-echo
 
-### Utility (2)
-- quick-start-curl
-- quick-start-keycloak
+### ZeroMQ (2)
+- zeromq-publish
+- zeromq-push
 
 ## Automated Testing
 

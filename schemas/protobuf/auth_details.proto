@@ -1,0 +1,10 @@
+syntax = "proto3";
+package io.github.fortunen.kete.events;
+
+message AuthDetails {
+  string realm_id = 1;
+  string realm_name = 2;
+  string client_id = 3;
+  string user_id = 4;
+  string ip_address = 5;
+}

@@ -1,5 +1,8 @@
 package io.github.fortunen.kete.destinations.nats;
 
+import java.util.Map;
+import java.util.Set;
+
 import io.github.fortunen.kete.Component;
 import io.github.fortunen.kete.Constants;
 import io.github.fortunen.kete.Destination;
@@ -20,7 +23,10 @@ import lombok.SneakyThrows;
 @EqualsAndHashCode(callSuper = true)
 public class NatsDestination extends Destination<NatsDestinationConfig> {
 
+	private String subject;
 	private Connection connection;
+	private boolean isSubjectTemplated;
+	private Set<Map.Entry<String, String>> customHeadersEntrySet;
 
 	@Override
 	@SneakyThrows
@@ -28,10 +34,14 @@ public class NatsDestination extends Destination<NatsDestinationConfig> {
 
 		ValidationUtils.requireNonNull(config, "config is required");
 
-		connection = Nats.connect(config.getNatsOptions());
-
+		subject = config.getSubject();
+		isSubjectTemplated = config.isSubjectTemplated();
+		customHeadersEntrySet = config.getCustomHeadersEntrySet();
+		
 		// verify connection
-
+		
+		connection = Nats.connect(config.getNatsOptions());
+		
 		ValidationUtils.requireTrue(connection.getStatus() == Connection.Status.CONNECTED, "failed to connect to NATS server");
 	}
 
@@ -43,13 +53,13 @@ public class NatsDestination extends Destination<NatsDestinationConfig> {
 
 		// subject
 
-		var actualSubject = TemplateUtils.substitute(config.getSubject(), message);
+		var actualSubject = isSubjectTemplated ? TemplateUtils.substitute(subject, message) : subject;
 
 		// headers (message headers take priority over custom headers)
 
 		var headers = new Headers();
 
-		for (var entry : config.getCustomHeadersEntrySet()) {
+		for (var entry : customHeadersEntrySet) {
 			headers.add(entry.getKey(), entry.getValue());
 		}
 

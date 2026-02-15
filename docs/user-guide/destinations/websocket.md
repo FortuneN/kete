@@ -96,6 +96,7 @@ Stream Keycloak events to WebSocket servers.
 - ✅ Text and binary message modes
 - ✅ TLS/SSL support with mutual TLS (mTLS)
 - ✅ OAuth 2.0 Client Credentials with token caching
+- ✅ Standard message headers (`eventkind`, `eventtype`, `contenttype`)
 - ✅ Custom headers for authentication
 - ✅ Automatic reconnection on connection loss
 - ✅ Configurable connection timeout
@@ -124,7 +125,7 @@ kete.routes.ws.destination.url=ws://websocket-server.example.com:8080/events/${r
 kete.routes.ws.destination.url=ws://websocket-server.example.com/${kindLowerCase}/${eventTypeLowerCase}
 ```
 
-Available variables: `${realmLowerCase}`, `${realmUpperCase}`, `${eventTypeLowerCase}`, `${eventTypeUpperCase}`, `${kindLowerCase}`, `${kindUpperCase}`, `${resourceTypeLowerCase}`, `${resourceTypeUpperCase}`, `${operationTypeLowerCase}`, `${operationTypeUpperCase}`, `${resultLowerCase}`, `${resultUpperCase}`
+Available variables: `${realmLowerCase}`, `${realmUpperCase}`, `${realmKebabCase}`, `${realmPascalCase}`, `${realmCamelCase}`, `${eventTypeLowerCase}`, `${eventTypeUpperCase}`, `${eventTypeKebabCase}`, `${eventTypePascalCase}`, `${eventTypeCamelCase}`, `${kindLowerCase}`, `${kindUpperCase}`, `${kindKebabCase}`, `${kindPascalCase}`, `${kindCamelCase}`, `${resourceTypeLowerCase}`, `${resourceTypeUpperCase}`, `${resourceTypeKebabCase}`, `${resourceTypePascalCase}`, `${resourceTypeCamelCase}`, `${operationTypeLowerCase}`, `${operationTypeUpperCase}`, `${operationTypeKebabCase}`, `${operationTypePascalCase}`, `${operationTypeCamelCase}`, `${resultLowerCase}`, `${resultUpperCase}`, `${resultKebabCase}`, `${resultPascalCase}`, `${resultCamelCase}`
 
 When using `destination.url`:
 
@@ -148,8 +149,9 @@ If both `url` and individual properties are specified, `url` takes precedence.
 | `destination.port` | `80` (WS) / `443` (WSS) | WebSocket server port | `8080` |
 | `destination.path` | `/` | URL path | `/events` |
 | `destination.binary-mode` | `false` | Send as binary frames (not text) | `true` |
+| `destination.subprotocol` | _(empty)_ | Comma-separated WebSocket subprotocols (RFC 6455 Sec-WebSocket-Protocol) | `graphql-ws,mqtt` |
 | `destination.connection-timeout-seconds` | `10` | Connection timeout in seconds | `30` |
-| `destination.connection-lost-timeout-seconds` | `60` | Heartbeat timeout in seconds (0 = disabled). Uses WebSocket ping/pong to detect dead connections. | `30` |
+| `destination.connection-lost-timeout-seconds` | _(inactive)_ | Heartbeat timeout in seconds (0 = disabled). Uses WebSocket ping/pong to detect dead connections. Only active when explicitly set. | `60` |
 | `destination.pool.min-idle` | `1` | Minimum idle connections in pool | `5` |
 | `destination.pool.max-idle` | `10` | Maximum idle connections in pool | `20` |
 | `destination.pool.max-total` | `20` | Maximum total connections in pool | `50` |
@@ -162,6 +164,8 @@ Headers are configured under `destination.headers.<NAME>`:
 kete.routes.ws.destination.headers.Authorization=Bearer my-token
 kete.routes.ws.destination.headers.X-Custom-Header=value
 ```
+
+In addition to custom headers, KETE automatically adds the standard message headers (`eventkind`, `eventtype`, `contenttype`) to the WebSocket client for each message. All headers are HTTP-level headers sent during the WebSocket handshake and on reconnection.
 
 ### OAuth 2.0 Properties
 
@@ -274,3 +278,22 @@ kete.routes.ws.destination.port=8080
 kete.routes.ws.destination.path=/keycloak/events
 kete.routes.ws.destination.tls.enabled=true
 ```
+
+
+
+## Quick Starts
+
+| Quick Start | Description |
+|-------------|-------------|
+| [websocket-echo](https://github.com/FortuneN/kete/tree/release/quick-starts/websocket-echo/) | WebSocket echo server |
+
+
+
+## See Also
+
+- [Socket.IO Destination](socketio.md) — Socket.IO protocol with namespaces and rooms
+- [SignalR Destination](signalr.md) — ASP.NET SignalR protocol
+- [Serializers](../serializers/overview.md)
+- [Matchers](../matchers/overview.md)
+- [Event Types](../event-types.md)
+- [Certificate Loaders](../certificate-loaders/overview.md)

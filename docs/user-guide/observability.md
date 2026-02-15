@@ -37,8 +37,8 @@ scrape_configs:
 KETE logs lifecycle events at INFO level (always enabled):
 
 ```
-INFO  kete initializing
-INFO  kete Route 'my-route' initialized: destination=KafkaDestination, serializer=JsonSerializer, matchers=2
+INFO  kete (1.0.0) initializing
+INFO  kete Route 'my-route' initialized: destination=KafkaDestination, serializer=JsonSerializer, realmMatchers=1, eventMatchers=2
 INFO  kete initialized
 ...
 INFO  kete closing

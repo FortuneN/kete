@@ -1,0 +1,42 @@
+services:
+
+  cloud-tasks-emulator:
+    image: ghcr.io/fortunen/kete/quick-start-gcp-cloud-tasks-emulator
+    ports:
+      - 8123:8123
+    command:
+      - -host=0.0.0.0
+      - -port=8123
+      - -queue=projects/demo-project/locations/us-central1/queues/keycloak-events
+
+  webhook:
+    image: ghcr.io/fortunen/kete/quick-start-http-echo
+    ports:
+      - 8090:8090
+    environment:
+      HTTP_PORT: 8090
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:8090/ || exit 0"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  keycloak:
+    image: ghcr.io/fortunen/kete/quick-start-keycloak
+    command: start-dev
+    ports:
+      - 8080:8080
+      - 9000:9000
+    environment:
+      kete.routes.quick-start.destination.kind: gcp-cloud-tasks
+      kete.routes.quick-start.destination.project: demo-project
+      kete.routes.quick-start.destination.location: us-central1
+      kete.routes.quick-start.destination.queue: keycloak-events
+      kete.routes.quick-start.destination.target-url: http://webhook:8090/handler
+      kete.routes.quick-start.destination.endpoint: cloud-tasks-emulator:8123
+      kete.routes.quick-start.destination.use-plaintext: "true"
+    depends_on:
+      cloud-tasks-emulator:
+        condition: service_started
+      webhook:
+        condition: service_healthy

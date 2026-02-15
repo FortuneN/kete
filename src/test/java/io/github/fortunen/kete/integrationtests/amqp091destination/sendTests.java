@@ -20,7 +20,7 @@ import io.github.fortunen.kete.TlsMaterial;
 public class sendTests extends TestBase {
 
 	@Test
-	public void shouldSendMessage_NonTls() throws Exception {
+	public void shouldSend_NonTls() throws Exception {
 
 		// arrange
 
@@ -29,7 +29,7 @@ public class sendTests extends TestBase {
 		var routingKey = "test-key";
 		var queueName = "test-queue";
 		var map = new HashMap<String, Object>();
-		map.put("host", container.getHost());
+		map.put("host", "127.0.0.1");
 		map.put("port", String.valueOf(container.getAmqpPort()));
 		map.put("exchange", exchangeName);
 		map.put("routing-key", routingKey);
@@ -41,7 +41,7 @@ public class sendTests extends TestBase {
 
 		// Set up consumer using RabbitMQ client
 		var factory = new ConnectionFactory();
-		factory.setHost(container.getHost());
+		factory.setHost("127.0.0.1");
 		factory.setPort(container.getAmqpPort());
 
 		try (var connection = factory.newConnection();
@@ -74,19 +74,18 @@ public class sendTests extends TestBase {
 
 			// assert
 
-			await().atMost(Duration.ofMinutes(2)).pollInterval(Duration.ofSeconds(2)).until(() -> receivedMessage.get() != null);
+			await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).until(() -> receivedMessage.get() != null);
 			assertThat(new String(receivedMessage.get(), StandardCharsets.UTF_8)).isEqualTo("{\"type\":\"LOGIN\"}");
 		}
 	}
 
 	@Test
-	public void shouldSendMessage_Tls() throws Exception {
+	public void shouldSend_Tls() throws Exception {
 
 		// arrange
 
 		var tls = TlsMaterial.builder()
 			.withEnabled(true)
-			.withWriteFiles(true)
 			.withTrustStorePassword("changeit")
 			.withKeyStorePassword("changeit")
 			.withKeyPassword("changeit")
@@ -98,7 +97,7 @@ public class sendTests extends TestBase {
 		var routingKey = "test-key";
 		var queueName = "test-queue";
 		var map = new HashMap<String, Object>();
-		map.put("host", container.getHost());
+		map.put("host", "127.0.0.1");
 		map.put("port", String.valueOf(getAmqpTlsPort()));
 		map.put("exchange", exchangeName);
 		map.put("routing-key", routingKey);
@@ -114,7 +113,7 @@ public class sendTests extends TestBase {
 
 		// Set up consumer using RabbitMQ client with TLS
 		var factory = new ConnectionFactory();
-		factory.setHost(container.getHost());
+		factory.setHost("127.0.0.1");
 		factory.setPort(getAmqpTlsPort());
 		factory.useSslProtocol(tls.getKeyStoreAndTrustStoreSSLContext());
 
@@ -148,19 +147,18 @@ public class sendTests extends TestBase {
 
 			// assert
 
-			await().atMost(Duration.ofMinutes(2)).pollInterval(Duration.ofSeconds(2)).until(() -> receivedMessage.get() != null);
+			await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).until(() -> receivedMessage.get() != null);
 			assertThat(new String(receivedMessage.get(), StandardCharsets.UTF_8)).isEqualTo("{\"type\":\"LOGIN\"}");
 		}
 	}
 
 	@Test
-	public void shouldSendMessage_mTls() throws Exception {
+	public void shouldSend_mTls() throws Exception {
 
 		// arrange
 
 		var tls = TlsMaterial.builder()
 			.withEnabled(true)
-			.withWriteFiles(true)
 			.withTrustStorePassword("changeit")
 			.withKeyStorePassword("changeit")
 			.withKeyPassword("changeit")
@@ -172,16 +170,16 @@ public class sendTests extends TestBase {
 		var routingKey = "test-key";
 		var queueName = "test-queue";
 		var map = new HashMap<String, Object>();
-		map.put("host", container.getHost());
+		map.put("host", "127.0.0.1");
 		map.put("port", String.valueOf(getAmqpTlsPort()));
 		map.put("exchange", exchangeName);
 		map.put("routing-key", routingKey);
 		map.put("tls.enabled", true);
-		map.put("tls.trust-store.loader.kind", "jks-file-path");
-		map.put("tls.trust-store.loader.path", tls.getTrustStoreFilePath());
+		map.put("tls.trust-store.loader.kind", "jks-file-base64");
+		map.put("tls.trust-store.loader.base64", tls.getTrustStoreBase64());
 		map.put("tls.trust-store.password", tls.getTrustStorePassword());
-		map.put("tls.key-store.loader.kind", "jks-file-path");
-		map.put("tls.key-store.loader.path", tls.getKeyStoreFilePath());
+		map.put("tls.key-store.loader.kind", "jks-file-base64");
+		map.put("tls.key-store.loader.base64", tls.getKeyStoreBase64());
 		map.put("tls.key-store.password", tls.getKeyStorePassword());
 		map.put("tls.key-store.key-password", tls.getKeyPassword());
 		var mapConfig = new MapConfiguration(map);
@@ -192,7 +190,7 @@ public class sendTests extends TestBase {
 
 		// Set up consumer using RabbitMQ client with TLS
 		var factory = new ConnectionFactory();
-		factory.setHost(container.getHost());
+		factory.setHost("127.0.0.1");
 		factory.setPort(getAmqpTlsPort());
 		factory.useSslProtocol(tls.getKeyStoreAndTrustStoreSSLContext());
 
@@ -226,7 +224,7 @@ public class sendTests extends TestBase {
 
 			// assert
 
-			await().atMost(Duration.ofMinutes(2)).pollInterval(Duration.ofSeconds(2)).until(() -> receivedMessage.get() != null);
+			await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).until(() -> receivedMessage.get() != null);
 			assertThat(new String(receivedMessage.get(), StandardCharsets.UTF_8)).isEqualTo("{\"type\":\"LOGIN\"}");
 		}
 	}

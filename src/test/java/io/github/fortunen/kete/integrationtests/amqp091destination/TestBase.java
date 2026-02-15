@@ -3,8 +3,6 @@ package io.github.fortunen.kete.integrationtests.amqp091destination;
 import static org.awaitility.Awaitility.await;
 
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.time.Duration;
 
 import org.apache.commons.configuration2.MapConfiguration;
@@ -67,6 +65,7 @@ public class TestBase {
 		return startRabbitMqWithTls(tls, true);
 	}
 
+	@SuppressWarnings("resource")
 	private RabbitMQContainer startRabbitMqWithTls(TlsMaterial tls, boolean requireClientAuth) throws Exception {
 
 		if (tls == null) {
@@ -114,12 +113,11 @@ public class TestBase {
 		var configContent = configBuilder.toString();
 
 		var rabbitContainer = new RabbitMQContainer("rabbitmq:3.13-management")
-			.withCopyToContainer(Transferable.of(Files.readAllBytes(Path.of(tls.getServerPrivateKeyPkcs1PemFilePath())), 0777), "/etc/rabbitmq/rabbitmq_key.pem")
-			.withCopyToContainer(Transferable.of(Files.readAllBytes(Path.of(tls.getServerCertificatePemFilePath())), 0777), "/etc/rabbitmq/rabbitmq_cert.pem")
-			.withCopyToContainer(Transferable.of(Files.readAllBytes(Path.of(tls.getCaCertificatePemFilePath())), 0777), "/etc/rabbitmq/ca_cert.pem")
+			.withCopyToContainer(Transferable.of(tls.getServerPrivateKeyPkcs1PemBytes(), 0777), "/etc/rabbitmq/rabbitmq_key.pem")
+			.withCopyToContainer(Transferable.of(tls.getServerCertificatePemBytes(), 0777), "/etc/rabbitmq/rabbitmq_cert.pem")
+			.withCopyToContainer(Transferable.of(tls.getCaCertificatePemBytes(), 0777), "/etc/rabbitmq/ca_cert.pem")
 			.withCopyToContainer(Transferable.of(configContent.getBytes(StandardCharsets.UTF_8), 0777), "/etc/rabbitmq/rabbitmq.conf")
 			.withExposedPorts(AMQP_TLS_PORT)
-			.withStartupTimeout(Duration.ofMinutes(10))
 			.withLogConsumer(outputFrame -> System.out.println("[RABBITMQ] " + outputFrame.getUtf8String()));
 
 		container = rabbitContainer;
@@ -132,10 +130,29 @@ public class TestBase {
 			throw e;
 		}
 
-		// Note: For TLS mode, we skip the readiness probe since the plaintext port is not exposed.
-		// The container.start() already waits for the container to be ready.
+		waitForTlsPortReady(tls, requireClientAuth);
 
 		return container;
+	}
+
+	private void waitForTlsPortReady(TlsMaterial tls, boolean requireClientAuth) {
+		await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).until(() -> {
+			try {
+				var factory = new ConnectionFactory();
+				factory.setHost("127.0.0.1");
+				factory.setPort(container.getMappedPort(AMQP_TLS_PORT));
+				if (requireClientAuth) {
+					factory.useSslProtocol(tls.getKeyStoreAndTrustStoreSSLContext());
+				} else {
+					factory.useSslProtocol(tls.getTrustStoreSSLContext());
+				}
+				try (var connection = factory.newConnection()) {
+					return true;
+				}
+			} catch (Exception e) {
+				return false;
+			}
+		});
 	}
 
 	protected void cleanUpContainer() {
@@ -152,11 +169,11 @@ public class TestBase {
 	}
 
 	private void waitForRabbitMqReady() throws Exception {
-		await().atMost(Duration.ofMinutes(2)).pollInterval(Duration.ofSeconds(2)).until(() -> {
+		await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).until(() -> {
 			try {
 
 				var factory = new ConnectionFactory();
-				factory.setHost(container.getHost());
+				factory.setHost("127.0.0.1");
 				factory.setPort(container.getAmqpPort());
 
 				try (var connection = factory.newConnection()) {

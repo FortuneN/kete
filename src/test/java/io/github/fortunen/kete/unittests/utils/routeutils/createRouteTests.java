@@ -146,7 +146,7 @@ class createRouteTests {
 		assertThat(result.acceptEvent("any-event")).isTrue();
 		assertThat(result.getSerializer()).isInstanceOf(JsonSerializer.class);
 		assertThat(result.getDestinationConfig()).isInstanceOf(HttpDestinationConfig.class);
-		assertThat(result.getRetry()).isNull();
+		assertThat(result.getRetry()).isNotNull();
 	}
 
 	@Test

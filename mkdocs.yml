@@ -103,33 +103,58 @@ nav:
       - SQL: user-guide/matchers/sql.md
     - Serializers:
       - Overview: user-guide/serializers/overview.md
-      - JSON: user-guide/serializers/json.md
-      - YAML: user-guide/serializers/yaml.md
-      - XML: user-guide/serializers/xml.md
-      - CSV: user-guide/serializers/csv.md
-      - TOML: user-guide/serializers/toml.md
-      - Properties: user-guide/serializers/properties.md
+      - Avro: user-guide/serializers/avro.md
       - CBOR: user-guide/serializers/cbor.md
+      - CSV: user-guide/serializers/csv.md
+      - JSON: user-guide/serializers/json.md
+      - Multipart Form: user-guide/serializers/multipart-form.md
+      - Properties: user-guide/serializers/properties.md
+      - Protobuf: user-guide/serializers/protobuf.md
       - Smile: user-guide/serializers/smile.md
+      - Template: user-guide/serializers/template.md
+      - TOML: user-guide/serializers/toml.md
+      - URL-Encoded Form: user-guide/serializers/url-encoded-form.md
+      - XML: user-guide/serializers/xml.md
+      - YAML: user-guide/serializers/yaml.md
+    - Content Encodings:
+      - Overview: user-guide/content-encodings/overview.md
+      - Deflate: user-guide/content-encodings/deflate.md
+      - Gzip: user-guide/content-encodings/gzip.md
+    - Content Transfer Encodings:
+      - Overview: user-guide/content-transfer-encodings/overview.md
+      - Base64: user-guide/content-transfer-encodings/base64.md
     - Destinations:
       - Overview: user-guide/destinations/overview.md
       - Support Matrix: user-guide/destinations/support-matrix.md
-      - Kafka: user-guide/destinations/kafka.md
       - AMQP 0.9.1: user-guide/destinations/amqp-0.9.1.md
       - AMQP 1: user-guide/destinations/amqp-1.md
+      - AWS EventBridge: user-guide/destinations/aws-eventbridge.md
+      - AWS Kinesis: user-guide/destinations/aws-kinesis.md
+      - AWS SNS: user-guide/destinations/aws-sns.md
+      - AWS SQS: user-guide/destinations/aws-sqs.md
+      - Azure Event Grid: user-guide/destinations/azure-eventgrid.md
+      - Azure Event Hubs: user-guide/destinations/azure-eventhubs.md
+      - Azure Service Bus: user-guide/destinations/azure-servicebus.md
+      - Azure Storage Queue: user-guide/destinations/azure-storage-queue.md
+      - Azure Web PubSub: user-guide/destinations/azure-webpubsub.md
+      - GCP Cloud Tasks: user-guide/destinations/gcp-cloud-tasks.md
+      - GCP Pub/Sub: user-guide/destinations/gcp-pubsub.md
+      - gRPC: user-guide/destinations/grpc.md
+      - HTTP: user-guide/destinations/http.md
+      - Kafka: user-guide/destinations/kafka.md
       - MQTT 3: user-guide/destinations/mqtt-3.md
       - MQTT 5: user-guide/destinations/mqtt-5.md
-      - HTTP: user-guide/destinations/http.md
-      - WebSocket: user-guide/destinations/websocket.md
-      - STOMP: user-guide/destinations/stomp.md
       - NATS: user-guide/destinations/nats.md
       - NATS JetStream: user-guide/destinations/nats-jetstream.md
       - Pulsar: user-guide/destinations/pulsar.md
       - Redis Pub/Sub: user-guide/destinations/redis-pubsub.md
       - Redis Stream: user-guide/destinations/redis-stream.md
+      - SignalR: user-guide/destinations/signalr.md
+      - SOAP: user-guide/destinations/soap.md
+      - Socket.IO: user-guide/destinations/socketio.md
+      - STOMP: user-guide/destinations/stomp.md
+      - WebSocket: user-guide/destinations/websocket.md
       - ZeroMQ: user-guide/destinations/zeromq.md
-      - GCP Pub/Sub: user-guide/destinations/gcp-pubsub.md
-      - Azure Storage Queue: user-guide/destinations/azure-storage-queue.md
     - Certificate Loaders:
       - Overview: user-guide/certificate-loaders/overview.md
       - PEM File Path: user-guide/certificate-loaders/pem-file-path.md
@@ -146,8 +171,6 @@ nav:
     - Deployments:
       - Overview: user-guide/deployments/overview.md
       - Docker: user-guide/deployments/docker.md
-      - Docker Compose: user-guide/deployments/docker-compose.md
-      - Kubernetes: user-guide/deployments/kubernetes.md
       - Bare Metal: user-guide/deployments/bare-metal.md
   - Developer Guide:
     - Overview: developer-guide/overview.md
@@ -155,11 +178,29 @@ nav:
     - Architecture: developer-guide/architecture.md
     - Configuration: developer-guide/configuration.md
     - Libraries: developer-guide/libraries.md
+    - Maven Plugins: developer-guide/maven-plugins.md
     - Extending: developer-guide/extending.md
     - Component Scopes: developer-guide/component-scopes.md
     - Certificate Loaders: developer-guide/certificate-loaders.md
     - OAuth: developer-guide/oauth.md
     - Transaction Support: developer-guide/transaction-support.md
     - Contributing: developer-guide/development.md
+    - Testing Guide: developer-guide/testing.md
     - Test Patterns: developer-guide/test-patterns-and-conventions.md
+    - Integration Tests: developer-guide/integration-tests.md
     - Quickstart Testing: developer-guide/quickstart-testing.md
+    - Future Enhancements: developer-guide/future-enhancements.md
+    - Dockerfile Reference: developer-guide/dockerfile-reference.md
+    - Docker Compose Reference: developer-guide/docker-compose-reference.md
+    - Scripts:
+      - Overview: developer-guide/scripts/overview.md
+      - run-unit-tests: developer-guide/scripts/run-unit-tests.md
+      - run-integration-tests: developer-guide/scripts/run-integration-tests.md
+      - run-end-to-end-tests: developer-guide/scripts/run-end-to-end-tests.md
+      - run-all-tests: developer-guide/scripts/run-all-tests.md
+      - run-quick-starts: developer-guide/scripts/run-quick-starts.md
+      - run-on-pull-request-push: developer-guide/scripts/run-on-pull-request-push.md
+      - run-on-develop-push: developer-guide/scripts/run-on-develop-push.md
+      - run-on-release-push: developer-guide/scripts/run-on-release-push.md
+      - run-push: developer-guide/scripts/run-push.md
+      - run-docs-preview: developer-guide/scripts/run-docs-preview.md

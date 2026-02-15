@@ -19,9 +19,9 @@ Keycloak emits two kinds of events:
 | Kind | Template Variable | Description | Event Type Format |
 |------|-------------------|-------------|-------------------|
 | **User Events** | `event` | Authentication and account events | Single word: `LOGIN`, `LOGOUT`, `REGISTER` |
-| **Admin Events** | `admin-event` | Administrative operations via Admin Console/API | Combined: `USER_CREATE`, `CLIENT_UPDATE` |
+| **Admin Events** | `admin_event` | Administrative operations via Admin Console/API | Combined: `USER_CREATE`, `CLIENT_UPDATE` |
 
-Use the `${kindLowerCase}` or `${kindUpperCase}` template variables to route events by kind.
+Use the `${kindLowerCase}`, `${kindUpperCase}`, `${kindKebabCase}`, `${kindPascalCase}`, or `${kindCamelCase}` template variables to route events by kind.
 
 
 

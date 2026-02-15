@@ -3,6 +3,7 @@ package io.github.fortunen.kete.destinations.amqp1;
 import org.apache.qpid.jms.JmsConnectionFactory;
 
 import io.github.fortunen.kete.DestinationConfig;
+import io.github.fortunen.kete.utils.TemplateUtils;
 import io.github.fortunen.kete.utils.ValidationUtils;
 import jakarta.jms.DeliveryMode;
 import lombok.Data;
@@ -15,30 +16,25 @@ import lombok.SneakyThrows;
 @EqualsAndHashCode(callSuper = true)
 public class Amqp1DestinationConfig extends DestinationConfig {
 
+	public static final String TLS = "tls";
 	public static final String HOST = "host";
 	public static final String PORT = "port";
-	public static final int DEFAULT_TCP_PORT = 5672;
-	public static final int DEFAULT_TLS_PORT = 5671;
-	public static final String TRANSPORT_TYPE = "transport-type";
-
-	public static final String USERNAME = "username";
-	public static final String PASSWORD = "password";
-
-	public static final String TLS = "tls";
-	public static final String TLS_ENABLED = TLS + ".enabled";
-
-	public static final int DEFAULT_IDLE_TIMEOUT_SECONDS = 60;
-	public static final String IDLE_TIMEOUT_SECONDS = "idle-timeout-seconds";
-
-	public static final String DESTINATION_NAME = "destination-name";
-	public static final String DESTINATION_TYPE = "destination-type";
-
 	public static final int MIN_PRIORITY = 0;
 	public static final int MAX_PRIORITY = 9;
 	public static final int DEFAULT_PRIORITY = 4;
+	public static final int DEFAULT_TCP_PORT = 5672;
+	public static final int DEFAULT_TLS_PORT = 5671;
+	public static final String USERNAME = "username";
+	public static final String PASSWORD = "password";
 	public static final String PRIORITY = "priority";
+	public static final int DEFAULT_IDLE_TIMEOUT_SECONDS = 60;
+	public static final String TLS_ENABLED = TLS + ".enabled";
 	public static final long DEFAULT_TIME_TO_LIVE_SECONDS = 0L;
 	public static final String DELIVERY_MODE = "delivery-mode";
+	public static final String TRANSPORT_TYPE = "transport-type";
+	public static final String DESTINATION_NAME = "destination-name";
+	public static final String DESTINATION_TYPE = "destination-type";
+	public static final String IDLE_TIMEOUT_SECONDS = "idle-timeout-seconds";
 	public static final String TIME_TO_LIVE_SECONDS = "time-to-live-seconds";
 
 	private int port;
@@ -49,6 +45,7 @@ public class Amqp1DestinationConfig extends DestinationConfig {
 	private String username;
 	private String password;
 	private int deliveryMode;
+	private boolean hasPriority;
 	private String transportType;
 	private long timeToLiveSeconds;
 	private int idleTimeoutSeconds;
@@ -56,6 +53,7 @@ public class Amqp1DestinationConfig extends DestinationConfig {
 	private String queueOrTopicName;
 	private String deliveryModeString;
 	private boolean destinationIsQueue;
+	private boolean isQueueOrTopicNameTemplated;
 	private JmsConnectionFactory connectionFactory;
 
 	@Override
@@ -108,14 +106,15 @@ public class Amqp1DestinationConfig extends DestinationConfig {
 
 		// idleTimeoutSeconds
 
-		idleTimeoutSeconds = ValidationUtils.requireNonNegative(configuration.getInt(IDLE_TIMEOUT_SECONDS, DEFAULT_IDLE_TIMEOUT_SECONDS), IDLE_TIMEOUT_SECONDS + " must be non-negative");
-
-		// url (AMQP protocol expects idle timeout in milliseconds)
-
-		if (idleTimeoutSeconds > 0) {
-			url = scheme + "://" + host + ":" + port + "?amqp.idleTimeout=" + (idleTimeoutSeconds * 1000);
+		if (configuration.containsKey(IDLE_TIMEOUT_SECONDS)) {
+			idleTimeoutSeconds = ValidationUtils.requireNonNegative(configuration.getInt(IDLE_TIMEOUT_SECONDS, DEFAULT_IDLE_TIMEOUT_SECONDS), IDLE_TIMEOUT_SECONDS + " must be non-negative");
+			if (idleTimeoutSeconds > 0) {
+				url = scheme + "://" + host + ":" + port + "?amqp.idleTimeout=" + (idleTimeoutSeconds * 1000);
+			} else {
+				url = scheme + "://" + host + ":" + port + "?amqp.idleTimeout=0";
+			}
 		} else {
-			url = scheme + "://" + host + ":" + port + "?amqp.idleTimeout=0";
+			url = scheme + "://" + host + ":" + port;
 		}
 
 		// deliveryMode
@@ -128,11 +127,18 @@ public class Amqp1DestinationConfig extends DestinationConfig {
 
 		// priority
 
-		priority = ValidationUtils.requireInRange(configuration.getInt(PRIORITY, DEFAULT_PRIORITY), MIN_PRIORITY, MAX_PRIORITY, PRIORITY + " must be between " + MIN_PRIORITY + " and " + MAX_PRIORITY);
+		if (configuration.containsKey(PRIORITY)) {
+			priority = ValidationUtils.requireInRange(configuration.getInt(PRIORITY, DEFAULT_PRIORITY), MIN_PRIORITY, MAX_PRIORITY, PRIORITY + " must be between " + MIN_PRIORITY + " and " + MAX_PRIORITY);
+			hasPriority = true;
+		}
 
 		// timeToLiveSeconds
 
 		timeToLiveSeconds = ValidationUtils.requireNonNegative(configuration.getLong(TIME_TO_LIVE_SECONDS, DEFAULT_TIME_TO_LIVE_SECONDS), TIME_TO_LIVE_SECONDS + " must be non-negative");
+
+		// precomputed fields
+
+		isQueueOrTopicNameTemplated = TemplateUtils.containsTemplate(queueOrTopicName);
 
 		// connectionFactory
 
@@ -140,6 +146,7 @@ public class Amqp1DestinationConfig extends DestinationConfig {
 
 		if (tls.isEnabled()) {
 			connectionFactory.setSslContext(tls.getKeyStoreAndTrustStoreSSLContext());
+			connectionFactory.setRemoteURI(url + (url.contains("?") ? "&" : "?") + "transport.verifyHost=" + tls.isVerifyHostname());
 		}
 
 		if (ValidationUtils.isNotBlank(username)) {

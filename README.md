@@ -21,6 +21,12 @@
   <a href="https://www.apache.org/licenses/LICENSE-2.0">
     <img src="https://img.shields.io/badge/License-Apache%202.0-blue" alt="Apache 2.0 License" />
   </a>
+  <a href="https://github.com/FortuneN/kete/releases">
+    <img src="https://img.shields.io/github/downloads/FortuneN/kete/total?label=Downloads" alt="Downloads" />
+  </a>
+  <a href="https://fortunen.github.io/kete/developer-guide/overview">
+    <img src="https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/FortuneN/kete/release/coverage-badge.json" alt="Code Coverage" />
+  </a>
 </p>
 
 <p align="center">
@@ -43,22 +49,40 @@
 | **Event-Driven Architecture** | Trigger downstream services based on Keycloak events |
 | **Multi-Destination Routing** | Send different event types to different systems simultaneously |
 
+## Features
+
+- **29 destination kinds** — stream events to messaging, cloud, and custom endpoints
+- **12 serializers** — JSON, XML, YAML, CSV, TOML, Properties, CBOR, Protobuf, Smile, URL-Encoded Form, Multipart Form, Template
+- **4 matchers** — Glob, List, Regex, SQL — to filter which events reach which destinations
+- **11 certificate loaders** — PEM, PKCS12, PKCS7, DER, JKS (file path, base64, and text variants)
+- **Multi-route** — send different event types to different destinations simultaneously
+- **TLS / mTLS** — full TLS and mutual TLS support across all destinations
+- **Retry** — configurable retry via Resilience4j
+- **Connection pooling** — Apache Commons Pool2 for all destination connections
+
 ## Supported Destinations
 
-| Protocol | Examples |
-|----------|----------|
-| **Kafka** | Apache Kafka, Confluent Platform, Redpanda, Azure Event Hubs, AWS MSK, Aiven for Apache Kafka, Instaclustr, CloudKarafka |
-| **AMQP 1.0** | Apache ActiveMQ, Apache Artemis, Azure Service Bus, Azure Event Hubs, Apache Qpid, RabbitMQ, SwiftMQ, Solace PubSub+, IBM MQ |
-| **AMQP 0-9-1** | RabbitMQ, LavinMQ, Apache Qpid, CloudAMQP, Amazon MQ |
-| **MQTT 3.1.1** | Eclipse Mosquitto, EMQX, HiveMQ, VerneMQ, NanoMQ, RabbitMQ, AWS IoT Core, Azure IoT Hub |
-| **MQTT 5.0** | Eclipse Mosquitto, EMQX, HiveMQ, VerneMQ, NanoMQ, RabbitMQ, Azure Event Grid, AWS IoT Core |
-| **Redis** | Redis, Valkey, Dragonfly, KeyDB, AWS ElastiCache, Azure Cache for Redis, Upstash Redis, Google Cloud Memorystore (Pub/Sub & Streams) |
-| **NATS** | NATS Server, NATS JetStream, Synadia Cloud, NGS (NATS Global Service) |
-| **Pulsar** | Apache Pulsar, StreamNative Cloud, DataStax Astra Streaming, StreamNative Private Cloud, Clever Cloud Pulsar |
-| **HTTP** | Webhooks, REST APIs, Azure Event Grid, AWS EventBridge, Google Cloud Pub/Sub Push, Twilio, Slack, Discord, Custom HTTP Endpoints |
-| **STOMP** | Apache ActiveMQ, Apache Artemis, RabbitMQ, EMQX, HornetQ |
-| **WebSocket** | Custom WebSocket Servers, Socket.IO, SignalR, Ably, Pusher, WebSocket-based Chat Applications |
-| **ZeroMQ** | Any ZeroMQ peer — brokerless, 40+ language bindings (Python, C, .NET, Java, Node.js, Go, Rust) |
+| Category | Compatible Services |
+|----------|---------------------|
+| **Kafka** | Apache Kafka, Confluent, Redpanda, AWS MSK, Aiven, CloudKarafka |
+| **AMQP 1.0** | Apache ActiveMQ, Apache Artemis, Apache Qpid, RabbitMQ, Solace PubSub+ |
+| **AMQP 0-9-1** | RabbitMQ, LavinMQ, CloudAMQP, Amazon MQ |
+| **MQTT 3.1.1** | Eclipse Mosquitto, EMQX, HiveMQ, VerneMQ, NanoMQ, RabbitMQ |
+| **MQTT 5.0** | Eclipse Mosquitto, EMQX, HiveMQ, VerneMQ, NanoMQ, RabbitMQ |
+| **Redis** | Redis, Valkey, Dragonfly, KeyDB, Garnet, Upstash, AWS ElastiCache, Azure Cache, Google Memorystore (Pub/Sub & Streams) |
+| **NATS** | NATS Server, Synadia Cloud (NATS Core & JetStream) |
+| **Pulsar** | Apache Pulsar, StreamNative Cloud |
+| **HTTP** | Webhooks, REST APIs, Custom HTTP Endpoints |
+| **STOMP** | Apache ActiveMQ, Apache Artemis, RabbitMQ, EMQX |
+| **WebSocket** | Custom WebSocket Servers |
+| **ZeroMQ** | Any ZeroMQ peer — brokerless, 40+ language bindings |
+| **AWS** | EventBridge, Kinesis Data Streams, SNS, SQS |
+| **Azure** | Event Grid, Event Hubs, Service Bus, Storage Queue, Web PubSub |
+| **GCP** | Cloud Tasks, Pub/Sub |
+| **gRPC** | Any gRPC Server |
+| **SOAP** | Any SOAP Endpoint |
+| **SignalR** | ASP.NET SignalR Hubs |
+| **Socket.IO** | Socket.IO Servers |
 
 ## Quick Start (5 minutes)
 
@@ -85,6 +109,7 @@ services:
         condition: service_healthy
     entrypoint: >
       sh -c '
+        for i in $(seq 1 30); do curl -sf -u guest:guest http://rabbitmq:15672/api/overview > /dev/null && break || sleep 1; done &&
         curl -s -u guest:guest -X PUT http://rabbitmq:15672/api/queues/%2f/keycloak-events -H "content-type: application/json" -d "{\"durable\":true}" &&
         curl -s -u guest:guest -X POST http://rabbitmq:15672/api/bindings/%2f/e/amq.direct/q/keycloak-events -H "content-type: application/json" -d "{\"routing_key\":\"keycloak-events\"}"
       '
@@ -172,15 +197,23 @@ docker compose up -d
 | [Lettuce](https://lettuce.io/) | Redis client for Pub/Sub and Streams |
 | [NATS Java Client](https://github.com/nats-io/nats.java) | NATS and JetStream messaging |
 | [JeroMQ](https://github.com/zeromq/jeromq) | Pure Java ZeroMQ implementation |
+| [AWS SDK for Java v2](https://aws.amazon.com/sdk-for-java/) | SQS, SNS, Kinesis, EventBridge clients |
+| [Azure SDK for Java](https://github.com/Azure/azure-sdk-for-java) | Event Hubs, Service Bus, Storage Queue, Web PubSub, Event Grid, Identity |
+| [Google Cloud Java SDK](https://cloud.google.com/java/docs/reference) | Pub/Sub and Cloud Tasks clients |
+| [Google Auth Library](https://github.com/googleapis/google-auth-library-java) | OAuth2 and credential support for GCP services |
+| [gRPC Java](https://grpc.io/) | gRPC destination and Cloud Tasks transport |
+| [Microsoft SignalR Java Client](https://learn.microsoft.com/aspnet/core/signalr/java-client) | ASP.NET SignalR hub client |
+| [Socket.IO Java Client](https://github.com/socketio/socket.io-client-java) | Socket.IO protocol client |
 | [Nimbus OAuth SDK](https://connect2id.com/products/nimbus-oauth-openid-connect-sdk) | OAuth 2.0 client credentials |
-| [Resilience4j](https://resilience4j.readme.io/) | Retry patterns with exponential backoff |
+| [Resilience4j](https://resilience4j.readme.io/) | Retry patterns |
 | [Jackson](https://github.com/FasterXML/jackson) | JSON, XML, YAML, CSV, CBOR, TOML, Smile, Properties |
 | [hrakaroo/glob](https://github.com/hrakaroo/glob-library-java) | High-performance glob and SQL LIKE patterns |
 | [Bouncy Castle](https://www.bouncycastle.org/) | TLS/SSL cryptography provider |
 | [Reflections](https://github.com/ronmamo/reflections) | Runtime component discovery |
-| [Google Guava](https://github.com/google/guava) | Cached matcher results |
+| [Google Guava](https://github.com/google/guava) | Caching and case-format transformations |
 | [SLF4J](https://www.slf4j.org/) | Logging facade |
 | [JUnit 5](https://junit.org/junit5/) | Testing framework |
 | [Mockito](https://site.mockito.org/) | Mocking framework for tests |
 | [AssertJ](https://assertj.github.io/doc/) | Fluent assertions for tests |
+| [Awaitility](https://github.com/awaitility/awaitility) | Asynchronous readiness probes for tests |
 | [Testcontainers](https://testcontainers.com/) | Docker-based integration testing |

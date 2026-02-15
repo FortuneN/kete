@@ -79,6 +79,7 @@ Stream Keycloak events to Redis Stream for persistent, ordered message storage.
 - Event metadata as stream fields (headers)
 - TLS/SSL support with mutual TLS (mTLS)
 - Username/password authentication (Redis 6+)
+- Standalone, Sentinel, and Cluster mode support
 - Configurable connection and command timeouts
 - Automatic reconnection
 - Dynamic stream names (templating)
@@ -112,8 +113,8 @@ Redis Stream provides features not available in Pub/Sub:
 
 | Property | Description | Example |
 |----------|-------------|---------|
-| `host` | Redis server hostname | `redis.example.com` |
 | `stream` | Redis stream name (supports templating) | `keycloak-events` |
+| `host` | Redis server hostname (required for `standalone` mode) | `redis.example.com` |
 
 ### Dynamic Streams (Templating)
 
@@ -127,7 +128,7 @@ kete.routes.redis.destination.stream=keycloak-${realmLowerCase}-events
 kete.routes.redis.destination.stream=keycloak-${eventTypeLowerCase}
 ```
 
-Available variables: `${realmLowerCase}`, `${realmUpperCase}`, `${eventTypeLowerCase}`, `${eventTypeUpperCase}`, `${kindLowerCase}`, `${kindUpperCase}`, `${resourceTypeLowerCase}`, `${resourceTypeUpperCase}`, `${operationTypeLowerCase}`, `${operationTypeUpperCase}`, `${resultLowerCase}`, `${resultUpperCase}`
+Available variables: `${realmLowerCase}`, `${realmUpperCase}`, `${realmKebabCase}`, `${realmPascalCase}`, `${realmCamelCase}`, `${eventTypeLowerCase}`, `${eventTypeUpperCase}`, `${eventTypeKebabCase}`, `${eventTypePascalCase}`, `${eventTypeCamelCase}`, `${kindLowerCase}`, `${kindUpperCase}`, `${kindKebabCase}`, `${kindPascalCase}`, `${kindCamelCase}`, `${resourceTypeLowerCase}`, `${resourceTypeUpperCase}`, `${resourceTypeKebabCase}`, `${resourceTypePascalCase}`, `${resourceTypeCamelCase}`, `${operationTypeLowerCase}`, `${operationTypeUpperCase}`, `${operationTypeKebabCase}`, `${operationTypePascalCase}`, `${operationTypeCamelCase}`, `${resultLowerCase}`, `${resultUpperCase}`, `${resultKebabCase}`, `${resultPascalCase}`, `${resultCamelCase}`
 
 ### Custom Headers
 
@@ -148,6 +149,10 @@ Headers are included as fields in the Redis stream entry.
 | `database` | `0` | Redis database number | `1` |
 | `username` | `""` | Redis username (Redis 6+) | `default` |
 | `password` | `""` | Redis password | `secret123` |
+| `mode` | `standalone` | Connection mode: `standalone`, `sentinel`, or `cluster` | `sentinel` |
+| `sentinel-nodes` | _(empty)_ | Comma-separated `host:port` pairs (required for `sentinel` mode) | `sentinel1:26379,sentinel2:26379` |
+| `sentinel-master-id` | _(empty)_ | Sentinel master name (required for `sentinel` mode) | `mymaster` |
+| `cluster-nodes` | _(empty)_ | Comma-separated `host:port` pairs (required for `cluster` mode) | `node1:6379,node2:6379,node3:6379` |
 | `client-name` | `kete` | Client name for connection | `keycloak-events` |
 | `connection-timeout-seconds` | `10` | Connection timeout in seconds | `30` |
 | `command-timeout-seconds` | `60` | Command timeout in seconds | `120` |
@@ -185,7 +190,7 @@ Messages are stored as stream entries with the following fields:
 
 | Field | Description | Example |
 |-------|-------------|---------|
-| `eventkind` | Event kind (`EVENT` or `ADMIN-EVENT`) | `EVENT` |
+| `eventkind` | Event kind (`EVENT` or `ADMIN_EVENT`) | `EVENT` |
 | `eventtype` | Event type | `LOGIN` |
 | `contenttype` | Content type of body | `application/json` |
 | `body` | Serialized event payload | `{"id":"...","type":"LOGIN",...}` |
@@ -248,12 +253,14 @@ kete.routes.trimmed-redis.destination.approximate-trimming=true
 
 | Broker | Quickstart |
 |--------|------------|
-| Redis | [redis-stream-redis](../../quick-starts/redis-stream-redis/) |
-| Valkey | [redis-stream-valkey](../../quick-starts/redis-stream-valkey/) |
-| Dragonfly | [redis-stream-dragonfly](../../quick-starts/redis-stream-dragonfly/) |
-| KeyDB | [redis-stream-keydb](../../quick-starts/redis-stream-keydb/) |
-| Azure Cache for Redis | [redis-stream-azure-cache-for-redis](../../quick-starts/redis-stream-azure-cache-for-redis/) |
-| Upstash | [redis-stream-upstash](../../quick-starts/redis-stream-upstash/) |
+| Redis | [redis-stream-redis](https://github.com/FortuneN/kete/tree/release/quick-starts/redis-stream-redis/) |
+| Valkey | [redis-stream-valkey](https://github.com/FortuneN/kete/tree/release/quick-starts/redis-stream-valkey/) |
+| Dragonfly | [redis-stream-dragonfly](https://github.com/FortuneN/kete/tree/release/quick-starts/redis-stream-dragonfly/) |
+| KeyDB | [redis-stream-keydb](https://github.com/FortuneN/kete/tree/release/quick-starts/redis-stream-keydb/) |
+| Azure Cache for Redis | [redis-stream-azure-cache-for-redis](https://github.com/FortuneN/kete/tree/release/quick-starts/redis-stream-azure-cache-for-redis/) |
+| Upstash | [redis-stream-upstash](https://github.com/FortuneN/kete/tree/release/quick-starts/redis-stream-upstash/) |
+| Amazon ElastiCache | [redis-stream-amazon-elasticache](https://github.com/FortuneN/kete/tree/release/quick-starts/redis-stream-amazon-elasticache/) |
+| Google Memorystore | [redis-stream-google-memorystore](https://github.com/FortuneN/kete/tree/release/quick-starts/redis-stream-google-memorystore/) |
 
 
 

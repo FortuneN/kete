@@ -50,6 +50,53 @@
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
+			<dependency>
+				<groupId>io.grpc</groupId>
+				<artifactId>grpc-bom</artifactId>
+				<version>1.79.0</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<dependency>
+				<groupId>com.google.protobuf</groupId>
+				<artifactId>protobuf-java</artifactId>
+				<version>4.33.2</version>
+			</dependency>
+			<dependency>
+				<groupId>io.grpc</groupId>
+				<artifactId>grpc-api</artifactId>
+				<version>1.79.0</version>
+			</dependency>
+			<dependency>
+				<groupId>io.grpc</groupId>
+				<artifactId>grpc-core</artifactId>
+				<version>1.79.0</version>
+			</dependency>
+			<dependency>
+				<groupId>io.grpc</groupId>
+				<artifactId>grpc-stub</artifactId>
+				<version>1.79.0</version>
+			</dependency>
+			<dependency>
+				<groupId>io.grpc</groupId>
+				<artifactId>grpc-protobuf</artifactId>
+				<version>1.79.0</version>
+			</dependency>
+			<dependency>
+				<groupId>io.grpc</groupId>
+				<artifactId>grpc-protobuf-lite</artifactId>
+				<version>1.79.0</version>
+			</dependency>
+			<dependency>
+				<groupId>io.grpc</groupId>
+				<artifactId>grpc-util</artifactId>
+				<version>1.79.0</version>
+			</dependency>
+			<dependency>
+				<groupId>io.grpc</groupId>
+				<artifactId>grpc-context</artifactId>
+				<version>1.79.0</version>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 
@@ -232,9 +279,120 @@
 			<artifactId>jnats</artifactId>
 			<version>2.20.5</version>
 		</dependency>
+		<dependency>
+			<groupId>software.amazon.awssdk</groupId>
+			<artifactId>sqs</artifactId>
+			<version>2.31.51</version>
+		</dependency>
+		<dependency>
+			<groupId>software.amazon.awssdk</groupId>
+			<artifactId>sns</artifactId>
+			<version>2.31.51</version>
+		</dependency>
+		<dependency>
+			<groupId>software.amazon.awssdk</groupId>
+			<artifactId>kinesis</artifactId>
+			<version>2.31.51</version>
+		</dependency>
+		<dependency>
+			<groupId>software.amazon.awssdk</groupId>
+			<artifactId>eventbridge</artifactId>
+			<version>2.31.51</version>
+		</dependency>
+		<dependency>
+			<groupId>software.amazon.awssdk</groupId>
+			<artifactId>url-connection-client</artifactId>
+			<version>2.31.51</version>
+		</dependency>
+		<dependency>
+			<groupId>software.amazon.awssdk</groupId>
+			<artifactId>sts</artifactId>
+			<version>2.31.51</version>
+		</dependency>
+		<dependency>
+			<groupId>com.azure</groupId>
+			<artifactId>azure-storage-queue</artifactId>
+			<version>12.25.0</version>
+		</dependency>
+		<dependency>
+			<groupId>com.azure</groupId>
+			<artifactId>azure-messaging-webpubsub</artifactId>
+			<version>1.5.4</version>
+		</dependency>
+		<dependency>
+			<groupId>com.azure</groupId>
+			<artifactId>azure-messaging-eventhubs</artifactId>
+			<version>5.21.3</version>
+		</dependency>
+		<dependency>
+			<groupId>com.azure</groupId>
+			<artifactId>azure-messaging-servicebus</artifactId>
+			<version>7.17.17</version>
+		</dependency>
+		<dependency>
+			<groupId>com.azure</groupId>
+			<artifactId>azure-messaging-eventgrid</artifactId>
+			<version>4.31.5</version>
+		</dependency>
+		<dependency>
+			<groupId>com.azure</groupId>
+			<artifactId>azure-identity</artifactId>
+			<version>1.15.4</version>
+		</dependency>
+		<dependency>
+			<groupId>com.azure</groupId>
+			<artifactId>azure-core-http-netty</artifactId>
+			<version>1.15.12</version>
+		</dependency>
+		<dependency>
+			<groupId>com.google.apis</groupId>
+			<artifactId>google-api-services-pubsub</artifactId>
+			<version>v1-rev20250414-2.0.0</version>
+		</dependency>
+		<dependency>
+			<groupId>com.google.api.grpc</groupId>
+			<artifactId>grpc-google-cloud-tasks-v2</artifactId>
+			<version>2.84.0</version>
+		</dependency>
+		<dependency>
+			<groupId>io.grpc</groupId>
+			<artifactId>grpc-okhttp</artifactId>
+			<version>1.79.0</version>
+		</dependency>
+		<dependency>
+			<groupId>io.grpc</groupId>
+			<artifactId>grpc-auth</artifactId>
+			<version>1.79.0</version>
+		</dependency>
+		<dependency>
+			<groupId>com.google.auth</groupId>
+			<artifactId>google-auth-library-oauth2-http</artifactId>
+			<version>1.35.0</version>
+		</dependency>
+		<dependency>
+			<groupId>com.microsoft.signalr</groupId>
+			<artifactId>signalr</artifactId>
+			<version>10.0.2</version>
+		</dependency>
+		<dependency>
+			<groupId>io.socket</groupId>
+			<artifactId>socket.io-client</artifactId>
+			<version>2.1.2</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.avro</groupId>
+			<artifactId>avro</artifactId>
+			<version>1.12.0</version>
+		</dependency>
 
 		<!-- custom : test -->
 
+		<dependency>
+			<groupId>io.grpc</groupId>
+			<artifactId>grpc-netty-shaded</artifactId>
+			<version>1.79.0</version>
+			<scope>test</scope>
+		</dependency>
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter-api</artifactId>
@@ -379,6 +537,25 @@
 	</dependencies>
 
 	<build>
+		<extensions>
+			<extension>
+				<groupId>kr.motd.maven</groupId>
+				<artifactId>os-maven-plugin</artifactId>
+				<version>1.7.1</version>
+			</extension>
+		</extensions>
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+			</resource>
+			<resource>
+				<directory>schemas/avro</directory>
+				<targetPath>schemas/avro</targetPath>
+				<includes>
+					<include>*.avsc</include>
+				</includes>
+			</resource>
+		</resources>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -423,7 +600,7 @@
 				<artifactId>maven-surefire-plugin</artifactId>
 				<version>3.5.4</version>
 				<configuration>
-					<argLine>@{argLine} -XX:+EnableDynamicAgentLoading -Dnet.bytebuddy.experimental=true</argLine>
+					<argLine>@{argLine} -XX:+EnableDynamicAgentLoading -Dnet.bytebuddy.experimental=true -Djava.net.preferIPv4Stack=true</argLine>
 					<systemPropertyVariables>
 						<keycloak.version>${keycloak.version}</keycloak.version>
 					</systemPropertyVariables>
@@ -446,6 +623,32 @@
 						<goals>
 							<goal>report</goal>
 						</goals>
+						<configuration>
+							<formats>
+								<format>XML</format>
+								<format>CSV</format>
+								<format>HTML</format>
+							</formats>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.xolstice.maven.plugins</groupId>
+				<artifactId>protobuf-maven-plugin</artifactId>
+				<version>0.6.1</version>
+				<configuration>
+					<protocArtifact>com.google.protobuf:protoc:4.33.2:exe:${os.detected.classifier}</protocArtifact>
+					<protoSourceRoot>${project.basedir}/schemas/protobuf</protoSourceRoot>
+					<writeDescriptorSet>true</writeDescriptorSet>
+					<descriptorSetFileName>protobuf.desc</descriptorSetFileName>
+					<includeDependenciesInDescriptorSet>false</includeDependenciesInDescriptorSet>
+					<descriptorSetOutputDirectory>${project.build.outputDirectory}/schemas/protobuf</descriptorSetOutputDirectory>
+					<outputDirectory>${project.build.directory}/protoc-java-unused</outputDirectory>
+				</configuration>
+				<executions>
+					<execution>
+						<goals><goal>compile</goal></goals>
 					</execution>
 				</executions>
 			</plugin>
@@ -506,323 +709,444 @@
 							Every dependency without <scope>provided</scope> or <scope>test</scope>
 							MUST be relocated to avoid classpath conflicts when loaded into Keycloak.
 
-							All packages relocated under: io.github.fortunen.kete.shaded.*
+							All packages relocated under: kete.*
 							=============================================================================
 							-->
 							<relocations>
 								<!-- Jackson (Keycloak bundles jackson-databind, we must shade all jackson packages) -->
 								<relocation>
 									<pattern>com.fasterxml.jackson.core</pattern>
-									<shadedPattern>io.github.fortunen.kete.shaded.jackson.core</shadedPattern>
+									<shadedPattern>kete.com.fasterxml.jackson.core</shadedPattern>
 								</relocation>
 								<relocation>
 									<pattern>com.fasterxml.jackson.annotation</pattern>
-									<shadedPattern>io.github.fortunen.kete.shaded.jackson.annotation</shadedPattern>
+									<shadedPattern>kete.com.fasterxml.jackson.annotation</shadedPattern>
 								</relocation>
 								<relocation>
 									<pattern>com.fasterxml.jackson.databind</pattern>
-									<shadedPattern>io.github.fortunen.kete.shaded.jackson.databind</shadedPattern>
+									<shadedPattern>kete.com.fasterxml.jackson.databind</shadedPattern>
 								</relocation>
 								<!-- Jackson dataformats -->
 								<relocation>
 									<pattern>com.fasterxml.jackson.dataformat.xml</pattern>
-									<shadedPattern>io.github.fortunen.kete.shaded.jackson.dataformat.xml</shadedPattern>
+									<shadedPattern>kete.com.fasterxml.jackson.dataformat.xml</shadedPattern>
 								</relocation>
 								<relocation>
 									<pattern>com.fasterxml.jackson.dataformat.yaml</pattern>
-									<shadedPattern>io.github.fortunen.kete.shaded.jackson.dataformat.yaml</shadedPattern>
+									<shadedPattern>kete.com.fasterxml.jackson.dataformat.yaml</shadedPattern>
 								</relocation>
 								<relocation>
 									<pattern>com.fasterxml.jackson.dataformat.csv</pattern>
-									<shadedPattern>io.github.fortunen.kete.shaded.jackson.dataformat.csv</shadedPattern>
+									<shadedPattern>kete.com.fasterxml.jackson.dataformat.csv</shadedPattern>
 								</relocation>
 								<relocation>
 									<pattern>com.fasterxml.jackson.dataformat.toml</pattern>
-									<shadedPattern>io.github.fortunen.kete.shaded.jackson.dataformat.toml</shadedPattern>
+									<shadedPattern>kete.com.fasterxml.jackson.dataformat.toml</shadedPattern>
 								</relocation>
 								<relocation>
 									<pattern>com.fasterxml.jackson.dataformat.smile</pattern>
-									<shadedPattern>io.github.fortunen.kete.shaded.jackson.dataformat.smile</shadedPattern>
+									<shadedPattern>kete.com.fasterxml.jackson.dataformat.smile</shadedPattern>
 								</relocation>
 								<relocation>
 									<pattern>com.fasterxml.jackson.dataformat.cbor</pattern>
-									<shadedPattern>io.github.fortunen.kete.shaded.jackson.dataformat.cbor</shadedPattern>
+									<shadedPattern>kete.com.fasterxml.jackson.dataformat.cbor</shadedPattern>
 								</relocation>
 								<relocation>
 									<pattern>com.fasterxml.jackson.dataformat.javaprop</pattern>
-									<shadedPattern>io.github.fortunen.kete.shaded.jackson.dataformat.javaprop</shadedPattern>
+									<shadedPattern>kete.com.fasterxml.jackson.dataformat.javaprop</shadedPattern>
+								</relocation>
+								<!-- Jackson datatypes (pulled in by Azure SDK azure-core → jackson-datatype-jsr310) -->
+								<relocation>
+									<pattern>com.fasterxml.jackson.datatype</pattern>
+									<shadedPattern>kete.com.fasterxml.jackson.datatype</shadedPattern>
 								</relocation>
 								<!-- Kafka -->
 								<relocation>
 									<pattern>org.apache.kafka</pattern>
-									<shadedPattern>io.github.fortunen.kete.shaded.kafka</shadedPattern>
+									<shadedPattern>kete.org.apache.kafka</shadedPattern>
 								</relocation>
 								<!-- SLF4J (Keycloak provides this, but many of our deps require it) -->
 								<relocation>
 									<pattern>org.slf4j</pattern>
-									<shadedPattern>io.github.fortunen.kete.shaded.slf4j</shadedPattern>
+									<shadedPattern>kete.org.slf4j</shadedPattern>
 								</relocation>
 								<!-- Netty (Keycloak bundles netty, qpid-jms brings 4.1.108, Keycloak may use different version) -->
 								<relocation>
 									<pattern>io.netty</pattern>
-									<shadedPattern>io.github.fortunen.kete.shaded.netty</shadedPattern>
+									<shadedPattern>kete.io.netty</shadedPattern>
 								</relocation>
 								<!-- Kotlin stdlib (okhttp brings this, conflicts possible) -->
 								<relocation>
 									<pattern>kotlin</pattern>
-									<shadedPattern>io.github.fortunen.kete.shaded.kotlin</shadedPattern>
+									<shadedPattern>kete.kotlin</shadedPattern>
 								</relocation>
 								<relocation>
 									<pattern>org.jetbrains.kotlin</pattern>
-									<shadedPattern>io.github.fortunen.kete.shaded.jetbrains.kotlin</shadedPattern>
+									<shadedPattern>kete.org.jetbrains.kotlin</shadedPattern>
 								</relocation>
 								<!-- RabbitMQ AMQP client -->
 								<relocation>
 									<pattern>com.rabbitmq</pattern>
-									<shadedPattern>io.github.fortunen.kete.shaded.rabbitmq</shadedPattern>
+									<shadedPattern>kete.com.rabbitmq</shadedPattern>
 								</relocation>
 								<!-- Apache Commons -->
 								<relocation>
 									<pattern>org.apache.commons.lang3</pattern>
-									<shadedPattern>io.github.fortunen.kete.shaded.commons.lang3</shadedPattern>
+									<shadedPattern>kete.org.apache.commons.lang3</shadedPattern>
 								</relocation>
 								<relocation>
 									<pattern>org.apache.commons.io</pattern>
-									<shadedPattern>io.github.fortunen.kete.shaded.commons.io</shadedPattern>
+									<shadedPattern>kete.org.apache.commons.io</shadedPattern>
 								</relocation>
 								<relocation>
 									<pattern>org.apache.commons.text</pattern>
-									<shadedPattern>io.github.fortunen.kete.shaded.commons.text</shadedPattern>
+									<shadedPattern>kete.org.apache.commons.text</shadedPattern>
 								</relocation>
 								<relocation>
 									<pattern>org.apache.commons.configuration2</pattern>
-									<shadedPattern>io.github.fortunen.kete.shaded.commons.configuration2</shadedPattern>
+									<shadedPattern>kete.org.apache.commons.configuration2</shadedPattern>
 								</relocation>
 								<relocation>
 									<pattern>org.apache.commons.pool2</pattern>
-									<shadedPattern>io.github.fortunen.kete.shaded.commons.pool2</shadedPattern>
+									<shadedPattern>kete.org.apache.commons.pool2</shadedPattern>
 								</relocation>
 								<!-- Glob matcher -->
 								<relocation>
 									<pattern>com.hrakaroo.glob</pattern>
-									<shadedPattern>io.github.fortunen.kete.shaded.glob</shadedPattern>
+									<shadedPattern>kete.com.hrakaroo.glob</shadedPattern>
 								</relocation>
 								<!-- Reflections -->
 								<relocation>
 									<pattern>org.reflections</pattern>
-									<shadedPattern>io.github.fortunen.kete.shaded.reflections</shadedPattern>
+									<shadedPattern>kete.org.reflections</shadedPattern>
 								</relocation>
 								<!-- Resilience4j -->
 								<relocation>
 									<pattern>io.github.resilience4j</pattern>
-									<shadedPattern>io.github.fortunen.kete.shaded.resilience4j</shadedPattern>
+									<shadedPattern>kete.io.github.resilience4j</shadedPattern>
 								</relocation>
 								<!-- Nimbus OAuth SDK -->
 								<relocation>
 									<pattern>com.nimbusds</pattern>
-									<shadedPattern>io.github.fortunen.kete.shaded.nimbusds</shadedPattern>
+									<shadedPattern>kete.com.nimbusds</shadedPattern>
 								</relocation>
 								<!-- Eclipse Paho MQTT -->
 								<relocation>
 									<pattern>org.eclipse.paho.client.mqttv3</pattern>
-									<shadedPattern>io.github.fortunen.kete.shaded.paho.mqttv3</shadedPattern>
+									<shadedPattern>kete.org.eclipse.paho.client.mqttv3</shadedPattern>
 								</relocation>
 								<relocation>
 									<pattern>org.eclipse.paho.mqttv5</pattern>
-									<shadedPattern>io.github.fortunen.kete.shaded.paho.mqttv5</shadedPattern>
+									<shadedPattern>kete.org.eclipse.paho.mqttv5</shadedPattern>
 								</relocation>
 								<!-- Apache Qpid JMS (AMQP 1.0) -->
 								<relocation>
 									<pattern>org.apache.qpid</pattern>
-									<shadedPattern>io.github.fortunen.kete.shaded.qpid</shadedPattern>
+									<shadedPattern>kete.org.apache.qpid</shadedPattern>
 								</relocation>
 								<!-- Java-WebSocket -->
 								<relocation>
 									<pattern>org.java_websocket</pattern>
-									<shadedPattern>io.github.fortunen.kete.shaded.java_websocket</shadedPattern>
+									<shadedPattern>kete.org.java_websocket</shadedPattern>
 								</relocation>
 								<!-- Pooled JMS -->
 								<relocation>
 									<pattern>org.messaginghub.pooled</pattern>
-									<shadedPattern>io.github.fortunen.kete.shaded.pooled.jms</shadedPattern>
+									<shadedPattern>kete.org.messaginghub.pooled</shadedPattern>
 								</relocation>
 								<!-- Guava -->
 								<relocation>
 									<pattern>com.google.common</pattern>
-									<shadedPattern>io.github.fortunen.kete.shaded.guava</shadedPattern>
+									<shadedPattern>kete.com.google.common</shadedPattern>
 								</relocation>
 								<relocation>
 									<pattern>com.google.thirdparty.publicsuffix</pattern>
-									<shadedPattern>io.github.fortunen.kete.shaded.guava.publicsuffix</shadedPattern>
+									<shadedPattern>kete.com.google.thirdparty.publicsuffix</shadedPattern>
 								</relocation>
 								<!-- OkHttp TLS -->
 								<relocation>
 									<pattern>okhttp3</pattern>
-									<shadedPattern>io.github.fortunen.kete.shaded.okhttp3</shadedPattern>
+									<shadedPattern>kete.okhttp3</shadedPattern>
 								</relocation>
 								<relocation>
 									<pattern>okio</pattern>
-									<shadedPattern>io.github.fortunen.kete.shaded.okio</shadedPattern>
+									<shadedPattern>kete.okio</shadedPattern>
 								</relocation>
 								<!-- Bouncy Castle -->
 								<relocation>
 									<pattern>org.bouncycastle</pattern>
-									<shadedPattern>io.github.fortunen.kete.shaded.bouncycastle</shadedPattern>
+									<shadedPattern>kete.org.bouncycastle</shadedPattern>
 								</relocation>
 								<!-- Transitive dependencies -->
 								<!-- Woodstox (jackson-dataformat-xml transitive) -->
 								<relocation>
 									<pattern>org.codehaus.stax2</pattern>
-									<shadedPattern>io.github.fortunen.kete.shaded.stax2</shadedPattern>
+									<shadedPattern>kete.org.codehaus.stax2</shadedPattern>
 								</relocation>
 								<relocation>
 									<pattern>com.ctc.wstx</pattern>
-									<shadedPattern>io.github.fortunen.kete.shaded.woodstox</shadedPattern>
+									<shadedPattern>kete.com.ctc.wstx</shadedPattern>
 								</relocation>
 								<!-- SnakeYAML (jackson-dataformat-yaml transitive) -->
 								<relocation>
 									<pattern>org.yaml.snakeyaml</pattern>
-									<shadedPattern>io.github.fortunen.kete.shaded.snakeyaml</shadedPattern>
+									<shadedPattern>kete.org.yaml.snakeyaml</shadedPattern>
 								</relocation>
 								<!-- Kafka compression libraries -->
 								<relocation>
 									<pattern>com.github.luben.zstd</pattern>
-									<shadedPattern>io.github.fortunen.kete.shaded.zstd</shadedPattern>
+									<shadedPattern>kete.com.github.luben.zstd</shadedPattern>
 								</relocation>
 								<relocation>
 									<pattern>org.lz4</pattern>
-									<shadedPattern>io.github.fortunen.kete.shaded.lz4</shadedPattern>
+									<shadedPattern>kete.org.lz4</shadedPattern>
 								</relocation>
 								<relocation>
 									<pattern>org.xerial.snappy</pattern>
-									<shadedPattern>io.github.fortunen.kete.shaded.snappy</shadedPattern>
+									<shadedPattern>kete.org.xerial.snappy</shadedPattern>
 								</relocation>
 								<!-- Commons Logging (commons-configuration2 transitive) -->
 								<relocation>
 									<pattern>org.apache.commons.logging</pattern>
-									<shadedPattern>io.github.fortunen.kete.shaded.commons.logging</shadedPattern>
+									<shadedPattern>kete.org.apache.commons.logging</shadedPattern>
 								</relocation>
 								<!-- Javassist (reflections transitive) -->
 								<relocation>
 									<pattern>javassist</pattern>
-									<shadedPattern>io.github.fortunen.kete.shaded.javassist</shadedPattern>
+									<shadedPattern>kete.javassist</shadedPattern>
 								</relocation>
 								<!-- JSR305 annotations (reflections transitive) -->
 								<relocation>
 									<pattern>javax.annotation</pattern>
-									<shadedPattern>io.github.fortunen.kete.shaded.javax.annotation</shadedPattern>
+									<shadedPattern>kete.javax.annotation</shadedPattern>
 								</relocation>
 								<!-- JSON Smart (oauth2-oidc-sdk transitive) -->
 								<relocation>
 									<pattern>net.minidev</pattern>
-									<shadedPattern>io.github.fortunen.kete.shaded.minidev</shadedPattern>
+									<shadedPattern>kete.net.minidev</shadedPattern>
 								</relocation>
 								<!-- ASM (accessors-smart transitive) -->
 								<relocation>
 									<pattern>org.objectweb.asm</pattern>
-									<shadedPattern>io.github.fortunen.kete.shaded.asm</shadedPattern>
+									<shadedPattern>kete.org.objectweb.asm</shadedPattern>
 								</relocation>
 								<!-- JCIP annotations -->
 								<relocation>
 									<pattern>net.jcip</pattern>
-									<shadedPattern>io.github.fortunen.kete.shaded.jcip</shadedPattern>
+									<shadedPattern>kete.net.jcip</shadedPattern>
 								</relocation>
 								<!-- Lettuce Redis client -->
 								<relocation>
 									<pattern>io.lettuce</pattern>
-									<shadedPattern>io.github.fortunen.kete.shaded.lettuce</shadedPattern>
+									<shadedPattern>kete.io.lettuce</shadedPattern>
 								</relocation>
 								<!-- NATS client -->
 								<relocation>
 									<pattern>io.nats</pattern>
-									<shadedPattern>io.github.fortunen.kete.shaded.nats</shadedPattern>
+									<shadedPattern>kete.io.nats</shadedPattern>
 								</relocation>
 								<!-- Jakarta JMS API (qpid-jms transitive) -->
 								<relocation>
 									<pattern>jakarta.jms</pattern>
-									<shadedPattern>io.github.fortunen.kete.shaded.jakarta.jms</shadedPattern>
+									<shadedPattern>kete.jakarta.jms</shadedPattern>
 								</relocation>
 								<!-- Guava helper artifacts -->
 								<relocation>
 									<pattern>com.google.errorprone</pattern>
-									<shadedPattern>io.github.fortunen.kete.shaded.errorprone</shadedPattern>
+									<shadedPattern>kete.com.google.errorprone</shadedPattern>
 								</relocation>
 								<relocation>
 									<pattern>com.google.j2objc</pattern>
-									<shadedPattern>io.github.fortunen.kete.shaded.j2objc</shadedPattern>
+									<shadedPattern>kete.com.google.j2objc</shadedPattern>
 								</relocation>
 								<relocation>
 									<pattern>org.jspecify</pattern>
-									<shadedPattern>io.github.fortunen.kete.shaded.jspecify</shadedPattern>
+									<shadedPattern>kete.org.jspecify</shadedPattern>
 								</relocation>
 								<!-- JetBrains annotations -->
 								<relocation>
 									<pattern>org.intellij.lang.annotations</pattern>
-									<shadedPattern>io.github.fortunen.kete.shaded.intellij.annotations</shadedPattern>
+									<shadedPattern>kete.org.intellij.lang.annotations</shadedPattern>
 								</relocation>
 								<relocation>
 									<pattern>org.jetbrains.annotations</pattern>
-									<shadedPattern>io.github.fortunen.kete.shaded.jetbrains.annotations</shadedPattern>
+									<shadedPattern>kete.org.jetbrains.annotations</shadedPattern>
 								</relocation>
 								<!-- Proton-J (qpid transitive) -->
 								<relocation>
 									<pattern>org.apache.qpid.proton</pattern>
-									<shadedPattern>io.github.fortunen.kete.shaded.proton</shadedPattern>
+									<shadedPattern>kete.org.apache.qpid.proton</shadedPattern>
 								</relocation>
 								<!-- Failureaccess (guava transitive) -->
 								<relocation>
 									<pattern>com.google.common.util.concurrent.internal</pattern>
-									<shadedPattern>io.github.fortunen.kete.shaded.guava.failureaccess</shadedPattern>
+									<shadedPattern>kete.com.google.common.util.concurrent.internal</shadedPattern>
 								</relocation>
 								<!-- Pulsar client -->
 								<relocation>
 									<pattern>org.apache.pulsar</pattern>
-									<shadedPattern>io.github.fortunen.kete.shaded.pulsar</shadedPattern>
+									<shadedPattern>kete.org.apache.pulsar</shadedPattern>
 								</relocation>
 								<!-- OpenTelemetry (pulsar-client transitive) -->
 								<relocation>
 									<pattern>io.opentelemetry</pattern>
-									<shadedPattern>io.github.fortunen.kete.shaded.opentelemetry</shadedPattern>
+									<shadedPattern>kete.io.opentelemetry</shadedPattern>
 								</relocation>
 								<!-- Javax Validation (pulsar-client transitive) -->
 								<relocation>
 									<pattern>javax.validation</pattern>
-									<shadedPattern>io.github.fortunen.kete.shaded.javax.validation</shadedPattern>
+									<shadedPattern>kete.javax.validation</shadedPattern>
 								</relocation>
 								<!-- ActiveMQ -->
 								<relocation>
 									<pattern>org.apache.activemq</pattern>
-									<shadedPattern>io.github.fortunen.kete.shaded.activemq</shadedPattern>
+									<shadedPattern>kete.org.apache.activemq</shadedPattern>
 								</relocation>
 								<!-- HawtBuf (activemq-client transitive) -->
 								<relocation>
 									<pattern>org.fusesource.hawtbuf</pattern>
-									<shadedPattern>io.github.fortunen.kete.shaded.hawtbuf</shadedPattern>
+									<shadedPattern>kete.org.fusesource.hawtbuf</shadedPattern>
 								</relocation>
 								<!-- Jakarta Annotation API (activemq transitive) -->
 								<relocation>
 									<pattern>jakarta.annotation</pattern>
-									<shadedPattern>io.github.fortunen.kete.shaded.jakarta.annotation</shadedPattern>
+									<shadedPattern>kete.jakarta.annotation</shadedPattern>
 								</relocation>
 								<!-- JeroMQ (ZeroMQ) -->
 								<relocation>
 									<pattern>org.zeromq</pattern>
-									<shadedPattern>io.github.fortunen.kete.shaded.zeromq</shadedPattern>
+									<shadedPattern>kete.org.zeromq</shadedPattern>
 								</relocation>
 								<!-- jnacl (jeromq transitive) -->
 								<relocation>
 									<pattern>com.neilalexander.jnacl</pattern>
-									<shadedPattern>io.github.fortunen.kete.shaded.jnacl</shadedPattern>
+									<shadedPattern>kete.com.neilalexander.jnacl</shadedPattern>
 								</relocation>
 								<!-- Project Reactor (lettuce-core transitive) -->
 								<relocation>
 									<pattern>reactor</pattern>
-									<shadedPattern>io.github.fortunen.kete.shaded.reactor</shadedPattern>
+									<shadedPattern>kete.reactor</shadedPattern>
 								</relocation>
 								<!-- Reactive Streams (reactor-core transitive) -->
 								<relocation>
 									<pattern>org.reactivestreams</pattern>
-									<shadedPattern>io.github.fortunen.kete.shaded.reactivestreams</shadedPattern>
+									<shadedPattern>kete.org.reactivestreams</shadedPattern>
+								</relocation>
+								<!-- AWS SDK v2 -->
+								<relocation>
+									<pattern>software.amazon.awssdk</pattern>
+									<shadedPattern>kete.software.amazon.awssdk</shadedPattern>
+								</relocation>
+								<relocation>
+									<pattern>software.amazon.eventstream</pattern>
+									<shadedPattern>kete.software.amazon.eventstream</shadedPattern>
+								</relocation>
+								<!-- Azure SDK -->
+								<relocation>
+									<pattern>com.azure</pattern>
+									<shadedPattern>kete.com.azure</shadedPattern>
+								</relocation>
+								<!-- Azure SDK AMQP extensions (azure-messaging-eventhubs/servicebus transitive) -->
+								<relocation>
+									<pattern>com.microsoft.azure</pattern>
+									<shadedPattern>kete.com.microsoft.azure</shadedPattern>
+								</relocation>
+								<!-- MSAL4J (azure-identity transitive) -->
+								<relocation>
+									<pattern>com.microsoft.aad</pattern>
+									<shadedPattern>kete.com.microsoft.aad</shadedPattern>
+								</relocation>
+								<!-- Google API Client / HTTP Client / Services -->
+								<relocation>
+									<pattern>com.google.api.client</pattern>
+									<shadedPattern>kete.com.google.api.client</shadedPattern>
+								</relocation>
+								<relocation>
+									<pattern>com.google.api.services</pattern>
+									<shadedPattern>kete.com.google.api.services</shadedPattern>
+								</relocation>
+								<!-- Google Cloud Tasks gRPC stubs + protobuf types -->
+								<relocation>
+									<pattern>com.google.cloud</pattern>
+									<shadedPattern>kete.com.google.cloud</shadedPattern>
+								</relocation>
+								<relocation>
+									<pattern>com.google.protobuf</pattern>
+									<shadedPattern>kete.com.google.protobuf</shadedPattern>
+								</relocation>
+								<relocation>
+									<pattern>com.google.api.grpc</pattern>
+									<shadedPattern>kete.com.google.api.grpc</shadedPattern>
+								</relocation>
+								<relocation>
+									<pattern>com.google.longrunning</pattern>
+									<shadedPattern>kete.com.google.longrunning</shadedPattern>
+								</relocation>
+								<relocation>
+									<pattern>com.google.type</pattern>
+									<shadedPattern>kete.com.google.type</shadedPattern>
+								</relocation>
+								<relocation>
+									<pattern>com.google.rpc</pattern>
+									<shadedPattern>kete.com.google.rpc</shadedPattern>
+								</relocation>
+								<relocation>
+									<pattern>com.google.api.core</pattern>
+									<shadedPattern>kete.com.google.api.core</shadedPattern>
+								</relocation>
+								<relocation>
+									<pattern>com.google.iam</pattern>
+									<shadedPattern>kete.com.google.iam</shadedPattern>
+								</relocation>
+								<!-- Google Auth Library -->
+								<relocation>
+									<pattern>com.google.auth</pattern>
+									<shadedPattern>kete.com.google.auth</shadedPattern>
+								</relocation>
+								<!-- Gson (google-http-client-gson transitive) -->
+								<relocation>
+									<pattern>com.google.gson</pattern>
+									<shadedPattern>kete.com.google.gson</shadedPattern>
+								</relocation>
+								<!-- OpenCensus (google-http-client transitive) -->
+								<relocation>
+									<pattern>io.opencensus</pattern>
+									<shadedPattern>kete.io.opencensus</shadedPattern>
+								</relocation>
+								<!-- gRPC context (opencensus-api transitive) -->
+								<relocation>
+									<pattern>io.grpc</pattern>
+									<shadedPattern>kete.io.grpc</shadedPattern>
+								</relocation>
+								<!-- Auto Value annotations (google-auth-library transitive) -->
+								<relocation>
+									<pattern>com.google.auto.value</pattern>
+									<shadedPattern>kete.com.google.auto.value</shadedPattern>
+								</relocation>
+								<!-- SignalR Java Client -->
+								<relocation>
+									<pattern>com.microsoft.signalr</pattern>
+									<shadedPattern>kete.com.microsoft.signalr</shadedPattern>
+								</relocation>
+								<!-- RxJava3 (signalr transitive) -->
+								<relocation>
+									<pattern>io.reactivex.rxjava3</pattern>
+									<shadedPattern>kete.io.reactivex.rxjava3</shadedPattern>
+								</relocation>
+								<!-- Socket.IO Java Client -->
+								<relocation>
+									<pattern>io.socket</pattern>
+									<shadedPattern>kete.io.socket</shadedPattern>
+								</relocation>
+								<!-- JSON.org (socket.io-client transitive) -->
+								<relocation>
+									<pattern>org.json</pattern>
+									<shadedPattern>kete.org.json</shadedPattern>
+								</relocation>
+								<!-- Apache Avro -->
+								<relocation>
+									<pattern>org.apache.avro</pattern>
+									<shadedPattern>kete.org.apache.avro</shadedPattern>
 								</relocation>
 							</relocations>
 							<transformers>

@@ -4,6 +4,8 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import com.google.common.base.CaseFormat;
+
 import io.github.fortunen.kete.utils.ValidationUtils;
 
 public record EventMessage(String realm, String eventId, byte[] eventBody, String eventType, String contentType, String resourceType, String kind, String operationType, String result) {
@@ -25,6 +27,27 @@ public record EventMessage(String realm, String eventId, byte[] eventBody, Strin
 	});
 
 	private static final Map<String, String> UPPERCASE_CACHE = Collections.synchronizedMap(new LinkedHashMap<>(16, 0.75f, true) {
+		@Override
+		protected boolean removeEldestEntry(Map.Entry<String, String> eldest) {
+			return size() > MAX_CACHE_SIZE;
+		}
+	});
+
+	private static final Map<String, String> KEBAB_CACHE = Collections.synchronizedMap(new LinkedHashMap<>(16, 0.75f, true) {
+		@Override
+		protected boolean removeEldestEntry(Map.Entry<String, String> eldest) {
+			return size() > MAX_CACHE_SIZE;
+		}
+	});
+
+	private static final Map<String, String> PASCAL_CACHE = Collections.synchronizedMap(new LinkedHashMap<>(16, 0.75f, true) {
+		@Override
+		protected boolean removeEldestEntry(Map.Entry<String, String> eldest) {
+			return size() > MAX_CACHE_SIZE;
+		}
+	});
+
+	private static final Map<String, String> CAMEL_CACHE = Collections.synchronizedMap(new LinkedHashMap<>(16, 0.75f, true) {
 		@Override
 		protected boolean removeEldestEntry(Map.Entry<String, String> eldest) {
 			return size() > MAX_CACHE_SIZE;
@@ -184,9 +207,180 @@ public record EventMessage(String realm, String eventId, byte[] eventBody, Strin
 		return LOWERCASE_CACHE.computeIfAbsent(result, String::toLowerCase);
 	}
 
+	// kebab-case
+
+	public String kindKebabCase() {
+
+		if (ValidationUtils.isBlank(kind)) {
+			return null;
+		}
+
+		return KEBAB_CACHE.computeIfAbsent(kind, v -> CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.LOWER_HYPHEN, v));
+	}
+
+	public String realmKebabCase() {
+
+		if (ValidationUtils.isBlank(realm)) {
+			return null;
+		}
+
+		return KEBAB_CACHE.computeIfAbsent(realm, v -> CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.LOWER_HYPHEN, v));
+	}
+
+	public String eventTypeKebabCase() {
+
+		if (ValidationUtils.isBlank(eventType)) {
+			return null;
+		}
+
+		return KEBAB_CACHE.computeIfAbsent(eventType, v -> CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.LOWER_HYPHEN, v));
+	}
+
+	public String resourceTypeKebabCase() {
+
+		if (ValidationUtils.isBlank(resourceType)) {
+			return null;
+		}
+
+		return KEBAB_CACHE.computeIfAbsent(resourceType, v -> CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.LOWER_HYPHEN, v));
+	}
+
+	public String operationTypeKebabCase() {
+
+		if (ValidationUtils.isBlank(operationType)) {
+			return null;
+		}
+
+		return KEBAB_CACHE.computeIfAbsent(operationType, v -> CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.LOWER_HYPHEN, v));
+	}
+
+	public String resultKebabCase() {
+
+		if (ValidationUtils.isBlank(result)) {
+			return null;
+		}
+
+		return KEBAB_CACHE.computeIfAbsent(result, v -> CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.LOWER_HYPHEN, v));
+	}
+
+	// PascalCase
+
+	public String kindPascalCase() {
+
+		if (ValidationUtils.isBlank(kind)) {
+			return null;
+		}
+
+		return PASCAL_CACHE.computeIfAbsent(kind, v -> CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL, v));
+	}
+
+	public String realmPascalCase() {
+
+		if (ValidationUtils.isBlank(realm)) {
+			return null;
+		}
+
+		return PASCAL_CACHE.computeIfAbsent(realm, v -> CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL, v));
+	}
+
+	public String eventTypePascalCase() {
+
+		if (ValidationUtils.isBlank(eventType)) {
+			return null;
+		}
+
+		return PASCAL_CACHE.computeIfAbsent(eventType, v -> CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL, v));
+	}
+
+	public String resourceTypePascalCase() {
+
+		if (ValidationUtils.isBlank(resourceType)) {
+			return null;
+		}
+
+		return PASCAL_CACHE.computeIfAbsent(resourceType, v -> CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL, v));
+	}
+
+	public String operationTypePascalCase() {
+
+		if (ValidationUtils.isBlank(operationType)) {
+			return null;
+		}
+
+		return PASCAL_CACHE.computeIfAbsent(operationType, v -> CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL, v));
+	}
+
+	public String resultPascalCase() {
+
+		if (ValidationUtils.isBlank(result)) {
+			return null;
+		}
+
+		return PASCAL_CACHE.computeIfAbsent(result, v -> CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL, v));
+	}
+
+	// camelCase
+
+	public String kindCamelCase() {
+
+		if (ValidationUtils.isBlank(kind)) {
+			return null;
+		}
+
+		return CAMEL_CACHE.computeIfAbsent(kind, v -> CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, v));
+	}
+
+	public String realmCamelCase() {
+
+		if (ValidationUtils.isBlank(realm)) {
+			return null;
+		}
+
+		return CAMEL_CACHE.computeIfAbsent(realm, v -> CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, v));
+	}
+
+	public String eventTypeCamelCase() {
+
+		if (ValidationUtils.isBlank(eventType)) {
+			return null;
+		}
+
+		return CAMEL_CACHE.computeIfAbsent(eventType, v -> CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, v));
+	}
+
+	public String resourceTypeCamelCase() {
+
+		if (ValidationUtils.isBlank(resourceType)) {
+			return null;
+		}
+
+		return CAMEL_CACHE.computeIfAbsent(resourceType, v -> CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, v));
+	}
+
+	public String operationTypeCamelCase() {
+
+		if (ValidationUtils.isBlank(operationType)) {
+			return null;
+		}
+
+		return CAMEL_CACHE.computeIfAbsent(operationType, v -> CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, v));
+	}
+
+	public String resultCamelCase() {
+
+		if (ValidationUtils.isBlank(result)) {
+			return null;
+		}
+
+		return CAMEL_CACHE.computeIfAbsent(result, v -> CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, v));
+	}
+
 	public static void clearCache() {
 		BYTES.clear();
 		LOWERCASE_CACHE.clear();
 		UPPERCASE_CACHE.clear();
+		KEBAB_CACHE.clear();
+		PASCAL_CACHE.clear();
+		CAMEL_CACHE.clear();
 	}
 }

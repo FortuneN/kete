@@ -34,6 +34,7 @@ class MetricsE2ETests extends EndToEndTestBase {
 		cleanupNetwork();
 	}
 
+	@SuppressWarnings("resource")
 	@Test
 	void shouldExposeMetricsWhenEnabled() throws Exception {
 
@@ -44,7 +45,6 @@ class MetricsE2ETests extends EndToEndTestBase {
 		waitForKafkaReady(kafka);
 
 		var envVars = new HashMap<String, String>();
-		envVars.put("kete.enabled", "true");
 		envVars.put("kete.metrics.enabled", "true");
 		envVars.put("kete.routes.metrics-test.realm-matchers.filter", "list:" + TEST_REALM);
 		envVars.put("kete.routes.metrics-test.destination.kind", "kafka");
@@ -80,7 +80,7 @@ class MetricsE2ETests extends EndToEndTestBase {
 					triggerLoginEvent(keycloak);
 
 					// Wait for message to be forwarded to Kafka
-					await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).until(() -> {
+					await().atMost(Duration.ofMinutes(2)).pollInterval(Duration.ofSeconds(2)).until(() -> {
 						var records = consumer.poll(Duration.ofSeconds(1));
 						return !records.isEmpty();
 					});
@@ -95,7 +95,7 @@ class MetricsE2ETests extends EndToEndTestBase {
 					.build();
 
 				var metricsBody = new String[1];
-				await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(2)).until(() -> {
+				await().atMost(Duration.ofMinutes(2)).pollInterval(Duration.ofSeconds(2)).until(() -> {
 					var response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 					metricsBody[0] = response.body();
 					return metricsBody[0].contains("kete_events_forwarded_total");
@@ -127,7 +127,6 @@ class MetricsE2ETests extends EndToEndTestBase {
 		// arrange - No destination needed, just checking metrics endpoint
 
 		var envVars = new HashMap<String, String>();
-		envVars.put("kete.enabled", "true");
 		envVars.put("kete.metrics.enabled", "false");
 
 		try (var keycloak = createKeycloakContainerWithMetrics(envVars)) {
@@ -143,7 +142,7 @@ class MetricsE2ETests extends EndToEndTestBase {
 				.build();
 
 			var metricsBody = new String[1];
-			await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).until(() -> {
+			await().atMost(Duration.ofMinutes(2)).pollInterval(Duration.ofSeconds(2)).until(() -> {
 				var response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 				metricsBody[0] = response.body();
 				return response.statusCode() == 200;

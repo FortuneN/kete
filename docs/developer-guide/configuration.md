@@ -15,7 +15,7 @@
 
 ## Overview
 
-The extension is configured entirely through **environment variables** following the 12-factor app methodology. This makes it container-friendly and easy to manage across different environments.
+The extension is configured through **environment variables** and/or **Keycloak SPI configuration**. This makes it container-friendly and easy to manage across different environments.
 
 ### Configuration Hierarchy
 
@@ -192,7 +192,7 @@ Each route is configured with a unique name under `kete.routes.<NAME>`.
 
 | Property | Type | Default | Description |
 |----------|------|---------|-------------|
-| `kete.routes.<NAME>.serializer.kind` | String | `json` | Serializer kind: `json`, `xml`, `yaml`, `csv`, `toml`, `smile`, `cbor`, `properties` |
+| `kete.routes.<NAME>.serializer.kind` | String | `json` | Serializer kind: `json`, `xml`, `yaml`, `csv`, `toml`, `smile`, `cbor`, `properties`, `template` |
 
 JSON serialization is used by default if no serializer is specified.
 
@@ -200,9 +200,10 @@ JSON serialization is used by default if no serializer is specified.
 
 | Property | Type | Default | Description |
 |----------|------|---------|-------------|
-| `kete.routes.<NAME>.destination.kind` | String | - | Destination kind (required): `kafka`, `amqp-0.9.1`, `amqp-1`, `mqtt-3`, `mqtt-5`, `http` |
-| `kete.routes.<NAME>.destination.min-pool-size` | Integer | `5` | Minimum connection pool size. Must be > 0. |
-| `kete.routes.<NAME>.destination.max-pool-size` | Integer | `20` | Maximum connection pool size. Must be >= min-pool-size. |
+| `kete.routes.<NAME>.destination.kind` | String | - | Destination kind (required): `kafka`, `amqp-0.9.1`, `amqp-1`, `mqtt-3`, `mqtt-5`, `http`, `websocket`, `nats`, `nats-jetstream`, `redis-pubsub`, `redis-stream`, `pulsar`, `stomp`, `zeromq`, `signalr`, `socketio`, `aws-sns`, `aws-sqs`, `aws-kinesis`, `aws-eventbridge`, `gcp-pubsub`, `gcp-cloud-tasks`, `azure-storage-queue`, `azure-webpubsub`, `azure-eventhubs`, `azure-servicebus`, `azure-eventgrid` |
+| `kete.routes.<NAME>.destination.pool.min-idle` | Integer | `1` | Minimum idle pool size. Must be > 0. |
+| `kete.routes.<NAME>.destination.pool.max-idle` | Integer | `10` | Maximum idle pool size. |
+| `kete.routes.<NAME>.destination.pool.max-total` | Integer | `20` | Maximum total pool size. Must be >= min-idle. |
 | `kete.routes.<NAME>.destination.*` | Various | - | Destination-specific properties (see destination guides) |
 
 ```bash
@@ -212,8 +213,8 @@ kete.routes.my-route.destination.bootstrap.servers=kafka:9092
 kete.routes.my-route.destination.topic=keycloak-events
 
 # Optional: Configure connection pool size
-kete.routes.my-route.destination.min-pool-size=3
-kete.routes.my-route.destination.max-pool-size=15
+kete.routes.my-route.destination.pool.min-idle=3
+kete.routes.my-route.destination.pool.max-total=15
 ```
 
 ### Matcher Configuration
@@ -258,14 +259,13 @@ kete.routes.my-route.event-matchers.logout=glob:LOGOUT*
 
 | Property | Type | Default | Description |
 |----------|------|---------|-------------|
-| `kete.routes.<NAME>.retry.enabled` | Boolean | `false` | Enable retry with Resilience4j |
-| `kete.routes.<NAME>.retry.max-attempts` | Integer | - | Maximum retry attempts |
-| `kete.routes.<NAME>.retry.wait-duration` | Duration | - | Wait between retries (ISO 8601 format) |
+| `kete.routes.<NAME>.retry.enabled` | Boolean | `true` | Enable retry with Resilience4j |
+| `kete.routes.<NAME>.retry.max-attempts` | Integer | `3` | Maximum number of attempts (including initial call) |
+| `kete.routes.<NAME>.retry.wait-duration` | Duration | `500ms` | Wait between retries |
 
 ```bash
-kete.routes.my-route.retry.enabled=true
-kete.routes.my-route.retry.max-attempts=3
-kete.routes.my-route.retry.wait-duration=PT1S   # 1 second
+kete.routes.my-route.retry.max-attempts=5
+kete.routes.my-route.retry.wait-duration=PT2S
 ```
 
 
@@ -328,38 +328,31 @@ kete.routes.success.event-matchers.no-error=glob:not:*ERROR*
 
 ## Retry Configuration
 
-Retry is configured using Resilience4j exponential backoff at the route level.
+Retry is configured using Resilience4j at the route level. Retry is enabled by default with a fixed wait duration between attempts.
 
 ### Properties
 
 | Property | Type | Default | Description |
 |----------|------|---------|-------------|
-| `kete.routes.<NAME>.retry.enabled` | Boolean | `false` | Enable retry |
-| `kete.routes.<NAME>.retry.max-attempts` | Integer | - | Maximum retry attempts |
-| `kete.routes.<NAME>.retry.wait-duration` | Duration | - | Wait between retries (ISO 8601) |
+| `kete.routes.<NAME>.retry.enabled` | Boolean | `true` | Enable retry |
+| `kete.routes.<NAME>.retry.max-attempts` | Integer | `3` | Maximum number of attempts (including initial call) |
+| `kete.routes.<NAME>.retry.wait-duration` | Duration | `500ms` | Wait between retries |
 
 ### Configuration
 
 ```bash
-# Conservative: 3 retries
-kete.routes.api.retry.enabled=true
-kete.routes.api.retry.max-attempts=3
-kete.routes.api.retry.wait-duration=PT1S
-
-# Aggressive: 10 retries for unreliable networks
-kete.routes.resilient.retry.enabled=true
+# Custom retry: 10 attempts for unreliable networks
 kete.routes.resilient.retry.max-attempts=10
 kete.routes.resilient.retry.wait-duration=PT2S
 
-# No retries: fail fast (default)
+# No retries: fail fast
 kete.routes.fast.retry.enabled=false
 ```
 
 ### Retry Strategy
 
-- **Exponential Backoff**: Configurable wait duration between retries
-- **Retry On**: IOExceptions (network issues, timeouts, 5xx errors)
-- **No Retry On**: 4xx client errors (authentication failures, bad requests)
+- **Resilience4j**: Uses Resilience4j retry with configurable wait duration
+- **All failures retried**: Any exception during delivery triggers retry (up to `max-attempts`)
 
 ### Example
 
@@ -370,7 +363,6 @@ kete.routes.reliable-api.destination.host=api.example.com
 kete.routes.reliable-api.destination.port=443
 kete.routes.reliable-api.destination.path-and-query=/events
 kete.routes.reliable-api.destination.tls.enabled=true
-kete.routes.reliable-api.retry.enabled=true
 kete.routes.reliable-api.retry.max-attempts=5
 kete.routes.reliable-api.retry.wait-duration=PT1S
 ```
@@ -490,14 +482,32 @@ Dynamic topic names and URLs can use template variables that are substituted at 
 | `${realmUpperCase}` | Realm name (uppercase) | `MYREALM` |
 | `${eventTypeLowerCase}` | Event type (lowercase) | `login_error` |
 | `${eventTypeUpperCase}` | Event type (uppercase) | `LOGIN_ERROR` |
-| `${kindLowerCase}` | Event kind (lowercase) | `event` or `admin-event` |
-| `${kindUpperCase}` | Event kind (uppercase) | `EVENT` or `ADMIN-EVENT` |
+| `${kindLowerCase}` | Event kind (lowercase) | `event` or `admin_event` |
+| `${kindUpperCase}` | Event kind (uppercase) | `EVENT` or `ADMIN_EVENT` |
 | `${resourceTypeLowerCase}` | Admin event resource type (lowercase) | `user` |
 | `${resourceTypeUpperCase}` | Admin event resource type (uppercase) | `USER` |
 | `${operationTypeLowerCase}` | Admin event operation (lowercase) | `create` |
 | `${operationTypeUpperCase}` | Admin event operation (uppercase) | `CREATE` |
 | `${resultLowerCase}` | Event result (lowercase) | `success` or `error` |
 | `${resultUpperCase}` | Event result (uppercase) | `SUCCESS` or `ERROR` |
+| `${realmKebabCase}` | Realm name (kebab-case) | `my-realm` |
+| `${realmPascalCase}` | Realm name (PascalCase) | `MyRealm` |
+| `${realmCamelCase}` | Realm name (camelCase) | `myRealm` |
+| `${eventTypeKebabCase}` | Event type (kebab-case) | `login-error` |
+| `${eventTypePascalCase}` | Event type (PascalCase) | `LoginError` |
+| `${eventTypeCamelCase}` | Event type (camelCase) | `loginError` |
+| `${kindKebabCase}` | Event kind (kebab-case) | `event` or `admin-event` |
+| `${kindPascalCase}` | Event kind (PascalCase) | `Event` or `AdminEvent` |
+| `${kindCamelCase}` | Event kind (camelCase) | `event` or `adminEvent` |
+| `${resourceTypeKebabCase}` | Admin event resource type (kebab-case) | `user` |
+| `${resourceTypePascalCase}` | Admin event resource type (PascalCase) | `User` |
+| `${resourceTypeCamelCase}` | Admin event resource type (camelCase) | `user` |
+| `${operationTypeKebabCase}` | Admin event operation (kebab-case) | `create` |
+| `${operationTypePascalCase}` | Admin event operation (PascalCase) | `Create` |
+| `${operationTypeCamelCase}` | Admin event operation (camelCase) | `create` |
+| `${resultKebabCase}` | Event result (kebab-case) | `success` or `error` |
+| `${resultPascalCase}` | Event result (PascalCase) | `Success` or `Error` |
+| `${resultCamelCase}` | Event result (camelCase) | `success` or `error` |
 
 > **Note:** The `result` variable is derived from whether the event contains an error. Events with no error have result `SUCCESS`, while events with any error have result `ERROR`.
 
@@ -654,7 +664,7 @@ IllegalStateException: Unknown filter type: xxxxx
 → Check filter syntax: glob: or regex:
 
 Destination 'name' references unknown serializer 'xxxx'
-→ Check serializer is 'json' or 'xml'
+→ Check serializer kind is valid (json, xml, yaml, csv, toml, smile, cbor, properties, template)
 
 Destination 'name' is configured for non-existent realm 'xxxx'
 → Check realm name matches exactly (case-sensitive)

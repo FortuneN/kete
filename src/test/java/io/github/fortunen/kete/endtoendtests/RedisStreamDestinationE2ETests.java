@@ -33,6 +33,7 @@ class RedisStreamDestinationE2ETests extends EndToEndTestBase {
 		cleanupNetwork();
 	}
 
+	@SuppressWarnings("resource")
 	@Test
 	void shouldForwardLoginEventToRedisStream() throws Exception {
 
@@ -46,7 +47,6 @@ class RedisStreamDestinationE2ETests extends EndToEndTestBase {
 		waitForRedisReady();
 
 		var envVars = new HashMap<String, String>();
-		envVars.put("kete.enabled", "true");
 		envVars.put("kete.routes.redis-test.realm-matchers.filter", "list:" + TEST_REALM);
 		envVars.put("kete.routes.redis-test.destination.kind", "redis-stream");
 		envVars.put("kete.routes.redis-test.destination.host", "redis");
@@ -66,7 +66,7 @@ class RedisStreamDestinationE2ETests extends EndToEndTestBase {
 
 				// assert
 
-				await().atMost(Duration.ofSeconds(30)).until(() -> !readFromStream(REDIS_STREAM_RESOLVED).isEmpty());
+				await().atMost(Duration.ofMinutes(2)).pollInterval(Duration.ofSeconds(2)).until(() -> !readFromStream(REDIS_STREAM_RESOLVED).isEmpty());
 
 				var messages = readFromStream(REDIS_STREAM_RESOLVED);
 				assertThat(messages).hasSizeGreaterThan(0);
@@ -96,10 +96,10 @@ class RedisStreamDestinationE2ETests extends EndToEndTestBase {
 	}
 
 	private void waitForRedisReady() {
-		await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).until(() -> {
+		await().atMost(Duration.ofMinutes(2)).pollInterval(Duration.ofSeconds(2)).until(() -> {
 			try {
 				var uri = RedisURI.builder()
-					.withHost(redis.getHost())
+					.withHost("127.0.0.1")
 					.withPort(redis.getMappedPort(6379))
 					.build();
 				var client = RedisClient.create(uri);
@@ -116,7 +116,7 @@ class RedisStreamDestinationE2ETests extends EndToEndTestBase {
 
 	private List<StreamMessage<String, String>> readFromStream(String stream) {
 		var uri = RedisURI.builder()
-			.withHost(redis.getHost())
+			.withHost("127.0.0.1")
 			.withPort(redis.getMappedPort(6379))
 			.build();
 

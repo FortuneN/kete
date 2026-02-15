@@ -113,7 +113,7 @@ This runs Keycloak on embedded Undertow in the same JVM as your tests.
 
 ### Keycloak Boot Tests
 
-Located in: `src/tests/integration-tests/.../keycloak/CleanKeycloakBootTests.java`
+Located in: `src/test/java/.../integrationtests/keycloak/CleanKeycloakBootTests.java`
 
 Verifies basic Keycloak container functionality:
 - Container starts successfully
@@ -122,7 +122,7 @@ Verifies basic Keycloak container functionality:
 
 ### Provider Integration Tests
 
-Located in: `src/tests/integration-tests/.../provider/EventListenerProviderIntegrationTests.java`
+Located in: `src/test/java/.../integrationtests/provider/EventListenerProviderIntegrationTests.java`
 
 Verifies the kete provider:
 - Provider loads into Keycloak
@@ -269,9 +269,7 @@ private void startActiveMqArtemisWithTls(TlsMaterial tls, boolean requireClientA
         .withCopyToContainer(
             Transferable.of(truststoreBytes, 0777),
             "/var/lib/artemis-instance/etc-override/truststore.jks")
-        .withExposedPorts(AMQP_PORT, AMQPS_PORT, 8161)
-        .waitingFor(Wait.forLogMessage(".*AMQ221007.*", 1))
-        .withStartupTimeout(Duration.ofMinutes(10));
+        .withExposedPorts(AMQP_PORT, AMQPS_PORT, 8161);
 
     container.start();
 }
@@ -363,14 +361,76 @@ container
 
 ## Troubleshooting
 
+### Container Readiness Checks (CRITICAL)
+
+**MANDATORY RULE**: Never use Testcontainers' built-in wait strategies (`waitingFor()`, `withStartupTimeout()`, `WaitStrategy`, `Wait.forLogMessage()`, `Wait.forHttp()`, etc.). These are fragile and inconsistent across container images.
+
+Instead, use **Awaitility-based readiness probes** with the highest-level client available:
+
+#### Readiness Check Hierarchy (in order of preference)
+
+1. **SDK/native client** (best) — Proves the service protocol is working, not just the port:
+   ```java
+   // MQTT — Paho client connect
+   var client = new MqttClient("tcp://127.0.0.1:" + mappedPort, "probe", new MemoryPersistence());
+   var options = new MqttConnectOptions();
+   options.setConnectionTimeout(5);
+   client.connect(options);
+   client.disconnect();
+   client.close();
+   
+   // Kafka — AdminClient
+   adminClient.describeCluster().clusterId().get(5, TimeUnit.SECONDS);
+   
+   // Azure Event Hubs — SDK consumer
+   consumerClient.getPartitionIds();
+   
+   // AMQP 1.0 — Qpid JMS
+   var factory = new JmsConnectionFactory("amqp://127.0.0.1:" + mappedPort);
+   var connection = factory.createConnection();
+   connection.start();
+   ```
+
+2. **HTTP client** (second) — For services with HTTP/admin endpoints:
+   ```java
+   // Pulsar admin endpoint
+   waitForHttpReady(container, 8080, "/admin/v2/clusters");
+   
+   // Azurite
+   waitForHttpReady(azurite, 10000, "/");
+   ```
+
+3. **Socket** (last resort only) — Only when no higher-level option exists:
+   ```java
+   // Nginx TLS proxy — no higher-level option available
+   new Socket("127.0.0.1", mappedPort).close();
+   ```
+
+#### Readiness Probe Pattern
+
+All readiness checks follow the same Awaitility pattern:
+
+```java
+await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).until(() -> {
+    try {
+        // SDK/HTTP/Socket probe here
+        return true;
+    } catch (Exception e) {
+        return false;
+    }
+});
+```
+
+### Container Lifecycle Rules
+
+- **Always call `.start()`** before `.getMappedPort()` when managing containers manually (not using `@Container` annotation)
+- **Never set `kete.enabled=true`** in test env vars — `true` is the default. Only set it to `false` when testing the disabled case.
+
 ### Container Fails to Start
 
 - Check Docker is running
 - Check for port conflicts
-- Increase container startup timeout:
-  ```java
-  keycloak.withStartupTimeout(Duration.ofMinutes(10));
-  ```
+- Check container logs for error details
 
 ### Provider Not Loading
 

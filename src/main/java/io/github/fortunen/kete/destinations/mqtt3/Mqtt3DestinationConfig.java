@@ -6,6 +6,7 @@ import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 
 import io.github.fortunen.kete.DestinationConfig;
 import io.github.fortunen.kete.utils.DestinationUtils;
+import io.github.fortunen.kete.utils.TemplateUtils;
 import io.github.fortunen.kete.utils.ValidationUtils;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -17,31 +18,26 @@ import lombok.SneakyThrows;
 @EqualsAndHashCode(callSuper = true)
 public class Mqtt3DestinationConfig extends DestinationConfig {
 
-	public static final String HOST = "host";
-	public static final String PORT = "port";
-	public static final int DEFAULT_WS_PORT = 8000;
-	public static final int DEFAULT_WSS_PORT = 443;
-	public static final int DEFAULT_TCP_PORT = 1883;
-	public static final int DEFAULT_TLS_PORT = 8883;
-	public static final String TRANSPORT_TYPE = "transport-type";
-
-	public static final String USERNAME = "username";
-	public static final String PASSWORD = "password";
-
-	public static final String CLEAN_SESSION = "clean-session";
-	public static final String CLIENT_ID_PREFIX = "client-id-prefix";
-
-	public static final String TOPIC = "topic";
-
 	public static final int MIN_QOS = 0;
 	public static final int MAX_QOS = 2;
 	public static final String QOS = "qos";
 	public static final int DEFAULT_QOS = 1;
+	public static final String HOST = "host";
+	public static final String PORT = "port";
+	public static final String TOPIC = "topic";
+	public static final int DEFAULT_WS_PORT = 8000;
+	public static final int DEFAULT_WSS_PORT = 443;
+	public static final int DEFAULT_TCP_PORT = 1883;
+	public static final int DEFAULT_TLS_PORT = 8883;
+	public static final String USERNAME = "username";
+	public static final String PASSWORD = "password";
 	public static final String RETAINED = "retained";
-
 	public static final int DEFAULT_MAX_INFLIGHT = 2048;
 	public static final String MAX_INFLIGHT = "max-inflight";
+	public static final String CLEAN_SESSION = "clean-session";
+	public static final String TRANSPORT_TYPE = "transport-type";
 	public static final int DEFAULT_CONNECTION_TIMEOUT_SECONDS = 10;
+	public static final String CLIENT_ID_PREFIX = "client-id-prefix";
 	public static final int DEFAULT_KEEP_ALIVE_INTERVAL_SECONDS = 60;
 	public static final String CONNECTION_TIMEOUT_SECONDS = "connection-timeout-seconds";
 	public static final String KEEP_ALIVE_INTERVAL_SECONDS = "keep-alive-interval-seconds";
@@ -59,6 +55,7 @@ public class Mqtt3DestinationConfig extends DestinationConfig {
 	private boolean cleanSession;
 	private String transportType;
 	private String clientIdPrefix;
+	private boolean isTopicTemplated;
 	private int connectionTimeoutSeconds;
 	private int keepAliveIntervalSeconds;
 	private MqttConnectOptions connectOptions;
@@ -140,14 +137,24 @@ public class Mqtt3DestinationConfig extends DestinationConfig {
 
 		password = configuration.getString(PASSWORD, "").trim();
 
+		// precomputed fields
+
+		isTopicTemplated = TemplateUtils.containsTemplate(topic);
+
 		// connectOptions
 
 		connectOptions = new MqttConnectOptions();
 		connectOptions.setMaxInflight(maxInflight);
-		connectOptions.setCleanSession(cleanSession);
 		connectOptions.setConnectionTimeout(connectionTimeoutSeconds);
-		connectOptions.setKeepAliveInterval(keepAliveIntervalSeconds);
 		connectOptions.setAutomaticReconnect(true);
+
+		if (configuration.containsKey(CLEAN_SESSION)) {
+			connectOptions.setCleanSession(cleanSession);
+		}
+
+		if (configuration.containsKey(KEEP_ALIVE_INTERVAL_SECONDS)) {
+			connectOptions.setKeepAliveInterval(keepAliveIntervalSeconds);
+		}
 
 		if (ValidationUtils.isNotBlank(username)) {
 			connectOptions.setUserName(username);
@@ -159,6 +166,7 @@ public class Mqtt3DestinationConfig extends DestinationConfig {
 
 		if (tls.isEnabled()) {
 			connectOptions.setSocketFactory(tls.getKeyStoreAndTrustStoreSSLContext().getSocketFactory());
+			connectOptions.setHttpsHostnameVerificationEnabled(tls.isVerifyHostname());
 		}
 	}
 }

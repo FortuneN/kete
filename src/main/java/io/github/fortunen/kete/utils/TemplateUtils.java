@@ -45,31 +45,49 @@ public final class TemplateUtils {
 			if (ValidationUtils.isNotBlank(message.kind())) {
 				values.put("kindUpperCase", message.kindUpperCase());
 				values.put("kindLowerCase", message.kindLowerCase());
+				values.put("kindKebabCase", message.kindKebabCase());
+				values.put("kindPascalCase", message.kindPascalCase());
+				values.put("kindCamelCase", message.kindCamelCase());
 			}
 
 			if (ValidationUtils.isNotBlank(message.realm())) {
 				values.put("realmUpperCase", message.realmUpperCase());
 				values.put("realmLowerCase", message.realmLowerCase());
+				values.put("realmKebabCase", message.realmKebabCase());
+				values.put("realmPascalCase", message.realmPascalCase());
+				values.put("realmCamelCase", message.realmCamelCase());
 			}
 
 			if (ValidationUtils.isNotBlank(message.eventType())) {
 				values.put("eventTypeUpperCase", message.eventTypeUpperCase());
 				values.put("eventTypeLowerCase", message.eventTypeLowerCase());
+				values.put("eventTypeKebabCase", message.eventTypeKebabCase());
+				values.put("eventTypePascalCase", message.eventTypePascalCase());
+				values.put("eventTypeCamelCase", message.eventTypeCamelCase());
 			}
 
 			if (ValidationUtils.isNotBlank(message.resourceType())) {
 				values.put("resourceTypeUpperCase", message.resourceTypeUpperCase());
 				values.put("resourceTypeLowerCase", message.resourceTypeLowerCase());
+				values.put("resourceTypeKebabCase", message.resourceTypeKebabCase());
+				values.put("resourceTypePascalCase", message.resourceTypePascalCase());
+				values.put("resourceTypeCamelCase", message.resourceTypeCamelCase());
 			}
 
 			if (ValidationUtils.isNotBlank(message.operationType())) {
 				values.put("operationTypeUpperCase", message.operationTypeUpperCase());
 				values.put("operationTypeLowerCase", message.operationTypeLowerCase());
+				values.put("operationTypeKebabCase", message.operationTypeKebabCase());
+				values.put("operationTypePascalCase", message.operationTypePascalCase());
+				values.put("operationTypeCamelCase", message.operationTypeCamelCase());
 			}
 
 			if (ValidationUtils.isNotBlank(message.result())) {
 				values.put("resultUpperCase", message.resultUpperCase());
 				values.put("resultLowerCase", message.resultLowerCase());
+				values.put("resultKebabCase", message.resultKebabCase());
+				values.put("resultPascalCase", message.resultPascalCase());
+				values.put("resultCamelCase", message.resultCamelCase());
 			}
 
 			var substitutor = new StringSubstitutor(values, "${", "}");
@@ -77,6 +95,10 @@ public final class TemplateUtils {
 
 			return substitutor.replace(template);
 		});
+	}
+
+	public static boolean containsTemplate(String value) {
+		return value != null && value.contains("${");
 	}
 
 	public static void clearCache() {

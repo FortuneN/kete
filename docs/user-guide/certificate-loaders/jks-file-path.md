@@ -16,15 +16,15 @@ Load a Java KeyStore from a file on the filesystem. Format is auto-detected.
 ## Example
 
 ```bash
-kete.routes.myroute.destination.tls=true
+kete.routes.myroute.destination.tls.enabled=true
 
 # Trust store (CA certificates)
-kete.routes.myroute.destination.trust-store.loader.kind=jks-file-path
-kete.routes.myroute.destination.trust-store.loader.path=/certs/truststore.jks
-kete.routes.myroute.destination.trust-store.password=changeit
+kete.routes.myroute.destination.tls.trust-store.loader.kind=jks-file-path
+kete.routes.myroute.destination.tls.trust-store.loader.path=/certs/truststore.jks
+kete.routes.myroute.destination.tls.trust-store.password=changeit
 
 # Key store (client certificate + private key)
-kete.routes.myroute.destination.key-store.loader.kind=jks-file-path
-kete.routes.myroute.destination.key-store.loader.path=/certs/keystore.jks
-kete.routes.myroute.destination.key-store.password=changeit
+kete.routes.myroute.destination.tls.key-store.loader.kind=jks-file-path
+kete.routes.myroute.destination.tls.key-store.loader.path=/certs/keystore.jks
+kete.routes.myroute.destination.tls.key-store.password=changeit
 ```

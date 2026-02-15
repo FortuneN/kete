@@ -1,7 +1,7 @@
 package io.github.fortunen.kete.destinations.mqtt5;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
+import java.util.List;
 
 import org.eclipse.paho.mqttv5.client.MqttClient;
 import org.eclipse.paho.mqttv5.client.persist.MemoryPersistence;
@@ -28,7 +28,12 @@ import lombok.extern.slf4j.Slf4j;
 @EqualsAndHashCode(callSuper = true)
 public class Mqtt5Destination extends Destination<Mqtt5DestinationConfig> {
 
+	private int qos;
+	private String topic;
+	private boolean retained;
 	private MqttClient client;
+	private boolean isTopicTemplated;
+	private List<UserProperty> staticUserProperties;
 
 	@Override
 	@SneakyThrows
@@ -38,7 +43,15 @@ public class Mqtt5Destination extends Destination<Mqtt5DestinationConfig> {
 
 		var clientId = config.getClientIdPrefix() + "-" + config.getClientIdCounter().incrementAndGet();
 
+		qos = config.getQos();
+		topic = config.getTopic();
+		retained = config.isRetained();
+		isTopicTemplated = config.isTopicTemplated();
+		staticUserProperties = config.getStaticUserProperties();
 		client = new MqttClient(config.getUrl(), clientId, new MemoryPersistence());
+
+		// verify connection
+
 		client.connect(config.getConnectOptions());
 	}
 
@@ -50,22 +63,14 @@ public class Mqtt5Destination extends Destination<Mqtt5DestinationConfig> {
 
 		// actualTopic
 
-		var actualTopic = TemplateUtils.substitute(config.getTopic(), message);
+		var actualTopic = isTopicTemplated ? TemplateUtils.substitute(topic, message) : topic;
 
-		// userProperties (message headers take priority over custom headers)
+		// userProperties (start from precomputed static list, add per-message KETE headers)
 
-		var headerMap = new LinkedHashMap<String, String>();
+		var userProperties = new ArrayList<>(staticUserProperties);
 
-		for (var entry : config.getCustomHeadersEntrySet()) {
-			headerMap.put(entry.getKey(), entry.getValue());
-		}
-
-		headerMap.put(Constants.MESSAGE_HEADER_EVENT_KIND, message.kind());
-		headerMap.put(Constants.MESSAGE_HEADER_EVENT_TYPE, message.eventType());
-
-		var userProperties = new ArrayList<UserProperty>();
-
-		headerMap.forEach((key, value) -> userProperties.add(new UserProperty(key, value)));
+		userProperties.add(new UserProperty(Constants.MESSAGE_HEADER_EVENT_KIND, message.kind()));
+		userProperties.add(new UserProperty(Constants.MESSAGE_HEADER_EVENT_TYPE, message.eventType()));
 
 		// properties
 
@@ -78,10 +83,10 @@ public class Mqtt5Destination extends Destination<Mqtt5DestinationConfig> {
 
 		var mqttMessage = new MqttMessage();
 
-		mqttMessage.setQos(config.getQos());
+		mqttMessage.setQos(qos);
 		mqttMessage.setProperties(properties);
 		mqttMessage.setPayload(message.eventBody());
-		mqttMessage.setRetained(config.isRetained());
+		mqttMessage.setRetained(retained);
 
 		// publish
 
@@ -92,7 +97,7 @@ public class Mqtt5Destination extends Destination<Mqtt5DestinationConfig> {
 	@SneakyThrows
 	public void close() {
 		try {
-			if (client != null && client.isConnected()) {
+			if (ValidationUtils.isNotNull(client) && client.isConnected()) {
 				client.disconnect();
 			}
 		} catch (Exception e) {

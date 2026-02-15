@@ -1,2 +1,0 @@
-## Shaded XOAUTH2 SASL mechanism for kete
-class=io.github.fortunen.kete.shaded.qpid.jms.sasl.XOauth2MechanismFactory

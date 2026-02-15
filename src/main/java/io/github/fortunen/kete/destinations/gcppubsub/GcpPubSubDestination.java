@@ -1,18 +1,24 @@
 package io.github.fortunen.kete.destinations.gcppubsub;
 
 import java.io.IOException;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
+import java.time.Duration;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+
+import com.google.api.client.http.GenericUrl;
+import com.google.api.client.json.gson.GsonFactory;
+import com.google.api.services.pubsub.Pubsub;
+import com.google.api.services.pubsub.model.PublishRequest;
+import com.google.api.services.pubsub.model.PubsubMessage;
+import com.google.auth.http.HttpCredentialsAdapter;
 
 import io.github.fortunen.kete.Component;
 import io.github.fortunen.kete.Constants;
 import io.github.fortunen.kete.Destination;
 import io.github.fortunen.kete.EventMessage;
-import io.github.fortunen.kete.utils.Base64Utils;
-import io.github.fortunen.kete.utils.JsonUtils;
 import io.github.fortunen.kete.utils.TemplateUtils;
 import io.github.fortunen.kete.utils.ValidationUtils;
 import lombok.Data;
@@ -26,13 +32,16 @@ import lombok.SneakyThrows;
 @EqualsAndHashCode(callSuper = true)
 public class GcpPubSubDestination extends Destination<GcpPubSubDestinationConfig> {
 
-	private static final String CONTENT_TYPE = "Content-Type";
-	private static final String AUTHORIZATION = "Authorization";
-	private static final String APPLICATION_JSON = "application/json";
-
-	private HttpClient httpClient;
-	private String publishUrlPrefix;
-	private final ConcurrentHashMap<String, URI> publishUrlCache = new ConcurrentHashMap<>();
+	private String topic;
+	private Pubsub pubsub;
+	private Duration timeout;
+	private String orderingKey;
+	private boolean hasOrderingKey;
+	private boolean isTopicTemplated;
+	private String publishTopicPrefix;
+	private boolean isOrderingKeyTemplated;
+	private Set<Map.Entry<String, String>> customHeadersEntrySet;
+	private final ConcurrentHashMap<String, String> topicNameCache = new ConcurrentHashMap<>();
 
 	@Override
 	@SneakyThrows
@@ -40,19 +49,28 @@ public class GcpPubSubDestination extends Destination<GcpPubSubDestinationConfig
 
 		ValidationUtils.requireNonNull(config, "config is required");
 
-		httpClient = config.getClientBuilder().build();
+		var credentials = config.getCredentials();
+		var httpTransport = config.getHttpTransport();
+		var initializer = ValidationUtils.isNotNull(credentials) ? new HttpCredentialsAdapter(credentials) : null;
 
-		publishUrlPrefix = config.getUrl() + "/v1/projects/" + config.getProject() + "/topics/";
+		// build Pub/Sub client
+
+		topic = config.getTopic();
+		timeout = config.getTimeout();
+		orderingKey = config.getOrderingKey();
+		hasOrderingKey = config.isHasOrderingKey();
+		isTopicTemplated = config.isTopicTemplated();
+		publishTopicPrefix = config.getPublishTopicPrefix();
+		isOrderingKeyTemplated = config.isOrderingKeyTemplated();
+		customHeadersEntrySet = config.getCustomHeadersEntrySet();
+		pubsub = new Pubsub.Builder(httpTransport, GsonFactory.getDefaultInstance(), initializer).setApplicationName("kete").setRootUrl(config.getUrl() + "/").build();
 
 		// verify connection
 
-		var testRequest = HttpRequest.newBuilder()
-			.uri(URI.create(config.getUrl()))
-			.timeout(config.getTimeout())
-			.GET()
-			.build();
-
-		httpClient.send(testRequest, HttpResponse.BodyHandlers.discarding());
+		httpTransport
+			.createRequestFactory()
+			.buildGetRequest(new GenericUrl(config.getUrl()))
+			.execute();
 	}
 
 	@Override
@@ -63,52 +81,48 @@ public class GcpPubSubDestination extends Destination<GcpPubSubDestinationConfig
 
 		// topic
 
-		var actualTopic = TemplateUtils.substitute(config.getTopic(), message);
+		var actualTopic = isTopicTemplated ? TemplateUtils.substitute(topic, message) : topic;
 
-		// publish url
+		// full topic name
 
-		var publishUri = publishUrlCache.computeIfAbsent(actualTopic, topic -> URI.create(publishUrlPrefix + topic + ":publish"));
+		var fullTopicName = topicNameCache.computeIfAbsent(actualTopic, t -> publishTopicPrefix + t);
 
-		// body
+		// attributes
 
-		var rootObject = JsonUtils.createObjectNode();
-		var messagesArray = rootObject.putArray("messages");
-		var messageObject = messagesArray.addObject();
+		var attributes = new HashMap<String, String>();
 
-        if (ValidationUtils.isNotBlank(config.getOrderingKey())) {
-			messageObject.put("orderingKey", config.getOrderingKey());
+		for (var entry : customHeadersEntrySet) {
+			attributes.put(entry.getKey(), entry.getValue());
 		}
-
-		messageObject.put("data", Base64Utils.encode(message.eventBody()));
-
-		var attributes = messageObject.putObject("attributes");
 
 		attributes.put(Constants.MESSAGE_HEADER_EVENT_KIND, message.kind());
 		attributes.put(Constants.MESSAGE_HEADER_EVENT_TYPE, message.eventType());
 		attributes.put(Constants.MESSAGE_HEADER_CONTENT_TYPE, message.contentType());
 
-		var bodyJson = rootObject.toString();
+		// message
 
-		// request
+		var pubsubMessage = new PubsubMessage()
+			.encodeData(message.eventBody())
+			.setAttributes(attributes);
 
-		var requestBuilder = HttpRequest.newBuilder()
-			.uri(publishUri)
-			.timeout(config.getTimeout())
-			.header(CONTENT_TYPE, APPLICATION_JSON);
-
-		if (config.isAuthenticated()) {
-			requestBuilder.header(AUTHORIZATION, config.getAuth().getAccessToken().toAuthorizationHeader());
+		if (hasOrderingKey) {
+			var actualOrderingKey = isOrderingKeyTemplated ? TemplateUtils.substitute(orderingKey, message) : orderingKey;
+			pubsubMessage.setOrderingKey(actualOrderingKey);
 		}
 
-		requestBuilder.POST(HttpRequest.BodyPublishers.ofString(bodyJson));
+		// publish
 
-		var response = httpClient.send(requestBuilder.build(), HttpResponse.BodyHandlers.ofString());
+		var messages = new ArrayList<PubsubMessage>();
+		messages.add(pubsubMessage);
 
-		ValidationUtils.requireTrue(response.statusCode() >= 200 && response.statusCode() < 300, () -> new IOException("GCP Pub/Sub publish failed: HTTP " + response.statusCode() + " : " + response.body()));
+		var publishRequest = new PublishRequest().setMessages(messages);
+		var response = pubsub.projects().topics().publish(fullTopicName, publishRequest).execute();
+
+		ValidationUtils.requireTrue(response.getMessageIds() != null && !response.getMessageIds().isEmpty(), () -> new IOException("GCP Pub/Sub publish failed: no message IDs returned"));
 	}
 
 	@Override
 	public void close() {
-		ValidationUtils.tryClose(httpClient, "httpClient");
+		// Pubsub client is stateless — no cleanup needed
 	}
 }

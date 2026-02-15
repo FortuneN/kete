@@ -31,6 +31,7 @@ class KafkaDestinationE2ETests extends EndToEndTestBase {
 		cleanupNetwork();
 	}
 
+	@SuppressWarnings("resource")
 	@Test
 	void shouldForwardLoginEventToKafkaTopic() throws Exception {
 
@@ -41,7 +42,6 @@ class KafkaDestinationE2ETests extends EndToEndTestBase {
 		waitForKafkaReady(kafka);
 
 		var envVars = new HashMap<String, String>();
-		envVars.put("kete.enabled", "true");
 		envVars.put("kete.routes.kafka-test.realm-matchers.filter", "list:" + TEST_REALM);
 		envVars.put("kete.routes.kafka-test.destination.kind", "kafka");
 		envVars.put("kete.routes.kafka-test.destination.bootstrap.servers", "kafka:19092");

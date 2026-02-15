@@ -1,0 +1,45 @@
+services:
+
+  artemis:
+    image: ghcr.io/fortunen/kete/quick-start-activemq-artemis
+    ports:
+      - 1883:61616
+      - 8161:8161
+    environment:
+      ARTEMIS_USER: admin
+      ARTEMIS_PASSWORD: admin
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8161/console"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  subscriber:
+    image: ghcr.io/fortunen/kete/quick-start-mqtt-subscriber
+    entrypoint: ["/bin/sh", "-c", "sleep 2 && mosquitto_sub -h $$MQTT_BROKER_HOST -p $$MQTT_BROKER_PORT -t $$MQTT_TOPIC -i kete-test-subscriber -u admin -P admin -v | while read -r line; do echo EVENT-RECEIVED; done"]
+    environment:
+      MQTT_BROKER_HOST: artemis
+      MQTT_BROKER_PORT: 61616
+      MQTT_TOPIC: keycloak-events
+    depends_on:
+      artemis:
+        condition: service_healthy
+
+  keycloak:
+    image: ghcr.io/fortunen/kete/quick-start-keycloak
+    command: start-dev
+    ports:
+      - 8080:8080
+      - 9000:9000
+    environment:
+      kete.routes.quick-start.destination.kind: mqtt-3
+      kete.routes.quick-start.destination.host: artemis
+      kete.routes.quick-start.destination.port: 61616
+      kete.routes.quick-start.destination.topic: keycloak-events
+      kete.routes.quick-start.destination.username: admin
+      kete.routes.quick-start.destination.password: admin
+    depends_on:
+      artemis:
+        condition: service_healthy
+      subscriber:
+        condition: service_started

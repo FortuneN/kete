@@ -16,15 +16,15 @@ Load Base64-encoded Java KeyStore content. Format is auto-detected.
 ## Example
 
 ```bash
-kete.routes.myroute.destination.tls=true
+kete.routes.myroute.destination.tls.enabled=true
 
 # Trust store (CA certificates)
-kete.routes.myroute.destination.trust-store.loader.kind=jks-file-base64
-kete.routes.myroute.destination.trust-store.loader.base64=/u3+7QAAAAIAAAABAAAAAQAFYWxpYXM...
-kete.routes.myroute.destination.trust-store.password=changeit
+kete.routes.myroute.destination.tls.trust-store.loader.kind=jks-file-base64
+kete.routes.myroute.destination.tls.trust-store.loader.base64=/u3+7QAAAAIAAAABAAAAAQAFYWxpYXM...
+kete.routes.myroute.destination.tls.trust-store.password=changeit
 
 # Key store (client certificate + private key)
-kete.routes.myroute.destination.key-store.loader.kind=jks-file-base64
-kete.routes.myroute.destination.key-store.loader.base64=/u3+7QAAAAIAAAABAAAAAQAFa2V5c3Rv...
-kete.routes.myroute.destination.key-store.password=changeit
+kete.routes.myroute.destination.tls.key-store.loader.kind=jks-file-base64
+kete.routes.myroute.destination.tls.key-store.loader.base64=/u3+7QAAAAIAAAABAAAAAQAFa2V5c3Rv...
+kete.routes.myroute.destination.tls.key-store.password=changeit
 ```

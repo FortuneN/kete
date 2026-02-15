@@ -23,6 +23,7 @@ services:
         condition: service_healthy
     entrypoint: >
       sh -c '
+        for i in $(seq 1 30); do curl -sf -u admin:admin http://rabbitmq:15672/api/overview > /dev/null && break || sleep 1; done &&
         curl -s -u admin:admin -X PUT http://rabbitmq:15672/api/queues/%2f/keycloak-events -H "content-type: application/json" -d "{\"durable\":true}"
       '
 

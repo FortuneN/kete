@@ -1,0 +1,15 @@
+services:
+
+  keycloak:
+    image: ghcr.io/fortunen/kete/quick-start-keycloak
+    command: start-dev
+    ports:
+      - "8080:8080"
+      - "9000:9000"
+    environment:
+      kete.routes.quick-start.destination.kind: nats-jetstream
+      kete.routes.quick-start.destination.servers: ${NATS_SERVERS:-tls://connect.ngs.global}
+      kete.routes.quick-start.destination.subject: ${NATS_SUBJECT:-keycloak.events}
+      kete.routes.quick-start.destination.stream: ${NATS_STREAM:-KEYCLOAK_EVENTS}
+      kete.routes.quick-start.destination.authentication-method: credentials-file-text
+      kete.routes.quick-start.destination.credentials-file-text: ${NATS_CREDENTIALS_FILE_TEXT:-<YOUR_NATS_CREDENTIALS_FILE_CONTENTS>}

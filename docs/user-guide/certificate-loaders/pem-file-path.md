@@ -16,13 +16,13 @@ Load certificates from a PEM file on the filesystem.
 ## Example
 
 ```bash
-kete.routes.myroute.destination.tls=true
+kete.routes.myroute.destination.tls.enabled=true
 
 # Trust store (CA certificates)
-kete.routes.myroute.destination.trust-store.loader.kind=pem-file-path
-kete.routes.myroute.destination.trust-store.loader.path=/certs/ca.pem
+kete.routes.myroute.destination.tls.trust-store.loader.kind=pem-file-path
+kete.routes.myroute.destination.tls.trust-store.loader.path=/certs/ca.pem
 
 # Key store (client certificate + private key)
-kete.routes.myroute.destination.key-store.loader.kind=pem-file-path
-kete.routes.myroute.destination.key-store.loader.path=/certs/client.pem
+kete.routes.myroute.destination.tls.key-store.loader.kind=pem-file-path
+kete.routes.myroute.destination.tls.key-store.loader.path=/certs/client.pem
 ```

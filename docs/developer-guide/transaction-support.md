@@ -30,13 +30,13 @@ public class ProviderFactory implements EventListenerProviderFactory,
     @Override
     public void accept(Event event) {
         // Called on commit - publish event to destinations
-        sendMessage(event.getId(), event.getRealmId(), ...);
+        sendMessage(event.getId(), event.getRealmName(), ...);
     }
 
     @Override
     public void accept(AdminEvent event, Boolean includeRepresentation) {
         // Called on commit - publish admin event to destinations
-        sendMessage(event.getId(), event.getRealmId(), ...);
+        sendMessage(event.getId(), event.getRealmName(), ...);
     }
 }
 ```
