@@ -1281,6 +1281,8 @@ unittests/destinations/<destination>/
 - Use MockWebServer or WireMock
 - Perform any operation that requires a running external process
 
+**SCOPE:** This rule applies exclusively to tests under `package io.github.fortunen.kete.unittests.destinations`. Integration tests (`integrationtests/`) and E2E tests (`endtoendtests/`) are governed by the Integration & E2E Test Policy in section 21.2 below.
+
 **Example (NatsDestination):**
 
 ```java

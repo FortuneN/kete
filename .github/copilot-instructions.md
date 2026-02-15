@@ -106,6 +106,8 @@ These tests work by:
 
 **NEVER** in these tests: start a container, open a socket, make an HTTP call, connect to a broker, or perform any operation that requires a running external process.
 
+**SCOPE**: This rule applies exclusively to tests under `package io.github.fortunen.kete.unittests.destinations`. Integration tests (`integrationtests/`) and E2E tests (`endtoendtests/`) are governed by the Integration & E2E Test Policy below.
+
 ### Integration & E2E Test Policy (CRITICAL)
 
 **MANDATORY RULE**: Tests requiring containers or external services are **expensive**. Strict limits apply per destination:
