@@ -382,6 +382,10 @@ KETE works with major cloud messaging services through protocol compatibility:
 | **StreamNative Cloud** | `pulsar` | [Pulsar](pulsar.md) |
 | **DataStax Astra Streaming** | `pulsar` | [Pulsar](pulsar.md) |
 | **DataStax Luna Streaming** | `pulsar` | [Pulsar](pulsar.md) |
+| **Synadia Cloud** | `nats` or `nats-jetstream` | [NATS](nats.md) / [NATS JetStream](nats-jetstream.md) |
+| **CloudAMQP** | `amqp-0.9.1` | [AMQP 0.9.1](amqp-0.9.1.md) |
+| **HiveMQ Cloud** | `mqtt-3` or `mqtt-5` | [MQTT 3](mqtt-3.md) / [MQTT 5](mqtt-5.md) |
+| **EMQX Cloud** | `mqtt-3` or `mqtt-5` | [MQTT 3](mqtt-3.md) / [MQTT 5](mqtt-5.md) |
 
 !!! tip "Multiple Protocol Options"
     Azure Event Hubs, Azure Service Bus, and Azure Event Grid can each be accessed via their native SDK destination or through standard protocols (Kafka, AMQP 1.0, HTTP, MQTT). Use the native SDK destination for features like Managed Identity authentication, or use protocol-based destinations for portability.

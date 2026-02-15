@@ -146,6 +146,7 @@ kete/
 │   │   │   │   ├── XmlSerializer.java
 │   │   │   │   └── YamlSerializer.java
 │   │   │   └── utils/                            # Utility classes
+│   │   │       ├── AvroUtils.java
 │   │   │       ├── AwsUtils.java
 │   │   │       ├── AzureUtils.java
 │   │   │       ├── Base64Utils.java
@@ -160,6 +161,7 @@ kete/
 │   │   │       ├── JwtUtils.java
 │   │   │       ├── MatcherUtils.java
 │   │   │       ├── MetricsUtils.java
+│   │   │       ├── ProtobufUtils.java
 │   │   │       ├── RetryUtils.java
 │   │   │       ├── RouteUtils.java
 │   │   │       ├── SerializerUtils.java

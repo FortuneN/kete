@@ -44,6 +44,8 @@ This page provides a comprehensive cross-reference of message brokers and the de
 | **Confluent Cloud** | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
 | **Aiven for Kafka** | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
 | **Strimzi** | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| **WarpStream** | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| **Instaclustr** | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
 | **Solace PubSub+** | ❌ | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ✅ | ❌ | ❌ |
 | **Apache RocketMQ** | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
 | **AWS IoT Core** | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ✅ | ❌ | ❌ |
@@ -213,6 +215,9 @@ Use `destination.kind=kafka`:
 - **Azure Event Hubs** - Kafka protocol support
 - **Amazon MSK** - Managed Kafka
 - **Aiven for Kafka** - Managed
+- **Strimzi** - Kubernetes Kafka operator
+- **WarpStream** - Zero-disk Kafka
+- **Instaclustr** - Multi-cloud managed Kafka
 
 **Quickstarts available:** [kafka-apache](https://github.com/FortuneN/kete/tree/release/quick-starts/kafka-apache/), [kafka-redpanda](https://github.com/FortuneN/kete/tree/release/quick-starts/kafka-redpanda/), [kafka-confluent](https://github.com/FortuneN/kete/tree/release/quick-starts/kafka-confluent/), [kafka-azure-event-hubs](https://github.com/FortuneN/kete/tree/release/quick-starts/kafka-azure-event-hubs/), [kafka-azure-event-hubs-emulator](https://github.com/FortuneN/kete/tree/release/quick-starts/kafka-azure-event-hubs-emulator/), [kafka-amazon-msk](https://github.com/FortuneN/kete/tree/release/quick-starts/kafka-amazon-msk/)
 
