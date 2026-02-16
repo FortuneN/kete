@@ -76,8 +76,7 @@ The `.avsc` schema files needed to decode messages are in the [`schemas/avro/`](
     { "name": "operation_type",  "type": ["null", "string"], "default": null },
     { "name": "resource_path",   "type": ["null", "string"], "default": null },
     { "name": "representation",  "type": ["null", "string"], "default": null },
-    { "name": "error",           "type": ["null", "string"], "default": null },
-    { "name": "details",         "type": ["null", { "type": "map", "values": "string" }], "default": null }
+    { "name": "error",           "type": ["null", "string"], "default": null }
   ]
 }
 ```

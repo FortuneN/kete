@@ -62,7 +62,6 @@ message AdminEvent {
   string resource_path = 8;
   string representation = 9;
   string error = 10;
-  map<string, string> details = 11;
 }
 ```
 

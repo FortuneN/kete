@@ -82,6 +82,8 @@ Set a global escape mode with `variable-escape`, then override individual variab
 | `csv` | `csv-quote` | CSV quoting (wraps in quotes if value contains `,`, `"`, or newlines) |
 | `b64` | `base64` | Base64 encoding |
 
+Unrecognized filter names are treated as `none` (raw passthrough).
+
 **Per-variable override:**
 
 ```bash
