@@ -20,7 +20,7 @@ All destinations support:
 Most destinations support:
 
 - **Message Headers** - Event metadata sent with each message — see [Per-Destination Details](#per-destination-details) for which destinations support headers
-- **Content Encoding** - Compress payload with gzip or deflate — supported by HTTP-based and SDK-based destinations (HTTP, SOAP, gRPC, AWS, Azure Event Grid, Azure Storage Queue, Azure Web PubSub, GCP Cloud Tasks) - see [Content Encodings](../content-encodings/overview.md)
+- **Content Encoding** - Compress payload with gzip or deflate — supported by HTTP-based and SDK-based destinations (HTTP, SOAP, gRPC, AWS EventBridge, AWS SNS, AWS SQS, Azure Event Grid, Azure Storage Queue, Azure Web PubSub, GCP Cloud Tasks) - see [Content Encodings](../content-encodings/overview.md)
 - **Content Transfer Encoding** - Encode payload with base64 — same destinations as Content Encoding - see [Content Transfer Encodings](../content-transfer-encodings/overview.md)
 
 ## Destination Pool
@@ -510,5 +510,96 @@ kete.routes.events.destination.connection-string=Endpoint=sb://my-namespace.serv
 ```bash
 kete.routes.events.destination.kind=azure-servicebus
 kete.routes.events.destination.connection-string=Endpoint=sb://my-namespace.servicebus.windows.net/;SharedAccessKeyName=send;SharedAccessKey=your-key
+kete.routes.events.destination.queue=keycloak-events
+```
+
+**AMQP 1.0:**
+```bash
+kete.routes.events.destination.kind=amqp-1
+kete.routes.events.destination.host=artemis.example.com
+kete.routes.events.destination.destination-name=keycloak.events
+```
+
+**MQTT 3:**
+```bash
+kete.routes.events.destination.kind=mqtt-3
+kete.routes.events.destination.host=mosquitto.example.com
+kete.routes.events.destination.topic=keycloak/events
+```
+
+**MQTT 5:**
+```bash
+kete.routes.events.destination.kind=mqtt-5
+kete.routes.events.destination.host=hivemq.example.com
+kete.routes.events.destination.topic=keycloak/events
+```
+
+**NATS:**
+```bash
+kete.routes.events.destination.kind=nats
+kete.routes.events.destination.servers=nats://localhost:4222
+kete.routes.events.destination.subject=keycloak.events
+kete.routes.events.destination.authentication-method=none
+```
+
+**NATS JetStream:**
+```bash
+kete.routes.events.destination.kind=nats-jetstream
+kete.routes.events.destination.servers=nats://localhost:4222
+kete.routes.events.destination.subject=keycloak.events
+kete.routes.events.destination.stream=KEYCLOAK_EVENTS
+kete.routes.events.destination.authentication-method=none
+```
+
+**Pulsar:**
+```bash
+kete.routes.events.destination.kind=pulsar
+kete.routes.events.destination.service-url=pulsar://localhost:6650
+kete.routes.events.destination.topic=persistent://public/default/keycloak-events
+```
+
+**Redis Pub/Sub:**
+```bash
+kete.routes.events.destination.kind=redis-pubsub
+kete.routes.events.destination.host=redis.example.com
+kete.routes.events.destination.channel=keycloak-events
+```
+
+**Redis Stream:**
+```bash
+kete.routes.events.destination.kind=redis-stream
+kete.routes.events.destination.host=redis.example.com
+kete.routes.events.destination.stream=keycloak-events
+```
+
+**STOMP:**
+```bash
+kete.routes.events.destination.kind=stomp
+kete.routes.events.destination.host=activemq.example.com
+kete.routes.events.destination.destination=/queue/keycloak-events
+```
+
+**WebSocket:**
+```bash
+kete.routes.events.destination.kind=websocket
+kete.routes.events.destination.url=ws://websocket-server:8080/events
+```
+
+**AWS Kinesis:**
+```bash
+kete.routes.events.destination.kind=aws-kinesis
+kete.routes.events.destination.stream=keycloak-events
+kete.routes.events.destination.partition-key=keycloak
+```
+
+**AWS SNS:**
+```bash
+kete.routes.events.destination.kind=aws-sns
+kete.routes.events.destination.topic=keycloak-events
+```
+
+**AWS SQS:**
+```bash
+kete.routes.events.destination.kind=aws-sqs
 kete.routes.events.destination.queue=keycloak-events
 ```

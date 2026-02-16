@@ -62,7 +62,7 @@ Stream Keycloak events to Azure Web PubSub.
 - Send messages to all connected clients or a specific group
 - Automatic JSON/text content type detection
 - Three authentication methods: connection string, managed identity, default Azure credential
-- Hub name configuration for message routing
+- Hub and group name templating with variables
 - TLS/mTLS support
 
 

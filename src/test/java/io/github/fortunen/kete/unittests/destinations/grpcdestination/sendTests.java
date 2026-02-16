@@ -54,6 +54,7 @@ public class sendTests {
 		when(channel.newCall(any(MethodDescriptor.class), any(CallOptions.class))).thenReturn(clientCall);
 
 		// capture the response listener so we can complete the call
+
 		final ClientCall.Listener<byte[]>[] captured = new ClientCall.Listener[1];
 		doAnswer(invocation -> {
 			captured[0] = invocation.getArgument(0);
@@ -61,6 +62,7 @@ public class sendTests {
 		}).when(clientCall).start(any(), any(Metadata.class));
 
 		// when halfClose is called, complete the call via the captured listener
+
 		doAnswer(invocation -> {
 			captured[0].onMessage(new byte[0]);
 			captured[0].onClose(Status.OK, new Metadata());

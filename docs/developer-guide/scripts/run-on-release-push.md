@@ -110,6 +110,10 @@ The release is created using the GitHub CLI (`gh`):
   └──────────────────────────────────────────────────────────────────────────┘
 
     ✓ quick-start-keycloak [:2026.01.31.18.45 + :latest]
+    ✓ quick-start-activemq-artemis [:2026.01.31.18.45 + :latest]
+    ✓ quick-start-mosquitto [:2026.01.31.18.45 + :latest]
+    ...47 more images...
+    ✓ quick-start-zeromq-subscriber [:2026.01.31.18.45 + :latest]
 
   ┌──────────────────────────────────────────────────────────────────────────┐
   │  STEP 4 of 5 │ BUILD DOCUMENTATION SITE                                │
@@ -135,6 +139,8 @@ The release is created using the GitHub CLI (`gh`):
 
   Docker Images Published:
     ghcr.io/fortunen/kete/quick-start-keycloak:2026.01.31.18.45
+    ghcr.io/fortunen/kete/quick-start-activemq-artemis:2026.01.31.18.45
+    ...and 49 more images
 
   GitHub Release:
     https://github.com/FortuneN/kete/releases/tag/2026.01.31.18.45

@@ -49,7 +49,7 @@ Stream Keycloak events to Azure Storage Queue.
 ## Features
 
 - Azure Storage Queue SDK integration
-- Authentication via connection string (Shared Key or SAS Token)
+- Authentication via connection string, Managed Identity, or Default Azure Credential
 - Emulator support via Azurite for local development and testing
 - Queue name templating with variables
 - Configurable message TTL
@@ -71,8 +71,9 @@ Stream Keycloak events to Azure Storage Queue.
 ### Optional Properties
 
 | Property | Default | Description | Example |
-|----------|---------|-------------|---------|
-| `destination.message-ttl` | `0` | Message TTL in seconds (`0` = Azure default 7 days, `-1` = no expiry) | `3600` |
+|----------|---------|-------------|---------|| `destination.endpoint` | _(empty)_ | Storage account queue endpoint (required for `managed-identity` / `default-azure-credential` auth) | `https://mystorageaccount.queue.core.windows.net` |
+| `destination.authentication-type` | _(empty)_ | Authentication method: `connection-string`, `managed-identity`, `default-azure-credential` | `managed-identity` |
+| `destination.managed-identity-client-id` | _(empty)_ | Client ID for user-assigned managed identity | `your-client-id` || `destination.message-ttl` | `0` | Message TTL in seconds (`0` = Azure default 7 days, `-1` = no expiry) | `3600` |
 | `destination.timeout-seconds` | `10` | HTTP connect and request timeout in seconds | `30` |
 
 ### Dynamic Queue Name (Templating)

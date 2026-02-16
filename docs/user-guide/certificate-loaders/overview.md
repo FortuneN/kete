@@ -14,4 +14,4 @@ Loaders specify how KETE reads certificates and keys for TLS connections.
 | [`der-file-path`](der-file-path.md) | File | DER file (.der, .cer) — trust stores only |
 | [`der-file-base64`](der-file-base64.md) | Inline | Base64-encoded DER content — trust stores only |
 | [`jks-file-path`](jks-file-path.md) | File | Java KeyStore (.jks, .keystore) — auto-detects JKS/PKCS12 |
-| [`jks-file-base64`](jks-file-base64.md) | Inline | Base64-encoded keystore content |
+| [`jks-file-base64`](jks-file-base64.md) | Inline | Base64-encoded keystore content — auto-detects JKS/PKCS12 |

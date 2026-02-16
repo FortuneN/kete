@@ -49,43 +49,6 @@
 | **Event-Driven Architecture** | Trigger downstream services based on Keycloak events |
 | **Multi-Destination Routing** | Send different event types to different systems simultaneously |
 
-## Features
-
-- **29 destination kinds** — stream events to messaging, cloud, and custom endpoints
-- **13 serializers** — JSON, XML, YAML, CSV, TOML, Properties, CBOR, Protobuf, Avro, Smile, URL-Encoded Form, Multipart Form, Template
-- **4 matchers** — Glob, List, Regex, SQL — to filter which events reach which destinations
-- **11 certificate loaders** — PEM, PKCS12, PKCS7, DER, JKS (file path, base64, and text variants)
-- **2 content encodings** — Gzip, Deflate
-- **1 content transfer encoding** — Base64
-- **Multi-route** — send different event types to different destinations simultaneously
-- **TLS / mTLS** — full TLS and mutual TLS support across all destinations
-- **Retry** — configurable retry via Resilience4j
-- **Connection pooling** — Apache Commons Pool2 for all destination connections
-
-## Supported Destinations
-
-| Category | Compatible Services |
-|----------|---------------------|
-| **Kafka** | Apache Kafka, Confluent, Redpanda, AWS MSK, Azure Event Hubs, Aiven, Strimzi, WarpStream, Instaclustr |
-| **AMQP 1.0** | Apache ActiveMQ, Apache Artemis, Apache Qpid, RabbitMQ, Solace PubSub+, Amazon MQ, Azure Event Hubs, Azure Service Bus |
-| **AMQP 0-9-1** | RabbitMQ, LavinMQ, CloudAMQP, Amazon MQ |
-| **MQTT 3.1.1** | Eclipse Mosquitto, EMQX, HiveMQ, VerneMQ, NanoMQ, RabbitMQ, ActiveMQ Artemis, Solace, Azure Event Grid, AWS IoT Core, Azure IoT Hub |
-| **MQTT 5.0** | Eclipse Mosquitto, EMQX, HiveMQ, VerneMQ, NanoMQ, RabbitMQ, ActiveMQ Artemis, Solace, Azure Event Grid |
-| **Redis** | Redis, Valkey, Dragonfly, KeyDB, Garnet, Upstash, AWS ElastiCache, Azure Cache, Google Memorystore (Pub/Sub & Streams) |
-| **NATS** | NATS Server, Synadia Cloud (NATS Core & JetStream) |
-| **Pulsar** | Apache Pulsar, StreamNative Cloud, DataStax Astra Streaming, DataStax Luna Streaming |
-| **HTTP** | Webhooks, REST APIs, Custom HTTP Endpoints |
-| **STOMP** | Apache ActiveMQ, Apache Artemis, RabbitMQ, EMQX, Amazon MQ |
-| **WebSocket** | Custom WebSocket Servers |
-| **ZeroMQ** | Any ZeroMQ peer — brokerless, 40+ language bindings |
-| **AWS** | EventBridge, Kinesis Data Streams, SNS, SQS |
-| **Azure** | Event Grid, Event Hubs, Service Bus, Storage Queue, Web PubSub |
-| **GCP** | Cloud Tasks, Pub/Sub |
-| **gRPC** | Any gRPC Server |
-| **SOAP** | Any SOAP Endpoint |
-| **SignalR** | ASP.NET SignalR Hubs |
-| **Socket.IO** | Socket.IO Servers |
-
 ## Quick Start (5 minutes)
 
 ### Step 1: <a href="https://raw.githubusercontent.com/FortuneN/kete/release/quick-starts/amqp-0.9.1-rabbitmq/docker-compose.yml" download>Download</a> or create docker-compose.yml
@@ -168,6 +131,30 @@ docker compose up -d
 ## Issues
 
 [Create new issue →](https://github.com/FortuneN/kete/issues/new)
+
+## Supported Systems
+
+| Category | Compatible Services |
+|----------|---------------------|
+| **Kafka** | Apache Kafka, Confluent, Redpanda, AWS MSK, Azure Event Hubs, Aiven, Strimzi, WarpStream, Instaclustr |
+| **AMQP 1.0** | Apache ActiveMQ, Apache Artemis, Apache Qpid, RabbitMQ, Solace PubSub+, Amazon MQ, Azure Event Hubs, Azure Service Bus |
+| **AMQP 0-9-1** | RabbitMQ, LavinMQ, CloudAMQP, Amazon MQ |
+| **MQTT 3.1.1** | Eclipse Mosquitto, EMQX, HiveMQ, VerneMQ, NanoMQ, RabbitMQ, ActiveMQ Artemis, Solace, Azure Event Grid, AWS IoT Core, Azure IoT Hub |
+| **MQTT 5.0** | Eclipse Mosquitto, EMQX, HiveMQ, VerneMQ, NanoMQ, RabbitMQ, ActiveMQ Artemis, Solace, Azure Event Grid |
+| **Redis** | Redis, Valkey, Dragonfly, KeyDB, Garnet, Upstash, AWS ElastiCache, Azure Cache, Google Memorystore (Pub/Sub & Streams) |
+| **NATS** | NATS Server, Synadia Cloud (NATS Core & JetStream) |
+| **Pulsar** | Apache Pulsar, StreamNative Cloud, DataStax Astra Streaming, DataStax Luna Streaming |
+| **HTTP** | Webhooks, REST APIs, Custom HTTP Endpoints |
+| **STOMP** | Apache ActiveMQ, Apache Artemis, RabbitMQ, EMQX, Amazon MQ |
+| **WebSocket** | Custom WebSocket Servers |
+| **ZeroMQ** | Any ZeroMQ peer — brokerless, 40+ language bindings |
+| **AWS** | EventBridge, Kinesis Data Streams, SNS, SQS |
+| **Azure** | Event Grid, Event Hubs, Service Bus, Storage Queue, Web PubSub |
+| **GCP** | Cloud Tasks, Pub/Sub |
+| **gRPC** | Any gRPC Server |
+| **SOAP** | Any SOAP Endpoint |
+| **SignalR** | ASP.NET SignalR Hubs |
+| **Socket.IO** | Socket.IO Servers |
 
 ## Please consider supporting the project
 
