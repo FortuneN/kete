@@ -110,28 +110,6 @@ docker compose up -d
 3. Open RabbitMQ: [http://localhost:15672/#/queues/%2F/keycloak-events](http://localhost:15672/#/queues/%2F/keycloak-events) (guest/guest)
 4. See events arriving!
 
-## Other Quick Starts
-
-[Browse →](https://github.com/FortuneN/kete/tree/release/quick-starts)
-
-## Releases
-
-[See releases →](https://github.com/FortuneN/kete/releases)
-
-## Documentation
-
-[User Guide →](https://fortunen.github.io/kete/user-guide/overview)
-
-[Developer Guide →](https://fortunen.github.io/kete/developer-guide/overview)
-
-## License
-
-[Apache 2.0 →](https://www.apache.org/licenses/LICENSE-2.0)
-
-## Issues
-
-[Create new issue →](https://github.com/FortuneN/kete/issues/new)
-
 ## Supported Systems
 
 | Category | Compatible Services |
@@ -155,6 +133,28 @@ docker compose up -d
 | **SOAP** | Any SOAP Endpoint |
 | **SignalR** | ASP.NET SignalR Hubs |
 | **Socket.IO** | Socket.IO Servers |
+
+## Other Quick Starts
+
+[Browse →](https://github.com/FortuneN/kete/tree/release/quick-starts)
+
+## Releases
+
+[See releases →](https://github.com/FortuneN/kete/releases)
+
+## Documentation
+
+[User Guide →](https://fortunen.github.io/kete/user-guide/overview)
+
+[Developer Guide →](https://fortunen.github.io/kete/developer-guide/overview)
+
+## License
+
+[Apache 2.0 →](https://www.apache.org/licenses/LICENSE-2.0)
+
+## Issues
+
+[Create new issue →](https://github.com/FortuneN/kete/issues/new)
 
 ## Please consider supporting the project
 
