@@ -44,7 +44,7 @@ authDetails:
 resourceType: USER
 operationType: CREATE
 resourcePath: users/user-uuid
-representation: "{\\\"username\\\":\\\"newuser\\\"}"
+representation: "{\"username\":\"newuser\"}"
 error: null
 resourceTypeAsString: USER
 ```

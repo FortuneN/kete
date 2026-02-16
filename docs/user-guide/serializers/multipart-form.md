@@ -51,6 +51,10 @@ Content-Disposition: form-data; name="realmId"
 
 master
 --kete-boundary
+Content-Disposition: form-data; name="realmName"
+
+master
+--kete-boundary
 Content-Disposition: form-data; name="clientId"
 
 my-app
@@ -58,6 +62,18 @@ my-app
 Content-Disposition: form-data; name="userId"
 
 550e8400-e29b-41d4-a716-446655440000
+--kete-boundary
+Content-Disposition: form-data; name="sessionId"
+
+abc-session-123
+--kete-boundary
+Content-Disposition: form-data; name="ipAddress"
+
+192.168.1.100
+--kete-boundary
+Content-Disposition: form-data; name="time"
+
+1704816000000
 --kete-boundary
 Content-Disposition: form-data; name="details[username]"
 
