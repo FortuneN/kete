@@ -53,28 +53,6 @@ connectionFactory = factory;
 
 ---
 
-### Solace PubSub+ (`solace-jms`)
-
-Solace provides a JMS API for their PubSub+ platform. Solace is already reachable via AMQP 1.0, MQTT 3, and MQTT 5 destinations (quickstarts available). A dedicated JMS destination would provide access to Solace-specific features not available through standard protocols.
-
-**Priority:** Low (already reachable via standard protocols)
-
-**Potential Configuration:**
-
-```properties
-kete.routes.solace.destination.kind=solace-jms
-kete.routes.solace.destination.host=solace.example.com
-kete.routes.solace.destination.vpn=default
-kete.routes.solace.destination.queue=keycloak-events
-kete.routes.solace.destination.username=admin
-kete.routes.solace.destination.password=admin
-```
-
-**Dependencies Required:**
-- `com.solacesystems:sol-jms`
-
----
-
 ### TIBCO EMS (`tibco-ems-jms`)
 
 TIBCO Enterprise Message Service with native JMS.
@@ -312,15 +290,10 @@ Systems that cannot be reached by any existing KETE destination because they use
 | Beanstalkd | `schickling/beanstalkd` | Custom text protocol | Lightweight work queue |
 | Pravega | `pravega/pravega` | Custom protocol | Dell streaming storage |
 
-!!! note "Apache RocketMQ"
-    RocketMQ supports MQTT 3.1.1 via the [rocketmq-mqtt](https://github.com/apache/rocketmq-mqtt) gateway extension and is reachable via KETE's `mqtt-3` destination. The gateway requires separate deployment alongside the RocketMQ broker (RocketMQ >= 4.9.3, <= 5.1.4).
-
 ### Protocol Categories Not Covered
 
-- **gRPC** (generic) — Unary implemented (see [gRPC Destination docs](../user-guide/destinations/grpc.md)). Streaming modes remain future.
 - **Server-Sent Events (SSE)** — one-way HTTP streaming
 - **Database-as-queue** — PostgreSQL LISTEN/NOTIFY, Oracle AQ
-- **JMS** (directly) — covered indirectly via AMQP 1.0 and STOMP for brokers that support both
 
 ---
 
