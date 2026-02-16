@@ -110,7 +110,7 @@ Instead of `url`, you can configure each component separately:
 | `destination.timeout-seconds` | `10` | Request timeout in seconds | `30` |
 | `destination.soap-version` | `1.1` | SOAP version (`1.1` or `1.2`) | `1.2` |
 | `destination.soap-action` | _(empty)_ | SOAPAction header value | `urn:SendEvent` |
-| `destination.content-encoding` | _(empty)_ | Compress body before wrapping (e.g., `gzip`) | `gzip` |
+| `destination.content-encoding` | _(empty)_ | Compress the SOAP envelope (applied after wrapping, e.g., `gzip`) | `gzip` |
 | `destination.content-transfer-encoding` | _(empty)_ | Encode body after compression (e.g., `base64`) | `base64` |
 
 ### SOAP Versions
@@ -118,7 +118,7 @@ Instead of `url`, you can configure each component separately:
 | Version | Content-Type | SOAPAction | Namespace |
 |---------|-------------|------------|-----------|
 | **1.1** | `text/xml` | Separate HTTP header | `http://schemas.xmlsoap.org/soap/envelope/` |
-| **1.2** | `application/soap+xml` | `action` parameter in Content-Type | `http://www.w3.org/2003/05/soap-envelope` |
+| **1.2** | `application/soap+xml` | Separate HTTP header | `http://www.w3.org/2003/05/soap-envelope` |
 
 ### Custom Headers
 

@@ -15,10 +15,13 @@ All destinations support:
 
 - **Destination Pooling** - Configurable pool sizes for performance tuning (see below)
 - **TLS Encryption** - Secure connections with optional mutual TLS (mTLS) - see [TLS & mTLS](#tls-mtls) below
-- **Dynamic Routing (Templating)** - Use variables in topic names, URLs, routing keys, etc. (see below)
-- **Message Headers** - Event metadata sent with each message (see below)
-- **Content Encoding** - Compress payload with gzip or deflate - see [Content Encodings](../content-encodings/overview.md)
-- **Content Transfer Encoding** - Encode payload with base64 - see [Content Transfer Encodings](../content-transfer-encodings/overview.md)
+- **Dynamic Routing (Templating)** - Use variables in topic names, URLs, routing keys, etc. (see below) — all destinations except gRPC
+
+Most destinations support:
+
+- **Message Headers** - Event metadata sent with each message — see [Per-Destination Details](#per-destination-details) for which destinations support headers
+- **Content Encoding** - Compress payload with gzip or deflate — supported by HTTP-based and SDK-based destinations (HTTP, SOAP, gRPC, AWS, Azure Event Grid, Azure Storage Queue, Azure Web PubSub, GCP Cloud Tasks) - see [Content Encodings](../content-encodings/overview.md)
+- **Content Transfer Encoding** - Encode payload with base64 — same destinations as Content Encoding - see [Content Transfer Encodings](../content-transfer-encodings/overview.md)
 
 ## Destination Pool
 

@@ -88,7 +88,7 @@
 
 ## Quick Start (5 minutes)
 
-### Step 1: <a href="https://raw.githubusercontent.com/FortuneN/kete/develop/quick-starts/amqp-0.9.1-rabbitmq/docker-compose.yml" download>Download</a> or create docker-compose.yml
+### Step 1: <a href="https://raw.githubusercontent.com/FortuneN/kete/release/quick-starts/amqp-0.9.1-rabbitmq/docker-compose.yml" download>Download</a> or create docker-compose.yml
 
 ```yaml
 services:

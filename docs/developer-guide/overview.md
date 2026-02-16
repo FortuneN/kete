@@ -27,6 +27,7 @@ Keycloak Event → Route → Matcher → Serializer → Destination
 
 | Document | Description |
 |----------|-------------|
+| [How It Works](how-it-works.md) | Visual guide to KETE's event processing |
 | [Architecture](architecture.md) | System design, event flow, threading model, destination pooling |
 | [Component Scopes](component-scopes.md) | Dependency injection, SINGLETON vs TRANSIENT |
 | [Transaction Support](transaction-support.md) | Keycloak transaction integration, commit/rollback handling |
@@ -53,6 +54,7 @@ Keycloak Event → Route → Matcher → Serializer → Destination
 | [Testing](testing.md) | Test types, running tests, test environment |
 | [Integration Tests](integration-tests.md) | Testcontainers setup, debugging |
 | [Test Patterns](test-patterns-and-conventions.md) | Code conventions, AAA pattern, file organization |
+| [Quickstart Testing](quickstart-testing.md) | Testing KETE quickstarts to verify event flow |
 
 ###  Development
 
@@ -154,7 +156,7 @@ See [Component Scopes](component-scopes.md) for details.
 | `template` | `text/plain` | Custom text templates with variables |
 | `avro` | `application/avro` | Big data, schema evolution |
 | `protobuf` | `application/x-protobuf` | High-performance binary serialization |
-| `multipart-form` | `multipart/form-data` | Form uploads |
+| `multipart-form` | `multipart/form-data; boundary=kete-boundary` | Form uploads |
 | `url-encoded-form` | `application/x-www-form-urlencoded` | Form submissions |
 
 ### Matchers (4)

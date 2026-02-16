@@ -55,6 +55,9 @@ This page provides a comprehensive cross-reference of message brokers and the de
 !!! note "Brokerless Destination"
     ZeroMQ is a brokerless messaging library — it connects directly to peers without a message broker. The "Any ZeroMQ peer" row represents any application using a ZeroMQ binding (Python, C, .NET, Java, Node.js, etc.).
 
+!!! note "WebSocket Column"
+    The WebSocket column indicates that the broker supports WebSocket as a **transport layer** for its native protocol (e.g., MQTT-over-WebSocket, AMQP-over-WebSocket). This does not mean you use `destination.kind=websocket` — you use the broker's protocol destination (e.g., `mqtt-5`, `amqp-0.9.1`) with the broker's WebSocket endpoint. The KETE `websocket` destination is for connecting to raw/custom WebSocket servers.
+
 !!! note "Native SDK Destinations"
     The following destinations use vendor-specific SDKs and are not shown as columns in the protocol matrix above: `azure-eventhubs`, `azure-servicebus`, `azure-eventgrid`, `azure-storage-queue`, `azure-webpubsub`, `aws-eventbridge`, `aws-sqs`, `aws-sns`, `aws-kinesis`, `gcp-cloud-tasks`, `grpc`, `signalr`, `soap`, `socketio`. See the [By Destination](#by-destination) section for details.
 
@@ -527,6 +530,10 @@ Is your broker NATS Server or Synadia Cloud?
 ├── Yes → Do you need message persistence?
 │   ├── Yes → Use nats-jetstream (persistent, acknowledgments)
 │   └── No → Use nats (fire-and-forget, lowest latency)
+└── No → Continue...
+
+Is your broker Apache Pulsar, StreamNative, or DataStax?
+├── Yes → Use pulsar
 └── No → Continue...
 
 Is your broker ActiveMQ Artemis, Azure Service Bus, or Qpid?

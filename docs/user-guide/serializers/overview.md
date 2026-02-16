@@ -21,7 +21,7 @@ Serializers convert Keycloak events into your desired output format.
 | **[Protobuf](protobuf.md)** | `protobuf` | `application/x-protobuf` | Yes |
 | **[Smile](smile.md)** | `smile` | `application/x-jackson-smile` | Yes |
 | **[URL-Encoded Form](url-encoded-form.md)** | `url-encoded-form` | `application/x-www-form-urlencoded` | No |
-| **[Multipart Form](multipart-form.md)** | `multipart-form` | `multipart/form-data` | No |
+| **[Multipart Form](multipart-form.md)** | `multipart-form` | `multipart/form-data; boundary=kete-boundary` | No |
 | **[Template](template.md)** | `template` | configurable (default: `text/plain`) | No |
 
 The **Content-Type** is sent as the `contenttype` header (or native content-type property where supported). This allows consumers to know how to deserialize the message body.
