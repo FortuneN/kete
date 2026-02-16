@@ -1,6 +1,8 @@
 package io.github.fortunen.kete.destinations.kafka;
 
 import java.time.Duration;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.kafka.clients.admin.AdminClient;
@@ -26,7 +28,10 @@ public class KafkaDestination extends Destination<KafkaDestinationConfig> {
 
 	public static final int CLUSTER_DESCRIBE_TIMEOUT_SECONDS = 10;
 
+	private String topic;
+	private boolean isTopicTemplated;
 	private KafkaProducer<String, byte[]> producer;
+	private Set<Map.Entry<String, byte[]>> customHeadersBytesEntrySet;
 
 	@Override
 	@SneakyThrows
@@ -34,12 +39,31 @@ public class KafkaDestination extends Destination<KafkaDestinationConfig> {
 
 		ValidationUtils.requireNonNull(config, "config is required");
 
-		producer = new KafkaProducer<>(config.getProducerConfiguration());
+		// JAAS LoginContext uses Thread Context ClassLoader to find LoginModule classes.
+		// After shading, classes like PlainLoginModule live under kete.org.apache.kafka.*
+		// but are only visible to the classloader that loaded this JAR (Keycloak's provider classloader).
+		// We temporarily set the TCCL so JAAS can discover shaded LoginModule classes.
 
-		// test
+		var originalClassLoader = Thread.currentThread().getContextClassLoader();
 
-		try (var admin = AdminClient.create(config.getProducerConfiguration())) {
-			admin.describeCluster().clusterId().get(Duration.ofSeconds(CLUSTER_DESCRIBE_TIMEOUT_SECONDS).toMillis(), TimeUnit.MILLISECONDS);
+		try {
+
+			Thread.currentThread().setContextClassLoader(KafkaDestination.class.getClassLoader());
+
+			producer = new KafkaProducer<>(config.getProducerConfiguration());
+
+			topic = config.getTopic();
+			isTopicTemplated = config.isTopicTemplated();
+			customHeadersBytesEntrySet = config.getCustomHeadersBytesEntrySet();
+
+			// verify connection
+
+			try (var admin = AdminClient.create(config.getProducerConfiguration())) {
+				admin.describeCluster().clusterId().get(Duration.ofSeconds(CLUSTER_DESCRIBE_TIMEOUT_SECONDS).toMillis(), TimeUnit.MILLISECONDS);
+			}
+
+		} finally {
+			Thread.currentThread().setContextClassLoader(originalClassLoader);
 		}
 	}
 
@@ -51,7 +75,7 @@ public class KafkaDestination extends Destination<KafkaDestinationConfig> {
 
 		// topic
 
-		var actualTopic = TemplateUtils.substitute(config.getTopic(), message);
+		var actualTopic = isTopicTemplated ? TemplateUtils.substitute(topic, message) : topic;
 
 		// record
 
@@ -61,7 +85,7 @@ public class KafkaDestination extends Destination<KafkaDestinationConfig> {
 
 		var headers = producerRecord.headers();
 
-		for (var entry : config.getCustomHeadersBytesEntrySet()) {
+		for (var entry : customHeadersBytesEntrySet) {
 			headers.add(entry.getKey(), entry.getValue());
 		}
 

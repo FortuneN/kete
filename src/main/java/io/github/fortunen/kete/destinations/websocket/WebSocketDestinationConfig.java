@@ -1,14 +1,22 @@
 package io.github.fortunen.kete.destinations.websocket;
 
 import java.net.URI;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import javax.net.SocketFactory;
+
+import org.java_websocket.drafts.Draft_6455;
+import org.java_websocket.protocols.IProtocol;
+import org.java_websocket.protocols.Protocol;
 
 import io.github.fortunen.kete.DestinationConfig;
 import io.github.fortunen.kete.OAuthMaterial;
 import io.github.fortunen.kete.TlsMaterial;
 import io.github.fortunen.kete.utils.ConfigurationUtils;
+import io.github.fortunen.kete.utils.TemplateUtils;
 import io.github.fortunen.kete.utils.ValidationUtils;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -24,29 +32,29 @@ public class WebSocketDestinationConfig extends DestinationConfig {
 	public static final String HOST = "host";
 	public static final String PORT = "port";
 	public static final String PATH = "path";
+	public static final String OAUTH = "oauth";
 	public static final int DEFAULT_WS_PORT = 80;
 	public static final int DEFAULT_WSS_PORT = 443;
-
 	public static final String BINARY_MODE = "binary-mode";
-
+	public static final String SUBPROTOCOL = "subprotocol";
 	public static final int DEFAULT_CONNECTION_TIMEOUT_SECONDS = 10;
-	public static final String CONNECTION_TIMEOUT_SECONDS = "connection-timeout-seconds";
-
 	public static final int DEFAULT_CONNECTION_LOST_TIMEOUT_SECONDS = 60;
+	public static final String CONNECTION_TIMEOUT_SECONDS = "connection-timeout-seconds";
 	public static final String CONNECTION_LOST_TIMEOUT_SECONDS = "connection-lost-timeout-seconds";
-
-	public static final String OAUTH = "oauth";
 
 	private int port;
 	private String url;
 	private String host;
 	private String path;
 	private String scheme;
+	private Draft_6455 draft;
 	private boolean binaryMode;
 	private OAuthMaterial oauth;
 	private boolean oauthEnabled;
+	private boolean isUrlTemplated;
 	private SocketFactory socketFactory;
 	private int connectionTimeoutSeconds;
+	private boolean hasConnectionLostTimeout;
 	private int connectionLostTimeoutSeconds;
 	private TimeUnit connectionTimeoutUnit = TimeUnit.SECONDS;
 
@@ -139,9 +147,11 @@ public class WebSocketDestinationConfig extends DestinationConfig {
 
 		// connectionLostTimeoutSeconds
 
-		connectionLostTimeoutSeconds = configuration.getInt(CONNECTION_LOST_TIMEOUT_SECONDS, DEFAULT_CONNECTION_LOST_TIMEOUT_SECONDS);
-
-		ValidationUtils.requireNonNegative(connectionLostTimeoutSeconds, CONNECTION_LOST_TIMEOUT_SECONDS + " must be non-negative");
+		if (configuration.containsKey(CONNECTION_LOST_TIMEOUT_SECONDS)) {
+			connectionLostTimeoutSeconds = configuration.getInt(CONNECTION_LOST_TIMEOUT_SECONDS, DEFAULT_CONNECTION_LOST_TIMEOUT_SECONDS);
+			ValidationUtils.requireNonNegative(connectionLostTimeoutSeconds, CONNECTION_LOST_TIMEOUT_SECONDS + " must be non-negative");
+			hasConnectionLostTimeout = true;
+		}
 
 		// oauth
 
@@ -149,8 +159,27 @@ public class WebSocketDestinationConfig extends DestinationConfig {
 
 		oauthEnabled = ValidationUtils.isNotNull(oauth) && oauth.isEnabled();
 
+		// precomputed fields
+
+		isUrlTemplated = TemplateUtils.containsTemplate(url);
+
+		// subprotocol
+
+		var subprotocol = configuration.getString(SUBPROTOCOL, "").trim();
+
+		if (ValidationUtils.isNotBlank(subprotocol)) {
+			
+			List<IProtocol> protocols = Arrays.stream(subprotocol.split(","))
+				.map(String::trim)
+				.filter(ValidationUtils::isNotBlank)
+				.map(Protocol::new)
+				.collect(java.util.stream.Collectors.toList());
+
+			draft = new Draft_6455(Collections.emptyList(), protocols);
+		}
+
 		// socketFactory
 
-		socketFactory = tls.isEnabled() ? tls.getKeyStoreAndTrustStoreSSLContext().getSocketFactory() : null;
+		socketFactory = tls.isEnabled() ? (tls.isVerifyHostname() ? tls.getHostnameVerifyingSocketFactory() : tls.getKeyStoreAndTrustStoreSSLContext().getSocketFactory()) : null;
 	}
 }

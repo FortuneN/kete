@@ -9,4 +9,4 @@ Set-Location $PSScriptRoot
 
 # Start MkDocs server
 
-& "C:\Users\fortu\AppData\Local\Programs\Python\Python312\python.exe" -m mkdocs serve
+& python -m mkdocs serve

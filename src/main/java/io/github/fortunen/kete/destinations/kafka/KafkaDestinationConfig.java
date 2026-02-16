@@ -11,8 +11,7 @@ import org.apache.kafka.common.serialization.ByteArraySerializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 
 import io.github.fortunen.kete.DestinationConfig;
-import io.github.fortunen.kete.TlsMaterial;
-import io.github.fortunen.kete.utils.ConfigurationUtils;
+import io.github.fortunen.kete.utils.TemplateUtils;
 import io.github.fortunen.kete.utils.ValidationUtils;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -25,16 +24,21 @@ import lombok.SneakyThrows;
 public class KafkaDestinationConfig extends DestinationConfig {
 
 	public static final String TOPIC = "topic";
-
 	public static final int DEFAULT_LINGER_MS = 5;
-	public static final String DEFAULT_ACKS = "all";
-	public static final int DEFAULT_MAX_IN_FLIGHT = 5;
 	public static final int DEFAULT_BATCH_SIZE = 32768;
 	public static final String DEFAULT_COMPRESSION_TYPE = "lz4";
-	public static final boolean DEFAULT_ENABLE_IDEMPOTENCE = true;
+
+	private static final String SASL_JAAS_CONFIG = "sasl.jaas.config";
+
+	// Constructed at runtime to prevent Maven Shade Plugin from rewriting the value.
+	// The shade plugin rewrites "org.apache.kafka." string constants to "kete.org.apache.kafka.",
+	// which would make both constants identical and the config-rewrite comparison a no-op.
+	private static final String KAFKA_PACKAGE_PREFIX = String.join(".", "org", "apache", "kafka") + ".";
+	private static final String SHADED_KAFKA_PACKAGE_PREFIX = "kete.org.apache.kafka.";
 
 	private String topic;
 	private boolean transactional;
+	private boolean isTopicTemplated;
 	private Properties producerConfiguration;
 	private Set<Map.Entry<String, byte[]>> customHeadersBytesEntrySet;
 	private Map<String, byte[]> customHeadersBytes = new LinkedHashMap<>();
@@ -68,22 +72,72 @@ public class KafkaDestinationConfig extends DestinationConfig {
 
 		producerConfiguration.remove(TOPIC);
 
+		// sasl.jaas.config: rewrite unshaded Kafka class names to shaded equivalents
+
+		var jaasConfig = producerConfiguration.getProperty(SASL_JAAS_CONFIG);
+
+		if (ValidationUtils.isNotBlank(jaasConfig) && jaasConfig.contains(KAFKA_PACKAGE_PREFIX) && !jaasConfig.contains(SHADED_KAFKA_PACKAGE_PREFIX)) {
+			producerConfiguration.put(SASL_JAAS_CONFIG, jaasConfig.replace(KAFKA_PACKAGE_PREFIX, SHADED_KAFKA_PACKAGE_PREFIX));
+		}
+
 		// defaults
 
-		producerConfiguration.putIfAbsent(ProducerConfig.ACKS_CONFIG, DEFAULT_ACKS);
 		producerConfiguration.putIfAbsent(ProducerConfig.LINGER_MS_CONFIG, DEFAULT_LINGER_MS);
 		producerConfiguration.putIfAbsent(ProducerConfig.BATCH_SIZE_CONFIG, DEFAULT_BATCH_SIZE);
 		producerConfiguration.putIfAbsent(ProducerConfig.COMPRESSION_TYPE_CONFIG, DEFAULT_COMPRESSION_TYPE);
-		producerConfiguration.putIfAbsent(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG, DEFAULT_ENABLE_IDEMPOTENCE);
-		producerConfiguration.putIfAbsent(ProducerConfig.MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION, DEFAULT_MAX_IN_FLIGHT);
 		producerConfiguration.putIfAbsent(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
 		producerConfiguration.putIfAbsent(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, ByteArraySerializer.class.getName());
 
 		// tls
 
 		if (tls.isEnabled()) {
-			tls = TlsMaterial.builder().withConfiguration(ConfigurationUtils.getSubSet(configuration, TLS)).withWriteFiles(true).build();
-			tls.updateKafkaConfiguration(producerConfiguration);
+
+			if (tls.isVerifyHostname()) {
+				producerConfiguration.put("ssl.endpoint.identification.algorithm", "https");
+			}
+
+			var securityProtocol = ValidationUtils.requireNonBlank(producerConfiguration.getProperty("security.protocol"), ".destination.security.protocol is required").trim();
+
+			ValidationUtils.requireTrue(securityProtocol.equals("SSL") || securityProtocol.equals("SASL_SSL"), ".destination.security.protocol must be 'SSL' or 'SASL_SSL' when TLS is enabled");
+
+			if (ValidationUtils.isNotBlank(tls.getVersion())) {
+				producerConfiguration.put("ssl.protocol", tls.getVersion());
+			}
+
+			if (ValidationUtils.isNotBlank(tls.getTrustStoreType())) {
+				producerConfiguration.put("ssl.truststore.type", tls.getTrustStoreType());
+			}
+
+			producerConfiguration.put("ssl.truststore.location", tls.getTrustStoreFilePath());
+
+			if (ValidationUtils.isNotBlank(tls.getTrustStorePassword())) {
+				producerConfiguration.put("ssl.truststore.password", tls.getTrustStorePassword());
+			}
+
+			if (ValidationUtils.isNotBlank(tls.getTrustManagerAlgorithm())) {
+				producerConfiguration.put("ssl.trustmanager.algorithm", tls.getTrustManagerAlgorithm());
+			}
+
+			if (tls.isKeyStoreConfigured()) {
+
+				if (ValidationUtils.isNotBlank(tls.getKeyStoreType())) {
+					producerConfiguration.put("ssl.keystore.type", tls.getKeyStoreType());
+				}
+
+				producerConfiguration.put("ssl.keystore.location", tls.getKeyStoreFilePath());
+
+				if (ValidationUtils.isNotBlank(tls.getKeyStorePassword())) {
+					producerConfiguration.put("ssl.keystore.password", tls.getKeyStorePassword());
+				}
+
+				if (ValidationUtils.isNotBlank(tls.getKeyPassword())) {
+					producerConfiguration.put("ssl.key.password", tls.getKeyPassword());
+				}
+
+				if (ValidationUtils.isNotBlank(tls.getKeyManagerAlgorithm())) {
+					producerConfiguration.put("ssl.keymanager.algorithm", tls.getKeyManagerAlgorithm());
+				}
+			}
 		}
 
 		// transactional
@@ -92,11 +146,13 @@ public class KafkaDestinationConfig extends DestinationConfig {
 
 		ValidationUtils.requireFalse(transactional, "transactional producers are not supported with connection pooling");
 
+		// precomputed fields
+
+		isTopicTemplated = TemplateUtils.containsTemplate(topic);
+
 		// customHeadersBytes
 
-		getCustomHeaders().forEach((key, value) -> {
-			customHeadersBytes.put(key, value.getBytes(StandardCharsets.UTF_8));
-		});
+		getCustomHeaders().forEach((key, value) -> customHeadersBytes.put(key, value.getBytes(StandardCharsets.UTF_8)));
 
 		customHeadersBytesEntrySet = customHeadersBytes.entrySet();
 	}

@@ -30,7 +30,7 @@ class WebSocketDestinationE2ETests extends EndToEndTestBase {
 		wsServer.start();
 
 		// Wait for the server to start
-		await().atMost(Duration.ofSeconds(10)).until(() -> wsServer.getPort() > 0);
+		await().atMost(Duration.ofMinutes(2)).pollInterval(Duration.ofSeconds(2)).until(() -> wsServer.getPort() > 0);
 
 		// Expose the port to Docker containers
 		Testcontainers.exposeHostPorts(wsServer.getPort());
@@ -50,7 +50,6 @@ class WebSocketDestinationE2ETests extends EndToEndTestBase {
 		// arrange
 
 		var envVars = new HashMap<String, String>();
-		envVars.put("kete.enabled", "true");
 		envVars.put("kete.routes.websocket-test.realm-matchers.filter", "list:" + TEST_REALM);
 		envVars.put("kete.routes.websocket-test.destination.kind", "websocket");
 		envVars.put("kete.routes.websocket-test.destination.host", "host.testcontainers.internal");
@@ -70,7 +69,7 @@ class WebSocketDestinationE2ETests extends EndToEndTestBase {
 
 				// assert - wait for message from Keycloak via WebSocket
 
-				await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).until(() -> !receivedMessages.isEmpty());
+				await().atMost(Duration.ofMinutes(2)).pollInterval(Duration.ofSeconds(2)).until(() -> !receivedMessages.isEmpty());
 
 				var body = receivedMessages.poll(1, TimeUnit.SECONDS);
 

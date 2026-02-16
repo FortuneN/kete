@@ -74,7 +74,7 @@ services:
       kete.routes.quick-start.destination.security.protocol: SASL_PLAINTEXT
       kete.routes.quick-start.destination.sasl.mechanism: PLAIN
       kete.routes.quick-start.destination.compression.type: none
-      kete.routes.quick-start.destination.sasl.jaas.config: io.github.fortunen.kete.shaded.kafka.common.security.plain.PlainLoginModule required username="$$ConnectionString" password="Endpoint=sb://eventhubs-emulator;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=SAS_KEY_VALUE;UseDevelopmentEmulator=true;";
+      kete.routes.quick-start.destination.sasl.jaas.config: org.apache.kafka.common.security.plain.PlainLoginModule required username="$$ConnectionString" password="Endpoint=sb://eventhubs-emulator;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=SAS_KEY_VALUE;UseDevelopmentEmulator=true;";
     depends_on:
       wait-for-emulator:
         condition: service_completed_successfully

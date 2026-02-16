@@ -130,7 +130,7 @@ kete.routes.mqtt5.destination.topic=keycloak/${realmLowerCase}/events
 kete.routes.mqtt5.destination.topic=keycloak/events/${eventTypeLowerCase}
 ```
 
-Available variables: `${realmLowerCase}`, `${realmUpperCase}`, `${eventTypeLowerCase}`, `${eventTypeUpperCase}`, `${kindLowerCase}`, `${kindUpperCase}`, `${resourceTypeLowerCase}`, `${resourceTypeUpperCase}`, `${operationTypeLowerCase}`, `${operationTypeUpperCase}`, `${resultLowerCase}`, `${resultUpperCase}`
+Available variables: `${realmLowerCase}`, `${realmUpperCase}`, `${realmKebabCase}`, `${realmPascalCase}`, `${realmCamelCase}`, `${eventTypeLowerCase}`, `${eventTypeUpperCase}`, `${eventTypeKebabCase}`, `${eventTypePascalCase}`, `${eventTypeCamelCase}`, `${kindLowerCase}`, `${kindUpperCase}`, `${kindKebabCase}`, `${kindPascalCase}`, `${kindCamelCase}`, `${resourceTypeLowerCase}`, `${resourceTypeUpperCase}`, `${resourceTypeKebabCase}`, `${resourceTypePascalCase}`, `${resourceTypeCamelCase}`, `${operationTypeLowerCase}`, `${operationTypeUpperCase}`, `${operationTypeKebabCase}`, `${operationTypePascalCase}`, `${operationTypeCamelCase}`, `${resultLowerCase}`, `${resultUpperCase}`, `${resultKebabCase}`, `${resultPascalCase}`, `${resultCamelCase}`
 
 ### Optional Properties
 
@@ -140,10 +140,11 @@ Available variables: `${realmLowerCase}`, `${realmUpperCase}`, `${eventTypeLower
 | `transport-type` | `tcp` | Transport: `tcp` or `websocket` | `websocket` |
 | `qos` | `1` | Quality of Service (0, 1, or 2) | `2` |
 | `retained` | `false` | Retain message on broker | `true` |
-| `client-id-prefix` | `kete-` | Client ID prefix (UUID appended) | `keycloak-` |
+| `client-id-prefix` | _(auto-generated)_ | Client ID prefix — auto-generates `kete-<UUID>` when not set | `keycloak-` |
 | `clean-session` | `true` | Clean start (MQTT 5 term) | `false` |
 | `connection-timeout-seconds` | `10` | Connection timeout in seconds | `60` |
 | `keep-alive-interval-seconds` | `60` | Keep-alive ping interval in seconds | `120` |
+| `max-inflight` | `2048` | Maximum number of in-flight messages (QoS 1/2) | `4096` |
 | `username` | `""` | MQTT username | `admin` |
 | `password` | `""` | MQTT password | `secret123` |
 | `pool.min-idle` | `1` | Minimum idle connections in pool | `5` |
@@ -237,3 +238,29 @@ kete.routes.mtls-mqtt5.destination.tls.trust-store.loader.kind=jks-file-path
 kete.routes.mtls-mqtt5.destination.tls.trust-store.loader.path=/certs/truststore.jks
 kete.routes.mtls-mqtt5.destination.tls.trust-store.password=truststorepass
 ```
+
+
+
+## Quick Starts
+
+| Broker | Quick Start |
+|--------|-------------|
+| Eclipse Mosquitto | [mqtt-5-mosquitto](https://github.com/FortuneN/kete/tree/release/quick-starts/mqtt-5-mosquitto/) |
+| EMQX | [mqtt-5-emqx](https://github.com/FortuneN/kete/tree/release/quick-starts/mqtt-5-emqx/) |
+| HiveMQ | [mqtt-5-hivemq](https://github.com/FortuneN/kete/tree/release/quick-starts/mqtt-5-hivemq/) |
+| VerneMQ | [mqtt-5-vernemq](https://github.com/FortuneN/kete/tree/release/quick-starts/mqtt-5-vernemq/) |
+| NanoMQ | [mqtt-5-nanomq](https://github.com/FortuneN/kete/tree/release/quick-starts/mqtt-5-nanomq/) |
+| RabbitMQ | [mqtt-5-rabbitmq](https://github.com/FortuneN/kete/tree/release/quick-starts/mqtt-5-rabbitmq/) |
+| ActiveMQ Artemis | [mqtt-5-activemq-artemis](https://github.com/FortuneN/kete/tree/release/quick-starts/mqtt-5-activemq-artemis/) |
+| Azure Event Grid | [mqtt-5-azure-event-grid](https://github.com/FortuneN/kete/tree/release/quick-starts/mqtt-5-azure-event-grid/) |
+| Solace PubSub+ | [mqtt-5-solace](https://github.com/FortuneN/kete/tree/release/quick-starts/mqtt-5-solace/) |
+
+
+
+## See Also
+
+- [MQTT 3 Destination](mqtt-3.md) — MQTT 3.1.1 for broader compatibility
+- [Serializers](../serializers/overview.md)
+- [Matchers](../matchers/overview.md)
+- [Event Types](../event-types.md)
+- [Certificate Loaders](../certificate-loaders/overview.md)

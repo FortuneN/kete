@@ -18,6 +18,9 @@ public final class SerializerUtils {
 		var kind = ValidationUtils.requireNonBlank(configuration.getString(Constants.KIND, "").trim(), Constants.KIND + " is required");
 		var serializer = ValidationUtils.requireNonNull(IocUtils.get(kind, Serializer.class), "serializer " + Constants.KIND + " '" + kind + "' not found");
 
+		serializer.setConfiguration(configuration);
+		serializer.initialize();
+
 		return serializer;
 	}
 }

@@ -3,7 +3,7 @@ services:
   activemq:
     image: ghcr.io/fortunen/kete/quick-start-activemq-classic
     ports:
-      - 61613:61613
+      - 36613:61613
       - 8161:8161
     environment:
       ACTIVEMQ_USERNAME: admin

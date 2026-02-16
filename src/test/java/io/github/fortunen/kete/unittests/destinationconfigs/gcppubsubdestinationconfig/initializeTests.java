@@ -227,7 +227,7 @@ public class initializeTests {
 
 		// assert
 
-		assertThat(config.getAuth()).isNull();
+		assertThat(config.getCredentials()).isNull();
 		assertThat(config.isAuthenticated()).isFalse();
 	}
 
@@ -371,7 +371,7 @@ public class initializeTests {
 	}
 
 	@Test
-	public void shouldCreateClientBuilder() {
+	public void shouldCreateHttpTransport() {
 
 		// arrange
 
@@ -389,7 +389,7 @@ public class initializeTests {
 
 		// assert
 
-		assertThat(config.getClientBuilder()).isNotNull();
+		assertThat(config.getHttpTransport()).isNotNull();
 	}
 
 	// =========================================================================
@@ -591,7 +591,7 @@ public class initializeTests {
 
 		// assert
 
-		assertThat(config.getAuth()).isNull();
+		assertThat(config.getCredentials()).isNull();
 		assertThat(config.isAuthenticated()).isFalse();
 	}
 

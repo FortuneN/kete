@@ -22,7 +22,6 @@ STOMP (Simple Text Oriented Messaging Protocol) is supported by many enterprise 
 | **Amazon MQ** | 61614 | Managed ActiveMQ |
 | **Apache Apollo** | 61613 | Native support |
 | **HornetQ** | 61613 | Legacy, native support |
-| **Solace PubSub+** | 61613 | Native support |
 | **TIBCO EMS** | 61613 | Native support |
 | **OpenMQ** | 61613 | Native support |
 
@@ -128,7 +127,7 @@ kete.routes.stomp.destination.destination=/queue/keycloak/${realmLowerCase}/even
 kete.routes.stomp.destination.destination=/topic/keycloak/${eventTypeLowerCase}
 ```
 
-Available variables: `${realmLowerCase}`, `${realmUpperCase}`, `${eventTypeLowerCase}`, `${eventTypeUpperCase}`, `${kindLowerCase}`, `${kindUpperCase}`, `${resourceTypeLowerCase}`, `${resourceTypeUpperCase}`, `${operationTypeLowerCase}`, `${operationTypeUpperCase}`, `${resultLowerCase}`, `${resultUpperCase}`
+Available variables: `${realmLowerCase}`, `${realmUpperCase}`, `${realmKebabCase}`, `${realmPascalCase}`, `${realmCamelCase}`, `${eventTypeLowerCase}`, `${eventTypeUpperCase}`, `${eventTypeKebabCase}`, `${eventTypePascalCase}`, `${eventTypeCamelCase}`, `${kindLowerCase}`, `${kindUpperCase}`, `${kindKebabCase}`, `${kindPascalCase}`, `${kindCamelCase}`, `${resourceTypeLowerCase}`, `${resourceTypeUpperCase}`, `${resourceTypeKebabCase}`, `${resourceTypePascalCase}`, `${resourceTypeCamelCase}`, `${operationTypeLowerCase}`, `${operationTypeUpperCase}`, `${operationTypeKebabCase}`, `${operationTypePascalCase}`, `${operationTypeCamelCase}`, `${resultLowerCase}`, `${resultUpperCase}`, `${resultKebabCase}`, `${resultPascalCase}`, `${resultCamelCase}`
 
 ### Custom Headers
 
@@ -206,7 +205,7 @@ This configuration tells Artemis:
 - Destinations starting with `/topic/` → Create **MULTICAST** addresses (pub/sub topics)
 
 For a complete minimal `broker.xml` for Docker deployments, see the 
-[stomp-artemis quickstart](https://github.com/FortuneN/kete/tree/develop/quick-starts/stomp-artemis).
+[stomp-artemis quickstart](https://github.com/FortuneN/kete/tree/release/quick-starts/stomp-artemis).
 
 **References:**
 
@@ -223,8 +222,8 @@ The following STOMP headers are always included with each message:
 |--------|-------------|
 | `content-type` | MIME type from serializer (e.g., `application/json`) |
 | `content-length` | Message body size in bytes |
-| `event-type` | Keycloak event type (e.g., `LOGIN`, `LOGOUT`) |
-| `event-kind` | Event kind (`USER_EVENT` or `ADMIN_EVENT`) |
+| `eventtype` | Keycloak event type (e.g., `LOGIN`, `LOGOUT`) |
+| `eventkind` | Event kind (`EVENT` or `ADMIN_EVENT`) |
 
 
 
@@ -275,3 +274,24 @@ kete.routes.heartbeat.destination.destination=/queue/keycloak-events
 kete.routes.heartbeat.destination.heart-beat-outgoing-seconds=10
 kete.routes.heartbeat.destination.heart-beat-incoming-seconds=10
 ```
+
+
+
+## Quick Starts
+
+| Broker | Quick Start |
+|--------|-------------|
+| ActiveMQ Classic | [stomp-activemq](https://github.com/FortuneN/kete/tree/release/quick-starts/stomp-activemq/) |
+| ActiveMQ Artemis | [stomp-artemis](https://github.com/FortuneN/kete/tree/release/quick-starts/stomp-artemis/) |
+| RabbitMQ | [stomp-rabbitmq](https://github.com/FortuneN/kete/tree/release/quick-starts/stomp-rabbitmq/) |
+| EMQX | [stomp-emqx](https://github.com/FortuneN/kete/tree/release/quick-starts/stomp-emqx/) |
+| Amazon MQ | [stomp-amazon-mq](https://github.com/FortuneN/kete/tree/release/quick-starts/stomp-amazon-mq/) |
+
+
+
+## See Also
+
+- [Serializers](../serializers/overview.md)
+- [Matchers](../matchers/overview.md)
+- [Event Types](../event-types.md)
+- [Certificate Loaders](../certificate-loaders/overview.md)

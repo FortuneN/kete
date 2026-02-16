@@ -305,7 +305,7 @@ public class initializeTests {
 		assertThat(config.getRoutingKey()).isEmpty();
 		assertThat(config.getUsername()).isEmpty();
 		assertThat(config.getPassword()).isEmpty();
-		assertThat(config.getPriority()).isEqualTo(Amqp091DestinationConfig.DEFAULT_PRIORITY);
+		assertThat(config.getPriority()).isEqualTo(0);
 		assertThat(config.isHasPriority()).isFalse();
 		assertThat(config.getTimeToLiveSeconds()).isEqualTo(Amqp091DestinationConfig.DEFAULT_TIME_TO_LIVE_SECONDS);
 		assertThat(config.isHasTimeToLiveSeconds()).isFalse();
@@ -997,7 +997,7 @@ public class initializeTests {
 	}
 
 	// =========================================================================
-	// TLS Configuration (parsed but not connected)
+	// tls Configuration (parsed but not connected)
 	// =========================================================================
 
 	@Test

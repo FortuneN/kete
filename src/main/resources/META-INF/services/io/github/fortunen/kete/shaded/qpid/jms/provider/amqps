@@ -1,4 +1,0 @@
-## Shaded AMQPS provider for kete
-class=io.github.fortunen.kete.shaded.qpid.jms.provider.amqp.AmqpProviderFactory
-transportScheme=ssl
-providerScheme=amqps

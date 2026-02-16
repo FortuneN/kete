@@ -16,15 +16,15 @@ Load certificates and keys from a PKCS#12 file on the filesystem.
 ## Example
 
 ```bash
-kete.routes.myroute.destination.tls=true
+kete.routes.myroute.destination.tls.enabled=true
 
 # Key store (client certificate + private key)
-kete.routes.myroute.destination.key-store.loader.kind=pkcs12-file-path
-kete.routes.myroute.destination.key-store.loader.path=/certs/client.p12
-kete.routes.myroute.destination.key-store.password=changeit
+kete.routes.myroute.destination.tls.key-store.loader.kind=pkcs12-file-path
+kete.routes.myroute.destination.tls.key-store.loader.path=/certs/client.p12
+kete.routes.myroute.destination.tls.key-store.password=changeit
 
 # Trust store (CA certificates)
-kete.routes.myroute.destination.trust-store.loader.kind=pkcs12-file-path
-kete.routes.myroute.destination.trust-store.loader.path=/certs/truststore.p12
-kete.routes.myroute.destination.trust-store.password=changeit
+kete.routes.myroute.destination.tls.trust-store.loader.kind=pkcs12-file-path
+kete.routes.myroute.destination.tls.trust-store.loader.path=/certs/truststore.p12
+kete.routes.myroute.destination.tls.trust-store.password=changeit
 ```

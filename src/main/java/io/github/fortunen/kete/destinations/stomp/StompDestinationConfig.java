@@ -5,6 +5,7 @@ import java.util.HashMap;
 import javax.net.SocketFactory;
 
 import io.github.fortunen.kete.DestinationConfig;
+import io.github.fortunen.kete.utils.TemplateUtils;
 import io.github.fortunen.kete.utils.ValidationUtils;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -20,22 +21,17 @@ public class StompDestinationConfig extends DestinationConfig {
 	public static final String PORT = "port";
 	public static final int DEFAULT_TCP_PORT = 61613;
 	public static final int DEFAULT_TLS_PORT = 61614;
-
-	public static final String DESTINATION = "destination";
-	public static final String VIRTUAL_HOST = "virtual-host";
-
 	public static final String USERNAME = "username";
 	public static final String PASSWORD = "password";
-
+	public static final String DESTINATION = "destination";
+	public static final int DEFAULT_HEART_BEAT_SECONDS = 30;
+	public static final String VIRTUAL_HOST = "virtual-host";
+	public static final int DEFAULT_READ_TIMEOUT_SECONDS = 30;
 	public static final boolean DEFAULT_RECEIPT_ENABLED = true;
 	public static final String RECEIPT_ENABLED = "receipt-enabled";
-
-	public static final int DEFAULT_HEART_BEAT_SECONDS = 30;
+	public static final String READ_TIMEOUT_SECONDS = "read-timeout-seconds";
 	public static final String HEART_BEAT_OUTGOING_SECONDS = "heart-beat-outgoing-seconds";
 	public static final String HEART_BEAT_INCOMING_SECONDS = "heart-beat-incoming-seconds";
-
-	public static final int DEFAULT_READ_TIMEOUT_SECONDS = 30;
-	public static final String READ_TIMEOUT_SECONDS = "read-timeout-seconds";
 
 	private int port;
 	private String host;
@@ -44,6 +40,7 @@ public class StompDestinationConfig extends DestinationConfig {
 	private String destination;
 	private String virtualHost;
 	private boolean receiptEnabled;
+	private boolean isDestinationTemplated;
 	private int readTimeoutSeconds;
 	private SocketFactory socketFactory;
 	private int heartBeatOutgoingSeconds;
@@ -107,6 +104,10 @@ public class StompDestinationConfig extends DestinationConfig {
 		// socketFactory
 
 		socketFactory = tls.isEnabled() ? tls.getKeyStoreAndTrustStoreSSLContext().getSocketFactory() : SocketFactory.getDefault();
+
+		// precomputed fields
+
+		isDestinationTemplated = TemplateUtils.containsTemplate(destination);
 
 		// connectHeaders
 

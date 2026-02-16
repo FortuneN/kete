@@ -56,13 +56,12 @@ Stream Keycloak events to HTTP/REST endpoints.
     kete.routes.internal-oauth.destination.oauth.mode=internal
     ```
 
-=== "With Retry"
+=== "With Custom Retry"
 
     ```bash
     kete.routes.reliable.realm-matchers.realm=list:master
     kete.routes.reliable.destination.kind=http
     kete.routes.reliable.destination.url=https://api.example.com/events
-    kete.routes.reliable.retry.enabled=true
     kete.routes.reliable.retry.max-attempts=5
     kete.routes.reliable.retry.wait-duration=PT2S
     ```
@@ -71,7 +70,7 @@ Stream Keycloak events to HTTP/REST endpoints.
 
 ## Features
 
-- Automatic retry with exponential backoff
+- Automatic retry with configurable attempts and wait duration
 - OAuth 2.0 Client Credentials with token caching
 - Custom headers and configurable timeouts
 - TLS/SSL with mTLS support
@@ -99,7 +98,7 @@ kete.routes.webhook.destination.url=https://api.example.com/events/${realmLowerC
 kete.routes.webhook.destination.url=https://api.example.com/${kindLowerCase}/${eventTypeLowerCase}
 ```
 
-Available variables: `${realmLowerCase}`, `${realmUpperCase}`, `${eventTypeLowerCase}`, `${eventTypeUpperCase}`, `${kindLowerCase}`, `${kindUpperCase}`, `${resourceTypeLowerCase}`, `${resourceTypeUpperCase}`, `${operationTypeLowerCase}`, `${operationTypeUpperCase}`, `${resultLowerCase}`, `${resultUpperCase}`
+Available variables: `${realmLowerCase}`, `${realmUpperCase}`, `${realmKebabCase}`, `${realmPascalCase}`, `${realmCamelCase}`, `${eventTypeLowerCase}`, `${eventTypeUpperCase}`, `${eventTypeKebabCase}`, `${eventTypePascalCase}`, `${eventTypeCamelCase}`, `${kindLowerCase}`, `${kindUpperCase}`, `${kindKebabCase}`, `${kindPascalCase}`, `${kindCamelCase}`, `${resourceTypeLowerCase}`, `${resourceTypeUpperCase}`, `${resourceTypeKebabCase}`, `${resourceTypePascalCase}`, `${resourceTypeCamelCase}`, `${operationTypeLowerCase}`, `${operationTypeUpperCase}`, `${operationTypeKebabCase}`, `${operationTypePascalCase}`, `${operationTypeCamelCase}`, `${resultLowerCase}`, `${resultUpperCase}`, `${resultKebabCase}`, `${resultPascalCase}`, `${resultCamelCase}`
 
 When using `destination.url`:
 
@@ -126,6 +125,8 @@ Instead of `url`, you can configure each component separately:
 | `destination.path-and-query` | `/` | URL path and query string | `/api/v1/events?source=keycloak` |
 | `destination.method` | `POST` | HTTP method (POST or PUT) | `PUT` |
 | `destination.timeout-seconds` | `10` | Request timeout in seconds | `60` |
+| `destination.content-encoding` | _(empty)_ | Compress body (e.g., `gzip`, `deflate`). Sets `Content-Encoding` header. | `gzip` |
+| `destination.content-transfer-encoding` | _(empty)_ | Encode body (e.g., `base64`). Sets `Content-Transfer-Encoding` header. | `base64` |
 | `destination.pool.min-idle` | `1` | Minimum idle connections in pool | `5` |
 | `destination.pool.max-idle` | `10` | Maximum idle connections in pool | `20` |
 | `destination.pool.max-total` | `20` | Maximum total connections in pool | `50` |
@@ -137,6 +138,37 @@ Headers are configured under `destination.headers.<NAME>`:
 ```bash
 kete.routes.my-api.destination.headers.X-API-Key=my-secret-key
 kete.routes.my-api.destination.headers.X-Source=keycloak
+```
+
+### Authentication
+
+The HTTP destination supports multiple authentication methods via the `authentication-type` property:
+
+| `authentication-type` | Description | Required Properties |
+|-----------------------|-------------|---------------------|
+| `oauth` | OAuth 2.0 Client Credentials flow | See [OAuth 2.0 Properties](#oauth-20-properties) below |
+| `basic` | HTTP Basic Authentication | `basic-username`, `basic-password` |
+| `api-key` | API key sent in `Api-Key` header | `api-key-value` |
+| `x-api-key` | API key sent in `X-API-Key` header | `x-api-key-value` |
+
+#### Basic Authentication
+
+```bash
+kete.routes.my-api.destination.authentication-type=basic
+kete.routes.my-api.destination.basic-username=keycloak
+kete.routes.my-api.destination.basic-password=secret123
+```
+
+#### API Key Authentication
+
+```bash
+# Sends header: Api-Key: <value>
+kete.routes.my-api.destination.authentication-type=api-key
+kete.routes.my-api.destination.api-key-value=sk-1234567890
+
+# Sends header: X-API-Key: <value>
+kete.routes.my-api.destination.authentication-type=x-api-key
+kete.routes.my-api.destination.x-api-key-value=sk-1234567890
 ```
 
 ### OAuth 2.0 Properties
@@ -237,7 +269,6 @@ kete.routes.api.destination.oauth.client-id=events-publisher
 kete.routes.api.destination.oauth.client-secret=your-secret-here
 kete.routes.api.destination.oauth.scope=api:write
 kete.routes.api.event-matchers.filter=glob:*
-kete.routes.api.retry.enabled=true
 kete.routes.api.retry.max-attempts=3
 kete.routes.api.retry.wait-duration=PT1S
 ```
@@ -310,3 +341,21 @@ kete.routes.azure.destination.kind=http
 kete.routes.azure.destination.url=https://myfunction.azurewebsites.net/api/events
 kete.routes.azure.destination.headers.x-functions-key=your-function-key
 ```
+
+
+
+## Quick Starts
+
+| Quick Start | Description |
+|-------------|-------------|
+| [http-webhook](https://github.com/FortuneN/kete/tree/release/quick-starts/http-webhook/) | HTTP webhook endpoint |
+| [http-azure-event-grid](https://github.com/FortuneN/kete/tree/release/quick-starts/http-azure-event-grid/) | Azure Event Grid |
+
+
+
+## See Also
+
+- [Serializers](../serializers/overview.md)
+- [Matchers](../matchers/overview.md)
+- [Event Types](../event-types.md)
+- [Certificate Loaders](../certificate-loaders/overview.md)

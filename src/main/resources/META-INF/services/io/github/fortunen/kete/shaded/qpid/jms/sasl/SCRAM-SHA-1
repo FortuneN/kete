@@ -1,2 +1,0 @@
-## Shaded SCRAM-SHA-1 SASL mechanism for kete
-class=io.github.fortunen.kete.shaded.qpid.jms.sasl.ScramSHA1MechanismFactory

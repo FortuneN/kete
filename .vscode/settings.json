@@ -16,5 +16,6 @@
     "tabby.endpoint": "http://127.0.0.1:11435",
     "tabby.config.telemetry": true,
     "tabby.settings.advanced": {},
-    "chat.agent.maxRequests": 99999999999
+    "chat.agent.maxRequests": 99999999999,
+    "java.jdt.ls.vmargs": "-XX:+UseParallelGC -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90 -Dsun.zip.disableMemoryMapping=true -Xmx4G -Xms100m -Xlog:disable"
 }

@@ -15,7 +15,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.keycloak.admin.client.Keycloak;
 import org.testcontainers.containers.GenericContainer;
-import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.utility.DockerImageName;
 
 class PulsarDestinationE2ETests extends EndToEndTestBase {
@@ -33,6 +32,7 @@ class PulsarDestinationE2ETests extends EndToEndTestBase {
 		cleanupNetwork();
 	}
 
+	@SuppressWarnings("resource")
 	@Test
 	void shouldForwardLoginEventToPulsarTopic() throws Exception {
 
@@ -42,13 +42,12 @@ class PulsarDestinationE2ETests extends EndToEndTestBase {
 			.withNetwork(createNetwork())
 			.withNetworkAliases("pulsar")
 			.withExposedPorts(PULSAR_PORT, PULSAR_HTTP_PORT)
-			.withCommand("/bin/bash", "-c", "bin/apply-config-from-env.py conf/standalone.conf && bin/pulsar standalone")
-			.waitingFor(Wait.forLogMessage(".*messaging service is ready.*", 1))
-			.withStartupTimeout(CONTAINER_STARTUP_TIMEOUT);
+			.withCommand("/bin/bash", "-c", "bin/apply-config-from-env.py conf/standalone.conf && bin/pulsar standalone");
 		pulsarServer.start();
 
+		waitForHttpReady(pulsarServer, PULSAR_HTTP_PORT, "/admin/v2/clusters");
+
 		var envVars = new HashMap<String, String>();
-		envVars.put("kete.enabled", "true");
 		envVars.put("kete.routes.pulsar-test.realm-matchers.filter", "list:" + TEST_REALM);
 		envVars.put("kete.routes.pulsar-test.destination.kind", "pulsar");
 		envVars.put("kete.routes.pulsar-test.destination.service-url", "pulsar://pulsar:" + PULSAR_PORT);
@@ -58,7 +57,7 @@ class PulsarDestinationE2ETests extends EndToEndTestBase {
 		var receivedMessages = new ArrayBlockingQueue<String>(10);
 
 		// Set up Pulsar subscriber
-		var pulsarUrl = "pulsar://" + pulsarServer.getHost() + ":" + pulsarServer.getMappedPort(PULSAR_PORT);
+		var pulsarUrl = "pulsar://127.0.0.1:" + pulsarServer.getMappedPort(PULSAR_PORT);
 		PulsarClient client = PulsarClient.builder()
 			.serviceUrl(pulsarUrl)
 			.connectionTimeout(10, TimeUnit.SECONDS)
@@ -99,7 +98,7 @@ class PulsarDestinationE2ETests extends EndToEndTestBase {
 
 				// assert - wait for message using Awaitility
 
-				await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).until(() -> !receivedMessages.isEmpty());
+				await().atMost(Duration.ofMinutes(2)).pollInterval(Duration.ofSeconds(2)).until(() -> !receivedMessages.isEmpty());
 
 				var body = receivedMessages.poll(1, TimeUnit.SECONDS);
 

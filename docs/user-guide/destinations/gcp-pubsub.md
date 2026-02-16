@@ -78,6 +78,7 @@ Stream Keycloak events to Google Cloud Pub/Sub.
 - Topic templating with variables
 - Message ordering key support
 - Event metadata sent as Pub/Sub message attributes
+- Custom user-defined Pub/Sub message attributes
 - TLS/mTLS support
 
 
@@ -98,11 +99,12 @@ Stream Keycloak events to Google Cloud Pub/Sub.
 |----------|---------|-------------|---------|
 | `destination.url` | `https://pubsub.googleapis.com` | Pub/Sub REST API base URL (override for emulators) | `http://localhost:8085` |
 | `destination.timeout-seconds` | `10` | HTTP request and connect timeout in seconds | `30` |
-| `destination.ordering-key` | _(empty)_ | Ordering key for all published messages | `keycloak` |
+| `destination.ordering-key` | _(empty)_ | Ordering key for all published messages (supports templating) | `keycloak` |
+| `destination.authentication-type` | _(empty)_ | Authentication method (see [Authentication](#authentication-credentials)) | `service-account-file-path` |
 
-### Topic Templating
+### Dynamic Properties (Templating)
 
-The `topic` property supports template variables:
+The `topic` and `ordering-key` properties support template variables:
 
 ```bash
 # Dynamic topic per realm
@@ -110,9 +112,12 @@ kete.routes.pubsub.destination.topic=keycloak-events-${realmLowerCase}
 
 # Dynamic topic per event type
 kete.routes.pubsub.destination.topic=keycloak-${eventTypeLowerCase}
+
+# Dynamic ordering key
+kete.routes.pubsub.destination.ordering-key=${realmLowerCase}
 ```
 
-Available variables: `${realmLowerCase}`, `${realmUpperCase}`, `${eventTypeLowerCase}`, `${eventTypeUpperCase}`, `${kindLowerCase}`, `${kindUpperCase}`, `${resourceTypeLowerCase}`, `${resourceTypeUpperCase}`, `${operationTypeLowerCase}`, `${operationTypeUpperCase}`, `${resultLowerCase}`, `${resultUpperCase}`
+Available variables: `${realmLowerCase}`, `${realmUpperCase}`, `${realmKebabCase}`, `${realmPascalCase}`, `${realmCamelCase}`, `${eventTypeLowerCase}`, `${eventTypeUpperCase}`, `${eventTypeKebabCase}`, `${eventTypePascalCase}`, `${eventTypeCamelCase}`, `${kindLowerCase}`, `${kindUpperCase}`, `${kindKebabCase}`, `${kindPascalCase}`, `${kindCamelCase}`, `${resourceTypeLowerCase}`, `${resourceTypeUpperCase}`, `${resourceTypeKebabCase}`, `${resourceTypePascalCase}`, `${resourceTypeCamelCase}`, `${operationTypeLowerCase}`, `${operationTypeUpperCase}`, `${operationTypeKebabCase}`, `${operationTypePascalCase}`, `${operationTypeCamelCase}`, `${resultLowerCase}`, `${resultUpperCase}`, `${resultKebabCase}`, `${resultPascalCase}`, `${resultCamelCase}`
 
 ### Message Attributes
 
@@ -124,15 +129,27 @@ Every published message includes these Pub/Sub message attributes automatically:
 | `eventtype` | The Keycloak event type | `LOGIN`, `USER_CREATE` |
 | `contenttype` | MIME type of the message body | `application/json` |
 
+### Custom Attributes
+
+Custom attributes can be added to Pub/Sub messages using the `headers.*` prefix:
+
+```bash
+kete.routes.pubsub.destination.headers.source=keycloak
+kete.routes.pubsub.destination.headers.environment=production
+```
+
+These are forwarded as Pub/Sub message attributes alongside the built-in attributes above. The 3 built-in attributes always take priority on key conflict.
+
 ### Authentication (Credentials)
 
-GCP Pub/Sub uses service account credentials for authentication. Provide credentials using exactly **one** of these three methods:
+GCP Pub/Sub uses service account credentials for authentication. Set `destination.authentication-type` and provide credentials using the corresponding method:
 
-| Property | Description |
-|----------|-------------|
-| `destination.credentials-file-path` | Filesystem path to a GCP service account JSON file |
-| `destination.credentials-file-text` | GCP service account JSON provided inline as plain text |
-| `destination.credentials-file-base64` | GCP service account JSON provided as a Base64-encoded string |
+| Authentication Type | Required Property | Description |
+|---------------------|-------------------|-------------|
+| `service-account-file-path` | `destination.credentials-file-path` | Filesystem path to a GCP service account JSON file |
+| `service-account-file-text` | `destination.credentials-file-text` | GCP service account JSON provided inline as plain text |
+| `service-account-file-base64` | `destination.credentials-file-base64` | GCP service account JSON provided as a Base64-encoded string |
+| `application-default` | _(none)_ | Uses Application Default Credentials (ADC) |
 
 !!! note "Emulator Mode"
     Credentials are **not required** when using the GCP Pub/Sub Emulator. Set `destination.url` to the emulator endpoint (e.g., `http://localhost:8085`) and omit all credential properties.
@@ -173,6 +190,7 @@ kete.routes.prod.realm-matchers.realm=list:master
 kete.routes.prod.event-matchers.filter=glob:*
 kete.routes.prod.destination.project=my-production-project
 kete.routes.prod.destination.topic=keycloak-events
+kete.routes.prod.destination.authentication-type=service-account-file-path
 kete.routes.prod.destination.credentials-file-path=/secrets/service-account.json
 kete.routes.prod.destination.timeout-seconds=30
 kete.routes.prod.destination.ordering-key=keycloak
@@ -187,6 +205,7 @@ kete.routes.prod-events.realm-matchers.realm=list:production
 kete.routes.prod-events.event-matchers.filter=glob:*
 kete.routes.prod-events.destination.project=my-gcp-project
 kete.routes.prod-events.destination.topic=prod-keycloak-events
+kete.routes.prod-events.destination.authentication-type=service-account-file-path
 kete.routes.prod-events.destination.credentials-file-path=/secrets/service-account.json
 
 # Development realm events
@@ -195,6 +214,7 @@ kete.routes.dev-events.realm-matchers.realm=list:development
 kete.routes.dev-events.event-matchers.filter=glob:*
 kete.routes.dev-events.destination.project=my-gcp-project
 kete.routes.dev-events.destination.topic=dev-keycloak-events
+kete.routes.dev-events.destination.authentication-type=service-account-file-path
 kete.routes.dev-events.destination.credentials-file-path=/secrets/service-account.json
 ```
 
@@ -218,6 +238,7 @@ kete.routes.k8s.realm-matchers.realm=list:master
 kete.routes.k8s.event-matchers.filter=glob:*
 kete.routes.k8s.destination.project=my-gcp-project
 kete.routes.k8s.destination.topic=keycloak-events
+kete.routes.k8s.destination.authentication-type=service-account-file-base64
 kete.routes.k8s.destination.credentials-file-base64=${GCP_SA_KEY_BASE64}
 ```
 
@@ -227,8 +248,8 @@ kete.routes.k8s.destination.credentials-file-base64=${GCP_SA_KEY_BASE64}
 
 | Quick Start | Description |
 |-------------|-------------|
-| [gcp-pubsub](https://github.com/FortuneN/kete/tree/develop/quick-starts/gcp-pubsub) | Google Cloud Pub/Sub (real cloud) |
-| [gcp-pubsub-emulator](https://github.com/FortuneN/kete/tree/develop/quick-starts/gcp-pubsub-emulator) | GCP Pub/Sub Emulator (local) |
+| [gcp-pubsub](https://github.com/FortuneN/kete/tree/release/quick-starts/gcp-pubsub) | Google Cloud Pub/Sub (real cloud) |
+| [gcp-pubsub-emulator](https://github.com/FortuneN/kete/tree/release/quick-starts/gcp-pubsub-emulator) | GCP Pub/Sub Emulator (local) |
 
 
 

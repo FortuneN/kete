@@ -65,7 +65,6 @@ class HttpDestinationOAuthE2ETests extends EndToEndTestBase {
 		}
 
 		var envVars = new HashMap<String, String>();
-		envVars.put("kete.enabled", "true");
 		envVars.put("kete.routes.oauth-test.realm-matchers.filter", "list:" + TEST_REALM);
 		envVars.put("kete.routes.oauth-test.destination.kind", "http");
 		envVars.put("kete.routes.oauth-test.destination.host", "host.testcontainers.internal");
@@ -74,6 +73,7 @@ class HttpDestinationOAuthE2ETests extends EndToEndTestBase {
 		envVars.put("kete.routes.oauth-test.destination.method", "POST");
 		envVars.put("kete.routes.oauth-test.serializer.kind", "json");
 
+		envVars.put("kete.routes.oauth-test.destination.authentication-type", "oauth");
 		envVars.put("kete.routes.oauth-test.destination.oauth.enabled", "true");
 		envVars.put("kete.routes.oauth-test.destination.oauth.client-id", OAUTH_CLIENT_ID);
 		envVars.put("kete.routes.oauth-test.destination.oauth.client-secret", OAUTH_CLIENT_SECRET);
@@ -175,7 +175,6 @@ class HttpDestinationOAuthE2ETests extends EndToEndTestBase {
 		}
 
 		var envVars = new HashMap<String, String>();
-		envVars.put("kete.enabled", "true");
 		envVars.put("kete.routes.oauth-admin-test.realm-matchers.filter", "list:" + TEST_REALM);
 		envVars.put("kete.routes.oauth-admin-test.destination.kind", "http");
 		envVars.put("kete.routes.oauth-admin-test.destination.host", "host.testcontainers.internal");
@@ -184,6 +183,7 @@ class HttpDestinationOAuthE2ETests extends EndToEndTestBase {
 		envVars.put("kete.routes.oauth-admin-test.destination.method", "POST");
 		envVars.put("kete.routes.oauth-admin-test.serializer.kind", "json");
 
+		envVars.put("kete.routes.oauth-admin-test.destination.authentication-type", "oauth");
 		envVars.put("kete.routes.oauth-admin-test.destination.oauth.enabled", "true");
 		envVars.put("kete.routes.oauth-admin-test.destination.oauth.client-id", OAUTH_CLIENT_ID);
 		envVars.put("kete.routes.oauth-admin-test.destination.oauth.client-secret", OAUTH_CLIENT_SECRET);
@@ -264,7 +264,6 @@ class HttpDestinationOAuthE2ETests extends EndToEndTestBase {
 		}
 
 		var envVars = new HashMap<String, String>();
-		envVars.put("kete.enabled", "true");
 		envVars.put("kete.routes.token-refresh-test.realm-matchers.filter", "list:" + TEST_REALM);
 		envVars.put("kete.routes.token-refresh-test.destination.kind", "http");
 		envVars.put("kete.routes.token-refresh-test.destination.host", "host.testcontainers.internal");
@@ -273,6 +272,7 @@ class HttpDestinationOAuthE2ETests extends EndToEndTestBase {
 		envVars.put("kete.routes.token-refresh-test.destination.method", "POST");
 		envVars.put("kete.routes.token-refresh-test.serializer.kind", "json");
 
+		envVars.put("kete.routes.token-refresh-test.destination.authentication-type", "oauth");
 		envVars.put("kete.routes.token-refresh-test.destination.oauth.enabled", "true");
 		envVars.put("kete.routes.token-refresh-test.destination.oauth.client-id", OAUTH_CLIENT_ID);
 		envVars.put("kete.routes.token-refresh-test.destination.oauth.client-secret", OAUTH_CLIENT_SECRET);

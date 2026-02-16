@@ -1,10 +1,10 @@
 # Bare Metal Deployment
 
-Deploy directly to Keycloak running on bare metal or VMs.
+Add the KETE extension to Keycloak running on bare metal or VMs.
 
 ## Overview
 
-Install the extension by copying the JAR file to Keycloak's providers directory. This method works for:
+Deploying KETE means copying the JAR file into Keycloak's `providers/` directory. This method works for:
 - Traditional server installations
 - VM deployments
 - Manual installations
@@ -12,7 +12,7 @@ Install the extension by copying the JAR file to Keycloak's providers directory.
 
 ## Prerequisites
 
-- Keycloak 22.0 or later installed
+- Keycloak 25.0.6 or later installed
 - Java 21 or later
 - Access to Keycloak's filesystem
 - Appropriate file permissions

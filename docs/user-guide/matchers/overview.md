@@ -46,6 +46,9 @@ When using multiple matchers, control how they combine:
 | `any` (default) | Event passes if **any** matcher matches |
 | `all` | Event passes only if **all** matchers match |
 
+Both event matchers and realm matchers support independent match modes:
+
 ```bash
 kete.routes.myroute.event-match-mode=all
+kete.routes.myroute.realm-match-mode=all
 ```

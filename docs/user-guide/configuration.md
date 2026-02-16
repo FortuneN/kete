@@ -76,6 +76,7 @@ kete.routes.<route-name>.<setting>=<value>
 |----------|---------|-------------|
 | `kete.enabled` | `true` | Master switch for KETE |
 | `kete.metrics.enabled` | `false` | Enable metrics at `/metrics` endpoint |
+| `kete.support-the-project-message` | `true` | Show support/sponsorship message in Keycloak logs on startup |
 
 !!! note "Restart Required"
     Configuration changes require a **Keycloak restart**. There is no hot-reload.

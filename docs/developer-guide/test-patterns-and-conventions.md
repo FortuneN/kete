@@ -100,7 +100,7 @@ destinations/setConfigurationTests.java        ← WRONG: Parent-level test for 
 ### 1.1 Root Test Directory
 
 ```
-src/tests/unit-tests/java/io/github/fortunen/kete/
+src/test/java/io/github/fortunen/kete/unittests/
 ```
 
 ### 1.2 Package Organization Pattern
@@ -109,15 +109,15 @@ src/tests/unit-tests/java/io/github/fortunen/kete/
 
 ```
 Main Source:                                    Test Location:
-src/main/.../ProviderFactory.java       →       src/tests/unit-tests/.../providerfactory/
-src/main/.../Provider.java              →       src/tests/unit-tests/.../provider/
-src/main/.../Configuration.java         →       src/tests/unit-tests/.../configuration/configuration/
-src/main/.../Route.java                 →       src/tests/unit-tests/.../routes/route/
-src/main/.../utils/ValidationUtils.java →       src/tests/unit-tests/.../utils/validationutils/
-src/main/.../utils/RouteUtils.java      →       src/tests/unit-tests/.../routes/routeutils/
-src/main/.../destinations/HttpDestination.java → src/tests/unit-tests/.../destinations/httpdestination/
-src/main/.../serializers/JsonSerializer.java   → src/tests/unit-tests/.../serializers/jsonserializer/
-src/main/.../matchers/GlobMatcher.java          → src/tests/unit-tests/.../matchers/globmatcher/
+src/main/.../ProviderFactory.java       →       src/test/.../unittests/.../providerfactory/
+src/main/.../Provider.java              →       src/test/.../unittests/.../provider/
+src/main/.../Configuration.java         →       src/test/.../unittests/.../configuration/configuration/
+src/main/.../Route.java                 →       src/test/.../unittests/.../routes/route/
+src/main/.../utils/ValidationUtils.java →       src/test/.../unittests/.../utils/validationutils/
+src/main/.../utils/RouteUtils.java      →       src/test/.../unittests/.../routes/routeutils/
+src/main/.../destinations/HttpDestination.java → src/test/.../unittests/.../destinations/httpdestination/
+src/main/.../serializers/JsonSerializer.java   → src/test/.../unittests/.../serializers/jsonserializer/
+src/main/.../matchers/GlobMatcher.java          → src/test/.../unittests/.../matchers/globmatcher/
 ```
 
 ### 1.3 Folder Naming Rules
@@ -131,7 +131,7 @@ src/main/.../matchers/GlobMatcher.java          → src/tests/unit-tests/.../mat
 ### 1.4 Complete Folder Structure
 
 ```
-src/tests/unit-tests/java/io/github/fortunen/kete/
+src/test/java/io/github/fortunen/kete/unittests/
 ├── configuration/
 │   ├── configuration/
 │   │   └── constructorTests.java
@@ -322,6 +322,8 @@ import static org.mockito.ArgumentMatchers.argThat;
 ### 4.3 Regular Imports
 
 **RULE:** Standard imports follow static imports. Group by: project classes → external libraries → JDK.
+
+**RULE:** Never use fully-qualified class names inline in code. Always use import statements. Write `new MqttClient(...)` not `new org.eclipse.paho.client.mqttv3.MqttClient(...)`. The only exception is when two classes share the same simple name from different packages and disambiguation is required.
 
 ```java
 // Project imports
@@ -744,17 +746,17 @@ doThrow(new RuntimeException("init failed")).when(route).initialize();
 
 ```java
 // Verify called once
-verify(destination).sendMessage(any(EventMessage.class));
+verify(destination).send(any(EventMessage.class));
 
 // Verify called specific times
-verify(destination, times(1)).sendMessage(any());
+verify(destination, times(1)).send(any());
 verify(mockTransaction, times(3)).addEvent(any(Event.class));
 
 // Verify never called
-verify(destination, never()).sendMessage(any(EventMessage.class));
+verify(destination, never()).send(any(EventMessage.class));
 
 // Verify with argument matcher
-verify(destination, times(1)).sendMessage(argThat(m ->
+verify(destination, times(1)).send(argThat(m ->
     "eventId".equals(m.eventId()) &&
     "LOGIN".equals(m.eventType())));
 
@@ -808,18 +810,19 @@ var config = new MapConfiguration(map);
 **RULE:** Private helper methods within test class for complex or repeated setup.
 
 ```java
-private EventMessage createMessage(String eventId, String realm, boolean isAdminEvent, 
-        String eventType, String contentType, byte[] eventBody, 
+private EventMessage createMessage(String eventId, String realm, String kind,
+        String eventType, String contentType, byte[] eventBody,
         String resourceType, String operationType) {
-    return EventMessage.get()
-        .eventId(eventId != null ? eventId : "")
-        .realm(realm != null ? realm : "")
-        .isAdminEvent(isAdminEvent)
-        .eventType(eventType != null ? eventType : "")
-        .contentType(contentType != null ? contentType : "")
-        .eventBody(eventBody != null ? eventBody : EMPTY_BYTES)
-        .resourceType(resourceType != null ? resourceType : "")
-        .operationType(operationType != null ? operationType : "");
+    return new EventMessage(
+        realm != null ? realm : "",
+        eventId != null ? eventId : "",
+        eventBody != null ? eventBody : EMPTY_BYTES,
+        eventType != null ? eventType : "",
+        contentType != null ? contentType : "",
+        resourceType != null ? resourceType : "",
+        kind,
+        operationType != null ? operationType : "",
+        Constants.SUCCESS);
 }
 ```
 
@@ -1059,6 +1062,12 @@ public class {methodName}Tests {
 | Testing abstract classes directly | Test concrete implementations instead |
 | Testing Lombok-generated constructors | Only test manually-written constructors with logic |
 | Testing Lombok-generated getters/setters | Only test manually-written accessors with logic |
+| Fully-qualified class names inline | Use import statements instead |
+| Testcontainers `waitingFor()` / `withStartupTimeout()` | Use Awaitility-based readiness probes |
+| Testcontainers `Wait.forLogMessage()` / `Wait.forHttp()` / any `WaitStrategy` | Use SDK/HTTP/Socket readiness probes via Awaitility |
+| Setting `kete.enabled=true` in tests | `true` is the default; only set when testing `false` |
+| Calling `.getMappedPort()` before `.start()` | Unstarted containers have no port mappings |
+| Calling `destination.send()` without `destination.initialize()` first | Initialize sets up the connection and catches config errors early |
 
 
 
@@ -1241,134 +1250,73 @@ public void shouldSerializeAndDeserializeEventWithAllFields() {
 
 ## 21. Destination Testing Requirements
 
-### 21.1 Unit Test Scope for Destinations
+### 21.1 Zero-IO Destination Unit Tests (CRITICAL)
 
-**UNDERSTANDING:** Integration tests achieve maximum effect for destinations, but unit tests MUST cover:
+**MANDATORY RULE:** Destination unit tests under `unittests/destinations/<destination>/` are **STRICTLY ZERO IO**. No containers, no servers, no server processes, no network connections, no Docker, no Testcontainers, no MockWebServer, no WireMock — nothing that performs any form of IO whatsoever.
 
-| Scenario | Unit Testable | Approach |
-|----------|:-------------:|----------|
-| Configuration validation |  | Test setConfiguration with invalid/missing values |
-| Constructor behavior |  | Verify dependencies are set |
-| Connection failure handling |  | Mock connection factories to throw |
-| Message send when disconnected |  | Mock clients in error state |
-| Resource cleanup on close |  | Verify close methods called on mocks |
-| Retry behavior |  | Mock failures, verify retry invocation |
+**Why?** These tests validate message-building logic, header construction, template substitution, and payload encoding — all pure in-memory operations that do not need a live broker.
 
-### 21.2 Unconnected Destination Behavior
+**How it works:**
 
-**RULE:** Test behavior when destinations cannot connect (no RabbitMQ, Kafka, etc.)
+1. Create the real `Destination` instance (e.g., `new NatsDestination()`)
+2. Inject a **mock transport client** via the Lombok-generated setter (e.g., `destination.setConnection(mock(Connection.class))`)
+3. Set fields directly to skip `doInitialize()` (which would attempt real IO)
+4. Mock the config to return `null` for content encoding/transfer encoding (unless testing those)
+5. Call `send(message)` and verify the mock client received the correct API calls
+
+**Test files per destination:**
+
+```
+unittests/destinations/<destination>/
+    sendTests.java   ← tests send() → doSend() (message building, headers, template substitution, payload encoding)
+    closeTests.java  ← tests close() (verifies client cleanup on mocks)
+```
+
+**NEVER in these tests:**
+
+- Start a container
+- Open a socket or network connection
+- Make an HTTP call
+- Connect to a broker
+- Use MockWebServer or WireMock
+- Perform any operation that requires a running external process
+
+**SCOPE:** This rule applies exclusively to tests under `package io.github.fortunen.kete.unittests.destinations`. Integration tests (`integrationtests/`) and E2E tests (`endtoendtests/`) are governed by the Integration & E2E Test Policy in section 21.2 below.
+
+**Example (NatsDestination):**
 
 ```java
 @Test
-public void shouldThrowWhenBrokerUnreachable() {
+public void shouldSendMessageToSubject() throws Exception {
 
     // arrange
 
-    var destination = new KafkaDestination(templateUtils, configUtils);
-    var config = new MapConfiguration(Map.of(
-        "bootstrap.servers", "unreachable:9092",
-        "topic", "test-topic"
-    ));
-    destination.setConfiguration(config);
+    var destination = new NatsDestination();
+    var mockConnection = mock(Connection.class);
+    destination.setConnection(mockConnection);
+    destination.setSubject("test-subject");
+    destination.setSubjectTemplated(false);
+    destination.setCustomHeadersEntrySet(Set.of());
+
+    var config = mock(NatsDestinationConfig.class);
+    when(config.getContentEncoding()).thenReturn(null);
+    when(config.getContentTransferEncoding()).thenReturn(null);
+    destination.setConfig(config);
+
+    var message = createMessage("test-event-id", "test-realm", false, "LOGIN",
+        "application/json", "{\"type\":\"LOGIN\"}".getBytes(StandardCharsets.UTF_8), null, null);
 
     // act
 
-    var thrown = catchThrowable(() -> destination.initialize());
+    destination.send(message);
 
     // assert
 
-    assertThat(thrown)
-        .isInstanceOf(KafkaException.class)
-        .hasMessageContaining("Failed to connect");
+    verify(mockConnection).publish(eq("test-subject"), any(Headers.class), eq(message.eventBody()));
 }
 ```
 
-### 21.3 HTTP Destination - WireMock Testing
-
-**RULE:** Use MockWebServer or WireMock for full HTTP destination testing in unit tests.
-
-```java
-import okhttp3.mockwebserver.MockWebServer;
-import okhttp3.mockwebserver.MockResponse;
-import okhttp3.mockwebserver.RecordedRequest;
-
-public class sendMessageTests {
-
-    private MockWebServer mockServer;
-
-    @BeforeEach
-    void setUp() throws Exception {
-        mockServer = new MockWebServer();
-        mockServer.start();
-    }
-
-    @AfterEach
-    void tearDown() throws Exception {
-        mockServer.shutdown();
-    }
-
-    @Test
-    public void shouldSendPostRequestWithEventBody() throws Exception {
-
-        // arrange
-
-        mockServer.enqueue(new MockResponse().setResponseCode(200));
-
-        var destination = new HttpDestination(templateUtils, configUtils);
-        var config = new MapConfiguration(Map.of(
-            "url", mockServer.url("/events").toString(),
-            "method", "POST"
-        ));
-        destination.setConfiguration(config);
-        destination.initialize();
-
-        var message = EventMessage.get()
-            .eventId("test-id")
-            .eventType("LOGIN")
-            .contentType("application/json")
-            .eventBody("{\"type\":\"LOGIN\"}".getBytes());
-
-        // act
-
-        destination.sendMessage(message);
-
-        // assert
-
-        RecordedRequest request = mockServer.takeRequest();
-        assertThat(request.getMethod()).isEqualTo("POST");
-        assertThat(request.getPath()).isEqualTo("/events");
-        assertThat(request.getBody().readUtf8()).isEqualTo("{\"type\":\"LOGIN\"}");
-        assertThat(request.getHeader("Content-Type")).isEqualTo("application/json");
-        assertThat(request.getHeader("EventId")).isEqualTo("test-id");
-        assertThat(request.getHeader("EventType")).isEqualTo("LOGIN");
-    }
-
-    @Test
-    public void shouldHandleServerError() throws Exception {
-
-        // arrange
-
-        mockServer.enqueue(new MockResponse().setResponseCode(500).setBody("Internal Error"));
-
-        var destination = new HttpDestination(templateUtils, configUtils);
-        // ... setup ...
-
-        // act
-
-        var thrown = catchThrowable(() -> destination.sendMessage(message));
-
-        // assert
-
-        assertThat(thrown)
-            .isInstanceOf(HttpResponseException.class)
-            .hasMessage("HTTP 500: Internal Error");
-    }
-}
-```
-
-**NOTE:** For HTTP destinations, `@BeforeEach` and `@AfterEach` ARE allowed for MockWebServer lifecycle management.
-
-### 21.4 Integration & E2E Test Policy
+### 21.2 Integration & E2E Test Policy
 
 **MANDATORY RULE:** Tests requiring containers or external services are **expensive**. Strict limits apply per destination.
 

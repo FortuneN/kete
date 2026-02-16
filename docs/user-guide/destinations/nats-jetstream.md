@@ -111,7 +111,7 @@ kete.routes.jetstream.destination.subject=keycloak.${realmLowerCase}.events
 kete.routes.jetstream.destination.subject=keycloak.events.${eventTypeLowerCase}
 ```
 
-Available variables: `${realmLowerCase}`, `${realmUpperCase}`, `${eventTypeLowerCase}`, `${eventTypeUpperCase}`, `${kindLowerCase}`, `${kindUpperCase}`, `${resourceTypeLowerCase}`, `${resourceTypeUpperCase}`, `${operationTypeLowerCase}`, `${operationTypeUpperCase}`, `${resultLowerCase}`, `${resultUpperCase}`
+Available variables: `${realmLowerCase}`, `${realmUpperCase}`, `${realmKebabCase}`, `${realmPascalCase}`, `${realmCamelCase}`, `${eventTypeLowerCase}`, `${eventTypeUpperCase}`, `${eventTypeKebabCase}`, `${eventTypePascalCase}`, `${eventTypeCamelCase}`, `${kindLowerCase}`, `${kindUpperCase}`, `${kindKebabCase}`, `${kindPascalCase}`, `${kindCamelCase}`, `${resourceTypeLowerCase}`, `${resourceTypeUpperCase}`, `${resourceTypeKebabCase}`, `${resourceTypePascalCase}`, `${resourceTypeCamelCase}`, `${operationTypeLowerCase}`, `${operationTypeUpperCase}`, `${operationTypeKebabCase}`, `${operationTypePascalCase}`, `${operationTypeCamelCase}`, `${resultLowerCase}`, `${resultUpperCase}`, `${resultKebabCase}`, `${resultPascalCase}`, `${resultCamelCase}`
 
 ### Custom Headers
 
@@ -270,3 +270,22 @@ kete.routes.dynamic.destination.authentication-method=none
 | Replay | No | Yes |
 | Use Case | Fire-and-forget | Reliable delivery |
 | Latency | Lower | Slightly higher |
+
+
+
+## Quick Starts
+
+| System | Quick Start |
+|--------|-------------|
+| NATS Server | [nats-jetstream-nats-server](https://github.com/FortuneN/kete/tree/release/quick-starts/nats-jetstream-nats-server/) |
+| Synadia Cloud | [nats-jetstream-synadia-cloud](https://github.com/FortuneN/kete/tree/release/quick-starts/nats-jetstream-synadia-cloud/) |
+
+
+
+## See Also
+
+- [NATS Destination](nats.md) — Fire-and-forget alternative
+- [Serializers](../serializers/overview.md)
+- [Matchers](../matchers/overview.md)
+- [Event Types](../event-types.md)
+- [Certificate Loaders](../certificate-loaders/overview.md)

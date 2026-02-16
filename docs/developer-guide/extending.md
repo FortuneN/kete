@@ -11,7 +11,7 @@ Add custom destinations, serializers, matchers, and certificate loaders to KETE.
 Each destination needs a configuration class extending `DestinationConfig`:
 
 ```java
-package io.github.fortunen.kete.destinations;
+package io.github.fortunen.kete.destinations.mydestination;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -34,7 +34,7 @@ public class MyDestinationConfig extends DestinationConfig {
 ### 2. Create the Destination Class
 
 ```java
-package io.github.fortunen.kete.destinations;
+package io.github.fortunen.kete.destinations.mydestination;
 
 import io.github.fortunen.kete.Component;
 import io.github.fortunen.kete.Destination;
@@ -57,7 +57,7 @@ public class MyDestination extends Destination<MyDestinationConfig> {
         client = new MyClient(config.getHost(), config.getPort());
         client.connect();
         
-        // TLS is available via config.getTls() if configured
+        // tls is available via config.getTls() if configured
         if (config.getTls().isEnabled()) {
             var sslContext = config.getTls().getKeyStoreAndTrustStoreSSLContext();
             client.enableTls(sslContext);
@@ -275,23 +275,42 @@ public record EventMessage(
     String operationType,   // Admin event operation
     String result           // Event result (e.g., SUCCESS, ERROR)
 ) {
-    // Helper methods
-    String kindLowerCase();         // "event" or "admin_event"
-    String kindUpperCase();         // "EVENT" or "ADMIN_EVENT"
-    String eventIdLowerCase();      // Lowercase event ID
-    String eventIdUpperCase();      // Uppercase event ID
-    String realmLowerCase();        // Cached lowercase realm
-    String realmUpperCase();        // Cached uppercase realm
-    String eventTypeLowerCase();    // Cached lowercase event type
-    String eventTypeUpperCase();    // Cached uppercase event type
-    String resourceTypeLowerCase(); // Cached lowercase resource type
-    String resourceTypeUpperCase(); // Cached uppercase resource type
-    String operationTypeLowerCase();// Cached lowercase operation type
-    String operationTypeUpperCase();// Cached uppercase operation type
-    String resultLowerCase();       // Cached lowercase result
-    String resultUpperCase();       // Cached uppercase result
-    byte[] eventTypeBytes();        // UTF-8 bytes for headers
-    byte[] contentTypeBytes();      // UTF-8 bytes for headers
+    // Helper methods — case conversions (cached, except eventId)
+    String kindLowerCase();             // "event" or "admin_event"
+    String kindUpperCase();             // "EVENT" or "ADMIN_EVENT"
+    String kindKebabCase();             // "event" or "admin-event"
+    String kindPascalCase();            // "Event" or "AdminEvent"
+    String kindCamelCase();             // "event" or "adminEvent"
+    String eventIdLowerCase();          // Lowercase event ID (uncached)
+    String eventIdUpperCase();          // Uppercase event ID (uncached)
+    String realmLowerCase();            // "master" or "my_realm"
+    String realmUpperCase();            // "MASTER" or "MY_REALM"
+    String realmKebabCase();            // "master" or "my-realm"
+    String realmPascalCase();           // "Master" or "MyRealm"
+    String realmCamelCase();            // "master" or "myRealm"
+    String eventTypeLowerCase();        // "login_error"
+    String eventTypeUpperCase();        // "LOGIN_ERROR"
+    String eventTypeKebabCase();        // "login-error"
+    String eventTypePascalCase();       // "LoginError"
+    String eventTypeCamelCase();        // "loginError"
+    String resourceTypeLowerCase();     // "realm_role"
+    String resourceTypeUpperCase();     // "REALM_ROLE"
+    String resourceTypeKebabCase();     // "realm-role"
+    String resourceTypePascalCase();    // "RealmRole"
+    String resourceTypeCamelCase();     // "realmRole"
+    String operationTypeLowerCase();    // "create"
+    String operationTypeUpperCase();    // "CREATE"
+    String operationTypeKebabCase();    // "create"
+    String operationTypePascalCase();   // "Create"
+    String operationTypeCamelCase();    // "create"
+    String resultLowerCase();           // "success"
+    String resultUpperCase();           // "SUCCESS"
+    String resultKebabCase();           // "success"
+    String resultPascalCase();          // "Success"
+    String resultCamelCase();           // "success"
+    byte[] kindBytes();                // UTF-8 bytes for headers
+    byte[] eventTypeBytes();            // UTF-8 bytes for headers
+    byte[] contentTypeBytes();          // UTF-8 bytes for headers
 }
 ```
 

@@ -1,0 +1,20 @@
+# Amazon ElastiCache for Redis (Pub/Sub)
+# See GUIDE.md for setup instructions
+
+services:
+
+  keycloak:
+    image: ghcr.io/fortunen/kete/quick-start-keycloak
+    command: start-dev
+    ports:
+      - 8080:8080
+      - 9000:9000
+    environment:
+      # Amazon ElastiCache for Redis configuration
+      # Replace these values or use a .env file
+      kete.routes.quick-start.destination.kind: redis-pubsub
+      kete.routes.quick-start.destination.host: ${ELASTICACHE_HOST:-<YOUR-CLUSTER>.cache.amazonaws.com}
+      kete.routes.quick-start.destination.port: 6379
+      kete.routes.quick-start.destination.channel: keycloak-events
+      kete.routes.quick-start.destination.tls.enabled: "true"
+      kete.routes.quick-start.destination.password: ${ELASTICACHE_AUTH_TOKEN:-<YOUR-AUTH-TOKEN>}

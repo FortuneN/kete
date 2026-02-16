@@ -1,0 +1,17 @@
+syntax = "proto3";
+package io.github.fortunen.kete.events;
+
+import "auth_details.proto";
+
+message AdminEvent {
+  string id = 1;
+  int64 time = 2;
+  string realm_id = 3;
+  string realm_name = 4;
+  AuthDetails auth_details = 5;
+  string resource_type = 6;
+  string operation_type = 7;
+  string resource_path = 8;
+  string representation = 9;
+  string error = 10;
+}

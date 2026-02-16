@@ -1,0 +1,21 @@
+# Amazon MSK (Managed Streaming for Apache Kafka)
+# See GUIDE.md for setup instructions
+
+services:
+
+  keycloak:
+    image: ghcr.io/fortunen/kete/quick-start-keycloak
+    command: start-dev
+    ports:
+      - 8080:8080
+      - 9000:9000
+    environment:
+      # Amazon MSK configuration
+      # Replace these values or use a .env file
+      kete.routes.quick-start.destination.kind: kafka
+      kete.routes.quick-start.destination.bootstrap-servers: ${MSK_BOOTSTRAP_SERVERS:-<YOUR-BROKER-1>:9096,<YOUR-BROKER-2>:9096}
+      kete.routes.quick-start.destination.topic: keycloak-events
+      kete.routes.quick-start.destination.security-protocol: SASL_SSL
+      kete.routes.quick-start.destination.sasl-mechanism: SCRAM-SHA-512
+      kete.routes.quick-start.destination.sasl-username: ${MSK_USERNAME:-<YOUR-USERNAME>}
+      kete.routes.quick-start.destination.sasl-password: ${MSK_PASSWORD:-<YOUR-PASSWORD>}

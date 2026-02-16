@@ -3,8 +3,6 @@ package io.github.fortunen.kete.integrationtests.stompdestination;
 import static org.awaitility.Awaitility.await;
 
 import java.net.Socket;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.concurrent.BlockingQueue;
@@ -20,7 +18,6 @@ import org.apache.commons.configuration2.MapConfiguration;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.testcontainers.containers.GenericContainer;
-import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.images.builder.Transferable;
 import org.testcontainers.utility.DockerImageName;
 
@@ -65,14 +62,13 @@ public class TestBase {
 		destination.setConfig(config);
 	}
 
+	@SuppressWarnings("resource")
 	protected GenericContainer<?> startActiveMq() throws Exception {
 
 		cleanUpContainer();
 
 		container = new GenericContainer<>(DockerImageName.parse("apache/activemq-classic:6.1.6"))
-			.withExposedPorts(STOMP_PORT, 61616)
-			.waitingFor(Wait.forLogMessage(".*Apache ActiveMQ.*started.*", 1))
-			.withStartupTimeout(Duration.ofMinutes(2));
+			.withExposedPorts(STOMP_PORT, 61616);
 
 		container.start();
 
@@ -89,6 +85,7 @@ public class TestBase {
 		startActiveMqWithTls(tls, true);
 	}
 
+	@SuppressWarnings("resource")
 	private void startActiveMqWithTls(TlsMaterial tls, boolean requireClientAuth) throws Exception {
 
 		cleanUpContainer();
@@ -103,16 +100,14 @@ public class TestBase {
 
 		// Create ActiveMQ XML config with STOMP+SSL connector
 		var activeMqXml = createActiveMqXml(tls.getKeyStorePassword(), tls.getTrustStorePassword(), requireClientAuth);
-		var keyStoreBytes = Files.readAllBytes(Path.of(tls.getServerKeyStoreFilePath()));
-		var trustStoreBytes = Files.readAllBytes(Path.of(tls.getTrustStoreFilePath()));
+		var keyStoreBytes = tls.getServerKeyStoreBytes();
+		var trustStoreBytes = tls.getTrustStoreBytes();
 
 		container = new GenericContainer<>(DockerImageName.parse("apache/activemq-classic:6.1.6"))
 			.withExposedPorts(STOMP_PORT, STOMPS_PORT, 61616)
 			.withCopyToContainer(Transferable.of(activeMqXml, 0777), "/opt/apache-activemq/conf/activemq.xml")
 			.withCopyToContainer(Transferable.of(keyStoreBytes, 0777), "/opt/apache-activemq/conf/keystore.jks")
-			.withCopyToContainer(Transferable.of(trustStoreBytes, 0777), "/opt/apache-activemq/conf/truststore.jks")
-			.waitingFor(Wait.forLogMessage(".*Apache ActiveMQ.*started.*", 1))
-			.withStartupTimeout(Duration.ofMinutes(2));
+			.withCopyToContainer(Transferable.of(trustStoreBytes, 0777), "/opt/apache-activemq/conf/truststore.jks");
 
 		container.start();
 
@@ -194,11 +189,15 @@ public class TestBase {
 	}
 
 	protected void waitForStompReady() {
-		await().atMost(Duration.ofSeconds(30))
-			.pollInterval(Duration.ofSeconds(1))
-			.until(() -> {
-				try (var socket = new Socket(container.getHost(), getStompPort())) {
-					return socket.isConnected();
+		var port = getStompPort();
+		await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).until(() -> {
+				try {
+					var conn = new StompConnection();
+					conn.open("127.0.0.1", port);
+					conn.connect("", "");
+					conn.disconnect();
+					conn.close();
+					return true;
 				} catch (Exception e) {
 					return false;
 				}
@@ -206,11 +205,10 @@ public class TestBase {
 	}
 
 	protected void waitForStompsReady() {
-		await().atMost(Duration.ofSeconds(30))
-			.pollInterval(Duration.ofSeconds(1))
-			.until(() -> {
-				try (var socket = new Socket(container.getHost(), getStompsPort())) {
-					return socket.isConnected();
+		var port = getStompsPort();
+		await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).until(() -> {
+				try (var socket = new Socket("127.0.0.1", port)) {
+					return true;
 				} catch (Exception e) {
 					return false;
 				}
@@ -222,12 +220,12 @@ public class TestBase {
 	}
 
 	protected StompSubscriber createSubscriber(String destination, int qos) throws Exception {
-		return new StompSubscriber(container.getHost(), getStompPort(), destination, null);
+		return new StompSubscriber("127.0.0.1", getStompPort(), destination, null);
 	}
 
 	protected StompSubscriber createTlsSubscriber(String destination, TlsMaterial tls) throws Exception {
 		var sslFactory = tls.getKeyStoreAndTrustStoreSSLContext().getSocketFactory();
-		return new StompSubscriber(container.getHost(), getStompsPort(), destination, sslFactory);
+		return new StompSubscriber("127.0.0.1", getStompsPort(), destination, sslFactory);
 	}
 
 	protected static class StompSubscriber implements AutoCloseable {

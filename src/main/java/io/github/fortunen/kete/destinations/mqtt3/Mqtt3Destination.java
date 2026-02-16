@@ -22,7 +22,11 @@ import lombok.extern.slf4j.Slf4j;
 @EqualsAndHashCode(callSuper = true)
 public class Mqtt3Destination extends Destination<Mqtt3DestinationConfig> {
 
+	private int qos;
+	private String topic;
+	private boolean retained;
 	private MqttClient client;
+	private boolean isTopicTemplated;
 
 	@Override
 	@SneakyThrows
@@ -32,7 +36,14 @@ public class Mqtt3Destination extends Destination<Mqtt3DestinationConfig> {
 
 		var clientId = config.getClientIdPrefix() + "-" + config.getClientIdCounter().incrementAndGet();
 
+		qos = config.getQos();
+		topic = config.getTopic();
+		retained = config.isRetained();
+		isTopicTemplated = config.isTopicTemplated();
 		client = new MqttClient(config.getUrl(), clientId, new MemoryPersistence());
+
+		// verify connection
+
 		client.connect(config.getConnectOptions());
 	}
 
@@ -44,14 +55,14 @@ public class Mqtt3Destination extends Destination<Mqtt3DestinationConfig> {
 
 		// actualTopic
 
-		var actualTopic = TemplateUtils.substitute(config.getTopic(), message);
+		var actualTopic = isTopicTemplated ? TemplateUtils.substitute(topic, message) : topic;
 
 		// mqttMessage
 
 		var mqttMessage = new MqttMessage();
 
-		mqttMessage.setQos(config.getQos());
-		mqttMessage.setRetained(config.isRetained());
+		mqttMessage.setQos(qos);
+		mqttMessage.setRetained(retained);
 		mqttMessage.setPayload(message.eventBody());
 
 		// publish
@@ -63,7 +74,7 @@ public class Mqtt3Destination extends Destination<Mqtt3DestinationConfig> {
 	@SneakyThrows
 	public void close() {
 		try {
-			if (client != null && client.isConnected()) {
+			if (ValidationUtils.isNotNull(client) && client.isConnected()) {
 				client.disconnect();
 			}
 		} catch (Exception e) {

@@ -1,0 +1,25 @@
+services:
+
+  socketio-echo:
+    image: ghcr.io/fortunen/kete/quick-start-socketio-echo
+    ports:
+      - 3000:3000
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://127.0.0.1:3000/health || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  keycloak:
+    image: ghcr.io/fortunen/kete/quick-start-keycloak
+    command: start-dev
+    ports:
+      - 8080:8080
+      - 9000:9000
+    environment:
+      kete.routes.quick-start.destination.kind: socketio
+      kete.routes.quick-start.destination.url: http://socketio-echo:3000
+      kete.routes.quick-start.destination.event-name: keycloak-event
+    depends_on:
+      socketio-echo:
+        condition: service_healthy

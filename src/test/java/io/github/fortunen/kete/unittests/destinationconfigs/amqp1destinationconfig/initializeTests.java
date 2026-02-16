@@ -601,7 +601,7 @@ public class initializeTests {
 
 		// assert
 
-		assertThat(config.getUrl()).isEqualTo("amqp://localhost:5672?amqp.idleTimeout=60000");
+		assertThat(config.getUrl()).isEqualTo("amqp://localhost:5672");
 		assertThat(config.getScheme()).isEqualTo("amqp");
 	}
 
@@ -624,7 +624,7 @@ public class initializeTests {
 
 		// assert
 
-		assertThat(config.getUrl()).isEqualTo("amqps://localhost:5671?amqp.idleTimeout=60000");
+		assertThat(config.getUrl()).isEqualTo("amqps://localhost:5671");
 		assertThat(config.getScheme()).isEqualTo("amqps");
 	}
 
@@ -647,7 +647,7 @@ public class initializeTests {
 
 		// assert
 
-		assertThat(config.getUrl()).isEqualTo("amqpws://localhost:443?amqp.idleTimeout=60000");
+		assertThat(config.getUrl()).isEqualTo("amqpws://localhost:443");
 		assertThat(config.getScheme()).isEqualTo("amqpws");
 	}
 
@@ -671,7 +671,7 @@ public class initializeTests {
 
 		// assert
 
-		assertThat(config.getUrl()).isEqualTo("amqpwss://localhost:443?amqp.idleTimeout=60000");
+		assertThat(config.getUrl()).isEqualTo("amqpwss://localhost:443");
 		assertThat(config.getScheme()).isEqualTo("amqpwss");
 	}
 
@@ -694,7 +694,7 @@ public class initializeTests {
 
 		// assert
 
-		assertThat(config.getUrl()).isEqualTo("amqp://my-broker.example.com:15672?amqp.idleTimeout=60000");
+		assertThat(config.getUrl()).isEqualTo("amqp://my-broker.example.com:15672");
 	}
 
 	// =========================================================================
@@ -814,7 +814,8 @@ public class initializeTests {
 
 		// assert
 
-		assertThat(config.getPriority()).isEqualTo(4);
+		assertThat(config.getPriority()).isEqualTo(0);
+		assertThat(config.isHasPriority()).isFalse();
 	}
 
 	@Test
@@ -1140,7 +1141,7 @@ public class initializeTests {
 	}
 
 	// =========================================================================
-	// TLS
+	// tls
 	// =========================================================================
 
 	@Test
@@ -1208,7 +1209,7 @@ public class initializeTests {
 
 		// assert
 
-		assertThat(config.getIdleTimeoutSeconds()).isEqualTo(Amqp1DestinationConfig.DEFAULT_IDLE_TIMEOUT_SECONDS);
+		assertThat(config.getIdleTimeoutSeconds()).isEqualTo(0);
 	}
 
 	@Test
@@ -1322,7 +1323,7 @@ public class initializeTests {
 		assertThat(config.getDeliveryMode()).isEqualTo(1);
 		assertThat(config.getPriority()).isEqualTo(7);
 		assertThat(config.getTimeToLiveSeconds()).isEqualTo(30L);
-		assertThat(config.getUrl()).isEqualTo("amqp://my-broker.example.com:5673?amqp.idleTimeout=60000");
+		assertThat(config.getUrl()).isEqualTo("amqp://my-broker.example.com:5673");
 		assertThat(config.getScheme()).isEqualTo("amqp");
 		assertThat(config.getConnectionFactory()).isNotNull();
 	}

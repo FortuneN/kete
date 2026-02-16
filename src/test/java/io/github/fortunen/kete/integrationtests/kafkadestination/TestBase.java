@@ -2,10 +2,7 @@ package io.github.fortunen.kete.integrationtests.kafkadestination;
 
 import static org.awaitility.Awaitility.await;
 
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -88,7 +85,7 @@ public class TestBase {
 	}
 
 	protected String getSaslBootstrapServers() {
-		return container.getHost() + ":" + container.getMappedPort(KAFKA_SASL_PORT);
+		return "127.0.0.1" + ":" + container.getMappedPort(KAFKA_SASL_PORT);
 	}
 
 	protected GenericContainer<?> startWithServerOnlyTLS(TlsMaterial tls) throws Exception {
@@ -146,11 +143,11 @@ public class TestBase {
 	}
 
 	protected String getSslBootstrapServers() {
-		return container.getHost() + ":" + container.getMappedPort(KAFKA_SSL_PORT);
+		return "127.0.0.1" + ":" + container.getMappedPort(KAFKA_SSL_PORT);
 	}
 
 	protected String getPlaintextBootstrapServers() {
-		return container.getHost() + ":" + container.getMappedPort(KAFKA_PLAINTEXT_PORT);
+		return "127.0.0.1" + ":" + container.getMappedPort(KAFKA_PLAINTEXT_PORT);
 	}
 
 	protected String getBootstrapServers() {
@@ -177,7 +174,7 @@ public class TestBase {
 	}
 
 	private void waitForKafkaReady() throws Exception {
-		await().atMost(Duration.ofMinutes(2)).pollInterval(Duration.ofSeconds(2)).until(() -> {
+		await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).until(() -> {
 			try {
 				var props = new Properties();
 				props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, getBootstrapServers());
@@ -194,7 +191,7 @@ public class TestBase {
 	}
 
 	private void waitForKafkaReadyWithSasl(String username, String password) throws Exception {
-		await().atMost(Duration.ofMinutes(2)).pollInterval(Duration.ofSeconds(2)).until(() -> {
+		await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).until(() -> {
 			try {
 				var props = new Properties();
 				props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, getSaslBootstrapServers());
@@ -313,34 +310,19 @@ public class TestBase {
 
 	private static class SslKafkaContainer extends KafkaContainer {
 
-		private Path keyPasswordFile;
-		private Path keystorePasswordFile;
-		private Path truststorePasswordFile;
-
-		SslKafkaContainer(String imageName, TlsMaterial tls, String sslClientAuth) throws IOException {
+		SslKafkaContainer(String imageName, TlsMaterial tls, String sslClientAuth) {
 			super(imageName);
-
-			// Create password files as expected by the apache/kafka Docker image
-			// The image reads passwords from files, not env vars directly
-			keyPasswordFile = Files.createTempFile("kafka-key-", ".creds");
-			Files.writeString(keyPasswordFile, tls.getKeyPassword() != null ? tls.getKeyPassword() : "");
-
-			keystorePasswordFile = Files.createTempFile("kafka-keystore-", ".creds");
-			Files.writeString(keystorePasswordFile, tls.getKeyStorePassword() != null ? tls.getKeyStorePassword() : "");
-
-			truststorePasswordFile = Files.createTempFile("kafka-truststore-", ".creds");
-			Files.writeString(truststorePasswordFile, tls.getTrustStorePassword() != null ? tls.getTrustStorePassword() : "");
 
 			// Add SSL listener configuration
 			this.withExposedPorts(KAFKA_PLAINTEXT_PORT, KAFKA_SSL_PORT);
 
 			// Copy keystore, truststore, and password files to container (in-memory)
-			// Use serverKeyStoreFilePath for the container (server-side TLS) - it contains only the server key
-			this.withCopyToContainer(Transferable.of(Files.readAllBytes(Path.of(tls.getServerKeyStoreFilePath())), 0777), "/etc/kafka/secrets/keystore.jks");
-			this.withCopyToContainer(Transferable.of(Files.readAllBytes(Path.of(tls.getTrustStoreFilePath())), 0777), "/etc/kafka/secrets/truststore.jks");
-			this.withCopyToContainer(Transferable.of(Files.readAllBytes(keyPasswordFile), 0777), "/etc/kafka/secrets/key-password");
-			this.withCopyToContainer(Transferable.of(Files.readAllBytes(keystorePasswordFile), 0777), "/etc/kafka/secrets/keystore-password");
-			this.withCopyToContainer(Transferable.of(Files.readAllBytes(truststorePasswordFile), 0777), "/etc/kafka/secrets/truststore-password");
+			// Use serverKeyStoreBytes for the container (server-side TLS) - it contains only the server key
+			this.withCopyToContainer(Transferable.of(tls.getServerKeyStoreBytes(), 0777), "/etc/kafka/secrets/keystore.jks");
+			this.withCopyToContainer(Transferable.of(tls.getTrustStoreBytes(), 0777), "/etc/kafka/secrets/truststore.jks");
+			this.withCopyToContainer(Transferable.of((tls.getKeyPassword() != null ? tls.getKeyPassword() : "").getBytes(StandardCharsets.UTF_8), 0777), "/etc/kafka/secrets/key-password");
+			this.withCopyToContainer(Transferable.of((tls.getKeyStorePassword() != null ? tls.getKeyStorePassword() : "").getBytes(StandardCharsets.UTF_8), 0777), "/etc/kafka/secrets/keystore-password");
+			this.withCopyToContainer(Transferable.of((tls.getTrustStorePassword() != null ? tls.getTrustStorePassword() : "").getBytes(StandardCharsets.UTF_8), 0777), "/etc/kafka/secrets/truststore-password");
 
 			// SSL configuration using FILENAME and CREDENTIALS pattern expected by apache/kafka image
 			this.withEnv("KAFKA_SSL_KEYSTORE_FILENAME", "keystore.jks");
@@ -359,7 +341,6 @@ public class TestBase {
 			this.withEnv("KAFKA_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM", "");
 
 			// Increase startup timeout for CI environments
-			this.withStartupTimeout(Duration.ofMinutes(10));
 
 			// Log output for debugging
 			this.withLogConsumer((OutputFrame outputFrame) -> System.out.print("[KAFKA] " + outputFrame.getUtf8String()));
@@ -370,7 +351,7 @@ public class TestBase {
 			// Get mapped ports for advertised listeners
 			var mappedPlaintextPort = getMappedPort(KAFKA_PLAINTEXT_PORT);
 			var mappedSslPort = getMappedPort(KAFKA_SSL_PORT);
-			var hostName = getHost();
+			var hostName = "127.0.0.1";
 			var containerHostName = containerInfo.getConfig().getHostName();
 
 			// Build the advertised listeners string including SSL
@@ -400,25 +381,11 @@ public class TestBase {
 			copyFileToContainer(Transferable.of(command, 0777), "/tmp/testcontainers_start.sh");
 		}
 
-		@Override
-		public void stop() {
-			super.stop();
-			// Clean up temp password files
-			try {
-				if (keyPasswordFile != null) Files.deleteIfExists(keyPasswordFile);
-				if (keystorePasswordFile != null) Files.deleteIfExists(keystorePasswordFile);
-				if (truststorePasswordFile != null) Files.deleteIfExists(truststorePasswordFile);
-			} catch (IOException e) {
-				// Ignore cleanup errors
-			}
-		}
 	}
 
 	private static class SaslKafkaContainer extends KafkaContainer {
 
-		private Path jaasConfigFile;
-
-		SaslKafkaContainer(String imageName, String username, String password) throws IOException {
+		SaslKafkaContainer(String imageName, String username, String password) {
 			super(imageName);
 
 			// Create JAAS config file for Kafka broker
@@ -431,11 +398,8 @@ public class TestBase {
 				"};",
 				username, password, username, password);
 
-			jaasConfigFile = Files.createTempFile("kafka-jaas-", ".conf");
-			Files.writeString(jaasConfigFile, jaasConfig);
-
 			this.withExposedPorts(KAFKA_PLAINTEXT_PORT, KAFKA_SASL_PORT);
-			this.withCopyToContainer(Transferable.of(Files.readAllBytes(jaasConfigFile), 0777), "/etc/kafka/kafka_server_jaas.conf");
+			this.withCopyToContainer(Transferable.of(jaasConfig.getBytes(StandardCharsets.UTF_8), 0777), "/etc/kafka/kafka_server_jaas.conf");
 
 			// SASL configuration
 			this.withEnv("KAFKA_OPTS", "-Djava.security.auth.login.config=/etc/kafka/kafka_server_jaas.conf");
@@ -446,14 +410,14 @@ public class TestBase {
 		}
 
 		public String getBootstrapServers() {
-			return getHost() + ":" + getMappedPort(KAFKA_SASL_PORT);
+			return "127.0.0.1" + ":" + getMappedPort(KAFKA_SASL_PORT);
 		}
 
 		@Override
 		protected void containerIsStarting(InspectContainerResponse containerInfo) {
 			var mappedPlaintextPort = getMappedPort(KAFKA_PLAINTEXT_PORT);
 			var mappedSaslPort = getMappedPort(KAFKA_SASL_PORT);
-			var hostName = getHost();
+			var hostName = "127.0.0.1";
 			var containerHostName = containerInfo.getConfig().getHostName();
 
 			var advertisedListeners = new ArrayList<String>();
@@ -479,16 +443,5 @@ public class TestBase {
 			copyFileToContainer(Transferable.of(command, 0777), "/tmp/testcontainers_start.sh");
 		}
 
-		@Override
-		public void stop() {
-
-			super.stop();
-
-			try {
-				if (jaasConfigFile != null) Files.deleteIfExists(jaasConfigFile);
-			} catch (IOException e) {
-				// Ignore cleanup errors
-			}
-		}
 	}
 }

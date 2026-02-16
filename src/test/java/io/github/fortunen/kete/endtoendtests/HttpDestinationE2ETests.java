@@ -41,7 +41,6 @@ class HttpDestinationE2ETests extends EndToEndTestBase {
 		mockServer.enqueue(new MockResponse().setResponseCode(200));
 
 		var envVars = new HashMap<String, String>();
-		envVars.put("kete.enabled", "true");
 		envVars.put("kete.routes.http-test.realm-matchers.filter", "list:" + TEST_REALM);
 		envVars.put("kete.routes.http-test.destination.kind", "http");
 		envVars.put("kete.routes.http-test.destination.host", "host.testcontainers.internal");

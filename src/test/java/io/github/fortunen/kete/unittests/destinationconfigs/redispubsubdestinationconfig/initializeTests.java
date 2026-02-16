@@ -36,7 +36,7 @@ public class initializeTests {
 
 		assertThat(thrown)
 			.isInstanceOf(IllegalStateException.class)
-			.hasMessage("host is required");
+			.hasMessage("host is required for standalone mode");
 	}
 
 	@Test
@@ -59,7 +59,7 @@ public class initializeTests {
 
 		assertThat(thrown)
 			.isInstanceOf(IllegalStateException.class)
-			.hasMessage("host is required");
+			.hasMessage("host is required for standalone mode");
 	}
 
 	@Test
@@ -82,7 +82,7 @@ public class initializeTests {
 
 		assertThat(thrown)
 			.isInstanceOf(IllegalStateException.class)
-			.hasMessage("host is required");
+			.hasMessage("host is required for standalone mode");
 	}
 
 	// =========================================================================

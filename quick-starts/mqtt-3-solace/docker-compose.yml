@@ -1,0 +1,44 @@
+services:
+
+  solace:
+    image: ghcr.io/fortunen/kete/quick-start-solace
+    shm_size: 1g
+    ports:
+      - 1883:1883
+      - 8180:8080
+    environment:
+      username_admin_globalaccesslevel: admin
+      username_admin_password: admin
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:5550/health-check/guaranteed-active || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
+
+  subscriber:
+    image: ghcr.io/fortunen/kete/quick-start-mqtt-subscriber
+    environment:
+      MQTT_BROKER_HOST: solace
+      MQTT_BROKER_PORT: 1883
+      MQTT_TOPIC: keycloak-events
+    depends_on:
+      solace:
+        condition: service_healthy
+
+  keycloak:
+    image: ghcr.io/fortunen/kete/quick-start-keycloak
+    command: start-dev
+    ports:
+      - 8080:8080
+      - 9000:9000
+    environment:
+      kete.routes.quick-start.destination.kind: mqtt-3
+      kete.routes.quick-start.destination.host: solace
+      kete.routes.quick-start.destination.port: 1883
+      kete.routes.quick-start.destination.topic: keycloak-events
+    depends_on:
+      solace:
+        condition: service_healthy
+      subscriber:
+        condition: service_started

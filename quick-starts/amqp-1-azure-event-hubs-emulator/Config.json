@@ -3,7 +3,7 @@
     "NamespaceConfig": [
       {
         "Type": "EventHub",
-        "Name": "ehemulatorns",
+        "Name": "emulatorns1",
         "Entities": [
           {
             "Name": "keycloak-events",

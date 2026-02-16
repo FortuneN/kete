@@ -1,0 +1,44 @@
+services:
+
+  localstack:
+    image: ghcr.io/fortunen/kete/quick-start-localstack
+    ports:
+      - 4566:4566
+    environment:
+      SERVICES: sns,sqs
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:4566/_localstack/health || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  sns-setup:
+    image: ghcr.io/fortunen/kete/quick-start-curl
+    depends_on:
+      localstack:
+        condition: service_healthy
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        curl -sf "http://localstack:4566/?Action=CreateTopic&Name=keycloak-events" &&
+        curl -sf "http://localstack:4566/?Action=CreateQueue&QueueName=keycloak-events-verification" &&
+        QUEUE_ARN=$$(curl -sf "http://localstack:4566/000000000000/keycloak-events-verification?Action=GetQueueAttributes&AttributeName.1=QueueArn" | sed -n 's/.*<Value>\(.*\)<\/Value>.*/\1/p') &&
+        curl -sf "http://localstack:4566/?Action=Subscribe&TopicArn=arn:aws:sns:us-east-1:000000000000:keycloak-events&Protocol=sqs&Endpoint=$$QUEUE_ARN&Attributes.entry.1.key=RawMessageDelivery&Attributes.entry.1.value=true" &&
+        echo "Topic, verification queue, and subscription created successfully" &&
+        sleep infinity
+
+  keycloak:
+    image: ghcr.io/fortunen/kete/quick-start-keycloak
+    command: start-dev
+    ports:
+      - 8080:8080
+      - 9000:9000
+    environment:
+      kete.routes.quick-start.destination.kind: aws-sns
+      kete.routes.quick-start.destination.topic: keycloak-events
+      kete.routes.quick-start.destination.region: us-east-1
+      kete.routes.quick-start.destination.account-id: "000000000000"
+      kete.routes.quick-start.destination.endpoint-url: http://localstack:4566
+    depends_on:
+      sns-setup:
+        condition: service_started

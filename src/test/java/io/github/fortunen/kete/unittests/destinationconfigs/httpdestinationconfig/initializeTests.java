@@ -556,7 +556,7 @@ public class initializeTests {
 	}
 
 	@Test
-	public void shouldThrowWhenMethodIsInvalid() {
+	public void shouldAcceptGetMethod() {
 
 		// arrange
 
@@ -569,17 +569,16 @@ public class initializeTests {
 
 		// act
 
-		var thrown = catchThrowable(() -> config.initialize());
+		config.initialize();
 
 		// assert
 
-		assertThat(thrown)
-			.isInstanceOf(IllegalStateException.class)
-			.hasMessage("method must be either POST or PUT");
+		assertThat(config.getMethod()).isEqualTo("GET");
+		assertThat(config.isMethodIsPost()).isFalse();
 	}
 
 	@Test
-	public void shouldThrowWhenMethodIsDelete() {
+	public void shouldAcceptDeleteMethod() {
 
 		// arrange
 
@@ -592,13 +591,12 @@ public class initializeTests {
 
 		// act
 
-		var thrown = catchThrowable(() -> config.initialize());
+		config.initialize();
 
 		// assert
 
-		assertThat(thrown)
-			.isInstanceOf(IllegalStateException.class)
-			.hasMessage("method must be either POST or PUT");
+		assertThat(config.getMethod()).isEqualTo("DELETE");
+		assertThat(config.isMethodIsPost()).isFalse();
 	}
 
 	// =========================================================================
@@ -797,7 +795,8 @@ public class initializeTests {
 		var config = new HttpDestinationConfig();
 		config.setConfiguration(new MapConfiguration(Map.of(
 			"kind", "http",
-			"host", "example.com"
+			"host", "example.com",
+			"authentication-type", "oauth"
 		)));
 
 		// act
@@ -837,6 +836,7 @@ public class initializeTests {
 		var configMap = new HashMap<String, Object>();
 		configMap.put("kind", "http");
 		configMap.put("host", "example.com");
+		configMap.put("authentication-type", "oauth");
 		configMap.put("oauth.enabled", "true");
 		configMap.put("oauth.token-url", "http://localhost/token");
 		configMap.put("oauth.client-id", "test-client");
@@ -879,7 +879,7 @@ public class initializeTests {
 	}
 
 	// =========================================================================
-	// TLS
+	// tls
 	// =========================================================================
 
 	@Test
@@ -1024,6 +1024,7 @@ public class initializeTests {
 		var configMap = new HashMap<String, Object>();
 		configMap.put("kind", "http");
 		configMap.put("host", "api.example.com");
+		configMap.put("authentication-type", "oauth");
 		configMap.put("port", "8443");
 		configMap.put("path-and-query", "/events/keycloak?source=auth");
 		configMap.put("method", "PUT");
@@ -1051,5 +1052,123 @@ public class initializeTests {
 		assertThat(config.getTls().isEnabled()).isTrue();
 		assertThat(config.getUrl()).isEqualTo("https://api.example.com:8443/events/keycloak?source=auth");
 		assertThat(config.getOauth()).isNotNull();
+	}
+
+	// =========================================================================
+	// content-transfer-encoding
+	// =========================================================================
+
+	@Test
+	public void shouldDefaultContentTransferEncodingToNull() {
+
+		// arrange
+
+		var config = new HttpDestinationConfig();
+		config.setConfiguration(new MapConfiguration(Map.of("kind", "http", "host", "example.com")));
+
+		// act
+
+		config.initialize();
+
+		// assert
+
+		assertThat(config.getContentTransferEncoding()).isNull();
+		assertThat(config.getContentTransferEncodingName()).isNull();
+	}
+
+	@Test
+	public void shouldResolveContentTransferEncoding() {
+
+		// arrange
+
+		var config = new HttpDestinationConfig();
+		config.setConfiguration(new MapConfiguration(Map.of("kind", "http", "host", "example.com", "content-transfer-encoding", "base64")));
+
+		// act
+
+		config.initialize();
+
+		// assert
+
+		assertThat(config.getContentTransferEncoding()).isNotNull();
+		assertThat(config.getContentTransferEncodingName()).isEqualTo("base64");
+	}
+
+	@Test
+	public void shouldThrowWhenContentTransferEncodingIsUnknown() {
+
+		// arrange
+
+		var config = new HttpDestinationConfig();
+		config.setConfiguration(new MapConfiguration(Map.of("kind", "http", "host", "example.com", "content-transfer-encoding", "unknown")));
+
+		// act
+
+		var thrown = catchThrowable(() -> config.initialize());
+
+		// assert
+
+		assertThat(thrown)
+			.isInstanceOf(IllegalStateException.class)
+			.hasMessage("unknown content-transfer-encoding: unknown");
+	}
+
+	// =========================================================================
+	// content-encoding
+	// =========================================================================
+
+	@Test
+	public void shouldDefaultContentEncodingToNull() {
+
+		// arrange
+
+		var config = new HttpDestinationConfig();
+		config.setConfiguration(new MapConfiguration(Map.of("kind", "http", "host", "example.com")));
+
+		// act
+
+		config.initialize();
+
+		// assert
+
+		assertThat(config.getContentEncoding()).isNull();
+		assertThat(config.getContentEncodingName()).isNull();
+	}
+
+	@Test
+	public void shouldResolveContentEncoding() {
+
+		// arrange
+
+		var config = new HttpDestinationConfig();
+		config.setConfiguration(new MapConfiguration(Map.of("kind", "http", "host", "example.com", "content-encoding", "gzip")));
+
+		// act
+
+		config.initialize();
+
+		// assert
+
+		assertThat(config.getContentEncoding()).isNotNull();
+		assertThat(config.getContentEncodingName()).isEqualTo("gzip");
+	}
+
+	@Test
+	public void shouldThrowWhenContentEncodingIsUnknown() {
+
+		// arrange
+
+		var config = new HttpDestinationConfig();
+		config.setConfiguration(new MapConfiguration(Map.of("kind", "http", "host", "example.com", "content-encoding", "unknown")));
+
+		// act
+
+		var thrown = catchThrowable(() -> config.initialize());
+
+		// assert
+
+		assertThat(thrown)
+			.isInstanceOf(IllegalStateException.class)
+			.hasMessage("unknown content-encoding: unknown");
 	}
 }

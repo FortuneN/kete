@@ -115,7 +115,7 @@ kete.routes.main-rabbitmq.destination.routing-key=events
 | `password` | Authentication password | `""` | `secret123` |
 | `virtual-host` | Virtual host | `/` | `/production` |
 | `routing-key` | Routing key (supports templating) | `""` | `${eventTypeLowerCase}` |
-| `priority` | Message priority (0-9) | `4` | `7` |
+| `priority` | Message priority (0-9, only applied when explicitly set) | _(none)_ | `7` |
 | `delivery-mode` | Message durability: `persistent` or `non-persistent` | `persistent` | `persistent` |
 | `time-to-live-seconds` | Message TTL in seconds (0 = never expires) | `0` | `60` |
 | `connection-timeout-seconds` | Connection timeout in seconds | `10` | `30` |
@@ -125,9 +125,9 @@ kete.routes.main-rabbitmq.destination.routing-key=events
 | `automatic-recovery-enabled` | Enable automatic connection recovery | `true` | `false` |
 | `network-recovery-interval-seconds` | Network recovery interval in seconds | `5` | `10` |
 | `topology-recovery-enabled` | Enable topology recovery | Same as `automatic-recovery-enabled` | `true` |
-| `pool.min-idle` | `1` | Minimum idle connections in pool | `5` |
-| `pool.max-idle` | `10` | Maximum idle connections in pool | `20` |
-| `pool.max-total` | `20` | Maximum total connections in pool | `50` |
+| `pool.min-idle` | Minimum idle connections in pool | `1` | `5` |
+| `pool.max-idle` | Maximum idle connections in pool | `10` | `20` |
+| `pool.max-total` | Maximum total connections in pool | `20` | `50` |
 | `tls.*` | TLS/SSL configuration | - | See [TLS & mTLS](overview.md#tls-mtls) |
 
 ### Custom Headers
@@ -157,7 +157,7 @@ kete.routes.rabbitmq.destination.exchange=keycloak-events
 kete.routes.rabbitmq.destination.routing-key=${realmLowerCase}.${eventTypeLowerCase}
 ```
 
-Available variables: `${realmLowerCase}`, `${realmUpperCase}`, `${eventTypeLowerCase}`, `${eventTypeUpperCase}`, `${kindLowerCase}`, `${kindUpperCase}`, `${resourceTypeLowerCase}`, `${resourceTypeUpperCase}`, `${operationTypeLowerCase}`, `${operationTypeUpperCase}`, `${resultLowerCase}`, `${resultUpperCase}`
+Available variables: `${realmLowerCase}`, `${realmUpperCase}`, `${realmKebabCase}`, `${realmPascalCase}`, `${realmCamelCase}`, `${eventTypeLowerCase}`, `${eventTypeUpperCase}`, `${eventTypeKebabCase}`, `${eventTypePascalCase}`, `${eventTypeCamelCase}`, `${kindLowerCase}`, `${kindUpperCase}`, `${kindKebabCase}`, `${kindPascalCase}`, `${kindCamelCase}`, `${resourceTypeLowerCase}`, `${resourceTypeUpperCase}`, `${resourceTypeKebabCase}`, `${resourceTypePascalCase}`, `${resourceTypeCamelCase}`, `${operationTypeLowerCase}`, `${operationTypeUpperCase}`, `${operationTypeKebabCase}`, `${operationTypePascalCase}`, `${operationTypeCamelCase}`, `${resultLowerCase}`, `${resultUpperCase}`, `${resultKebabCase}`, `${resultPascalCase}`, `${resultCamelCase}`
 
 ### Delivery Modes
 
@@ -502,3 +502,24 @@ kete.routes.ha.destination.routing-key=events
     rabbitmqadmin declare queue name=keycloak-events-ha `
       arguments='{"x-ha-policy":"all","x-ha-sync-mode":"automatic"}'
     ```
+
+
+
+## Quick Starts
+
+| Broker | Quick Start |
+|--------|-------------|
+| RabbitMQ | [amqp-0.9.1-rabbitmq](https://github.com/FortuneN/kete/tree/release/quick-starts/amqp-0.9.1-rabbitmq/) |
+| LavinMQ | [amqp-0.9.1-lavinmq](https://github.com/FortuneN/kete/tree/release/quick-starts/amqp-0.9.1-lavinmq/) |
+| Amazon MQ (RabbitMQ) | [amqp-0.9.1-amazon-mq](https://github.com/FortuneN/kete/tree/release/quick-starts/amqp-0.9.1-amazon-mq/) |
+| CloudAMQP | [amqp-0.9.1-cloudamqp](https://github.com/FortuneN/kete/tree/release/quick-starts/amqp-0.9.1-cloudamqp/) |
+
+
+
+## See Also
+
+- [AMQP 1.0 Destination](amqp-1.md) — Advanced AMQP with richer messaging features
+- [Serializers](../serializers/overview.md)
+- [Matchers](../matchers/overview.md)
+- [Event Types](../event-types.md)
+- [Certificate Loaders](../certificate-loaders/overview.md)

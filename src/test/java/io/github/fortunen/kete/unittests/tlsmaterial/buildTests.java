@@ -34,7 +34,6 @@ class buildTests {
 
 		var tls = TlsMaterial.builder()
 			.withEnabled(false)
-			.withWriteFiles(true)
 			.build();
 
 		// assert
@@ -54,7 +53,6 @@ class buildTests {
 		// act
 
 		var tls = TlsMaterial.builder()
-			.withWriteFiles(true)
 			.build();
 
 		// assert
@@ -95,7 +93,6 @@ class buildTests {
 
 		var tls = TlsMaterial.builder()
 			.withEnabled(true)
-			.withWriteFiles(true)
 			.build();
 
 		// assert
@@ -181,7 +178,6 @@ class buildTests {
 
 		var tls = TlsMaterial.builder()
 			.withEnabled(true)
-			.withWriteFiles(true)
 			.build();
 
 		// assert
@@ -199,7 +195,6 @@ class buildTests {
 
 		var tls = TlsMaterial.builder()
 			.withEnabled(true)
-			.withWriteFiles(true)
 			.build();
 
 		// assert
@@ -217,7 +212,6 @@ class buildTests {
 
 		var tls = TlsMaterial.builder()
 			.withEnabled(true)
-			.withWriteFiles(true)
 			.build();
 
 		// assert
@@ -234,7 +228,6 @@ class buildTests {
 
 		var tls = TlsMaterial.builder()
 			.withEnabled(true)
-			.withWriteFiles(true)
 			.build();
 
 		// assert
@@ -252,7 +245,6 @@ class buildTests {
 
 		var tls = TlsMaterial.builder()
 			.withEnabled(true)
-			.withWriteFiles(true)
 			.withServerHostNames(new String[]{"localhost"})
 			.build();
 
@@ -271,7 +263,6 @@ class buildTests {
 
 		var tls = TlsMaterial.builder()
 			.withEnabled(true)
-			.withWriteFiles(true)
 			.build();
 
 		// assert
@@ -288,7 +279,6 @@ class buildTests {
 
 		var tls = TlsMaterial.builder()
 			.withEnabled(false)
-			.withWriteFiles(true)
 			.build();
 
 		// assert
@@ -311,34 +301,35 @@ class buildTests {
 	}
 
 	@Test
-	void shouldGenerateBase64ButNotFilesWhenWriteFilesIsFalse() {
+	void shouldGenerateBase64AndFilePathsWhenEnabled() {
 
 		// act
 
 		var tls = TlsMaterial.builder()
 			.withEnabled(true)
-			.withWriteFiles(false)
 			.build();
 
 		// assert
 
 		assertThat(tls.getTrustStoreBase64())
-			.as("Trust store base64 is always generated when enabled")
+			.as("Trust store base64 is lazily generated when accessed")
 			.isNotNull()
 			.isNotBlank();
 
 		assertThat(tls.getTrustStoreFilePath())
-			.as("Trust store file path should not be generated when write files is false")
-			.isNull();
+			.as("Trust store file path is lazily generated when accessed")
+			.isNotNull()
+			.isNotBlank();
 
 		assertThat(tls.getKeyStoreBase64())
-			.as("Key store base64 is always generated when enabled")
+			.as("Key store base64 is lazily generated when accessed")
 			.isNotNull()
 			.isNotBlank();
 
 		assertThat(tls.getKeyStoreFilePath())
-			.as("Key store file path should not be generated when write files is false")
-			.isNull();
+			.as("Key store file path is lazily generated when accessed")
+			.isNotNull()
+			.isNotBlank();
 	}
 
 	@Test
@@ -348,7 +339,6 @@ class buildTests {
 
 		var tls = TlsMaterial.builder()
 			.withEnabled(true)
-			.withWriteFiles(true)
 			.build();
 
 		// assert
@@ -373,7 +363,6 @@ class buildTests {
 
 		var tls = TlsMaterial.builder()
 			.withEnabled(true)
-			.withWriteFiles(true)
 			.build();
 
 		// assert
@@ -400,7 +389,6 @@ class buildTests {
 
 		var tls = TlsMaterial.builder()
 			.withEnabled(true)
-			.withWriteFiles(true)
 			.build();
 
 		// assert
@@ -421,7 +409,6 @@ class buildTests {
 
 		var tls = TlsMaterial.builder()
 			.withEnabled(true)
-			.withWriteFiles(true)
 			.build();
 
 		// assert
@@ -525,7 +512,6 @@ class buildTests {
 
 		var tls = TlsMaterial.builder()
 			.withEnabled(true)
-			.withWriteFiles(true)
 			.build();
 
 		// assert
@@ -574,7 +560,6 @@ class buildTests {
 
 		var tls = TlsMaterial.builder()
 			.withEnabled(true)
-			.withWriteFiles(true)
 			.build();
 
 		// assert
@@ -623,7 +608,6 @@ class buildTests {
 
 		var tls = TlsMaterial.builder()
 			.withEnabled(true)
-			.withWriteFiles(true)
 			.build();
 
 		// assert
@@ -640,7 +624,6 @@ class buildTests {
 
 		var tls = TlsMaterial.builder()
 			.withEnabled(true)
-			.withWriteFiles(true)
 			.build();
 
 		// assert
@@ -652,5 +635,294 @@ class buildTests {
 		assertThat(tls.getKeyStoreAndTrustStore().size())
 			.as("Combined store should have at least 1 entry")
 			.isGreaterThanOrEqualTo(1);
+	}
+
+	// =========================================================================
+	// Byte Array Fields
+	// =========================================================================
+
+	@Test
+	void shouldGenerateTrustStoreBytesWhenEnabled() {
+
+		// act
+
+		var tls = TlsMaterial.builder()
+			.withEnabled(true)
+			.build();
+
+		// assert
+
+		assertThat(tls.getTrustStoreBytes())
+			.as("Trust store bytes should be generated when TLS is enabled")
+			.isNotNull()
+			.isNotEmpty();
+	}
+
+	@Test
+	void shouldGenerateKeyStoreBytesWhenEnabled() {
+
+		// act
+
+		var tls = TlsMaterial.builder()
+			.withEnabled(true)
+			.build();
+
+		// assert
+
+		assertThat(tls.getKeyStoreBytes())
+			.as("Key store bytes should be generated when TLS is enabled")
+			.isNotNull()
+			.isNotEmpty();
+	}
+
+	@Test
+	void shouldNotGenerateTrustStoreBytesWhenDisabled() {
+
+		// act
+
+		var tls = TlsMaterial.builder()
+			.withEnabled(false)
+			.build();
+
+		// assert
+
+		assertThat(tls.getTrustStoreBytes())
+			.as("Trust store bytes should be null when TLS is disabled")
+			.isNull();
+	}
+
+	@Test
+	void shouldNotGenerateKeyStoreBytesWhenDisabled() {
+
+		// act
+
+		var tls = TlsMaterial.builder()
+			.withEnabled(false)
+			.build();
+
+		// assert
+
+		assertThat(tls.getKeyStoreBytes())
+			.as("Key store bytes should be null when TLS is disabled")
+			.isNull();
+	}
+
+	@Test
+	void shouldGenerateTrustStoreBytesConsistentWithBase64() {
+
+		// act
+
+		var tls = TlsMaterial.builder()
+			.withEnabled(true)
+			.build();
+
+		// assert
+
+		assertThat(tls.getTrustStoreBytes()).isNotNull();
+		assertThat(tls.getTrustStoreBase64()).isNotNull();
+		assertThat(java.util.Base64.getEncoder().encodeToString(tls.getTrustStoreBytes()))
+			.as("Trust store bytes and base64 should be consistent")
+			.isEqualTo(tls.getTrustStoreBase64());
+	}
+
+	@Test
+	void shouldGenerateKeyStoreBytesConsistentWithBase64() {
+
+		// act
+
+		var tls = TlsMaterial.builder()
+			.withEnabled(true)
+			.build();
+
+		// assert
+
+		assertThat(tls.getKeyStoreBytes()).isNotNull();
+		assertThat(tls.getKeyStoreBase64()).isNotNull();
+		assertThat(java.util.Base64.getEncoder().encodeToString(tls.getKeyStoreBytes()))
+			.as("Key store bytes and base64 should be consistent")
+			.isEqualTo(tls.getKeyStoreBase64());
+	}
+
+	@Test
+	void shouldGenerateServerKeyStoreBytesWhenServerHostNamesProvided() {
+
+		// act
+
+		var tls = TlsMaterial.builder()
+			.withEnabled(true)
+			.withServerHostNames(new String[]{"localhost"})
+			.withKeyPassword("changeit")
+			.build();
+
+		// assert
+
+		assertThat(tls.getServerKeyStoreBytes())
+			.as("Server key store bytes should be generated when server host names are provided")
+			.isNotNull()
+			.isNotEmpty();
+	}
+
+	@Test
+	void shouldNotGenerateServerKeyStoreBytesWhenNoServerHostNames() {
+
+		// act
+
+		var tls = TlsMaterial.builder()
+			.withEnabled(true)
+			.build();
+
+		// assert
+
+		assertThat(tls.getServerKeyStoreBytes())
+			.as("Server key store bytes should be null when no server host names are provided")
+			.isNull();
+	}
+
+	@Test
+	void shouldGenerateCaCertificatePemBytesWhenServerHostNamesProvided() {
+
+		// act
+
+		var tls = TlsMaterial.builder()
+			.withEnabled(true)
+			.withServerHostNames(new String[]{"localhost"})
+			.withKeyPassword("changeit")
+			.build();
+
+		// assert
+
+		assertThat(tls.getCaCertificatePemBytes())
+			.as("CA certificate PEM bytes should be generated")
+			.isNotNull()
+			.isNotEmpty();
+
+		var pemString = new String(tls.getCaCertificatePemBytes(), java.nio.charset.StandardCharsets.UTF_8);
+		assertThat(pemString).contains("BEGIN CERTIFICATE");
+	}
+
+	@Test
+	void shouldGenerateServerCertificatePemBytesWhenServerHostNamesProvided() {
+
+		// act
+
+		var tls = TlsMaterial.builder()
+			.withEnabled(true)
+			.withServerHostNames(new String[]{"localhost"})
+			.withKeyPassword("changeit")
+			.build();
+
+		// assert
+
+		assertThat(tls.getServerCertificatePemBytes())
+			.as("Server certificate PEM bytes should be generated")
+			.isNotNull()
+			.isNotEmpty();
+
+		var pemString = new String(tls.getServerCertificatePemBytes(), java.nio.charset.StandardCharsets.UTF_8);
+		assertThat(pemString).contains("BEGIN CERTIFICATE");
+	}
+
+	@Test
+	void shouldGenerateServerPrivateKeyPemBytesWhenServerHostNamesProvided() {
+
+		// act
+
+		var tls = TlsMaterial.builder()
+			.withEnabled(true)
+			.withServerHostNames(new String[]{"localhost"})
+			.withKeyPassword("changeit")
+			.build();
+
+		// assert
+
+		assertThat(tls.getServerPrivateKeyPemBytes())
+			.as("Server private key PEM bytes should be generated")
+			.isNotNull()
+			.isNotEmpty();
+
+		var pemString = new String(tls.getServerPrivateKeyPemBytes(), java.nio.charset.StandardCharsets.UTF_8);
+		assertThat(pemString).contains("BEGIN PRIVATE KEY");
+	}
+
+	@Test
+	void shouldGenerateServerPrivateKeyPkcs1PemBytesWhenServerHostNamesProvided() {
+
+		// act
+
+		var tls = TlsMaterial.builder()
+			.withEnabled(true)
+			.withServerHostNames(new String[]{"localhost"})
+			.withKeyPassword("changeit")
+			.build();
+
+		// assert
+
+		assertThat(tls.getServerPrivateKeyPkcs1PemBytes())
+			.as("Server private key PKCS1 PEM bytes should be generated")
+			.isNotNull()
+			.isNotEmpty();
+
+		var pemString = new String(tls.getServerPrivateKeyPkcs1PemBytes(), java.nio.charset.StandardCharsets.UTF_8);
+		assertThat(pemString).contains("BEGIN RSA PRIVATE KEY");
+	}
+
+	@Test
+	void shouldNotGeneratePemBytesWhenNoServerHostNames() {
+
+		// act
+
+		var tls = TlsMaterial.builder()
+			.withEnabled(true)
+			.build();
+
+		// assert
+
+		assertThat(tls.getCaCertificatePemBytes()).isNull();
+		assertThat(tls.getServerCertificatePemBytes()).isNull();
+		assertThat(tls.getServerPrivateKeyPemBytes()).isNull();
+		assertThat(tls.getServerPrivateKeyPkcs1PemBytes()).isNull();
+	}
+
+	@Test
+	void shouldNotGeneratePemBytesWhenDisabled() {
+
+		// act
+
+		var tls = TlsMaterial.builder()
+			.withEnabled(false)
+			.withServerHostNames(new String[]{"localhost"})
+			.build();
+
+		// assert
+
+		assertThat(tls.getCaCertificatePemBytes()).isNull();
+		assertThat(tls.getServerCertificatePemBytes()).isNull();
+		assertThat(tls.getServerPrivateKeyPemBytes()).isNull();
+		assertThat(tls.getServerPrivateKeyPkcs1PemBytes()).isNull();
+		assertThat(tls.getServerKeyStoreBytes()).isNull();
+	}
+
+	@Test
+	void shouldGeneratePemBytesAndFilePathsWhenServerHostNamesProvided() {
+
+		// act
+
+		var tls = TlsMaterial.builder()
+			.withEnabled(true)
+			.withServerHostNames(new String[]{"localhost"})
+			.withKeyPassword("changeit")
+			.build();
+
+		// assert
+
+		assertThat(tls.getCaCertificatePemBytes()).isNotNull().isNotEmpty();
+		assertThat(tls.getServerCertificatePemBytes()).isNotNull().isNotEmpty();
+		assertThat(tls.getServerPrivateKeyPemBytes()).isNotNull().isNotEmpty();
+		assertThat(tls.getServerPrivateKeyPkcs1PemBytes()).isNotNull().isNotEmpty();
+		assertThat(tls.getServerKeyStoreBytes()).isNotNull().isNotEmpty();
+		assertThat(tls.getCaCertificatePemFilePath()).isNotNull().isNotBlank();
+		assertThat(tls.getServerCertificatePemFilePath()).isNotNull().isNotBlank();
+		assertThat(tls.getServerPrivateKeyPemFilePath()).isNotNull().isNotBlank();
+		assertThat(tls.getServerKeyStoreFilePath()).isNotNull().isNotBlank();
 	}
 }

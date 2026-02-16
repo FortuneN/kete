@@ -39,7 +39,7 @@ class createRetryTests {
 	}
 
 	@Test
-	void shouldReturnNullWhenEnabledNotSpecified() {
+	void shouldCreateRetryWhenEnabledNotSpecified() {
 
 		// arrange
 
@@ -52,7 +52,7 @@ class createRetryTests {
 
 		// assert
 
-		assertThat(result).isNull();
+		assertThat(result).isNotNull();
 	}
 
 	@Test

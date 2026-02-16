@@ -8,6 +8,9 @@ import io.github.fortunen.kete.utils.ValidationUtils;
 import io.lettuce.core.RedisClient;
 import io.lettuce.core.api.StatefulRedisConnection;
 import io.lettuce.core.api.sync.RedisCommands;
+import io.lettuce.core.cluster.RedisClusterClient;
+import io.lettuce.core.cluster.api.StatefulRedisClusterConnection;
+import io.lettuce.core.cluster.api.sync.RedisAdvancedClusterCommands;
 import io.lettuce.core.codec.StringCodec;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -22,9 +25,17 @@ import java.nio.charset.StandardCharsets;
 @EqualsAndHashCode(callSuper = true)
 public class RedisPubSubDestination extends Destination<RedisPubSubDestinationConfig> {
 
+	private String channel;
+	private boolean isClusterMode;
+	private boolean isChannelTemplated;
+
 	private RedisClient client;
 	private RedisCommands<String, String> commands;
 	private StatefulRedisConnection<String, String> connection;
+
+	private RedisClusterClient clusterClient;
+	private RedisAdvancedClusterCommands<String, String> clusterCommands;
+	private StatefulRedisClusterConnection<String, String> clusterConnection;
 
 	@Override
 	@SneakyThrows
@@ -32,21 +43,27 @@ public class RedisPubSubDestination extends Destination<RedisPubSubDestinationCo
 
 		ValidationUtils.requireNonNull(config, "config is required");
 
-		// client
+		channel = config.getChannel();
+		isClusterMode = config.isClusterMode();
+		isChannelTemplated = config.isChannelTemplated();
 
-		client = RedisClient.create();
-		client.setOptions(config.getClientOptions());
+		if (isClusterMode) {
+			clusterClient = RedisClusterClient.create(config.getClusterNodeUris());
+			clusterClient.setOptions(config.getClusterClientOptions());
+			clusterConnection = clusterClient.connect(StringCodec.UTF8);
+			clusterCommands = clusterConnection.sync();
 
-		// connection
+			var pong = clusterCommands.ping();
+			ValidationUtils.requireTrue("PONG".equalsIgnoreCase(pong), "Redis cluster connection test failed - expected PONG, got: " + pong);
+		} else {
+			client = RedisClient.create();
+			client.setOptions(config.getClientOptions());
+			connection = client.connect(StringCodec.UTF8, config.getRedisUri());
+			commands = connection.sync();
 
-		connection = client.connect(StringCodec.UTF8, config.getRedisUri());
-		commands = connection.sync();
-
-		// ping
-
-		var pong = commands.ping();
-
-		ValidationUtils.requireTrue("PONG".equalsIgnoreCase(pong), "Redis connection test failed - expected PONG, got: " + pong);
+			var pong = commands.ping();
+			ValidationUtils.requireTrue("PONG".equalsIgnoreCase(pong), "Redis connection test failed - expected PONG, got: " + pong);
+		}
 	}
 
 	@Override
@@ -55,17 +72,20 @@ public class RedisPubSubDestination extends Destination<RedisPubSubDestinationCo
 
 		ValidationUtils.requireNonNull(message, "message is required");
 
-		// actualChannel
+		var actualChannel = isChannelTemplated ? TemplateUtils.substitute(channel, message) : channel;
+		var body = new String(message.eventBody(), StandardCharsets.UTF_8);
 
-		var actualChannel = TemplateUtils.substitute(config.getChannel(), message);
-
-		// publish
-
-		commands.publish(actualChannel, new String(message.eventBody(), StandardCharsets.UTF_8));
+		if (isClusterMode) {
+			clusterCommands.publish(actualChannel, body);
+		} else {
+			commands.publish(actualChannel, body);
+		}
 	}
 
 	@Override
 	public void close() {
+		ValidationUtils.tryClose(clusterConnection, "clusterConnection");
+		ValidationUtils.tryClose(clusterClient, "clusterClient");
 		ValidationUtils.tryClose(connection, "connection");
 		ValidationUtils.tryClose(client, "client");
 	}

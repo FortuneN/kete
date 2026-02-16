@@ -73,6 +73,7 @@ kete/
 │   │   │   ├── EventMessage.java                 # Event data record
 │   │   │   ├── Matcher.java                      # Abstract matcher
 │   │   │   ├── MatchMode.java                    # Match mode enum
+│   │   │   ├── NatsAuthMaterial.java             # NATS auth configuration
 │   │   │   ├── OAuthMaterial.java                # OAuth configuration
 │   │   │   ├── Provider.java                     # Event handler
 │   │   │   ├── ProviderFactory.java              # Lifecycle mgmt
@@ -92,40 +93,75 @@ kete/
 │   │   │   │   ├── Pkcs12FilePathCertificateLoader.java
 │   │   │   │   ├── Pkcs7FileBase64CertificateLoader.java
 │   │   │   │   └── Pkcs7FilePathCertificateLoader.java
-│   │   │   ├── destinations/                     # Destination implementations
-│   │   │   │   ├── Amqp091Destination.java
-│   │   │   │   ├── Amqp091DestinationConfig.java
-│   │   │   │   ├── Amqp1Destination.java
-│   │   │   │   ├── Amqp1DestinationConfig.java
-│   │   │   │   ├── HttpDestination.java
-│   │   │   │   ├── HttpDestinationConfig.java
-│   │   │   │   ├── KafkaDestination.java
-│   │   │   │   ├── KafkaDestinationConfig.java
-│   │   │   │   ├── Mqtt3Destination.java
-│   │   │   │   ├── Mqtt3DestinationConfig.java
-│   │   │   │   ├── Mqtt5Destination.java
-│   │   │   │   └── Mqtt5DestinationConfig.java
+│   │   │   ├── destinations/                     # Destination implementations (29 destinations)
+│   │   │   │   ├── amqp091/                      # AMQP 0-9-1 (RabbitMQ)
+│   │   │   │   ├── amqp1/                        # AMQP 1.0 (Qpid JMS)
+│   │   │   │   ├── awseventbridge/               # AWS EventBridge
+│   │   │   │   ├── awskinesis/                   # AWS Kinesis
+│   │   │   │   ├── awssns/                       # AWS SNS
+│   │   │   │   ├── awssqs/                       # AWS SQS
+│   │   │   │   ├── azureeventgrid/               # Azure Event Grid
+│   │   │   │   ├── azureeventhubs/               # Azure Event Hubs
+│   │   │   │   ├── azureservicebus/              # Azure Service Bus
+│   │   │   │   ├── azurestoragequeue/            # Azure Storage Queue
+│   │   │   │   ├── azurewebpubsub/               # Azure Web PubSub
+│   │   │   │   ├── gcpcloudtasks/                # GCP Cloud Tasks
+│   │   │   │   ├── gcppubsub/                    # GCP Pub/Sub
+│   │   │   │   ├── grpc/                         # gRPC
+│   │   │   │   ├── http/                         # HTTP webhook
+│   │   │   │   ├── kafka/                        # Apache Kafka
+│   │   │   │   ├── mqtt3/                        # MQTT 3.1.1
+│   │   │   │   ├── mqtt5/                        # MQTT 5.0
+│   │   │   │   ├── nats/                         # NATS
+│   │   │   │   ├── natsjetstream/                # NATS JetStream
+│   │   │   │   ├── pulsar/                       # Apache Pulsar
+│   │   │   │   ├── redispubsub/                  # Redis Pub/Sub
+│   │   │   │   ├── redisstream/                  # Redis Streams
+│   │   │   │   ├── signalr/                      # SignalR
+│   │   │   │   ├── soap/                         # SOAP
+│   │   │   │   ├── socketio/                     # Socket.IO
+│   │   │   │   ├── stomp/                        # STOMP
+│   │   │   │   ├── websocket/                    # WebSocket
+│   │   │   │   └── zeromq/                       # ZeroMQ
+│   │   │   │   # Each subdirectory contains:
+│   │   │   │   #   <Name>Destination.java        — send logic
+│   │   │   │   #   <Name>DestinationConfig.java  — config parsing
 │   │   │   ├── matchers/                         # Matcher implementations
 │   │   │   │   ├── GlobMatcher.java
 │   │   │   │   ├── ListMatcher.java
 │   │   │   │   ├── RegexMatcher.java
 │   │   │   │   └── SqlMatcher.java
 │   │   │   ├── serializers/                      # Serializer implementations
+│   │   │   │   ├── AvroSerializer.java
 │   │   │   │   ├── CborSerializer.java
 │   │   │   │   ├── CsvSerializer.java
 │   │   │   │   ├── JsonSerializer.java
+│   │   │   │   ├── MultipartFormSerializer.java
 │   │   │   │   ├── PropertiesSerializer.java
+│   │   │   │   ├── ProtobufSerializer.java
 │   │   │   │   ├── SmileSerializer.java
+│   │   │   │   ├── TemplateSerializer.java
 │   │   │   │   ├── TomlSerializer.java
+│   │   │   │   ├── UrlEncodedFormSerializer.java
 │   │   │   │   ├── XmlSerializer.java
 │   │   │   │   └── YamlSerializer.java
 │   │   │   └── utils/                            # Utility classes
+│   │   │       ├── AvroUtils.java
+│   │   │       ├── AwsUtils.java
+│   │   │       ├── AzureUtils.java
+│   │   │       ├── Base64Utils.java
 │   │   │       ├── CertificateUtils.java
 │   │   │       ├── ConfigurationUtils.java
 │   │   │       ├── DestinationUtils.java
+│   │   │       ├── ExecutorUtils.java
 │   │   │       ├── FileUtils.java
+│   │   │       ├── GcpUtils.java
 │   │   │       ├── IocUtils.java
+│   │   │       ├── JsonUtils.java
+│   │   │       ├── JwtUtils.java
 │   │   │       ├── MatcherUtils.java
+│   │   │       ├── MetricsUtils.java
+│   │   │       ├── ProtobufUtils.java
 │   │   │       ├── RetryUtils.java
 │   │   │       ├── RouteUtils.java
 │   │   │       ├── SerializerUtils.java
@@ -134,21 +170,56 @@ kete/
 │   │   └── resources/
 │   │       └── META-INF/services/
 │   │           └── org.keycloak.events.EventListenerProviderFactory
-│   └── tests/
+│   └── test/
 │       ├── java/io/github/fortunen/kete/
-│       │   ├── certificateloaders/               # Certificate loader tests
-│       │   ├── destinationpooledobjectfactory/   # Pool factory tests
-│       │   ├── destinations/                     # Destination tests
-│       │   ├── e2e/                              # End-to-end tests
-│       │   ├── eventmessage/                     # EventMessage tests
-│       │   ├── matchers/                         # Matcher tests
-│       │   ├── oauthmaterial/                    # OAuth tests
-│       │   ├── provider/                         # Provider tests
-│       │   ├── providerfactory/                  # Factory tests
-│       │   ├── route/                            # Route tests
-│       │   ├── serializers/                      # Serializer tests
-│       │   ├── tlsmaterial/                      # TLS tests
-│       │   └── utils/                            # Utility tests
+│       │   ├── unittests/                        # Unit tests
+│       │   │   ├── certificateloaders/
+│       │   │   ├── destinationconfig/
+│       │   │   ├── destinationconfigs/
+│       │   │   ├── destinationpooledobjectfactory/
+│       │   │   ├── eventmessage/
+│       │   │   ├── matchers/
+│       │   │   ├── natsauthmaterial/
+│       │   │   ├── oauthmaterial/
+│       │   │   ├── provider/
+│       │   │   ├── providerfactory/
+│       │   │   ├── route/
+│       │   │   ├── serializerroutes/
+│       │   │   ├── serializers/
+│       │   │   ├── tlsmaterial/
+│       │   │   └── utils/
+│       │   ├── integrationtests/                 # Integration tests (29 destinations)
+│       │   │   ├── amqp091destination/
+│       │   │   ├── amqp1destination/
+│       │   │   ├── awseventbridgedestination/
+│       │   │   ├── awskinesisdestination/
+│       │   │   ├── awssnsdestination/
+│       │   │   ├── awssqsdestination/
+│       │   │   ├── azureeventgriddestination/
+│       │   │   ├── azureeventhubsdestination/
+│       │   │   ├── azureservicebusdestination/
+│       │   │   ├── azurestoragequeuedestination/
+│       │   │   ├── azurewebpubsubdestination/
+│       │   │   ├── gcpcloudtasksdestination/
+│       │   │   ├── gcppubsubdestination/
+│       │   │   ├── grpcdestination/
+│       │   │   ├── httpdestination/
+│       │   │   ├── kafkadestination/
+│       │   │   ├── mqtt3destination/
+│       │   │   ├── mqtt5destination/
+│       │   │   ├── natsdestination/
+│       │   │   ├── natsjetstreamdestination/
+│       │   │   ├── pulsardestination/
+│       │   │   ├── redispubsubdestination/
+│       │   │   ├── redisstreamdestination/
+│       │   │   ├── signalrdestination/
+│       │   │   ├── soapdestination/
+│       │   │   ├── socketiodestination/
+│       │   │   ├── stompdestination/
+│       │   │   ├── websocketdestination/
+│       │   │   └── zeromqdestination/
+│       │   ├── endtoendtests/                    # End-to-end tests
+│       │   └── utils/                            # Test utility classes
 │       └── resources/
 │           └── testcontainers.properties         # Test config
 ├── docs/                                         # Documentation
@@ -185,11 +256,33 @@ kete/
 - With shading: Extension works across Keycloak 25.x → 26.x+ without recompilation
 
 **What is shaded:**
-Every dependency without `<scope>provided</scope>` or `<scope>test</scope>` is relocated under `io.github.fortunen.kete.shaded.*`
+Every dependency without `<scope>provided</scope>` or `<scope>test</scope>` is relocated under `kete.*`
 
-**See:** `pom.xml` → `maven-shade-plugin` → `<relocations>` section (17 libraries relocated)
+**See:** `pom.xml` → `maven-shade-plugin` → `<relocations>` section (92 libraries relocated)
 
 **NEVER:** Add runtime dependencies without corresponding `<relocation>` entries.
+
+#### Kafka SASL/JAAS Classloader Workaround
+
+The Kafka client uses JAAS (`javax.security.auth.login`) for SASL authentication (e.g., PLAIN, SCRAM, OAUTHBEARER). After shading, two problems arise:
+
+**Problem 1 — JAAS class name resolution:**
+Users configure `sasl.jaas.config` with standard class names like `org.apache.kafka.common.security.plain.PlainLoginModule`. After shading, that class lives at `kete.org.apache.kafka.common.security.plain.PlainLoginModule`. JAAS `LoginContext` does `Class.forName()` on the class name from the config — if it still says `org.apache.kafka...`, the class is not found.
+
+**Solution:** `KafkaDestinationConfig.doInitialize()` automatically rewrites `org.apache.kafka.` → `kete.org.apache.kafka.` in the `sasl.jaas.config` value. Users always write standard class names; the rewrite is invisible.
+
+**Problem 2 — Thread Context ClassLoader (TCCL):**
+JAAS `LoginContext` uses `Thread.currentThread().getContextClassLoader()` to load the LoginModule class. In Keycloak, the TCCL is Keycloak's classloader, which cannot see classes inside the provider JAR. Even after rewriting the class name, `Class.forName("kete.org.apache.kafka...PlainLoginModule")` fails because the TCCL doesn't have visibility.
+
+**Solution:** `KafkaDestination.doInitialize()` temporarily sets the TCCL to the provider JAR's classloader before creating `KafkaProducer` and `AdminClient`, then restores it in a `finally` block.
+
+**Problem 3 — Shade plugin rewrites string constants:**
+The Maven Shade Plugin rewrites ALL string literals matching relocation patterns — including the `"org.apache.kafka."` constant used for the rewrite comparison itself. At runtime, both the "before" and "after" constants would become `"kete.org.apache.kafka."`, making the rewrite a no-op.
+
+**Solution:** The `KAFKA_PACKAGE_PREFIX` constant is constructed at runtime using `String.join(".", "org", "apache", "kafka") + "."` so the shade plugin cannot match and rewrite it.
+
+!!! warning "If you touch this code"
+    These three workarounds are tightly coupled. Changing one without understanding the others will break Kafka SASL authentication in Keycloak deployments. The unit tests in `kafkadestinationconfig/initializeTests.java` cover the config rewriting; the classloader fix is validated by the `kafka-azure-event-hubs-emulator` quickstart.
 
 ### Full Build
 
@@ -375,6 +468,8 @@ start target/site/jacoco/index.html # Windows
   - Methods: `camelCase`
   - Constants: `UPPER_SNAKE_CASE`
   - Packages: `lowercase`
+- **No fully-qualified class names inline**: Always use import statements. Write `new MqttClient(...)` not `new org.eclipse.paho.client.mqttv3.MqttClient(...)`. The only exception is when two classes share the same simple name and disambiguation is required.
+- **Use `var`**: Prefer `var` for local variable declarations when type is inferrable.
 
 ### Code Example
 
@@ -490,14 +585,14 @@ mvn clean package
 
 2. Copy to local Keycloak:
 ```bash
-cp target/kete.jar ~/keycloak-26.5.0/providers/
+cp target/kete.jar ~/keycloak-26.0.0/providers/
 ```
 
 3. Start Keycloak in debug mode:
 ```bash
 export KC_LOG_LEVEL=DEBUG
 export JAVA_OPTS="-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
-~/keycloak-26.5.0/bin/kc.sh start-dev
+~/keycloak-26.0.0/bin/kc.sh start-dev
 ```
 
 4. Attach debugger:
@@ -523,7 +618,7 @@ export JAVA_OPTS="-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=
 1. Build Docker image with debug enabled:
 
 ```dockerfile
-FROM quay.io/keycloak/keycloak:26.5.0
+FROM quay.io/keycloak/keycloak:26.0.0
 COPY target/kete.jar /opt/keycloak/providers/
 ENV JAVA_OPTS="-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
 RUN /opt/keycloak/bin/kc.sh build

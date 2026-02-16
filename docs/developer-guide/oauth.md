@@ -197,7 +197,6 @@ data:
   kete.routes.protected-api.destination.url: "https://api.company.com/events"
   kete.routes.protected-api.destination.method: "POST"
   kete.routes.protected-api.destination.timeout-seconds: "10"
-  kete.routes.protected-api.retry.enabled: "true"
   kete.routes.protected-api.retry.max-attempts: "3"
   kete.routes.protected-api.retry.wait-duration: "PT2S"
   kete.routes.protected-api.destination.oauth.enabled: "true"

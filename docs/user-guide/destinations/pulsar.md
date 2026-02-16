@@ -15,6 +15,7 @@ Stream Keycloak events to Apache Pulsar.
 |--------|-------|
 | **Apache Pulsar** | Primary target, all features supported |
 | **DataStax Luna Streaming** | Pulsar-compatible managed service |
+| **DataStax Astra Streaming** | Pulsar-compatible managed service |
 | **StreamNative Cloud** | Pulsar-compatible managed service |
 
 
@@ -48,6 +49,7 @@ Stream Keycloak events to Apache Pulsar.
     kete.routes.pulsar-auth.destination.kind=pulsar
     kete.routes.pulsar-auth.destination.service-url=pulsar://pulsar:6650
     kete.routes.pulsar-auth.destination.topic=persistent://public/default/keycloak-events
+    kete.routes.pulsar-auth.destination.authentication-type=token
     kete.routes.pulsar-auth.destination.token=eyJhbGciOiJIUzI1NiJ9...
     ```
 
@@ -57,6 +59,7 @@ Stream Keycloak events to Apache Pulsar.
     kete.routes.pulsar-basic.destination.kind=pulsar
     kete.routes.pulsar-basic.destination.service-url=pulsar://pulsar:6650
     kete.routes.pulsar-basic.destination.topic=persistent://public/default/keycloak-events
+    kete.routes.pulsar-basic.destination.authentication-type=basic
     kete.routes.pulsar-basic.destination.username=admin
     kete.routes.pulsar-basic.destination.password=admin
     ```
@@ -69,7 +72,7 @@ Stream Keycloak events to Apache Pulsar.
 - ✅ Topic templating with variables
 - ✅ Multiple compression types (LZ4, ZSTD, ZLIB, Snappy)
 - ✅ Message batching
-- ✅ Token and Basic authentication
+- ✅ Token, Basic, and OAuth 2.0 authentication
 - ✅ TLS/mTLS support
 - ✅ Event metadata in message properties
 
@@ -128,9 +131,23 @@ kete.routes.main-pulsar.destination.topic=persistent://public/default/keycloak-e
 
 | Property | Description | Default | Example |
 |----------|-------------|---------|---------|
-| `token` | JWT token for authentication | - | `eyJhbGciOiJIUzI1NiJ9...` |
-| `username` | Username for basic auth | - | `admin` |
-| `password` | Password for basic auth | - | `secret` |
+| `authentication-type` | Authentication method: `token`, `basic`, or `oauth` | _(none)_ | `token` |
+| `token` | JWT token (for `token` auth) | - | `eyJhbGciOiJIUzI1NiJ9...` |
+| `username` | Username (for `basic` auth) | - | `admin` |
+| `password` | Password (for `basic` auth) | - | `secret` |
+
+When `authentication-type` is `oauth`, the standard `oauth.*` sub-properties apply:
+
+| Property | Required | Default | Description |
+|----------|----------|---------|-------------|
+| `oauth.enabled` | No | `false` | Enable OAuth 2.0 Client Credentials flow |
+| `oauth.mode` | No | `external` | `external` or `internal` |
+| `oauth.token-url` | Yes* | - | OAuth token endpoint URL |
+| `oauth.client-id` | Yes* | - | OAuth client ID |
+| `oauth.client-secret` | Yes* | - | OAuth client secret |
+| `oauth.scope` | No | `""` | Requested OAuth scopes |
+
+*Required when `oauth.mode=external`.
 
 #### Optional Properties
 
@@ -162,9 +179,17 @@ kete.routes.pulsar.destination.topic=persistent://public/default/keycloak-events
 kete.routes.pulsar.destination.topic=persistent://public/default/keycloak-${eventTypeLowerCase}
 ```
 
-Available variables: `${realmLowerCase}`, `${realmUpperCase}`, `${eventTypeLowerCase}`, `${eventTypeUpperCase}`, `${kindLowerCase}`, `${kindUpperCase}`, `${resourceTypeLowerCase}`, `${resourceTypeUpperCase}`, `${operationTypeLowerCase}`, `${operationTypeUpperCase}`, `${resultLowerCase}`, `${resultUpperCase}`
+Available variables: `${realmLowerCase}`, `${realmUpperCase}`, `${realmKebabCase}`, `${realmPascalCase}`, `${realmCamelCase}`, `${eventTypeLowerCase}`, `${eventTypeUpperCase}`, `${eventTypeKebabCase}`, `${eventTypePascalCase}`, `${eventTypeCamelCase}`, `${kindLowerCase}`, `${kindUpperCase}`, `${kindKebabCase}`, `${kindPascalCase}`, `${kindCamelCase}`, `${resourceTypeLowerCase}`, `${resourceTypeUpperCase}`, `${resourceTypeKebabCase}`, `${resourceTypePascalCase}`, `${resourceTypeCamelCase}`, `${operationTypeLowerCase}`, `${operationTypeUpperCase}`, `${operationTypeKebabCase}`, `${operationTypePascalCase}`, `${operationTypeCamelCase}`, `${resultLowerCase}`, `${resultUpperCase}`, `${resultKebabCase}`, `${resultPascalCase}`, `${resultCamelCase}`
 
-### TLS Configuration
+### TLS Properties
+
+See [TLS & mTLS](overview.md#tls-mtls) for full details on TLS options.
+
+| Property | Default | Description |
+|----------|---------|-------------|
+| `destination.tls.enabled` | `false` | Enable TLS |
+| `destination.tls.key-store.*` | - | Client certificate for mTLS |
+| `destination.tls.trust-store.*` | - | CA certificates |
 
 For TLS/mTLS connections:
 
@@ -184,40 +209,6 @@ kete.routes.pulsar-tls.destination.tls.key-store.loader.kind=jks-file-path
 kete.routes.pulsar-tls.destination.tls.key-store.loader.path=/path/to/keystore.jks
 kete.routes.pulsar-tls.destination.tls.key-store.password=changeit
 kete.routes.pulsar-tls.destination.tls.key-store.key-password=changeit
-```
-
-### Configuration Examples
-
-#### Production Configuration (High Reliability)
-
-```bash
-kete.routes.prod.destination.service-url=pulsar://pulsar:6650
-kete.routes.prod.destination.topic=persistent://public/default/keycloak-events
-kete.routes.prod.destination.compression-type=ZSTD
-kete.routes.prod.destination.send-timeout-seconds=60
-kete.routes.prod.destination.max-pending-messages=5000
-kete.routes.prod.destination.block-if-queue-full=true
-```
-
-#### High Throughput Configuration
-
-```bash
-kete.routes.throughput.destination.service-url=pulsar://pulsar:6650
-kete.routes.throughput.destination.topic=persistent://public/default/keycloak-events
-kete.routes.throughput.destination.compression-type=LZ4
-kete.routes.throughput.destination.batching-max-messages=2000
-kete.routes.throughput.destination.batching-max-publish-delay-seconds=5
-kete.routes.throughput.destination.max-pending-messages=10000
-```
-
-#### Low Latency Configuration
-
-```bash
-kete.routes.lowlatency.destination.service-url=pulsar://pulsar:6650
-kete.routes.lowlatency.destination.topic=persistent://public/default/keycloak-events
-kete.routes.lowlatency.destination.compression-type=NONE
-kete.routes.lowlatency.destination.batching-max-messages=1
-kete.routes.lowlatency.destination.batching-max-publish-delay-seconds=0
 ```
 
 
@@ -286,7 +277,8 @@ kete.routes.admin.destination.topic=persistent://public/default/keycloak-admin
 
 | Quick Start | Description |
 |-------------|-------------|
-| [pulsar-apache](https://github.com/FortuneN/kete/tree/develop/quick-starts/pulsar-apache) | Apache Pulsar standalone |
+| [pulsar-apache](https://github.com/FortuneN/kete/tree/release/quick-starts/pulsar-apache) | Apache Pulsar standalone |
+| [pulsar-datastax](https://github.com/FortuneN/kete/tree/release/quick-starts/pulsar-datastax) | DataStax Luna Streaming |
 
 
 

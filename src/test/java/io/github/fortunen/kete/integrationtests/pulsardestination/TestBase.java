@@ -2,8 +2,6 @@ package io.github.fortunen.kete.integrationtests.pulsardestination;
 
 import static org.awaitility.Awaitility.await;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
@@ -49,6 +47,7 @@ public class TestBase {
 		destination.setConfig(config);
 	}
 
+	@SuppressWarnings("resource")
 	protected GenericContainer<?> startPulsar() throws Exception {
 
 		cleanUpContainer();
@@ -67,7 +66,7 @@ public class TestBase {
 
 		// Wait for broker healthcheck first
 
-		await().atMost(Duration.ofMinutes(10)).pollInterval(Duration.ofSeconds(2)).until(() -> {
+		await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).until(() -> {
 			try {
 				var result = container.execInContainer("curl", "-sf", "http://localhost:8080/admin/v2/brokers/healthcheck");
 				return result.getExitCode() == 0;
@@ -78,7 +77,7 @@ public class TestBase {
 
 		// Then wait for the default namespace to be ready
 
-		await().atMost(Duration.ofMinutes(10)).pollInterval(Duration.ofSeconds(2)).until(() -> {
+		await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).until(() -> {
 			try {
 				var result = container.execInContainer("curl", "-sf", "http://localhost:8080/admin/v2/namespaces/public/default");
 				return result.getExitCode() == 0;
@@ -89,7 +88,7 @@ public class TestBase {
 
 		// Wait for BookKeeper to be ready by verifying topic creation works (this is the actual readiness check)
 
-		await().atMost(Duration.ofMinutes(10)).pollInterval(Duration.ofSeconds(2)).until(() -> {
+		await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).until(() -> {
 			try {
 				var result = container.execInContainer(
 					"bin/pulsar-admin", "topics", "create", "persistent://public/default/readiness-check"
@@ -114,6 +113,7 @@ public class TestBase {
 		return startPulsarWithTls(tls, true);
 	}
 
+	@SuppressWarnings("resource")
 	private GenericContainer<?> startPulsarWithTls(TlsMaterial tls, boolean requireClientCert) throws Exception {
 
 		if (tls == null) {
@@ -133,9 +133,9 @@ public class TestBase {
 
 		container = new GenericContainer<>(DockerImageName.parse("apachepulsar/pulsar:3.3.2"))
 			.withExposedPorts(PULSAR_PORT, PULSAR_TLS_PORT, PULSAR_HTTP_PORT)
-			.withCopyToContainer(Transferable.of(Files.readAllBytes(Path.of(tls.getServerCertificatePemFilePath())), 0777), "/pulsar/server-cert.pem")
-			.withCopyToContainer(Transferable.of(Files.readAllBytes(Path.of(tls.getServerPrivateKeyPemFilePath())), 0777), "/pulsar/server-key.pem")
-			.withCopyToContainer(Transferable.of(Files.readAllBytes(Path.of(tls.getCaCertificatePemFilePath())), 0777), "/pulsar/ca-cert.pem")
+			.withCopyToContainer(Transferable.of(tls.getServerCertificatePemBytes(), 0777), "/pulsar/server-cert.pem")
+			.withCopyToContainer(Transferable.of(tls.getServerPrivateKeyPemBytes(), 0777), "/pulsar/server-key.pem")
+			.withCopyToContainer(Transferable.of(tls.getCaCertificatePemBytes(), 0777), "/pulsar/ca-cert.pem")
 			.withCommand("/bin/bash", "-c", startupScript);
 
 		container.start();
@@ -165,7 +165,7 @@ public class TestBase {
 	}
 
 	protected String getHost() {
-		return container.getHost();
+		return "127.0.0.1";
 	}
 
 	protected int getPort() {

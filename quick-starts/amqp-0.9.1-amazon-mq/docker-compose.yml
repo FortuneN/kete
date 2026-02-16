@@ -1,0 +1,22 @@
+# Amazon MQ for RabbitMQ (AMQP 0.9.1)
+# See GUIDE.md for setup instructions
+
+services:
+
+  keycloak:
+    image: ghcr.io/fortunen/kete/quick-start-keycloak
+    command: start-dev
+    ports:
+      - 8080:8080
+      - 9000:9000
+    environment:
+      # Amazon MQ (RabbitMQ) with AMQP 0.9.1 configuration
+      # Replace these values or use a .env file
+      kete.routes.quick-start.destination.kind: amqp-0.9.1
+      kete.routes.quick-start.destination.host: ${AMAZONMQ_HOST:-<YOUR-BROKER-ID>.mq.<YOUR-REGION>.amazonaws.com}
+      kete.routes.quick-start.destination.port: 5671
+      kete.routes.quick-start.destination.tls.enabled: true
+      kete.routes.quick-start.destination.username: ${AMAZONMQ_USERNAME:-<YOUR-USERNAME>}
+      kete.routes.quick-start.destination.password: ${AMAZONMQ_PASSWORD:-<YOUR-PASSWORD>}
+      kete.routes.quick-start.destination.exchange: amq.direct
+      kete.routes.quick-start.destination.routing-key: keycloak-events

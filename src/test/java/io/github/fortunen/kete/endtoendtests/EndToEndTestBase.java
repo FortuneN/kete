@@ -2,6 +2,10 @@ package io.github.fortunen.kete.endtoendtests;
 
 import java.io.File;
 import java.net.Socket;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.util.List;
 import java.util.Map;
@@ -12,6 +16,10 @@ import java.util.concurrent.TimeUnit;
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.maven.shared.invoker.DefaultInvocationRequest;
 import org.apache.maven.shared.invoker.DefaultInvoker;
+import org.apache.qpid.jms.JmsConnectionFactory;
+import org.eclipse.paho.client.mqttv3.MqttClient;
+import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
+import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.resource.RealmResource;
@@ -45,7 +53,6 @@ public abstract class EndToEndTestBase {
 	protected static final String TEST_REALM = "test-realm";
 	protected static final String TEST_USER = "test-user";
 	protected static final String TEST_PASSWORD = "test-password";
-	protected static final Duration CONTAINER_STARTUP_TIMEOUT = Duration.ofMinutes(10);
 
 	protected Network network;
 
@@ -194,13 +201,13 @@ public abstract class EndToEndTestBase {
 
 	protected KeycloakContainer createKeycloakContainer(Map<String, String> envVars) {
 
+		@SuppressWarnings("resource")
 		var keycloak = new KeycloakContainer(KEYCLOAK_IMAGE)
 			.withNetwork(createNetwork())
 			.withNetworkAliases("keycloak")
 			.withAdminUsername("admin")
 			.withAdminPassword("admin")
 			.withProviderLibsFrom(List.of(SHADED_JAR_FILE))
-			.withStartupTimeout(CONTAINER_STARTUP_TIMEOUT)
 			.withLogConsumer(new Slf4jLogConsumer(log));
 
 		envVars.forEach(keycloak::withEnv);
@@ -210,13 +217,13 @@ public abstract class EndToEndTestBase {
 
 	protected KeycloakContainer createKeycloakContainerWithMetrics(Map<String, String> envVars) {
 
+		@SuppressWarnings("resource")
 		var keycloak = new KeycloakContainer(KEYCLOAK_IMAGE)
 			.withNetwork(createNetwork())
 			.withNetworkAliases("keycloak")
 			.withAdminUsername("admin")
 			.withAdminPassword("admin")
 			.withProviderLibsFrom(List.of(SHADED_JAR_FILE))
-			.withStartupTimeout(CONTAINER_STARTUP_TIMEOUT)
 			.withLogConsumer(new Slf4jLogConsumer(log))
 			.withEnabledMetrics();
 
@@ -327,8 +334,41 @@ public abstract class EndToEndTestBase {
 		});
 	}
 
+	protected void waitForHttpReady(GenericContainer<?> container, int port, String path) throws Exception {
+		var url = "http://127.0.0.1:" + container.getMappedPort(port) + path;
+		var client = HttpClient.newBuilder().version(HttpClient.Version.HTTP_1_1).connectTimeout(Duration.ofSeconds(5)).build();
+		await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).until(() -> {
+			try {
+				var request = HttpRequest.newBuilder()
+					.uri(URI.create(url))
+					.timeout(Duration.ofSeconds(5))
+					.GET()
+					.build();
+				var response = client.send(request, HttpResponse.BodyHandlers.discarding());
+				return response.statusCode() == 200;
+			} catch (Exception e) {
+				return false;
+			}
+		});
+	}
+
 	protected void waitForMqttReady(GenericContainer<?> container, int port) throws Exception {
-		waitForPortReady(container.getHost(), container.getMappedPort(port));
+		var mappedPort = container.getMappedPort(port);
+		await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).until(() -> {
+			try {
+				var client = new MqttClient("tcp://127.0.0.1:" + mappedPort, "readiness-probe", new MemoryPersistence());
+				var options = new MqttConnectOptions();
+				options.setConnectionTimeout(5);
+				options.setCleanSession(true);
+				client.connect(options);
+				client.disconnect();
+				client.close();
+				log.debug("MQTT broker is ready at port {}", mappedPort);
+				return true;
+			} catch (Exception e) {
+				return false;
+			}
+		});
 	}
 
 	protected void waitForKafkaReady(KafkaContainer kafka) throws Exception {
@@ -351,7 +391,19 @@ public abstract class EndToEndTestBase {
 	}
 
 	protected void waitForAmqpReady(GenericContainer<?> container, int port) throws Exception {
-		waitForPortReady(container.getHost(), container.getMappedPort(port));
+		var mappedPort = container.getMappedPort(port);
+		await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).until(() -> {
+			try {
+				var factory = new JmsConnectionFactory("amqp://127.0.0.1:" + mappedPort);
+				try (var connection = factory.createConnection()) {
+					connection.start();
+					log.debug("AMQP broker is ready at port {}", mappedPort);
+					return true;
+				}
+			} catch (Exception e) {
+				return false;
+			}
+		});
 	}
 
 	protected void waitForRabbitMqReady(ConnectionFactory factory) throws Exception {

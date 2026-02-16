@@ -143,7 +143,7 @@ public class NatsAuthMaterial {
 
 			var expSeconds = JsonUtils.getLong(claims, "exp");
 
-			if (expSeconds == null) {
+			if (ValidationUtils.isNull(expSeconds)) {
 				return;
 			}
 
@@ -172,7 +172,7 @@ public class NatsAuthMaterial {
 			private NKey nKey;
 
 			private NKey getNKey() throws GeneralSecurityException {
-				if (nKey == null) {
+				if (ValidationUtils.isNull(nKey)) {
 					nKey = NKey.fromSeed(seed.toCharArray());
 				}
 				return nKey;

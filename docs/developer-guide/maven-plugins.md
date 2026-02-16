@@ -8,23 +8,20 @@ Maven plugins used in the build.
 
 | Plugin | Version | Purpose |
 |--------|---------|---------|
-| maven-compiler-plugin | 3.11.0 | Compiles Java 21 source with Lombok |
-| build-helper-maven-plugin | 3.6.0 | Adds custom test directories |
-| maven-enforcer-plugin | 3.6.2 | Enforces Maven 3.9.0+ |
-| maven-surefire-plugin | 3.5.2 | Runs tests |
-| jacoco-maven-plugin | 0.8.14 | Generates coverage reports |
-| maven-shade-plugin | 3.6.0 | Creates uber-JAR |
+| maven-compiler-plugin | 3.13.0 | Compiles Java 21 source with Lombok |
+| maven-enforcer-plugin | 3.6.2 | Enforces Maven 3.9.0+ and Java 21+ |
+| maven-surefire-plugin | 3.5.4 | Runs tests |
+| jacoco-maven-plugin | 0.8.13 | Generates coverage reports |
+| maven-shade-plugin | 3.6.1 | Creates uber-JAR |
 
 
 
 ## Test Directories
 
-The build uses custom test directory structure:
+The build uses the standard Maven test directory structure:
 
-- `src/tests/java` - Test source code
-- `src/tests/resources` - Test resources
-
-These are registered via `build-helper-maven-plugin`.
+- `src/test/java` - Test source code
+- `src/test/resources` - Test resources
 
 
 
@@ -48,24 +45,20 @@ flowchart TD
         V1["maven-enforcer-plugin"]
     end
 
-    subgraph G["2. generate-test-sources"]
-        G1["build-helper-maven-plugin"]
-    end
-
-    subgraph C["3. compile"]
+    subgraph C["2. compile"]
         C1["maven-compiler-plugin"]
     end
 
-    subgraph T["5. test"]
+    subgraph T["3. test"]
         T1["jacoco:prepare-agent"]
         T2["maven-surefire-plugin"]
         T3["jacoco:report"]
         T1 --> T2 --> T3
     end
 
-    subgraph P["6. package"]
+    subgraph P["4. package"]
         P1["maven-shade-plugin"]
     end
 
-    V --> G --> C --> T --> P
+    V --> C --> T --> P
 ```

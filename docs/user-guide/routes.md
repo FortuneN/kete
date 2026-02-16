@@ -113,10 +113,9 @@ kete.routes.strict.destination.url=https://api.example.com/events
 
 ## Retry
 
-By default, if a destination is unreachable, the event is lost. Enable retry for more reliable delivery:
+Retry is enabled by default (3 attempts, 500ms between retries). Customize retry settings per route:
 
 ```bash
-kete.routes.reliable.retry.enabled=true
 kete.routes.reliable.retry.max-attempts=5
 kete.routes.reliable.retry.wait-duration=PT2S
 ```

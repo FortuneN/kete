@@ -1,0 +1,16 @@
+syntax = "proto3";
+package io.github.fortunen.kete.events;
+
+message Event {
+  string id = 1;
+  int64 time = 2;
+  string type = 3;
+  string realm_id = 4;
+  string realm_name = 5;
+  string client_id = 6;
+  string user_id = 7;
+  string session_id = 8;
+  string ip_address = 9;
+  string error = 10;
+  map<string, string> details = 11;
+}

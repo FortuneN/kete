@@ -68,6 +68,7 @@ public abstract class TestBase {
 		}
 	}
 
+	@SuppressWarnings("resource")
 	protected void startActiveMqArtemis() throws Exception {
 		container = new GenericContainer<>(DockerImageName.parse("apache/activemq-artemis:2.40.0-alpine"))
 			.withEnv("ARTEMIS_USER", DEFAULT_USERNAME)
@@ -88,6 +89,7 @@ public abstract class TestBase {
 		startActiveMqArtemisWithTls(tls, true);
 	}
 
+	@SuppressWarnings("resource")
 	private void startActiveMqArtemisWithTls(TlsMaterial tls, boolean requireClientAuth) throws Exception {
 
 		if (tls == null) {
@@ -145,8 +147,8 @@ public abstract class TestBase {
 			.withEnv("ANONYMOUS_LOGIN", "true")
 			// Copy files to container (in-memory)
 			.withCopyToContainer(Transferable.of(brokerXml, 0777), "/var/lib/artemis-instance/etc-override/broker.xml")
-			.withCopyToContainer(Transferable.of(Files.readAllBytes(Path.of(tls.getServerKeyStoreFilePath())), 0777), "/var/lib/artemis-instance/etc-override/keystore.jks")
-			.withCopyToContainer(Transferable.of(Files.readAllBytes(Path.of(tls.getTrustStoreFilePath())), 0777), "/var/lib/artemis-instance/etc-override/truststore.jks")
+			.withCopyToContainer(Transferable.of(tls.getServerKeyStoreBytes(), 0777), "/var/lib/artemis-instance/etc-override/keystore.jks")
+			.withCopyToContainer(Transferable.of(tls.getTrustStoreBytes(), 0777), "/var/lib/artemis-instance/etc-override/truststore.jks")
 			.withExposedPorts(AMQP_PORT, AMQPS_PORT, 8161)
 			.withLogConsumer(outputFrame -> System.out.println("[ARTEMIS] " + outputFrame.getUtf8String()));
 
@@ -241,7 +243,7 @@ public abstract class TestBase {
 	}
 
 	protected String getHost() {
-		return container.getHost();
+		return "127.0.0.1";
 	}
 
 	protected int getMappedPort() {

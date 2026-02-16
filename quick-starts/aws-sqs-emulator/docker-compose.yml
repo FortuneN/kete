@@ -1,0 +1,40 @@
+services:
+
+  localstack:
+    image: ghcr.io/fortunen/kete/quick-start-localstack
+    ports:
+      - 4566:4566
+    environment:
+      SERVICES: sqs
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:4566/_localstack/health || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  sqs-setup:
+    image: ghcr.io/fortunen/kete/quick-start-curl
+    depends_on:
+      localstack:
+        condition: service_healthy
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        curl -sf "http://localstack:4566/?Action=CreateQueue&QueueName=keycloak-events" &&
+        echo "Queue 'keycloak-events' created successfully" &&
+        sleep infinity
+
+  keycloak:
+    image: ghcr.io/fortunen/kete/quick-start-keycloak
+    command: start-dev
+    ports:
+      - 8080:8080
+      - 9000:9000
+    environment:
+      kete.routes.quick-start.destination.kind: aws-sqs
+      kete.routes.quick-start.destination.queue: keycloak-events
+      kete.routes.quick-start.destination.region: us-east-1
+      kete.routes.quick-start.destination.endpoint-url: http://localstack:4566
+    depends_on:
+      sqs-setup:
+        condition: service_started

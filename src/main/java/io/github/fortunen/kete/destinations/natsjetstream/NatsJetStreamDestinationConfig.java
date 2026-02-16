@@ -3,6 +3,7 @@ package io.github.fortunen.kete.destinations.natsjetstream;
 import io.github.fortunen.kete.Constants;
 import io.github.fortunen.kete.DestinationConfig;
 import io.github.fortunen.kete.NatsAuthMaterial;
+import io.github.fortunen.kete.utils.TemplateUtils;
 import io.github.fortunen.kete.utils.ValidationUtils;
 import io.nats.client.Options;
 import lombok.Data;
@@ -18,17 +19,16 @@ import java.util.Arrays;
 @EqualsAndHashCode(callSuper = true)
 public class NatsJetStreamDestinationConfig extends DestinationConfig {
 
+	public static final String STREAM = "stream";
 	public static final String SERVERS = "servers";
 	public static final String SUBJECT = "subject";
 	public static final int DEFAULT_PING_INTERVAL_SECONDS = 60;
+	public static final int DEFAULT_PUBLISH_TIMEOUT_SECONDS = 10;
 	public static final String CONNECTION_NAME = "connection-name";
 	public static final int DEFAULT_CONNECTION_TIMEOUT_SECONDS = 10;
 	public static final String PING_INTERVAL_SECONDS = "ping-interval-seconds";
-	public static final String CONNECTION_TIMEOUT_SECONDS = "connection-timeout-seconds";
-
-	public static final String STREAM = "stream";
-	public static final int DEFAULT_PUBLISH_TIMEOUT_SECONDS = 10;
 	public static final String PUBLISH_TIMEOUT_SECONDS = "publish-timeout-seconds";
+	public static final String CONNECTION_TIMEOUT_SECONDS = "connection-timeout-seconds";
 
 	private String stream;
 	private String subject;
@@ -38,6 +38,7 @@ public class NatsJetStreamDestinationConfig extends DestinationConfig {
 	private int pingIntervalSeconds;
 	private Duration publishTimeout;
 	private int publishTimeoutSeconds;
+	private boolean isSubjectTemplated;
 	private int connectionTimeoutSeconds;
 	private NatsAuthMaterial authMaterial;
 
@@ -84,6 +85,10 @@ public class NatsJetStreamDestinationConfig extends DestinationConfig {
 		authMaterial = new NatsAuthMaterial();
 		authMaterial.initialize(configuration);
 
+		// precomputed fields
+
+		isSubjectTemplated = TemplateUtils.containsTemplate(subject);
+
 		// natsOptions
 
 		var builder = new Options.Builder()
@@ -94,7 +99,7 @@ public class NatsJetStreamDestinationConfig extends DestinationConfig {
 			.maxReconnects(-1);
 
 		if (tls.isEnabled()) {
-			builder.sslContext(tls.getKeyStoreAndTrustStoreSSLContext());
+			builder.sslContext(tls.isVerifyHostname() ? tls.getHostnameVerifyingSSLContext() : tls.getKeyStoreAndTrustStoreSSLContext());
 		}
 
 		authMaterial.applyTo(builder);

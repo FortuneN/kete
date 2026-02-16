@@ -48,8 +48,8 @@ Stream Keycloak events to Azure Storage Queue.
 
 ## Features
 
-- Azure Storage Queue REST API integration (no Azure SDK dependency)
-- Authentication via connection string (Shared Key or SAS Token)
+- Azure Storage Queue SDK integration
+- Authentication via connection string, Managed Identity, or Default Azure Credential
 - Emulator support via Azurite for local development and testing
 - Queue name templating with variables
 - Configurable message TTL
@@ -65,14 +65,15 @@ Stream Keycloak events to Azure Storage Queue.
 | Property | Description | Example |
 |----------|-------------|---------|
 | `destination.kind` | Must be `azure-storage-queue` | `azure-storage-queue` |
-| `destination.connection-string` | Azure Storage connection string | `DefaultEndpointsProtocol=https;AccountName=...;AccountKey=...;EndpointSuffix=core.windows.net` |
+| `destination.connection-string` | Azure Storage connection string (required unless using `authentication-type`) | `DefaultEndpointsProtocol=https;AccountName=...;AccountKey=...;EndpointSuffix=core.windows.net` |
 | `destination.queue` | Queue name (supports templating) | `keycloak-events` |
 
 ### Optional Properties
 
 | Property | Default | Description | Example |
-|----------|---------|-------------|---------|
-| `destination.message-ttl` | `0` | Message TTL in seconds (`0` = Azure default 7 days, `-1` = no expiry) | `3600` |
+|----------|---------|-------------|---------|| `destination.endpoint` | _(empty)_ | Storage account queue endpoint (required for `managed-identity` / `default-azure-credential` auth) | `https://mystorageaccount.queue.core.windows.net` |
+| `destination.authentication-type` | _(empty)_ | Authentication method: `connection-string`, `managed-identity`, `default-azure-credential` | `managed-identity` |
+| `destination.managed-identity-client-id` | _(empty)_ | Client ID for user-assigned managed identity | `your-client-id` || `destination.message-ttl` | `0` | Message TTL in seconds (`0` = Azure default 7 days, `-1` = no expiry) | `3600` |
 | `destination.timeout-seconds` | `10` | HTTP connect and request timeout in seconds | `30` |
 
 ### Dynamic Queue Name (Templating)
@@ -87,13 +88,21 @@ kete.routes.asq.destination.queue=keycloak-events-${realmLowerCase}
 kete.routes.asq.destination.queue=keycloak-${eventTypeLowerCase}
 ```
 
-Available variables: `${realmLowerCase}`, `${realmUpperCase}`, `${eventTypeLowerCase}`, `${eventTypeUpperCase}`, `${kindLowerCase}`, `${kindUpperCase}`, `${resourceTypeLowerCase}`, `${resourceTypeUpperCase}`, `${operationTypeLowerCase}`, `${operationTypeUpperCase}`, `${resultLowerCase}`, `${resultUpperCase}`
+Available variables: `${realmLowerCase}`, `${realmUpperCase}`, `${realmKebabCase}`, `${realmPascalCase}`, `${realmCamelCase}`, `${eventTypeLowerCase}`, `${eventTypeUpperCase}`, `${eventTypeKebabCase}`, `${eventTypePascalCase}`, `${eventTypeCamelCase}`, `${kindLowerCase}`, `${kindUpperCase}`, `${kindKebabCase}`, `${kindPascalCase}`, `${kindCamelCase}`, `${resourceTypeLowerCase}`, `${resourceTypeUpperCase}`, `${resourceTypeKebabCase}`, `${resourceTypePascalCase}`, `${resourceTypeCamelCase}`, `${operationTypeLowerCase}`, `${operationTypeUpperCase}`, `${operationTypeKebabCase}`, `${operationTypePascalCase}`, `${operationTypeCamelCase}`, `${resultLowerCase}`, `${resultUpperCase}`, `${resultKebabCase}`, `${resultPascalCase}`, `${resultCamelCase}`
 
 ### Authentication
 
-Authentication is configured entirely through the `connection-string` property. The connection string is parsed to extract `AccountName`, `AccountKey` or `SharedAccessSignature`, `QueueEndpoint`, `DefaultEndpointsProtocol`, and `EndpointSuffix`.
+Authentication can be configured via `connection-string` (default) or via `authentication-type` for managed identity scenarios.
 
-#### Shared Key Connection String
+| `authentication-type` | Description | Required Properties |
+|-----------------------|-------------|---------------------|
+| `connection-string` | Connection string auth (default when `connection-string` is set) | `connection-string` |
+| `managed-identity` | Azure Managed Identity | `endpoint`, optionally `managed-identity-client-id` |
+| `default-azure-credential` | Azure Default Credential chain | `endpoint` |
+
+#### Connection String (Default)
+
+When no `authentication-type` is set, the `connection-string` property is required:
 
 ```bash
 # Standard Azure connection string
@@ -103,8 +112,6 @@ DefaultEndpointsProtocol=https;AccountName=myaccount;AccountKey=your-key;Endpoin
 AccountName=myaccount;AccountKey=your-key;QueueEndpoint=https://myaccount.queue.core.windows.net
 ```
 
-Uses HMAC-SHA256 signing per the Azure Storage REST API specification.
-
 #### SAS Token Connection String
 
 ```bash
@@ -113,6 +120,24 @@ QueueEndpoint=https://myaccount.queue.core.windows.net;SharedAccessSignature=sv=
 
 # SAS with account name (endpoint derived)
 AccountName=myaccount;SharedAccessSignature=sv=2024-08-04&ss=q&sig=...
+```
+
+#### Managed Identity
+
+```bash
+kete.routes.asq.destination.authentication-type=managed-identity
+kete.routes.asq.destination.endpoint=https://mystorageaccount.queue.core.windows.net
+kete.routes.asq.destination.queue=keycloak-events
+# Optionally specify client ID for user-assigned managed identity:
+# kete.routes.asq.destination.managed-identity-client-id=your-client-id
+```
+
+#### Default Azure Credential
+
+```bash
+kete.routes.asq.destination.authentication-type=default-azure-credential
+kete.routes.asq.destination.endpoint=https://mystorageaccount.queue.core.windows.net
+kete.routes.asq.destination.queue=keycloak-events
 ```
 
 The SAS token is appended as query parameters to each request. No signing is needed.
@@ -187,8 +212,8 @@ kete.routes.env.destination.queue=keycloak-events
 
 | Quick Start | Description |
 |-------------|-------------|
-| [azure-storage-queue](https://github.com/FortuneN/kete/tree/develop/quick-starts/azure-storage-queue) | Azure Storage Queue (real cloud) |
-| [azure-storage-queue-emulator](https://github.com/FortuneN/kete/tree/develop/quick-starts/azure-storage-queue-emulator) | Azurite Emulator (local) |
+| [azure-storage-queue](https://github.com/FortuneN/kete/tree/release/quick-starts/azure-storage-queue) | Azure Storage Queue (real cloud) |
+| [azure-storage-queue-emulator](https://github.com/FortuneN/kete/tree/release/quick-starts/azure-storage-queue-emulator) | Azurite Emulator (local) |
 
 
 

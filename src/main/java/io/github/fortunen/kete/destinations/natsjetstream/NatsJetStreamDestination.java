@@ -1,5 +1,8 @@
 package io.github.fortunen.kete.destinations.natsjetstream;
 
+import java.util.Map;
+import java.util.Set;
+
 import io.github.fortunen.kete.Component;
 import io.github.fortunen.kete.Constants;
 import io.github.fortunen.kete.Destination;
@@ -23,14 +26,21 @@ import lombok.SneakyThrows;
 @EqualsAndHashCode(callSuper = true)
 public class NatsJetStreamDestination extends Destination<NatsJetStreamDestinationConfig> {
 
+	private String subject;
 	private JetStream jetStream;
 	private Connection connection;
+	private boolean isSubjectTemplated;
+	private Set<Map.Entry<String, String>> customHeadersEntrySet;
 
 	@Override
 	@SneakyThrows
 	public void doInitialize() {
 
 		ValidationUtils.requireNonNull(config, "config is required");
+
+		subject = config.getSubject();
+		isSubjectTemplated = config.isSubjectTemplated();
+		customHeadersEntrySet = config.getCustomHeadersEntrySet();
 
 		connection = Nats.connect(config.getNatsOptions());
 
@@ -64,7 +74,7 @@ public class NatsJetStreamDestination extends Destination<NatsJetStreamDestinati
 
 		// subject
 
-		var actualSubject = TemplateUtils.substitute(config.getSubject(), message);
+		var actualSubject = isSubjectTemplated ? TemplateUtils.substitute(subject, message) : subject;
 
 		// message
 
@@ -76,7 +86,7 @@ public class NatsJetStreamDestination extends Destination<NatsJetStreamDestinati
 
 		var headers = new Headers();
 
-		for (var entry : config.getCustomHeadersEntrySet()) {
+		for (var entry : customHeadersEntrySet) {
 			headers.add(entry.getKey(), entry.getValue());
 		}
 

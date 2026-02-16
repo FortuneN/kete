@@ -3,6 +3,7 @@ package io.github.fortunen.kete.unittests.destinationconfigs.websocketdestinatio
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.configuration2.MapConfiguration;
@@ -243,7 +244,7 @@ public class initializeTests {
 	}
 
 	// =========================================================================
-	// TLS Configuration
+	// tls Configuration
 	// =========================================================================
 
 	@Test
@@ -426,7 +427,8 @@ public class initializeTests {
 
 		// assert
 
-		assertThat(config.getConnectionLostTimeoutSeconds()).isEqualTo(WebSocketDestinationConfig.DEFAULT_CONNECTION_LOST_TIMEOUT_SECONDS);
+		assertThat(config.getConnectionLostTimeoutSeconds()).isEqualTo(0);
+		assertThat(config.isHasConnectionLostTimeout()).isFalse();
 	}
 
 	@Test
@@ -540,6 +542,97 @@ public class initializeTests {
 		// assert
 
 		assertThat(config.getCustomHeaders()).isEmpty();
+	}
+
+	// =========================================================================
+	// OAuth
+	// =========================================================================
+
+	@Test
+	public void shouldCreateOAuthMaterial() {
+
+		// arrange
+
+		var config = new WebSocketDestinationConfig();
+		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "websocket",
+			"host", "example.com"
+		)));
+
+		// act
+
+		config.initialize();
+
+		// assert
+
+		assertThat(config.getOauth()).isNotNull();
+	}
+
+	@Test
+	public void shouldSetOauthEnabledToFalseByDefault() {
+
+		// arrange
+
+		var config = new WebSocketDestinationConfig();
+		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "websocket",
+			"host", "example.com"
+		)));
+
+		// act
+
+		config.initialize();
+
+		// assert
+
+		assertThat(config.isOauthEnabled()).isFalse();
+	}
+
+	@Test
+	public void shouldSetOauthEnabledWhenOauthConfigured() {
+
+		// arrange
+
+		var configMap = new HashMap<String, Object>();
+		configMap.put("kind", "websocket");
+		configMap.put("host", "example.com");
+		configMap.put("oauth.enabled", "true");
+		configMap.put("oauth.token-url", "http://localhost/token");
+		configMap.put("oauth.client-id", "test-client");
+		configMap.put("oauth.client-secret", "test-secret");
+		var config = new WebSocketDestinationConfig();
+		config.setConfiguration(new MapConfiguration(configMap));
+
+		// act
+
+		config.initialize();
+
+		// assert
+
+		assertThat(config.isOauthEnabled()).isTrue();
+		assertThat(config.getOauth()).isNotNull();
+		assertThat(config.getOauth().isEnabled()).isTrue();
+	}
+
+	@Test
+	public void shouldSetOauthEnabledToFalseWhenOauthExplicitlyDisabled() {
+
+		// arrange
+
+		var configMap = new HashMap<String, Object>();
+		configMap.put("kind", "websocket");
+		configMap.put("host", "example.com");
+		configMap.put("oauth.enabled", "false");
+		var config = new WebSocketDestinationConfig();
+		config.setConfiguration(new MapConfiguration(configMap));
+
+		// act
+
+		config.initialize();
+
+		// assert
+
+		assertThat(config.isOauthEnabled()).isFalse();
 	}
 
 	// =========================================================================

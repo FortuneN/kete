@@ -24,6 +24,7 @@ Stream Keycloak events to MQTT 3 brokers.
 | **ActiveMQ Artemis** | Multi-protocol broker |
 | **Azure Event Grid** | MQTT Broker feature |
 | **Solace PubSub+** | Native MQTT support |
+| **Apache RocketMQ** | Via [rocketmq-mqtt](https://github.com/apache/rocketmq-mqtt) gateway |
 | **AWS IoT Core** | Managed, auto-scaling |
 | **Azure IoT Hub** | Managed, device management |
 
@@ -118,7 +119,7 @@ kete.routes.mqtt.destination.topic=keycloak/${realmLowerCase}/events
 kete.routes.mqtt.destination.topic=keycloak/events/${eventTypeLowerCase}
 ```
 
-Available variables: `${realmLowerCase}`, `${realmUpperCase}`, `${eventTypeLowerCase}`, `${eventTypeUpperCase}`, `${kindLowerCase}`, `${kindUpperCase}`, `${resourceTypeLowerCase}`, `${resourceTypeUpperCase}`, `${operationTypeLowerCase}`, `${operationTypeUpperCase}`, `${resultLowerCase}`, `${resultUpperCase}`
+Available variables: `${realmLowerCase}`, `${realmUpperCase}`, `${realmKebabCase}`, `${realmPascalCase}`, `${realmCamelCase}`, `${eventTypeLowerCase}`, `${eventTypeUpperCase}`, `${eventTypeKebabCase}`, `${eventTypePascalCase}`, `${eventTypeCamelCase}`, `${kindLowerCase}`, `${kindUpperCase}`, `${kindKebabCase}`, `${kindPascalCase}`, `${kindCamelCase}`, `${resourceTypeLowerCase}`, `${resourceTypeUpperCase}`, `${resourceTypeKebabCase}`, `${resourceTypePascalCase}`, `${resourceTypeCamelCase}`, `${operationTypeLowerCase}`, `${operationTypeUpperCase}`, `${operationTypeKebabCase}`, `${operationTypePascalCase}`, `${operationTypeCamelCase}`, `${resultLowerCase}`, `${resultUpperCase}`, `${resultKebabCase}`, `${resultPascalCase}`, `${resultCamelCase}`
 
 ### Optional Properties
 
@@ -128,10 +129,11 @@ Available variables: `${realmLowerCase}`, `${realmUpperCase}`, `${eventTypeLower
 | `transport-type` | `tcp` | Transport: `tcp` or `websocket` | `websocket` |
 | `qos` | `1` | Quality of Service (0, 1, or 2) | `2` |
 | `retained` | `false` | Retain message on broker | `true` |
-| `client-id-prefix` | `kete-` | Client ID prefix (UUID appended) | `keycloak-` |
+| `client-id-prefix` | _(auto-generated)_ | Client ID prefix — auto-generates `kete-<UUID>` when not set | `keycloak-` |
 | `clean-session` | `true` | Start with clean session | `false` |
 | `connection-timeout-seconds` | `10` | Connection timeout in seconds | `60` |
 | `keep-alive-interval-seconds` | `60` | Keep-alive ping interval in seconds | `120` |
+| `max-inflight` | `2048` | Maximum number of in-flight messages (QoS 1/2) | `4096` |
 | `username` | `""` | MQTT username | `admin` |
 | `password` | `""` | MQTT password | `secret123` |
 | `pool.min-idle` | `1` | Minimum idle connections in pool | `5` |
@@ -217,3 +219,28 @@ kete.routes.mtls-mqtt.destination.tls.trust-store.loader.kind=jks-file-path
 kete.routes.mtls-mqtt.destination.tls.trust-store.loader.path=/certs/truststore.jks
 kete.routes.mtls-mqtt.destination.tls.trust-store.password=truststorepass
 ```
+
+
+
+## Quick Starts
+
+| Broker | Quick Start |
+|--------|-------------|
+| Eclipse Mosquitto | [mqtt-3-mosquitto](https://github.com/FortuneN/kete/tree/release/quick-starts/mqtt-3-mosquitto/) |
+| EMQX | [mqtt-3-emqx](https://github.com/FortuneN/kete/tree/release/quick-starts/mqtt-3-emqx/) |
+| HiveMQ | [mqtt-3-hivemq](https://github.com/FortuneN/kete/tree/release/quick-starts/mqtt-3-hivemq/) |
+| VerneMQ | [mqtt-3-vernemq](https://github.com/FortuneN/kete/tree/release/quick-starts/mqtt-3-vernemq/) |
+| NanoMQ | [mqtt-3-nanomq](https://github.com/FortuneN/kete/tree/release/quick-starts/mqtt-3-nanomq/) |
+| RabbitMQ | [mqtt-3-rabbitmq](https://github.com/FortuneN/kete/tree/release/quick-starts/mqtt-3-rabbitmq/) |
+| ActiveMQ Artemis | [mqtt-3-activemq-artemis](https://github.com/FortuneN/kete/tree/release/quick-starts/mqtt-3-activemq-artemis/) |
+| Solace PubSub+ | [mqtt-3-solace](https://github.com/FortuneN/kete/tree/release/quick-starts/mqtt-3-solace/) |
+
+
+
+## See Also
+
+- [MQTT 5 Destination](mqtt-5.md) — MQTT 5.0 with enhanced features
+- [Serializers](../serializers/overview.md)
+- [Matchers](../matchers/overview.md)
+- [Event Types](../event-types.md)
+- [Certificate Loaders](../certificate-loaders/overview.md)

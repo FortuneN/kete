@@ -2,18 +2,30 @@ package io.github.fortunen.kete;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 import java.security.KeyStore;
+import java.security.SecureRandom;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Properties;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.net.ssl.KeyManager;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLContextSpi;
+import javax.net.ssl.SSLEngine;
+import javax.net.ssl.SSLServerSocketFactory;
+import javax.net.ssl.SSLSessionContext;
+import javax.net.ssl.SSLSocket;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 
@@ -90,16 +102,18 @@ public class TlsMaterial {
 
 	private String version;
 	private boolean enabled;
-	private String caCertificatePemFilePath;
+	private boolean verifyHostname;
+	private byte[] caCertificatePemBytes;
+	private String caCertificatePemBase64;
 	private SSLContext keyStoreAndTrustStoreSSLContext;
 
 	// trust stuff
 
 	private KeyStore trustStore;
 	private String trustStoreType;
+	private byte[] trustStoreBytes;
 	private String trustStoreBase64;
 	private String trustStorePassword;
-	private String trustStoreFilePath;
 	private String trustManagerAlgorithm;
 	private SSLContext trustStoreSSLContext;
 	private TrustManagerFactory trustManagerFactory;
@@ -109,28 +123,118 @@ public class TlsMaterial {
 	private KeyStore keyStore;
 	private String keyPassword;
 	private String keyStoreType;
+	private byte[] keyStoreBytes;
 	private String keyStoreBase64;
 	private String keyStorePassword;
-	private String keyStoreFilePath;
 	private String keyManagerAlgorithm;
+	private boolean keyStoreConfigured;
 	private SSLContext keyStoreSSLContext;
-	private KeyManagerFactory keyManagerFactory;
 	private KeyStore keyStoreAndTrustStore;
+	private KeyManagerFactory keyManagerFactory;
 
 	// client stuff
 
-	private String clientPrivateKeyPemFilePath;
-	private String clientCertificatePemFilePath;
-	private String clientPrivateKeyPkcs1PemFilePath;
+	private byte[] clientCertificatePemBytes;
+	private String clientCertificatePemBase64;
+	private byte[] clientPrivateKeyPemBytes;
+	private String clientPrivateKeyPemBase64;
+	private byte[] clientPrivateKeyPkcs1PemBytes;
+	private String clientPrivateKeyPkcs1PemBase64;
 
 	// server stuff
 
 	private KeyStore serverKeyStore;
-	private String serverKeyStoreFilePath;
-	private String serverPrivateKeyPemFilePath;
+	private byte[] serverKeyStoreBytes;
+	private String serverKeyStoreBase64;
+	private byte[] serverPrivateKeyPemBytes;
+	private String serverPrivateKeyPemBase64;
+	private byte[] serverCertificatePemBytes;
+	private String serverCertificatePemBase64;
 	private SSLContext serverKeyStoreSSLContext;
+	private byte[] serverPrivateKeyPkcs1PemBytes;
+	private String serverPrivateKeyPkcs1PemBase64;
+
+	// lazy file paths (written on first access from bytes)
+
+	private String keyStoreFilePath;
+	private String trustStoreFilePath;
+	private String serverKeyStoreFilePath;
+	private String caCertificatePemFilePath;
+	private String serverPrivateKeyPemFilePath;
+	private String clientPrivateKeyPemFilePath;
 	private String serverCertificatePemFilePath;
+	private String clientCertificatePemFilePath;
 	private String serverPrivateKeyPkcs1PemFilePath;
+	private String clientPrivateKeyPkcs1PemFilePath;
+
+	// =========================================================================
+	// Lazy Getters - computed on first access, cached for subsequent calls
+	// =========================================================================
+
+	private String lazyBase64(String cached, byte[] source) {
+		return cached != null ? cached : source != null ? Base64Utils.encode(source) : null;
+	}
+
+	@SneakyThrows
+	private String lazyFilePath(String cached, byte[] source, String extension) {
+		if (cached != null || source == null) return cached;
+		var file = FileUtils.createTempFile(extension);
+		try (var stream = new FileOutputStream(file)) { stream.write(source); }
+		return file.getAbsolutePath();
+	}
+
+	public String getKeyStoreBase64() { return keyStoreBase64 = lazyBase64(keyStoreBase64, keyStoreBytes); }
+	public String getTrustStoreBase64() { return trustStoreBase64 = lazyBase64(trustStoreBase64, trustStoreBytes); }
+	public String getServerKeyStoreBase64() { return serverKeyStoreBase64 = lazyBase64(serverKeyStoreBase64, serverKeyStoreBytes); }
+	public String getCaCertificatePemBase64() { return caCertificatePemBase64 = lazyBase64(caCertificatePemBase64, caCertificatePemBytes); }
+	public String getServerPrivateKeyPemBase64() { return serverPrivateKeyPemBase64 = lazyBase64(serverPrivateKeyPemBase64, serverPrivateKeyPemBytes); }
+	public String getClientPrivateKeyPemBase64() { return clientPrivateKeyPemBase64 = lazyBase64(clientPrivateKeyPemBase64, clientPrivateKeyPemBytes); }
+	public String getServerCertificatePemBase64() { return serverCertificatePemBase64 = lazyBase64(serverCertificatePemBase64, serverCertificatePemBytes); }
+	public String getClientCertificatePemBase64() { return clientCertificatePemBase64 = lazyBase64(clientCertificatePemBase64, clientCertificatePemBytes); }
+	public String getServerPrivateKeyPkcs1PemBase64() { return serverPrivateKeyPkcs1PemBase64 = lazyBase64(serverPrivateKeyPkcs1PemBase64, serverPrivateKeyPkcs1PemBytes); }
+	public String getClientPrivateKeyPkcs1PemBase64() { return clientPrivateKeyPkcs1PemBase64 = lazyBase64(clientPrivateKeyPkcs1PemBase64, clientPrivateKeyPkcs1PemBytes); }
+
+	public String getKeyStoreFilePath() { return keyStoreFilePath = lazyFilePath(keyStoreFilePath, keyStoreBytes, ".jks"); }
+	public String getTrustStoreFilePath() { return trustStoreFilePath = lazyFilePath(trustStoreFilePath, trustStoreBytes, ".jks"); }
+	public String getServerKeyStoreFilePath() { return serverKeyStoreFilePath = lazyFilePath(serverKeyStoreFilePath, serverKeyStoreBytes, ".jks"); }
+	public String getCaCertificatePemFilePath() { return caCertificatePemFilePath = lazyFilePath(caCertificatePemFilePath, caCertificatePemBytes, ".pem"); }
+	public String getServerPrivateKeyPemFilePath() { return serverPrivateKeyPemFilePath = lazyFilePath(serverPrivateKeyPemFilePath, serverPrivateKeyPemBytes, ".pem"); }
+	public String getClientPrivateKeyPemFilePath() { return clientPrivateKeyPemFilePath = lazyFilePath(clientPrivateKeyPemFilePath, clientPrivateKeyPemBytes, ".pem"); }
+	public String getServerCertificatePemFilePath() { return serverCertificatePemFilePath = lazyFilePath(serverCertificatePemFilePath, serverCertificatePemBytes, ".pem"); }
+	public String getClientCertificatePemFilePath() { return clientCertificatePemFilePath = lazyFilePath(clientCertificatePemFilePath, clientCertificatePemBytes, ".pem"); }
+	public String getServerPrivateKeyPkcs1PemFilePath() { return serverPrivateKeyPkcs1PemFilePath = lazyFilePath(serverPrivateKeyPkcs1PemFilePath, serverPrivateKeyPkcs1PemBytes, ".pem"); }
+	public String getClientPrivateKeyPkcs1PemFilePath() { return clientPrivateKeyPkcs1PemFilePath = lazyFilePath(clientPrivateKeyPkcs1PemFilePath, clientPrivateKeyPkcs1PemBytes, ".pem"); }
+
+	public SSLSocketFactory getHostnameVerifyingSocketFactory() {
+		var delegate = keyStoreAndTrustStoreSSLContext.getSocketFactory();
+		return new SSLSocketFactory() {
+			@Override public String[] getDefaultCipherSuites() { return delegate.getDefaultCipherSuites(); }
+			@Override public String[] getSupportedCipherSuites() { return delegate.getSupportedCipherSuites(); }
+			@Override public Socket createSocket(Socket s, String host, int port, boolean autoClose) throws IOException { return withVerification(delegate.createSocket(s, host, port, autoClose)); }
+			@Override public Socket createSocket(String host, int port) throws IOException { return withVerification(delegate.createSocket(host, port)); }
+			@Override public Socket createSocket(String host, int port, InetAddress localHost, int localPort) throws IOException { return withVerification(delegate.createSocket(host, port, localHost, localPort)); }
+			@Override public Socket createSocket(InetAddress host, int port) throws IOException { return withVerification(delegate.createSocket(host, port)); }
+			@Override public Socket createSocket(InetAddress address, int port, InetAddress localAddress, int localPort) throws IOException { return withVerification(delegate.createSocket(address, port, localAddress, localPort)); }
+			private Socket withVerification(Socket socket) {
+				if (socket instanceof SSLSocket ssl) { var params = ssl.getSSLParameters(); params.setEndpointIdentificationAlgorithm("HTTPS"); ssl.setSSLParameters(params); }
+				return socket;
+			}
+		};
+	}
+
+	public SSLContext getHostnameVerifyingSSLContext() {
+		var original = keyStoreAndTrustStoreSSLContext;
+		var wrappedFactory = getHostnameVerifyingSocketFactory();
+		return new SSLContext(new SSLContextSpi() {
+			@Override protected void engineInit(KeyManager[] km, TrustManager[] tm, SecureRandom sr) {}
+			@Override protected SSLSocketFactory engineGetSocketFactory() { return wrappedFactory; }
+			@Override protected SSLServerSocketFactory engineGetServerSocketFactory() { return original.getServerSocketFactory(); }
+			@Override protected SSLEngine engineCreateSSLEngine() { return original.createSSLEngine(); }
+			@Override protected SSLEngine engineCreateSSLEngine(String host, int port) { return original.createSSLEngine(host, port); }
+			@Override protected SSLSessionContext engineGetClientSessionContext() { return original.getClientSessionContext(); }
+			@Override protected SSLSessionContext engineGetServerSessionContext() { return original.getServerSessionContext(); }
+		}, original.getProvider(), original.getProtocol()) {};
+	}
 
 	// builder
 
@@ -140,7 +244,6 @@ public class TlsMaterial {
 
 	public static class TlsMaterialBuilder {
 
-		private boolean writeFiles;
 		private TlsMaterial material = new TlsMaterial();
 		private Set<String> serverHostNames = new HashSet<>();
 
@@ -194,11 +297,6 @@ public class TlsMaterial {
 			return this;
 		}
 
-		public TlsMaterialBuilder withWriteFiles(boolean writeFiles) {
-			this.writeFiles = writeFiles;
-			return this;
-		}
-
 		@SneakyThrows
 		public TlsMaterialBuilder withConfiguration(MapConfiguration configuration) {
 
@@ -206,6 +304,7 @@ public class TlsMaterial {
 
 			material.enabled = configuration.getBoolean(ENABLED, false);
 			material.version = configuration.getString(TLS_VERSION, DEFAULT_TLS_VERSION).trim();
+			material.verifyHostname = configuration.getBoolean("verify-hostname", false);
 
 			var trustStoreConfiguration = ConfigurationUtils.getSubSet(configuration, TRUST_STORE);
 
@@ -213,7 +312,7 @@ public class TlsMaterial {
 
 				material.trustStorePassword = trustStoreConfiguration.getString(PASSWORD, "").trim();
 				material.trustStoreType = trustStoreConfiguration.getString(TYPE, TRUST_STORE_DEFAULT_TYPE).trim();
-				material.trustManagerAlgorithm = trustStoreConfiguration.getString(TRUST_MANAGER_ALGORITHM, KEY_MANAGER_DEFAULT_ALGORITHM).trim();
+				material.trustManagerAlgorithm = trustStoreConfiguration.getString(TRUST_MANAGER_ALGORITHM, TRUST_MANAGER_DEFAULT_ALGORITHM).trim();
 				material.trustStore = KeyStore.getInstance(material.trustStoreType);
 
 				var trustStoreLoaderConfiguration = ConfigurationUtils.getSubSet(trustStoreConfiguration, LOADER);
@@ -222,7 +321,6 @@ public class TlsMaterial {
 
 					var trustStoreLoadedSuccessfully = false;
 					var trustStoreLoader = CertificateUtils.createCertificateLoader(trustStoreLoaderConfiguration);
-
 
 					for (var password : new String[] { material.trustStorePassword, null, "", "changeit", "secret" }) {
 						try {
@@ -250,6 +348,7 @@ public class TlsMaterial {
 
 			if (!keyStoreConfiguration.isEmpty()) {
 
+				material.keyStoreConfigured = true;
 				material.keyStoreType = keyStoreConfiguration.getString(TYPE, KEY_STORE_DEFAULT_TYPE).trim();
 				material.keyPassword = keyStoreConfiguration.getString(KEY_PASSWORD, "").trim();
 				material.keyStorePassword = keyStoreConfiguration.getString(PASSWORD, "").trim();
@@ -336,37 +435,25 @@ public class TlsMaterial {
 
 				material.serverKeyStore = KeyStore.getInstance(material.keyStoreType);
 				material.serverKeyStore.load(null, null);
-				material.serverKeyStore.setKeyEntry("server-key", caSignedServerCertificate.keyPair().getPrivate(), material.keyPassword != null ? material.keyPassword.toCharArray() : null, new Certificate[] { caSignedServerCertificate.certificate(), selfSignedCaCertificate.certificate() });
+				material.serverKeyStore.setKeyEntry("server-key", caSignedServerCertificate.keyPair().getPrivate(), ValidationUtils.isNotNull(material.keyPassword) ? material.keyPassword.toCharArray() : null, new Certificate[] { caSignedServerCertificate.certificate(), selfSignedCaCertificate.certificate() });
 
-				material.keyStore.setKeyEntry("client-key", caSignedClientCertificate.keyPair().getPrivate(), material.keyPassword != null ? material.keyPassword.toCharArray() : null, new Certificate[] { caSignedClientCertificate.certificate(), selfSignedCaCertificate.certificate() });
+				material.keyStore.setKeyEntry("client-key", caSignedClientCertificate.keyPair().getPrivate(), ValidationUtils.isNotNull(material.keyPassword) ? material.keyPassword.toCharArray() : null, new Certificate[] { caSignedClientCertificate.certificate(), selfSignedCaCertificate.certificate() });
 
-				if (writeFiles) {
-					material.caCertificatePemFilePath = FileUtils.writeToTempFile(selfSignedCaCertificate.certificatePem(), "-ca.pem");
-					material.serverCertificatePemFilePath = FileUtils.writeToTempFile(caSignedServerCertificate.certificatePem(), "-server.pem");
-					material.clientCertificatePemFilePath = FileUtils.writeToTempFile(caSignedClientCertificate.certificatePem(), "-client.pem");
-					material.serverPrivateKeyPemFilePath = FileUtils.writeToTempFile(caSignedServerCertificate.privateKeyPkcs8Pem(), "-server-key.pem");
-					material.clientPrivateKeyPemFilePath = FileUtils.writeToTempFile(caSignedClientCertificate.privateKeyPkcs8Pem(), "-client-key.pem");
-					material.serverPrivateKeyPkcs1PemFilePath = FileUtils.writeToTempFile(CertificateUtils.convertPkcs8ToPkcs1Pem(caSignedServerCertificate.keyPair().getPrivate()), "-server-key-pkcs1.pem");
-					material.clientPrivateKeyPkcs1PemFilePath = FileUtils.writeToTempFile(CertificateUtils.convertPkcs8ToPkcs1Pem(caSignedClientCertificate.keyPair().getPrivate()), "-client-key-pkcs1.pem");
-				}
+				material.caCertificatePemBytes = selfSignedCaCertificate.certificatePem().getBytes(StandardCharsets.UTF_8);
+				material.serverCertificatePemBytes = caSignedServerCertificate.certificatePem().getBytes(StandardCharsets.UTF_8);
+				material.serverPrivateKeyPemBytes = caSignedServerCertificate.privateKeyPkcs8Pem().getBytes(StandardCharsets.UTF_8);
+				material.serverPrivateKeyPkcs1PemBytes = CertificateUtils.convertPkcs8ToPkcs1Pem(caSignedServerCertificate.keyPair().getPrivate()).getBytes(StandardCharsets.UTF_8);
+
+				material.clientCertificatePemBytes = caSignedClientCertificate.certificatePem().getBytes(StandardCharsets.UTF_8);
+				material.clientPrivateKeyPemBytes = caSignedClientCertificate.privateKeyPkcs8Pem().getBytes(StandardCharsets.UTF_8);
+				material.clientPrivateKeyPkcs1PemBytes = CertificateUtils.convertPkcs8ToPkcs1Pem(caSignedClientCertificate.keyPair().getPrivate()).getBytes(StandardCharsets.UTF_8);
 			}
 
 			// trust stuff
 
 			try (var stream = new ByteArrayOutputStream()) {
 				material.trustStore.store(stream, ValidationUtils.isNotNull(material.trustStorePassword) ? material.trustStorePassword.toCharArray() : null);
-				material.trustStoreBase64 = Base64Utils.encode(stream.toByteArray());
-			}
-
-			if (writeFiles) {
-
-				var trustStoreFile = FileUtils.createTempFile(null);
-
-				try (var trustStoreStream = new FileOutputStream(trustStoreFile)) {
-					material.trustStore.store(trustStoreStream, ValidationUtils.isNotNull(material.trustStorePassword) ? material.trustStorePassword.toCharArray() : null);
-				}
-
-				material.trustStoreFilePath = trustStoreFile.getAbsolutePath();
+				material.trustStoreBytes = stream.toByteArray();
 			}
 
 			material.trustManagerAlgorithm = ValidationUtils.requireNonBlankElse(material.trustManagerAlgorithm, TRUST_MANAGER_DEFAULT_ALGORITHM).trim();
@@ -377,29 +464,14 @@ public class TlsMaterial {
 
 			try (var keyStoreStream = new ByteArrayOutputStream()) {
 				material.keyStore.store(keyStoreStream, ValidationUtils.isNotNull(material.keyStorePassword) ? material.keyStorePassword.toCharArray() : null);
-				material.keyStoreBase64 = Base64Utils.encode(keyStoreStream.toByteArray());
+				material.keyStoreBytes = keyStoreStream.toByteArray();
 			}
 
-			if (writeFiles && material.keyStore.size() > 0) {
-
-				var keyStoreFile = FileUtils.createTempFile(null);
-
-				try (var keyStoreStream = new FileOutputStream(keyStoreFile)) {
-					material.keyStore.store(keyStoreStream, ValidationUtils.isNotNull(material.keyStorePassword) ? material.keyStorePassword.toCharArray() : null);
-				}
-
-				material.keyStoreFilePath = keyStoreFile.getAbsolutePath();
-			}
-
-			if (writeFiles && material.serverKeyStore != null && material.serverKeyStore.size() > 0) {
-
-				var serverKeyStoreFile = FileUtils.createTempFile("-server.jks");
-
-				try (var serverKeyStoreStream = new FileOutputStream(serverKeyStoreFile)) {
+			if (ValidationUtils.isNotNull(material.serverKeyStore) && material.serverKeyStore.size() > 0) {
+				try (var serverKeyStoreStream = new ByteArrayOutputStream()) {
 					material.serverKeyStore.store(serverKeyStoreStream, ValidationUtils.isNotNull(material.keyStorePassword) ? material.keyStorePassword.toCharArray() : null);
+					material.serverKeyStoreBytes = serverKeyStoreStream.toByteArray();
 				}
-
-				material.serverKeyStoreFilePath = serverKeyStoreFile.getAbsolutePath();
 			}
 
 			material.keyManagerAlgorithm = ValidationUtils.requireNonBlankElse(material.keyManagerAlgorithm, KEY_MANAGER_DEFAULT_ALGORITHM).trim();
@@ -438,7 +510,7 @@ public class TlsMaterial {
 
 			// server stuff
 
-			if (material.serverKeyStore != null && material.serverKeyStore.size() > 0) {
+			if (ValidationUtils.isNotNull(material.serverKeyStore) && material.serverKeyStore.size() > 0) {
 
 				var serverKeyManagerFactoryInitializedSuccessfully = false;
 				var serverKeyManagerFactory = KeyManagerFactory.getInstance(material.keyManagerAlgorithm);
@@ -490,61 +562,6 @@ public class TlsMaterial {
 			// return
 
 			return material;
-		}
-	}
-
-	// kafka
-
-	@SneakyThrows
-	public void updateKafkaConfiguration(Properties configuration) {
-
-		ValidationUtils.requireNonNull(configuration, "configuration is required");
-
-		if (!enabled) {
-			return;
-		}
-
-		var securityProtocol = ValidationUtils.requireNonBlank(configuration.getProperty("security.protocol"), ".destination.security.protocol is required").trim();
-		ValidationUtils.requireTrue(securityProtocol.equals("SSL") || securityProtocol.equals("SASL_SSL"), ".destination.security.protocol must be 'SSL' or 'SASL_SSL' when TLS is enabled");
-
-		if (ValidationUtils.isNotBlank(version)) {
-			configuration.put("ssl.protocol", version);
-		}
-
-		if (ValidationUtils.isNotBlank(trustStoreType)) {
-			configuration.put("ssl.truststore.type", trustStoreType);
-		}
-
-		if (ValidationUtils.isNotBlank(trustStoreFilePath)) {
-			configuration.put("ssl.truststore.location", trustStoreFilePath);
-		}
-
-		if (ValidationUtils.isNotBlank(trustStorePassword)) {
-			configuration.put("ssl.truststore.password", trustStorePassword);
-		}
-
-		if (ValidationUtils.isNotBlank(trustManagerAlgorithm)) {
-			configuration.put("ssl.trustmanager.algorithm", trustManagerAlgorithm);
-		}
-
-		if (ValidationUtils.isNotBlank(keyStoreType)) {
-			configuration.put("ssl.keystore.type", keyStoreType);
-		}
-
-		if (ValidationUtils.isNotBlank(keyStoreFilePath)) {
-			configuration.put("ssl.keystore.location", keyStoreFilePath);
-		}
-
-		if (ValidationUtils.isNotBlank(keyStorePassword)) {
-			configuration.put("ssl.keystore.password", keyStorePassword);
-		}
-
-		if (ValidationUtils.isNotBlank(keyPassword)) {
-			configuration.put("ssl.key.password", keyPassword);
-		}
-
-		if (ValidationUtils.isNotBlank(keyManagerAlgorithm)) {
-			configuration.put("ssl.keymanager.algorithm", keyManagerAlgorithm);
 		}
 	}
 }

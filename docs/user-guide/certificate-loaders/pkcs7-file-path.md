@@ -16,9 +16,9 @@ Load a certificate chain from a PKCS#7 file on the filesystem.
 ## Example
 
 ```bash
-kete.routes.myroute.destination.tls=true
+kete.routes.myroute.destination.tls.enabled=true
 
 # Trust store only (PKCS#7 cannot contain private keys)
-kete.routes.myroute.destination.trust-store.loader.kind=pkcs7-file-path
-kete.routes.myroute.destination.trust-store.loader.path=/certs/ca-chain.p7b
+kete.routes.myroute.destination.tls.trust-store.loader.kind=pkcs7-file-path
+kete.routes.myroute.destination.tls.trust-store.loader.path=/certs/ca-chain.p7b
 ```

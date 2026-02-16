@@ -79,6 +79,7 @@ Stream Keycloak events to Redis using Pub/Sub messaging.
 - Low latency message delivery
 - TLS/SSL support with mutual TLS (mTLS)
 - Username/password authentication (Redis 6+)
+- Standalone, Sentinel, and Cluster mode support
 - Configurable connection and command timeouts
 - Automatic reconnection
 - Dynamic channel names (templating)
@@ -94,8 +95,8 @@ Stream Keycloak events to Redis using Pub/Sub messaging.
 
 | Property | Description | Example |
 |----------|-------------|---------|
-| `host` | Redis server hostname | `redis.example.com` |
 | `channel` | Redis channel to publish to (supports templating) | `keycloak-events` |
+| `host` | Redis server hostname (required for `standalone` mode) | `redis.example.com` |
 
 ### Dynamic Channels (Templating)
 
@@ -109,7 +110,7 @@ kete.routes.redis.destination.channel=keycloak-${realmLowerCase}-events
 kete.routes.redis.destination.channel=keycloak-${eventTypeLowerCase}
 ```
 
-Available variables: `${realmLowerCase}`, `${realmUpperCase}`, `${eventTypeLowerCase}`, `${eventTypeUpperCase}`, `${kindLowerCase}`, `${kindUpperCase}`, `${resourceTypeLowerCase}`, `${resourceTypeUpperCase}`, `${operationTypeLowerCase}`, `${operationTypeUpperCase}`, `${resultLowerCase}`, `${resultUpperCase}`
+Available variables: `${realmLowerCase}`, `${realmUpperCase}`, `${realmKebabCase}`, `${realmPascalCase}`, `${realmCamelCase}`, `${eventTypeLowerCase}`, `${eventTypeUpperCase}`, `${eventTypeKebabCase}`, `${eventTypePascalCase}`, `${eventTypeCamelCase}`, `${kindLowerCase}`, `${kindUpperCase}`, `${kindKebabCase}`, `${kindPascalCase}`, `${kindCamelCase}`, `${resourceTypeLowerCase}`, `${resourceTypeUpperCase}`, `${resourceTypeKebabCase}`, `${resourceTypePascalCase}`, `${resourceTypeCamelCase}`, `${operationTypeLowerCase}`, `${operationTypeUpperCase}`, `${operationTypeKebabCase}`, `${operationTypePascalCase}`, `${operationTypeCamelCase}`, `${resultLowerCase}`, `${resultUpperCase}`, `${resultKebabCase}`, `${resultPascalCase}`, `${resultCamelCase}`
 
 ### Optional Properties
 
@@ -119,6 +120,10 @@ Available variables: `${realmLowerCase}`, `${realmUpperCase}`, `${eventTypeLower
 | `database` | `0` | Redis database number | `1` |
 | `username` | `""` | Redis username (Redis 6+) | `default` |
 | `password` | `""` | Redis password | `secret123` |
+| `mode` | `standalone` | Connection mode: `standalone`, `sentinel`, or `cluster` | `sentinel` |
+| `sentinel-nodes` | _(empty)_ | Comma-separated `host:port` pairs (required for `sentinel` mode) | `sentinel1:26379,sentinel2:26379` |
+| `sentinel-master-id` | _(empty)_ | Sentinel master name (required for `sentinel` mode) | `mymaster` |
+| `cluster-nodes` | _(empty)_ | Comma-separated `host:port` pairs (required for `cluster` mode) | `node1:6379,node2:6379,node3:6379` |
 | `client-name` | `kete` | Client name for connection | `keycloak-events` |
 | `connection-timeout-seconds` | `10` | Connection timeout in seconds | `30` |
 | `command-timeout-seconds` | `60` | Command timeout in seconds | `120` |
@@ -193,13 +198,15 @@ kete.routes.auth-redis.destination.client-name=keycloak-events
 
 | Broker | Quickstart |
 |--------|------------|
-| Redis | [redis-pubsub-redis](../../quick-starts/redis-pubsub-redis/) |
-| Valkey | [redis-pubsub-valkey](../../quick-starts/redis-pubsub-valkey/) |
-| Dragonfly | [redis-pubsub-dragonfly](../../quick-starts/redis-pubsub-dragonfly/) |
-| KeyDB | [redis-pubsub-keydb](../../quick-starts/redis-pubsub-keydb/) |
-| Microsoft Garnet | [redis-pubsub-garnet](../../quick-starts/redis-pubsub-garnet/) |
-| Azure Cache for Redis | [redis-pubsub-azure-cache-for-redis](../../quick-starts/redis-pubsub-azure-cache-for-redis/) |
-| Upstash | [redis-pubsub-upstash](../../quick-starts/redis-pubsub-upstash/) |
+| Redis | [redis-pubsub-redis](https://github.com/FortuneN/kete/tree/release/quick-starts/redis-pubsub-redis/) |
+| Valkey | [redis-pubsub-valkey](https://github.com/FortuneN/kete/tree/release/quick-starts/redis-pubsub-valkey/) |
+| Dragonfly | [redis-pubsub-dragonfly](https://github.com/FortuneN/kete/tree/release/quick-starts/redis-pubsub-dragonfly/) |
+| KeyDB | [redis-pubsub-keydb](https://github.com/FortuneN/kete/tree/release/quick-starts/redis-pubsub-keydb/) |
+| Microsoft Garnet | [redis-pubsub-garnet](https://github.com/FortuneN/kete/tree/release/quick-starts/redis-pubsub-garnet/) |
+| Azure Cache for Redis | [redis-pubsub-azure-cache-for-redis](https://github.com/FortuneN/kete/tree/release/quick-starts/redis-pubsub-azure-cache-for-redis/) |
+| Upstash | [redis-pubsub-upstash](https://github.com/FortuneN/kete/tree/release/quick-starts/redis-pubsub-upstash/) |
+| Amazon ElastiCache | [redis-pubsub-amazon-elasticache](https://github.com/FortuneN/kete/tree/release/quick-starts/redis-pubsub-amazon-elasticache/) |
+| Google Memorystore | [redis-pubsub-google-memorystore](https://github.com/FortuneN/kete/tree/release/quick-starts/redis-pubsub-google-memorystore/) |
 
 
 

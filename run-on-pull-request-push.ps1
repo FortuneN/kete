@@ -7,7 +7,7 @@
 #     • Quick-start Docker image builds
 #     • Documentation site build
 #
-#   Usage: .\run-on-pr.ps1
+#   Usage: .\run-on-pull-request-push.ps1
 #
 # =============================================================================
 

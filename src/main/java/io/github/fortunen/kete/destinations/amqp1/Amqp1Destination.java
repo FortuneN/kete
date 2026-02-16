@@ -1,5 +1,7 @@
 package io.github.fortunen.kete.destinations.amqp1;
 
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import io.github.fortunen.kete.Component;
@@ -25,7 +27,12 @@ public class Amqp1Destination extends Destination<Amqp1DestinationConfig> {
 
 	private Session session;
 	private Connection connection;
+	private String queueOrTopicName;
 	private MessageProducer producer;
+	private boolean isDestinationIsQueue;
+	private boolean isQueueOrTopicNameTemplated;
+	private jakarta.jms.Destination jmsDestination;
+	private Set<Map.Entry<String, String>> customHeadersEntrySet;
 	private ConcurrentHashMap<String, jakarta.jms.Destination> destinationCache = new ConcurrentHashMap<>();
 
 	@Override
@@ -34,15 +41,29 @@ public class Amqp1Destination extends Destination<Amqp1DestinationConfig> {
 
 		ValidationUtils.requireNonNull(config, "config is required");
 
+		queueOrTopicName = config.getQueueOrTopicName();
+		isDestinationIsQueue = config.isDestinationIsQueue();
+		customHeadersEntrySet = config.getCustomHeadersEntrySet();
+		isQueueOrTopicNameTemplated = config.isQueueOrTopicNameTemplated();
+
+		// verify connection
+
 		connection = config.getConnectionFactory().createConnection();
 		connection.start();
 
 		session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
 		producer = session.createProducer(null);
 
-		producer.setPriority(config.getPriority());
+		if (config.isHasPriority()) {
+			producer.setPriority(config.getPriority());
+		}
+
 		producer.setDeliveryMode(config.getDeliveryMode());
 		producer.setTimeToLive(config.getTimeToLiveSeconds() * 1000);
+
+		if (!isQueueOrTopicNameTemplated) {
+			jmsDestination = isDestinationIsQueue ? session.createQueue(queueOrTopicName) : session.createTopic(queueOrTopicName);
+		}
 	}
 
 	@Override
@@ -53,15 +74,15 @@ public class Amqp1Destination extends Destination<Amqp1DestinationConfig> {
 
 		// destination
 
-		var actualQueueOrTopicName = TemplateUtils.substitute(config.getQueueOrTopicName(), message);
+		var actualQueueOrTopicName = isQueueOrTopicNameTemplated ? TemplateUtils.substitute(queueOrTopicName, message) : queueOrTopicName;
 
-		var jmsDestination = destinationCache.computeIfAbsent(actualQueueOrTopicName, name -> {
+		var destination = isQueueOrTopicNameTemplated ? destinationCache.computeIfAbsent(actualQueueOrTopicName, name -> {
 			try {
-				return config.isDestinationIsQueue() ? session.createQueue(name) : session.createTopic(name);
+				return isDestinationIsQueue ? session.createQueue(name) : session.createTopic(name);
 			} catch (JMSException exception) {
 				throw new RuntimeException(exception);
 			}
-		});
+		}) : jmsDestination;
 
 		// message
 
@@ -69,7 +90,7 @@ public class Amqp1Destination extends Destination<Amqp1DestinationConfig> {
 
 		jmsMessage.writeBytes(message.eventBody());
 
-		for (var entry : config.getCustomHeadersEntrySet()) {
+		for (var entry : customHeadersEntrySet) {
 			jmsMessage.setStringProperty(entry.getKey(), entry.getValue());
 		}
 
@@ -79,7 +100,7 @@ public class Amqp1Destination extends Destination<Amqp1DestinationConfig> {
 
 		// send
 
-		producer.send(jmsDestination, jmsMessage);
+		producer.send(destination, jmsMessage);
 	}
 
 	@Override

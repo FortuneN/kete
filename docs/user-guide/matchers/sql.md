@@ -11,7 +11,7 @@ sql:<pattern>
 | Wildcard | Matches | Example | Matches |
 |----------|---------|---------|---------|
 | `%` | Any number of characters | `LOGIN%` | `LOGIN`, `LOGIN_ERROR` |
-| `_` | Exactly one character | `USER_` | `USER_A`, `USER_1` |
+| `_` | Exactly one character | `CODE_` | `CODEA`, `CODE1` |
 
 ## Examples
 
@@ -44,10 +44,10 @@ kete.routes.kafka.event-matchers.deletes=sql:%_DELETE
 ```bash
 # Events with single character at end
 kete.routes.kafka.event-matchers.match=sql:CODE_
-# Matches: CODE_A, CODE_1 (not CODE_AB)
+# Matches: CODEA, CODE1 (not CODEAB)
 
-# USER_ followed by exactly 6 characters
-kete.routes.kafka.event-matchers.match=sql:USER______
+# USER followed by exactly 7 characters
+kete.routes.kafka.event-matchers.match=sql:USER_______
 # Matches: USER_CREATE, USER_UPDATE, USER_DELETE
 ```
 
@@ -103,7 +103,7 @@ To match literal `%` or `_` characters:
 
 ```bash
 # Match "USER_100%" literally
-sql:USER_100\%
+sql:USER\_100\%
 
 # Match "CODE_1_A" with literal underscores
 sql:CODE\_1\_A

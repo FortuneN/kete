@@ -2,7 +2,7 @@
 
 ## Before Starting Work
 
-1. **Review the codebase** - Familiarize yourself with both the core source code (`src/main/java`) and test code (`src/tests/java`) to understand the project structure, patterns, and conventions.
+1. **Review the codebase** - Familiarize yourself with both the core source code (`src/main/java`) and test code (`src/test/java`) to understand the project structure, patterns, and conventions.
 
 2. **Read the test patterns document** - Always read [docs/developer-guide/test-patterns-and-conventions.md](../docs/developer-guide/test-patterns-and-conventions.md) before writing or modifying tests to ensure consistency.
 
@@ -27,6 +27,27 @@
 12. No javadocs - remove all you find and generate any
 
 13. No new info logs - dont remove exusting, dont generate any (low nopise philosphy, only log the unexpected, not the expected, and that excludes info logs for expected operations)
+
+## Code Style Rules
+
+14. **No fully-qualified class names inline** — Always use import statements. Write `new MqttClient(...)` not `new org.eclipse.paho.client.mqttv3.MqttClient(...)`. The only exception is when two classes share the same simple name and disambiguation is required.
+
+15. **No Testcontainers `waitingFor()` or `withStartupTimeout()`** — Never use Testcontainers' built-in wait strategies. Use Awaitility-based readiness probes (`await().atMost(...).until(...)`) with the appropriate readiness check hierarchy (see below).
+
+16. **Container readiness check hierarchy** — When checking if a container is ready, use the highest-level client available:
+    1. **SDK/native client** (best) — e.g. `MqttClient.connect()`, `AdminClient.describeCluster()`, `EventHubClientBuilder.buildConsumerClient().getPartitionIds()`
+    2. **HTTP client** (second) — e.g. `HttpClient.send(GET /health)` for services with HTTP endpoints
+    3. **Socket** (last resort only) — `new Socket(host, port)` — only when no higher-level option exists (e.g. nginx TLS proxies, generic port checks)
+
+17. **No redundant `kete.enabled=true`** — The `enabled` property defaults to `true`. Never set it in tests unless you're explicitly testing the disabled (`false`) case.
+
+18. **Container `.start()` before `.getMappedPort()`** — When manually managing container lifecycle (not using `@Container`), always call `.start()` before accessing mapped ports. An unstarted container has no port mappings.
+
+19. **Verify connection ordering** — In integration tests, always call `destination.verify()` before `destination.send()`. The verify step validates connectivity and catches configuration errors early.
+
+20. When you run container-based/involved tests, **always** monitor the docker output in real time as tests execute. Do not wait until things hang and timeouts occur. This allows for faster feedback and quicker debugging when failures occur.
+
+21. Verify claims/recommendations/statements of fact/e.t.c from subagents. Do not take claims at face value without verification.
 
 ## During Long-Running Operations
 
@@ -67,6 +88,26 @@ This applies to:
 
 **NEVER**: Remove relocations from the Maven Shade Plugin configuration without understanding multi-version Keycloak compatibility impact.
 
+### Destination Unit Tests (CRITICAL)
+
+**MANDATORY RULE**: Destination unit tests under `unittests/destinations/<destination>/` are **STRICTLY ZERO IO**. No containers, no servers, no server processes, no network connections, no Docker, no Testcontainers, no MockWebServer, no WireMock — nothing that performs any form of IO whatsoever.
+
+These tests work by:
+
+1. Creating the real `Destination` instance (e.g., `new NatsDestination()`)
+2. Injecting a **mock transport client** via the Lombok-generated setter (e.g., `destination.setConnection(mock(Connection.class))`)
+3. Setting fields directly to skip `doInitialize()` (which would attempt real IO)
+4. Calling `send(message)` and verifying the mock client received the correct API calls (correct topic/subject, headers, payload)
+
+**Test files per destination:**
+
+- `sendTests.java` — tests `send()` → `doSend()` (message building, headers, template substitution, payload encoding)
+- `closeTests.java` — tests `close()` (verifies client cleanup on mocks)
+
+**NEVER** in these tests: start a container, open a socket, make an HTTP call, connect to a broker, or perform any operation that requires a running external process.
+
+**SCOPE**: This rule applies exclusively to tests under `package io.github.fortunen.kete.unittests.destinations`. Integration tests (`integrationtests/`) and E2E tests (`endtoendtests/`) are governed by the Integration & E2E Test Policy below.
+
 ### Integration & E2E Test Policy (CRITICAL)
 
 **MANDATORY RULE**: Tests requiring containers or external services are **expensive**. Strict limits apply per destination:
@@ -87,6 +128,15 @@ This applies to:
 - **Verification via emulator APIs**: After sending a message, verify delivery by reading it back from the emulator using its native API (e.g., Azurite REST peek, Pub/Sub subscription pull, Redis XRANGE). Do NOT rely on MockWebServer request recording. The test must prove the message actually arrived at the destination system.
 
 **REFERENCE PATTERNS**: See `integrationtests/azurestoragequeuedestination/` (Azurite + nginx) and `integrationtests/gcppubsubdestination/` (GCP Pub/Sub emulator + nginx) for the canonical emulator-based implementation. See `integrationtests/httpdestination/` for the canonical MockWebServer implementation (where MockWebServer is the actual target, not a substitute).
+
+### Destination Isolation (CRITICAL)
+
+**MANDATORY RULE**: No destination may force architectural changes beyond its own boundaries. The shared architecture (base classes, pipeline, serializers, matchers, pooling, DI, config loading, etc.) exists to serve all destinations equally. If a destination's requirements cannot be met within its own package — its `Destination.java`, `DestinationConfig.java`, and any destination-specific utility classes — then that destination is not supported. We would sooner drop a destination than allow it to pollute the shared architecture.
+
+- **No shared class modifications to accommodate a single destination.** A destination-specific concern stays in destination-specific code.
+- **No "if destination is X" branches in shared code.** If you find yourself writing conditional logic in a base class for one destination's quirk, the design is wrong.
+- **Utility classes shared between related destinations are fine** (e.g., a signing utility shared between two destinations from the same vendor), but they live in `utils/` and have zero knowledge of the destination classes that call them.
+- **This applies to all layers:** source code, config validation, serialization, test infrastructure, documentation tooling.
 
 ### Destination Documentation (CRITICAL)
 

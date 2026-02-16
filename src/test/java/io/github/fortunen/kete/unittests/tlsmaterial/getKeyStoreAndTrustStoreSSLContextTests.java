@@ -102,7 +102,6 @@ class getKeyStoreAndTrustStoreSSLContextTests {
 
 		var tls = TlsMaterial.builder()
 			.withEnabled(true)
-			.withWriteFiles(true)
 			.build();
 
 		// act & assert
@@ -130,11 +129,9 @@ class getKeyStoreAndTrustStoreSSLContextTests {
 
 		var tlsCorrect = TlsMaterial.builder()
 			.withEnabled(true)
-			.withWriteFiles(true)
 			.build();
 
 		var tlsIncorrect = TlsMaterial.builder()
-			.withWriteFiles(true)
 			.build();
 
 		// assert

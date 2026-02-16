@@ -42,7 +42,7 @@ public class sendTests extends TestBase {
 		// arrange
 
 		var tls = TlsMaterial.builder()
-			.withEnabled(true).withWriteFiles(true)
+			.withEnabled(true)
 			.withTrustStorePassword("changeit").withKeyStorePassword("changeit").withKeyPassword("changeit")
 			.withServerHostNames(new String[] { "localhost", "127.0.0.1", "host.docker.internal", "kubernetes.docker.internal" })
 			.build();
@@ -75,7 +75,7 @@ public class sendTests extends TestBase {
 		// arrange
 
 		var tls = TlsMaterial.builder()
-			.withEnabled(true).withWriteFiles(true)
+			.withEnabled(true)
 			.withTrustStorePassword("changeit").withKeyStorePassword("changeit").withKeyPassword("changeit")
 			.withServerHostNames(new String[] { "localhost", "127.0.0.1", "host.docker.internal", "kubernetes.docker.internal" })
 			.build();

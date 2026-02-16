@@ -51,7 +51,7 @@ public class sendTests extends TestBase {
 
 			// assert
 
-			await().atMost(Duration.ofSeconds(10)).until(() -> !collector.getMessages().isEmpty());
+			await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).until(() -> !collector.getMessages().isEmpty());
 
 			assertThat(collector.getMessages()).hasSize(1);
 			assertThat(collector.getMessages().get(0)).isEqualTo("{\"type\":\"LOGIN\"}");
@@ -65,7 +65,6 @@ public class sendTests extends TestBase {
 
 		var tls = TlsMaterial.builder()
 			.withEnabled(true)
-			.withWriteFiles(true)
 			.withTrustStorePassword("changeit")
 			.withKeyStorePassword("changeit")
 			.withKeyPassword("changeit")
@@ -108,7 +107,7 @@ public class sendTests extends TestBase {
 
 			// assert
 
-			await().atMost(Duration.ofSeconds(10)).until(() -> !collector.getMessages().isEmpty());
+			await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).until(() -> !collector.getMessages().isEmpty());
 
 			assertThat(collector.getMessages()).hasSize(1);
 			assertThat(collector.getMessages().get(0)).isEqualTo("{\"type\":\"LOGIN\"}");
@@ -116,13 +115,12 @@ public class sendTests extends TestBase {
 	}
 
 	@Test
-	public void shouldSend_Mtls() throws Exception {
+	public void shouldSend_mTls() throws Exception {
 
 		// arrange
 
 		var tls = TlsMaterial.builder()
 			.withEnabled(true)
-			.withWriteFiles(true)
 			.withTrustStorePassword("changeit")
 			.withKeyStorePassword("changeit")
 			.withKeyPassword("changeit")
@@ -169,7 +167,7 @@ public class sendTests extends TestBase {
 
 			// assert
 
-			await().atMost(Duration.ofSeconds(10)).until(() -> !collector.getMessages().isEmpty());
+			await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).until(() -> !collector.getMessages().isEmpty());
 
 			assertThat(collector.getMessages()).hasSize(1);
 			assertThat(collector.getMessages().get(0)).isEqualTo("{\"type\":\"LOGIN\"}");

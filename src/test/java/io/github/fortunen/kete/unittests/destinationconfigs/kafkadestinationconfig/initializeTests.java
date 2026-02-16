@@ -252,7 +252,7 @@ public class initializeTests {
 
 		// assert
 
-		assertThat(config.getProducerConfiguration().getProperty(ProducerConfig.ACKS_CONFIG)).isEqualTo("all");
+		assertThat(config.getProducerConfiguration().containsKey(ProducerConfig.ACKS_CONFIG)).isFalse();
 	}
 
 	@Test
@@ -336,7 +336,7 @@ public class initializeTests {
 
 		// assert
 
-		assertThat(config.getProducerConfiguration().get(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG)).isEqualTo(true);
+		assertThat(config.getProducerConfiguration().containsKey(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG)).isFalse();
 	}
 
 	@Test
@@ -357,7 +357,7 @@ public class initializeTests {
 
 		// assert
 
-		assertThat(config.getProducerConfiguration().get(ProducerConfig.MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION)).isEqualTo(5);
+		assertThat(config.getProducerConfiguration().containsKey(ProducerConfig.MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION)).isFalse();
 	}
 
 	@Test
@@ -497,7 +497,7 @@ public class initializeTests {
 	}
 
 	// =========================================================================
-	// TLS Configuration
+	// tls Configuration
 	// =========================================================================
 
 	@Test
@@ -806,5 +806,93 @@ public class initializeTests {
 			.doesNotContainKey("contenttype")
 			.containsKey("X-Custom")
 			.hasSize(1);
+	}
+
+	// =========================================================================
+	// SASL JAAS Config - Shade-Aware Class Name Rewriting
+	// Users always configure standard (unshaded) class names like
+	// org.apache.kafka.common.security.plain.PlainLoginModule.
+	// At runtime, KETE rewrites them to the shaded equivalents so that
+	// JAAS LoginContext can find the classes inside the shaded JAR.
+	// =========================================================================
+
+	@Test
+	public void shouldRewriteStandardKafkaClassNameInSaslJaasConfig() {
+
+		// arrange - user provides standard (unshaded) class name, as documented
+
+		var configMap = new HashMap<String, Object>();
+		configMap.put("kind", "kafka");
+		configMap.put("bootstrap.servers", "localhost:9092");
+		configMap.put("topic", "test-topic");
+		configMap.put("security.protocol", "SASL_PLAINTEXT");
+		configMap.put("sasl.mechanism", "PLAIN");
+		configMap.put("sasl.jaas.config", "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"user\" password=\"pass\";");
+
+		var config = new KafkaDestinationConfig();
+		config.setConfiguration(new MapConfiguration(configMap));
+
+		// act
+
+		config.initialize();
+
+		// assert - internally rewritten to shaded equivalent
+
+		assertThat(config.getProducerConfiguration().getProperty("sasl.jaas.config"))
+			.startsWith("kete.org.apache.kafka.common.security.plain.PlainLoginModule");
+	}
+
+	@Test
+	public void shouldNotDoubleRewriteIfShadedPrefixAlreadyPresent() {
+
+		// arrange - defensive: if someone somehow provides the shaded name, don't double-prefix it
+
+		var configMap = new HashMap<String, Object>();
+		configMap.put("kind", "kafka");
+		configMap.put("bootstrap.servers", "localhost:9092");
+		configMap.put("topic", "test-topic");
+		configMap.put("security.protocol", "SASL_PLAINTEXT");
+		configMap.put("sasl.mechanism", "PLAIN");
+		configMap.put("sasl.jaas.config", "kete.org.apache.kafka.common.security.plain.PlainLoginModule required username=\"user\" password=\"pass\";");
+
+		var config = new KafkaDestinationConfig();
+		config.setConfiguration(new MapConfiguration(configMap));
+
+		// act
+
+		config.initialize();
+
+		// assert - no double-prefixing (kete.kete.)
+
+		assertThat(config.getProducerConfiguration().getProperty("sasl.jaas.config"))
+			.startsWith("kete.org.apache.kafka.common.security.plain.PlainLoginModule")
+			.doesNotContain("kete.kete.");
+	}
+
+	@Test
+	public void shouldNotRewriteNonKafkaLoginModuleInSaslJaasConfig() {
+
+		// arrange - non-Kafka login modules (e.g. Kerberos) must be left untouched
+
+		var configMap = new HashMap<String, Object>();
+		configMap.put("kind", "kafka");
+		configMap.put("bootstrap.servers", "localhost:9092");
+		configMap.put("topic", "test-topic");
+		configMap.put("security.protocol", "SASL_PLAINTEXT");
+		configMap.put("sasl.mechanism", "PLAIN");
+		configMap.put("sasl.jaas.config", "com.sun.security.auth.module.Krb5LoginModule required useKeyTab=true;");
+
+		var config = new KafkaDestinationConfig();
+		config.setConfiguration(new MapConfiguration(configMap));
+
+		// act
+
+		config.initialize();
+
+		// assert
+
+		assertThat(config.getProducerConfiguration().getProperty("sasl.jaas.config"))
+			.startsWith("com.sun.security.auth.module.Krb5LoginModule")
+			.doesNotContain("kete.");
 	}
 }

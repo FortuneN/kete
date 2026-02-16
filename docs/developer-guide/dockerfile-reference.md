@@ -17,11 +17,11 @@ This Dockerfile uses a multi-stage build to:
 
 ### Stage 1: maven-build
 
-**Base Image:** `maven:3.9.12-eclipse-temurin-25-noble`  
+**Base Image:** `maven:3.9.9-eclipse-temurin-21-noble`  
 **Purpose:** Build the extension JAR
 
 ```dockerfile
-FROM maven:3.9.12-eclipse-temurin-25-noble AS maven-build
+FROM maven:3.9.9-eclipse-temurin-21-noble AS maven-build
 WORKDIR /src
 COPY pom.xml .
 RUN mvn -q -DskipTests dependency:go-offline
@@ -42,11 +42,11 @@ RUN mvn -B -DskipTests package
 
 ### Stage 2: keycloak-build
 
-**Base Image:** `quay.io/keycloak/keycloak:26.5.0`  
+**Base Image:** `quay.io/keycloak/keycloak:26.0.0`  
 **Purpose:** Install extension and build Keycloak
 
 ```dockerfile
-FROM quay.io/keycloak/keycloak:26.5.0 AS keycloak-build
+FROM quay.io/keycloak/keycloak:26.0.0 AS keycloak-build
 COPY --from=maven-build --chown=keycloak:keycloak /src/target/kete.jar /opt/keycloak/providers/kete.jar
 RUN /opt/keycloak/bin/kc.sh build --verbose
 ```
@@ -64,11 +64,11 @@ RUN /opt/keycloak/bin/kc.sh build --verbose
 
 ### Stage 3: final
 
-**Base Image:** `quay.io/keycloak/keycloak:26.5.0`  
+**Base Image:** `quay.io/keycloak/keycloak:26.0.0`  
 **Purpose:** Create minimal runtime image
 
 ```dockerfile
-FROM quay.io/keycloak/keycloak:26.5.0 AS final
+FROM quay.io/keycloak/keycloak:26.0.0 AS final
 COPY --from=keycloak-build /opt/keycloak/ /opt/keycloak/
 ```
 
@@ -85,7 +85,7 @@ COPY --from=keycloak-build /opt/keycloak/ /opt/keycloak/
 ### Manual Build
 
 ```bash
-docker build -t keycloak:hephaestus .
+docker build -t keycloak:kete .
 ```
 
 ### Build with Script
@@ -98,7 +98,7 @@ docker build -t keycloak:hephaestus .
 
 ```bash
 docker build \
-  --build-arg KEYCLOAK_VERSION=26.5.0 \
+  --build-arg KEYCLOAK_VERSION=26.0.0 \
   -t keycloak:custom \
   .
 ```
@@ -165,7 +165,7 @@ RUN mvn -B -o package
 ```bash
 docker buildx build \
   --platform linux/amd64,linux/arm64 \
-  -t keycloak:hephaestus \
+  -t keycloak:kete \
   .
 ```
 
@@ -176,10 +176,10 @@ docker buildx build \
 ### Define Build Args
 
 ```dockerfile
-ARG KEYCLOAK_VERSION=26.5.0
-ARG MAVEN_VERSION=3.9.12
+ARG KEYCLOAK_VERSION=26.0.0
+ARG MAVEN_VERSION=3.9.9
 
-FROM maven:${MAVEN_VERSION}-eclipse-temurin-25-noble AS maven-build
+FROM maven:${MAVEN_VERSION}-eclipse-temurin-21-noble AS maven-build
 # ...
 FROM quay.io/keycloak/keycloak:${KEYCLOAK_VERSION} AS keycloak-build
 ```
@@ -221,7 +221,7 @@ RUN mvn -B -T 1C package  # One thread per CPU core
 
 ```dockerfile
 # Use alpine variants
-FROM maven:3.9.12-eclipse-temurin-25-alpine AS maven-build
+FROM maven:3.9.9-eclipse-temurin-21-alpine AS maven-build
 
 # Remove unnecessary files
 RUN rm -rf /opt/keycloak/lib/lib/community/*.jar
@@ -243,10 +243,10 @@ COPY --chown=keycloak:keycloak ...
 
 ```bash
 # Using Docker Scout
-docker scout cves keycloak:hephaestus
+docker scout cves keycloak:kete
 
 # Using Trivy
-trivy image keycloak:hephaestus
+trivy image keycloak:kete
 ```
 
 
@@ -265,7 +265,7 @@ ping repo.maven.apache.org
 # Use local Maven repo
 docker build \
   -v ~/.m2:/root/.m2 \
-  -t keycloak:hephaestus \
+  -t keycloak:kete \
   .
 ```
 
@@ -276,7 +276,7 @@ docker build \
 **Solution:**
 ```bash
 # Check logs
-docker build --progress=plain -t keycloak:hephaestus .
+docker build --progress=plain -t keycloak:kete .
 
 # Verify JAR is valid
 jar tf target/kete.jar | grep META-INF/services
@@ -286,7 +286,7 @@ jar tf target/kete.jar | grep META-INF/services
 
 **Check layer sizes:**
 ```bash
-docker history keycloak:hephaestus
+docker history keycloak:kete
 ```
 
 **Optimize:**
@@ -323,11 +323,11 @@ docker-*.ps1
 
 ```yaml
 - name: Build Docker Image
-  run: docker build -t keycloak:hephaestus .
+  run: docker build -t keycloak:kete .
 
 - name: Push to Registry
   run: |
-    docker tag keycloak:hephaestus myregistry/keycloak:latest
+    docker tag keycloak:kete myregistry/keycloak:latest
     docker push myregistry/keycloak:latest
 ```
 

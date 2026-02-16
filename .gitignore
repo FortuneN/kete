@@ -201,6 +201,8 @@ README.html
 
 # Other
 dependency-reduced-pom.xml
+test-output.txt
+test-results.txt
 target/
 site/
 .github/appmod

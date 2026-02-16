@@ -20,6 +20,9 @@ class clearCacheTests {
 		message.realmUpperCase();
 		message.eventTypeLowerCase();
 		message.eventTypeUpperCase();
+		message.kindKebabCase();
+		message.kindPascalCase();
+		message.kindCamelCase();
 
 		// act & assert
 

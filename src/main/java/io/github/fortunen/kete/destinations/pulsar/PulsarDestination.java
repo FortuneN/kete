@@ -1,8 +1,11 @@
 package io.github.fortunen.kete.destinations.pulsar;
 
+import java.util.Set;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.pulsar.client.api.CompressionType;
 import org.apache.pulsar.client.api.Producer;
 import org.apache.pulsar.client.api.PulsarClient;
 
@@ -23,7 +26,22 @@ import lombok.SneakyThrows;
 @EqualsAndHashCode(callSuper = true)
 public class PulsarDestination extends Destination<PulsarDestinationConfig> {
 
+	private String topic;
 	private PulsarClient client;
+	private String producerName;
+	private int maxPendingMessages;
+	private int sendTimeoutSeconds;
+	private boolean hasSendTimeout;
+	private boolean hasProducerName;
+	private int batchingMaxMessages;
+	private boolean hasBatchingMaxMessages;
+	private boolean isTopicTemplated;
+	private boolean blockIfQueueFull;
+	private long batchingMaxPublishDelay;
+	private CompressionType compressionType;
+	private Producer<byte[]> defaultProducer;
+	private TimeUnit batchingMaxPublishDelayUnit;
+	private Set<Map.Entry<String, String>> customHeadersEntrySet;
 	private ConcurrentHashMap<String, Producer<byte[]>> producerCache = new ConcurrentHashMap<>();
 
 	@Override
@@ -32,9 +50,27 @@ public class PulsarDestination extends Destination<PulsarDestinationConfig> {
 
 		ValidationUtils.requireNonNull(config, "config is required");
 
-		// client
+		// fields
 
+		topic = config.getTopic();
+		producerName = config.getProducerName();
 		client = config.getClientBuilder().build();
+		isTopicTemplated = config.isTopicTemplated();
+		hasProducerName = config.isHasProducerName();
+		compressionType = config.getCompressionType();
+		blockIfQueueFull = config.isBlockIfQueueFull();
+		hasSendTimeout = config.isHasSendTimeout();
+		sendTimeoutSeconds = config.getSendTimeoutSeconds();
+		maxPendingMessages = config.getMaxPendingMessages();
+		hasBatchingMaxMessages = config.isHasBatchingMaxMessages();
+		batchingMaxMessages = config.getBatchingMaxMessages();
+		customHeadersEntrySet = config.getCustomHeadersEntrySet();
+		batchingMaxPublishDelay = config.getBatchingMaxPublishDelay();
+		batchingMaxPublishDelayUnit = config.getBatchingMaxPublishDelayUnit();
+
+		if (!isTopicTemplated) {
+			defaultProducer = createProducer(topic);
+		}
 
 		// verify connection
 
@@ -49,30 +85,9 @@ public class PulsarDestination extends Destination<PulsarDestinationConfig> {
 
 		// producer
 
-		var actualTopic = TemplateUtils.substitute(config.getTopic(), message);
+		var actualTopic = isTopicTemplated ? TemplateUtils.substitute(topic, message) : topic;
 
-		var producer = producerCache.computeIfAbsent(actualTopic, topic -> {
-			try {
-
-				var producerBuilder = client.newProducer()
-					.topic(topic)
-					.compressionType(config.getCompressionType())
-					.blockIfQueueFull(config.isBlockIfQueueFull())
-					.maxPendingMessages(config.getMaxPendingMessages())
-					.batchingMaxMessages(config.getBatchingMaxMessages())
-					.sendTimeout(config.getSendTimeoutSeconds(), TimeUnit.SECONDS)
-					.batchingMaxPublishDelay(config.getBatchingMaxPublishDelay(), config.getBatchingMaxPublishDelayUnit());
-
-				if (ValidationUtils.isNotBlank(config.getProducerName())) {
-					producerBuilder.producerName(config.getProducerName());
-				}
-
-				return producerBuilder.create();
-
-			} catch (Exception exception) {
-				throw new RuntimeException(exception);
-			}
-		});
+		var producer = isTopicTemplated ? producerCache.computeIfAbsent(actualTopic, this::createProducer) : defaultProducer;
 
 		// message builder
 
@@ -82,7 +97,7 @@ public class PulsarDestination extends Destination<PulsarDestinationConfig> {
 
 		// headers
 
-		for (var entry : config.getCustomHeadersEntrySet()) {
+		for (var entry : customHeadersEntrySet) {
 			messageBuilder.property(entry.getKey(), entry.getValue());
 		}
 
@@ -96,9 +111,35 @@ public class PulsarDestination extends Destination<PulsarDestinationConfig> {
 		messageBuilder.send();
 	}
 
+	@SneakyThrows
+	private Producer<byte[]> createProducer(String topicName) {
+
+		var producerBuilder = client.newProducer()
+			.topic(topicName)
+			.compressionType(compressionType)
+			.blockIfQueueFull(blockIfQueueFull)
+			.maxPendingMessages(maxPendingMessages)
+			.batchingMaxPublishDelay(batchingMaxPublishDelay, batchingMaxPublishDelayUnit);
+
+		if (hasSendTimeout) {
+			producerBuilder.sendTimeout(sendTimeoutSeconds, TimeUnit.SECONDS);
+		}
+
+		if (hasBatchingMaxMessages) {
+			producerBuilder.batchingMaxMessages(batchingMaxMessages);
+		}
+
+		if (hasProducerName) {
+			producerBuilder.producerName(producerName);
+		}
+
+		return producerBuilder.create();
+	}
+
 	@Override
 	@SneakyThrows
 	public void close() {
+		ValidationUtils.tryClose(defaultProducer, "producer");
 		producerCache.forEach((topic, producer) -> ValidationUtils.tryClose(producer, "producer for " + topic));
 		producerCache.clear();
 		ValidationUtils.tryClose(client, "client");

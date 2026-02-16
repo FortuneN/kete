@@ -2,8 +2,6 @@ package io.github.fortunen.kete.integrationtests.natsdestination;
 
 import static org.awaitility.Awaitility.await;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.time.Duration;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -52,6 +50,7 @@ public class TestBase {
 		destination.setConfig(config);
 	}
 
+	@SuppressWarnings("resource")
 	protected GenericContainer<?> startNats() throws Exception {
 
 		cleanUpContainer();
@@ -74,6 +73,7 @@ public class TestBase {
 		return startNatsWithTls(tls, true);
 	}
 
+	@SuppressWarnings("resource")
 	private GenericContainer<?> startNatsWithTls(TlsMaterial tls, boolean requireClientCert) throws Exception {
 
 		if (tls == null) {
@@ -103,9 +103,9 @@ public class TestBase {
 
 		container = new GenericContainer<>(DockerImageName.parse("nats:2.10-alpine"))
 			.withExposedPorts(NATS_PORT, NATS_MONITORING_PORT)
-			.withCopyToContainer(Transferable.of(Files.readAllBytes(Path.of(tls.getServerCertificatePemFilePath())), 0777), "/certs/server.crt")
-			.withCopyToContainer(Transferable.of(Files.readAllBytes(Path.of(tls.getServerPrivateKeyPemFilePath())), 0777), "/certs/server.key")
-			.withCopyToContainer(Transferable.of(Files.readAllBytes(Path.of(tls.getCaCertificatePemFilePath())), 0777), "/certs/ca.crt")
+			.withCopyToContainer(Transferable.of(tls.getServerCertificatePemBytes(), 0777), "/certs/server.crt")
+			.withCopyToContainer(Transferable.of(tls.getServerPrivateKeyPemBytes(), 0777), "/certs/server.key")
+			.withCopyToContainer(Transferable.of(tls.getCaCertificatePemBytes(), 0777), "/certs/ca.crt")
 			.withCommand(
 				"--http_port", "8222",
 				"--tls",
@@ -113,8 +113,7 @@ public class TestBase {
 				"--tlskey=/certs/server.key",
 				"--tlsverify=" + tlsVerifyOption,
 				"--tlscacert=/certs/ca.crt"
-			)
-			.withStartupTimeout(Duration.ofMinutes(10));
+			);
 
 		container.start();
 
@@ -124,7 +123,7 @@ public class TestBase {
 	}
 
 	protected String getHost() {
-		return container.getHost();
+		return "127.0.0.1";
 	}
 
 	protected int getPort() {
@@ -140,9 +139,9 @@ public class TestBase {
 	}
 
 	private void waitForNatsReady() throws Exception {
-		await().atMost(Duration.ofMinutes(2)).pollInterval(Duration.ofSeconds(1)).until(() -> {
+		await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).until(() -> {
 			try {
-				var url = "http://" + container.getHost() + ":" + container.getMappedPort(NATS_MONITORING_PORT) + "/varz";
+				var url = "http://" + "127.0.0.1" + ":" + container.getMappedPort(NATS_MONITORING_PORT) + "/varz";
 				var connection = new URI(url).toURL().openConnection();
 				connection.setConnectTimeout(1000);
 				connection.setReadTimeout(1000);

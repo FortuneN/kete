@@ -1,0 +1,45 @@
+services:
+
+  localstack:
+    image: ghcr.io/fortunen/kete/quick-start-localstack
+    ports:
+      - 4566:4566
+    environment:
+      SERVICES: events,sqs
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:4566/_localstack/health || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  eventbridge-setup:
+    image: ghcr.io/fortunen/kete/quick-start-curl
+    depends_on:
+      localstack:
+        condition: service_healthy
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        curl -sf "http://localstack:4566/?Action=CreateQueue&QueueName=keycloak-events-verification" &&
+        curl -sf -X POST http://localstack:4566 -H "X-Amz-Target: AWSEvents.CreateEventBus" -H "Content-Type: application/x-amz-json-1.1" -d '{"Name":"keycloak-events"}' &&
+        curl -sf -X POST http://localstack:4566 -H "X-Amz-Target: AWSEvents.PutRule" -H "Content-Type: application/x-amz-json-1.1" -d '{"Name":"catch-all","EventBusName":"keycloak-events","EventPattern":"{\"source\":[\"kete.keycloak\"]}","State":"ENABLED"}' &&
+        curl -sf -X POST http://localstack:4566 -H "X-Amz-Target: AWSEvents.PutTargets" -H "Content-Type: application/x-amz-json-1.1" -d '{"Rule":"catch-all","EventBusName":"keycloak-events","Targets":[{"Id":"1","Arn":"arn:aws:sqs:us-east-1:000000000000:keycloak-events-verification"}]}' &&
+        echo "Event bus, rule, target, and verification queue created successfully" &&
+        sleep infinity
+
+  keycloak:
+    image: ghcr.io/fortunen/kete/quick-start-keycloak
+    command: start-dev
+    ports:
+      - 8080:8080
+      - 9000:9000
+    environment:
+      kete.routes.quick-start.destination.kind: aws-eventbridge
+      kete.routes.quick-start.destination.event-bus: keycloak-events
+      kete.routes.quick-start.destination.source: kete.keycloak
+      kete.routes.quick-start.destination.detail-type: KeycloakEvent
+      kete.routes.quick-start.destination.region: us-east-1
+      kete.routes.quick-start.destination.endpoint-url: http://localstack:4566
+    depends_on:
+      eventbridge-setup:
+        condition: service_started

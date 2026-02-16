@@ -16,8 +16,8 @@ Keycloak Event → Route → Matcher → Serializer → Destination
 
 - **Routes** — Named pipelines connecting matchers → serializers → destinations
 - **Matchers** — Filter events by type (list, glob, regex, SQL)
-- **Serializers** — Convert events to bytes (JSON, XML, YAML, CBOR, CSV, TOML, Smile, Properties)
-- **Destinations** — Send bytes to external systems (Kafka, RabbitMQ, MQTT, AMQP 1.0, HTTP)
+- **Serializers** — Convert events to bytes (JSON, XML, YAML, CBOR, CSV, TOML, Smile, Properties, Avro, Protobuf, Multipart Form, URL-Encoded Form, Template)
+- **Destinations** — Send bytes to external systems (Kafka, AMQP, MQTT, HTTP, NATS, Redis, Pulsar, WebSocket, gRPC, SOAP, AWS, Azure, GCP, and more)
 
 ---
 
@@ -27,6 +27,7 @@ Keycloak Event → Route → Matcher → Serializer → Destination
 
 | Document | Description |
 |----------|-------------|
+| [How It Works](how-it-works.md) | Visual guide to KETE's event processing |
 | [Architecture](architecture.md) | System design, event flow, threading model, destination pooling |
 | [Component Scopes](component-scopes.md) | Dependency injection, SINGLETON vs TRANSIENT |
 | [Transaction Support](transaction-support.md) | Keycloak transaction integration, commit/rollback handling |
@@ -53,6 +54,7 @@ Keycloak Event → Route → Matcher → Serializer → Destination
 | [Testing](testing.md) | Test types, running tests, test environment |
 | [Integration Tests](integration-tests.md) | Testcontainers setup, debugging |
 | [Test Patterns](test-patterns-and-conventions.md) | Code conventions, AAA pattern, file organization |
+| [Quickstart Testing](quickstart-testing.md) | Testing KETE quickstarts to verify event flow |
 
 ###  Development
 
@@ -105,18 +107,41 @@ See [Component Scopes](component-scopes.md) for details.
 
 ## Current Capabilities
 
-### Destinations (6)
+### Destinations (29)
 
 | Kind | Protocol | Description |
 |------|----------|-------------|
 | `kafka` | Apache Kafka | Event streaming |
-| `amqp-0.9.1` | RabbitMQ | Message queue (AMQP 0-9-1) |
-| `amqp-1` | AMQP 1.0 | Message queue (Azure Service Bus, ActiveMQ Artemis) |
+| `amqp-0.9.1` | AMQP 0-9-1 | Message queue (RabbitMQ, LavinMQ, CloudAMQP) |
+| `amqp-1` | AMQP 1.0 | Message queue (Azure Service Bus, ActiveMQ Artemis, Qpid) |
 | `mqtt-3` | MQTT 3.1.1 | IoT messaging |
 | `mqtt-5` | MQTT 5.0 | IoT messaging with enhanced features |
 | `http` | HTTP/HTTPS | REST APIs, webhooks |
+| `websocket` | WebSocket | Real-time bidirectional communication |
+| `nats` | NATS Core | Lightweight messaging |
+| `nats-jetstream` | NATS JetStream | Persistent NATS messaging |
+| `redis-pubsub` | Redis Pub/Sub | Pub/Sub messaging via Redis |
+| `redis-stream` | Redis Streams | Persistent streaming via Redis |
+| `pulsar` | Apache Pulsar | Distributed messaging |
+| `stomp` | STOMP | Simple text-oriented messaging |
+| `zeromq` | ZeroMQ | High-performance distributed messaging |
+| `signalr` | SignalR | Real-time web (ASP.NET hubs) |
+| `socketio` | Socket.IO | Real-time web (Node.js) |
+| `grpc` | gRPC (HTTP/2) | Unary RPC calls |
+| `soap` | SOAP (HTTP) | SOAP/XML web services |
+| `aws-sns` | AWS SNS | Amazon notification service |
+| `aws-sqs` | AWS SQS | Amazon message queue |
+| `aws-kinesis` | AWS Kinesis | Amazon data streaming |
+| `aws-eventbridge` | AWS EventBridge | Amazon event routing |
+| `gcp-pubsub` | GCP Pub/Sub | Google Cloud messaging |
+| `gcp-cloud-tasks` | GCP Cloud Tasks | Google Cloud task queue |
+| `azure-storage-queue` | Azure Storage Queue | Azure queue messaging |
+| `azure-webpubsub` | Azure Web PubSub | Azure real-time messaging |
+| `azure-eventhubs` | Azure Event Hubs | Azure event streaming |
+| `azure-servicebus` | Azure Service Bus | Azure enterprise messaging |
+| `azure-eventgrid` | Azure Event Grid | Azure event routing |
 
-### Serializers (8)
+### Serializers (13)
 
 | Kind | Content Type | Use Case |
 |------|--------------|----------|
@@ -128,6 +153,11 @@ See [Component Scopes](component-scopes.md) for details.
 | `cbor` | `application/cbor` | IoT, constrained devices |
 | `smile` | `application/x-jackson-smile` | High-performance binary JSON |
 | `properties` | `text/plain` | Java applications |
+| `template` | `text/plain` | Custom text templates with variables |
+| `avro` | `application/avro` | Big data, schema evolution |
+| `protobuf` | `application/x-protobuf` | High-performance binary serialization |
+| `multipart-form` | `multipart/form-data; boundary=kete-boundary` | Form uploads |
+| `url-encoded-form` | `application/x-www-form-urlencoded` | Form submissions |
 
 ### Matchers (4)
 
