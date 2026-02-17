@@ -169,8 +169,10 @@ docker compose up -d
 
 ## Recognition
 
-- [Keycloak Extensions](https://www.keycloak.org/extensions) — Official Keycloak extensions directory
-- [Awesome Keycloak](https://github.com/thomasdarimont/awesome-keycloak) — Community-curated list of Keycloak resources
+| Directory | Description |
+|-----------|-------------|
+| [Keycloak Extensions](https://www.keycloak.org/extensions) | Official Keycloak extensions directory |
+| [Awesome Keycloak](https://github.com/thomasdarimont/awesome-keycloak) | Community-curated list of Keycloak resources |
 
 ## Credits
 
