@@ -199,7 +199,7 @@ if ($testsPassed) {
         }
     }
     $color = if ($coveragePercent -ge 80) { "brightgreen" } elseif ($coveragePercent -ge 60) { "green" } elseif ($coveragePercent -ge 40) { "yellow" } else { "red" }
-    $badgeJson = @{ schemaVersion = 1; label = "coverage"; message = "$coveragePercent%"; color = $color } | ConvertTo-Json
+    $badgeJson = @{ schemaVersion = 1; label = "Coverage"; message = "$coveragePercent%"; color = $color } | ConvertTo-Json
     Set-Content -Path "coverage-badge.json" -Value $badgeJson -Encoding UTF8
     Write-TaskResult "Coverage: $coveragePercent% (badge updated)" $true
 }
@@ -373,13 +373,22 @@ if (-not (Test-PreviousStepsPassed)) {
     $tagName = "$($script:Version)"
 
     Write-Task "Creating Git tag $tagName..."
-    git tag -a $tagName -m "Release $tagName" 2>&1 | Out-Null
+    $tagOutput = git tag -a $tagName -m "Release $tagName" 2>&1
     $tagCreated = $LASTEXITCODE -eq 0
+
+    if (-not $tagCreated) {
+        Write-Host "      Tag creation error: $tagOutput" -ForegroundColor Red
+    }
 
     if ($tagCreated) {
         Write-Task "Pushing tag to origin..."
-        git push origin $tagName 2>&1 | Out-Null
+        $pushOutput = git push origin $tagName 2>&1
         $tagPushed = $LASTEXITCODE -eq 0
+
+        if (-not $tagPushed) {
+            Write-Host "      Tag push error: $pushOutput" -ForegroundColor Red
+        }
+
         Write-TaskResult "Git tag $tagName" $tagPushed
         $script:Results["5. Git Tag"] = $tagPushed
     } else {
@@ -390,8 +399,13 @@ if (-not (Test-PreviousStepsPassed)) {
     if ($script:Results["5. Git Tag"]) {
         Write-Task "Creating GitHub Release..."
         $releaseNotes = ""
-        gh release create $tagName --title "$tagName" --notes $releaseNotes "target/$script:JarName" 2>&1 | Out-Null
+        $releaseOutput = gh release create $tagName --title "$tagName" --notes $releaseNotes "target/$script:JarName" 2>&1
         $releaseCreated = $LASTEXITCODE -eq 0
+
+        if (-not $releaseCreated) {
+            Write-Host "      Release creation error: $releaseOutput" -ForegroundColor Red
+        }
+
         Write-TaskResult "GitHub Release $tagName" $releaseCreated
         $script:Results["5. GitHub Release"] = $releaseCreated
     } else {

@@ -167,6 +167,13 @@ docker compose up -d
 | **Ko-fi** | One-time / Recurring | [Donate using Ko-fi](https://ko-fi.com/FortuneN) |
 | **Liberapay** | Recurring | [Donate using Liberapay](https://liberapay.com/FortuneN) |
 
+## Recognition
+
+| Source | Description |
+|-----------|-------------|
+| [Keycloak Extensions](https://www.keycloak.org/extensions) | Official Keycloak extensions directory |
+| [Awesome Keycloak](https://github.com/thomasdarimont/awesome-keycloak) | Community-curated list of Keycloak resources |
+
 ## Credits
 
 | Library | Description |
