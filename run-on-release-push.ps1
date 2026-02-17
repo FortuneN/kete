@@ -199,7 +199,7 @@ if ($testsPassed) {
         }
     }
     $color = if ($coveragePercent -ge 80) { "brightgreen" } elseif ($coveragePercent -ge 60) { "green" } elseif ($coveragePercent -ge 40) { "yellow" } else { "red" }
-    $badgeJson = @{ schemaVersion = 1; label = "coverage"; message = "$coveragePercent%"; color = $color } | ConvertTo-Json
+    $badgeJson = @{ schemaVersion = 1; label = "Coverage"; message = "$coveragePercent%"; color = $color } | ConvertTo-Json
     Set-Content -Path "coverage-badge.json" -Value $badgeJson -Encoding UTF8
     Write-TaskResult "Coverage: $coveragePercent% (badge updated)" $true
 }
