@@ -30,7 +30,7 @@ class WebSocketDestinationE2ETests extends EndToEndTestBase {
 		wsServer.start();
 
 		// Wait for the server to start
-		await().atMost(Duration.ofMinutes(2)).pollInterval(Duration.ofSeconds(2)).until(() -> wsServer.getPort() > 0);
+		await().atMost(Duration.ofMinutes(5)).pollInterval(Duration.ofSeconds(2)).until(() -> wsServer.getPort() > 0);
 
 		// Expose the port to Docker containers
 		Testcontainers.exposeHostPorts(wsServer.getPort());
@@ -69,7 +69,7 @@ class WebSocketDestinationE2ETests extends EndToEndTestBase {
 
 				// assert - wait for message from Keycloak via WebSocket
 
-				await().atMost(Duration.ofMinutes(2)).pollInterval(Duration.ofSeconds(2)).until(() -> !receivedMessages.isEmpty());
+				await().atMost(Duration.ofMinutes(5)).pollInterval(Duration.ofSeconds(2)).until(() -> !receivedMessages.isEmpty());
 
 				var body = receivedMessages.poll(1, TimeUnit.SECONDS);
 

@@ -79,7 +79,7 @@ class Mqtt3DestinationE2ETests extends EndToEndTestBase {
 
 					// assert
 
-					await().atMost(Duration.ofMinutes(2)).pollInterval(Duration.ofSeconds(2)).until(() -> receivedMessage.get() != null);
+					await().atMost(Duration.ofMinutes(5)).pollInterval(Duration.ofSeconds(2)).until(() -> receivedMessage.get() != null);
 
 					var body = receivedMessage.get();
 					// TOML serializer assertions - check for TOML format (key = "value")

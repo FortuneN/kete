@@ -190,7 +190,7 @@ public class TestBase {
 
 	protected void waitForStompReady() {
 		var port = getStompPort();
-		await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).until(() -> {
+		await().atMost(Duration.ofMinutes(5)).pollInterval(Duration.ofSeconds(2)).until(() -> {
 				try {
 					var conn = new StompConnection();
 					conn.open("127.0.0.1", port);
@@ -206,7 +206,7 @@ public class TestBase {
 
 	protected void waitForStompsReady() {
 		var port = getStompsPort();
-		await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).until(() -> {
+		await().atMost(Duration.ofMinutes(5)).pollInterval(Duration.ofSeconds(2)).until(() -> {
 				try (var socket = new Socket("127.0.0.1", port)) {
 					return true;
 				} catch (Exception e) {

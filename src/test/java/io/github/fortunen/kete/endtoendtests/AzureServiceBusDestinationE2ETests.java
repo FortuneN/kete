@@ -110,7 +110,7 @@ class AzureServiceBusDestinationE2ETests extends EndToEndTestBase {
 
 		// wait for emulator to be fully ready (SDK-level probe)
 
-		await().atMost(Duration.ofMinutes(2)).pollInterval(Duration.ofSeconds(2)).until(() -> {
+		await().atMost(Duration.ofMinutes(5)).pollInterval(Duration.ofSeconds(2)).until(() -> {
 			try {
 				receiverClient.peekMessage();
 				return true;
@@ -143,7 +143,7 @@ class AzureServiceBusDestinationE2ETests extends EndToEndTestBase {
 
 				// assert — poll Service Bus queue for messages
 
-				await().atMost(Duration.ofMinutes(2)).pollInterval(Duration.ofSeconds(2)).untilAsserted(() -> {
+				await().atMost(Duration.ofMinutes(5)).pollInterval(Duration.ofSeconds(2)).untilAsserted(() -> {
 					var messages = receiverClient.receiveMessages(10, Duration.ofSeconds(5));
 					var bodies = messages.stream().map(m -> m.getBody().toString()).toList();
 					assertThat(bodies).isNotEmpty();

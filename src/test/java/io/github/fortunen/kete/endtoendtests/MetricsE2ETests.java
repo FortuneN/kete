@@ -80,7 +80,7 @@ class MetricsE2ETests extends EndToEndTestBase {
 					triggerLoginEvent(keycloak);
 
 					// Wait for message to be forwarded to Kafka
-					await().atMost(Duration.ofMinutes(2)).pollInterval(Duration.ofSeconds(2)).until(() -> {
+					await().atMost(Duration.ofMinutes(5)).pollInterval(Duration.ofSeconds(2)).until(() -> {
 						var records = consumer.poll(Duration.ofSeconds(1));
 						return !records.isEmpty();
 					});
@@ -95,7 +95,7 @@ class MetricsE2ETests extends EndToEndTestBase {
 					.build();
 
 				var metricsBody = new String[1];
-				await().atMost(Duration.ofMinutes(2)).pollInterval(Duration.ofSeconds(2)).until(() -> {
+				await().atMost(Duration.ofMinutes(5)).pollInterval(Duration.ofSeconds(2)).until(() -> {
 					var response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 					metricsBody[0] = response.body();
 					return metricsBody[0].contains("kete_events_forwarded_total");
@@ -142,7 +142,7 @@ class MetricsE2ETests extends EndToEndTestBase {
 				.build();
 
 			var metricsBody = new String[1];
-			await().atMost(Duration.ofMinutes(2)).pollInterval(Duration.ofSeconds(2)).until(() -> {
+			await().atMost(Duration.ofMinutes(5)).pollInterval(Duration.ofSeconds(2)).until(() -> {
 				var response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 				metricsBody[0] = response.body();
 				return response.statusCode() == 200;

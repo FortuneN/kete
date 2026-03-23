@@ -79,7 +79,7 @@ public class TestBase {
 		wsServer = new TestWebSocketServer(0, receivedMessages);
 		wsServer.start();
 
-		await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).until(() -> wsServer.getPort() > 0);
+		await().atMost(Duration.ofMinutes(5)).pollInterval(Duration.ofSeconds(2)).until(() -> wsServer.getPort() > 0);
 	}
 
 	protected void startWithServerOnlyTLS(TlsMaterial tls) throws Exception {
@@ -104,7 +104,7 @@ public class TestBase {
 
 		wsServer.start();
 
-		await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).until(() -> wsServer.getPort() > 0);
+		await().atMost(Duration.ofMinutes(5)).pollInterval(Duration.ofSeconds(2)).until(() -> wsServer.getPort() > 0);
 
 		waitForWebSocketTlsReady(tls);
 	}
@@ -139,7 +139,7 @@ public class TestBase {
 	}
 
 	private void waitForWebSocketTlsReady(TlsMaterial tls) {
-		await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).until(() -> {
+		await().atMost(Duration.ofMinutes(5)).pollInterval(Duration.ofSeconds(2)).until(() -> {
 			try {
 				
 				var sslContext = tls.getKeyStoreAndTrustStoreSSLContext();

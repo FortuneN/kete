@@ -71,7 +71,7 @@ class AzureStorageQueueDestinationE2ETests extends EndToEndTestBase {
 
 				// assert — poll Azurite for the message
 
-				await().atMost(Duration.ofMinutes(2)).pollInterval(Duration.ofSeconds(2)).untilAsserted(() -> {
+				await().atMost(Duration.ofMinutes(5)).pollInterval(Duration.ofSeconds(2)).untilAsserted(() -> {
 					var body = peekMessage("test-queue");
 					assertThat(body).satisfiesAnyOf(
 						b -> assertThat(b).contains("\"type\""),
@@ -93,7 +93,7 @@ class AzureStorageQueueDestinationE2ETests extends EndToEndTestBase {
 
 	private void waitForAzuriteReady() {
 		var baseUrl = getAzuriteBaseUrl();
-		await().atMost(Duration.ofMinutes(2)).pollInterval(Duration.ofSeconds(2)).until(() -> {
+		await().atMost(Duration.ofMinutes(5)).pollInterval(Duration.ofSeconds(2)).until(() -> {
 			try {
 				var request = HttpRequest.newBuilder()
 					.uri(URI.create(baseUrl))

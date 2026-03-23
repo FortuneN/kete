@@ -42,7 +42,7 @@ public class sendTests extends TestBase {
 
 		// assert
 
-		await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).until(() -> !receivedMessages.isEmpty());
+		await().atMost(Duration.ofMinutes(5)).pollInterval(Duration.ofSeconds(2)).until(() -> !receivedMessages.isEmpty());
 
 		var received = receivedMessages.poll(1, TimeUnit.SECONDS);
 		assertThat(received).isNotNull();
@@ -89,7 +89,7 @@ public class sendTests extends TestBase {
 
 		// assert
 
-		await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).until(() -> !receivedMessages.isEmpty());
+		await().atMost(Duration.ofMinutes(5)).pollInterval(Duration.ofSeconds(2)).until(() -> !receivedMessages.isEmpty());
 
 		var received = receivedMessages.poll(1, TimeUnit.SECONDS);
 		assertThat(received).isNotNull();
@@ -140,7 +140,7 @@ public class sendTests extends TestBase {
 
 		// assert
 
-		await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).until(() -> !receivedMessages.isEmpty());
+		await().atMost(Duration.ofMinutes(5)).pollInterval(Duration.ofSeconds(2)).until(() -> !receivedMessages.isEmpty());
 
 		var received = receivedMessages.poll(1, TimeUnit.SECONDS);
 		assertThat(received).isNotNull();

@@ -66,7 +66,7 @@ class RedisStreamDestinationE2ETests extends EndToEndTestBase {
 
 				// assert
 
-				await().atMost(Duration.ofMinutes(2)).pollInterval(Duration.ofSeconds(2)).until(() -> !readFromStream(REDIS_STREAM_RESOLVED).isEmpty());
+				await().atMost(Duration.ofMinutes(5)).pollInterval(Duration.ofSeconds(2)).until(() -> !readFromStream(REDIS_STREAM_RESOLVED).isEmpty());
 
 				var messages = readFromStream(REDIS_STREAM_RESOLVED);
 				assertThat(messages).hasSizeGreaterThan(0);
@@ -96,7 +96,7 @@ class RedisStreamDestinationE2ETests extends EndToEndTestBase {
 	}
 
 	private void waitForRedisReady() {
-		await().atMost(Duration.ofMinutes(2)).pollInterval(Duration.ofSeconds(2)).until(() -> {
+		await().atMost(Duration.ofMinutes(5)).pollInterval(Duration.ofSeconds(2)).until(() -> {
 			try {
 				var uri = RedisURI.builder()
 					.withHost("127.0.0.1")

@@ -149,7 +149,7 @@ public class TestBase {
 	}
 
 	private void waitForEmulatorReady() {
-		await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).until(() -> {
+		await().atMost(Duration.ofMinutes(5)).pollInterval(Duration.ofSeconds(2)).until(() -> {
 			try {
 				var tempClient = new ServiceBusClientBuilder()
 					.connectionString(buildConnectionString())

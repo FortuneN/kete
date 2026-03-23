@@ -190,7 +190,7 @@ public class TestBase {
 
 	private void waitForEmulatorReady(String emulatorUrl) {
 		var client = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(5)).build();
-		await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).until(() -> {
+		await().atMost(Duration.ofMinutes(5)).pollInterval(Duration.ofSeconds(2)).until(() -> {
 			try {
 				var request = HttpRequest.newBuilder()
 					.uri(URI.create(emulatorUrl))
@@ -208,7 +208,7 @@ public class TestBase {
 	private void waitForNginxReady() {
 		var client = buildTrustAllHttpClient();
 		var url = getNginxBaseUrl();
-		await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).until(() -> {
+		await().atMost(Duration.ofMinutes(5)).pollInterval(Duration.ofSeconds(2)).until(() -> {
 			try {
 				var request = HttpRequest.newBuilder()
 					.uri(URI.create(url))

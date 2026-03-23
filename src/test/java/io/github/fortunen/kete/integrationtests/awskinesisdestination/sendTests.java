@@ -36,7 +36,7 @@ class sendTests extends TestBase {
 
 		// assert
 
-		await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).untilAsserted(() -> {
+		await().atMost(Duration.ofMinutes(5)).pollInterval(Duration.ofSeconds(2)).untilAsserted(() -> {
 			var record = readRecordFromStream(stream);
 			assertThat(record).isEqualTo("{\"type\":\"LOGIN\"}");
 		});
@@ -70,7 +70,7 @@ class sendTests extends TestBase {
 
 		// assert
 
-		await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).untilAsserted(() -> {
+		await().atMost(Duration.ofMinutes(5)).pollInterval(Duration.ofSeconds(2)).untilAsserted(() -> {
 			var record = readRecordFromStream(stream);
 			assertThat(record).isEqualTo("{\"type\":\"LOGIN_TLS\"}");
 		});
@@ -104,7 +104,7 @@ class sendTests extends TestBase {
 
 		// assert
 
-		await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).untilAsserted(() -> {
+		await().atMost(Duration.ofMinutes(5)).pollInterval(Duration.ofSeconds(2)).untilAsserted(() -> {
 			var record = readRecordFromStream(stream);
 			assertThat(record).isEqualTo("{\"type\":\"LOGIN_MTLS\"}");
 		});

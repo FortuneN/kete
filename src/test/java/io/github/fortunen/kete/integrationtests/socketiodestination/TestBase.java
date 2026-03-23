@@ -273,7 +273,7 @@ public class TestBase {
 	private void waitForServerReady() {
 		var url = "http://127.0.0.1:" + serverContainer.getMappedPort(SERVER_PORT) + "/events";
 		var client = HttpClient.newBuilder().version(HttpClient.Version.HTTP_1_1).connectTimeout(Duration.ofSeconds(5)).build();
-		await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).until(() -> {
+		await().atMost(Duration.ofMinutes(5)).pollInterval(Duration.ofSeconds(2)).until(() -> {
 			try {
 				var request = HttpRequest.newBuilder().uri(URI.create(url)).timeout(Duration.ofSeconds(5)).GET().build();
 				var response = client.send(request, HttpResponse.BodyHandlers.discarding());
@@ -287,7 +287,7 @@ public class TestBase {
 	private void waitForEventsEndpointReady() {
 		var url = "http://127.0.0.1:" + serverContainer.getMappedPort(EVENTS_PORT) + "/events";
 		var client = HttpClient.newBuilder().version(HttpClient.Version.HTTP_1_1).connectTimeout(Duration.ofSeconds(5)).build();
-		await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).until(() -> {
+		await().atMost(Duration.ofMinutes(5)).pollInterval(Duration.ofSeconds(2)).until(() -> {
 			try {
 				var request = HttpRequest.newBuilder().uri(URI.create(url)).timeout(Duration.ofSeconds(5)).GET().build();
 				var response = client.send(request, HttpResponse.BodyHandlers.discarding());

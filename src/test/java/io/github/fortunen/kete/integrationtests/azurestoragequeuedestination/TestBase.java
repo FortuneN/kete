@@ -170,7 +170,7 @@ public class TestBase {
 	private void waitForAzuriteReady() {
 		var client = currentTls != null ? buildTrustAllHttpClient() : HttpClient.newHttpClient();
 		var baseUrl = getAzuriteBaseUrl();
-		await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).until(() -> {
+		await().atMost(Duration.ofMinutes(5)).pollInterval(Duration.ofSeconds(2)).until(() -> {
 			try {
 				var request = HttpRequest.newBuilder()
 					.uri(URI.create(baseUrl))

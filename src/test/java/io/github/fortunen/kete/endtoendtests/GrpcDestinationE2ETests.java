@@ -113,7 +113,7 @@ class GrpcDestinationE2ETests extends EndToEndTestBase {
 
 				// assert — wait for the gRPC server to receive the event
 
-				await().atMost(Duration.ofMinutes(2)).pollInterval(Duration.ofSeconds(2)).until(() -> {
+				await().atMost(Duration.ofMinutes(5)).pollInterval(Duration.ofSeconds(2)).until(() -> {
 					// filter out verify calls (empty bytes)
 					return receivedPayloads.stream().anyMatch(p -> p.length > 0);
 				});

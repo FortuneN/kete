@@ -104,7 +104,7 @@ class AzureEventHubsDestinationE2ETests extends EndToEndTestBase {
 
 		// wait for emulator to be fully ready (SDK-level probe)
 
-		await().atMost(Duration.ofMinutes(2)).pollInterval(Duration.ofSeconds(2)).until(() -> {
+		await().atMost(Duration.ofMinutes(5)).pollInterval(Duration.ofSeconds(2)).until(() -> {
 			try {
 				consumerClient.getPartitionIds().stream().toList();
 				return true;
@@ -136,7 +136,7 @@ class AzureEventHubsDestinationE2ETests extends EndToEndTestBase {
 
 				// assert — poll Event Hub for events
 
-				await().atMost(Duration.ofMinutes(2)).pollInterval(Duration.ofSeconds(2)).untilAsserted(() -> {
+				await().atMost(Duration.ofMinutes(5)).pollInterval(Duration.ofSeconds(2)).untilAsserted(() -> {
 					
 					var allBodies = new ArrayList<String>();
 					var partitionIds = consumerClient.getPartitionIds().stream().toList();

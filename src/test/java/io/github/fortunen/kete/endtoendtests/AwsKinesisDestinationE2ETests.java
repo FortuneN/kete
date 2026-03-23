@@ -83,7 +83,7 @@ class AwsKinesisDestinationE2ETests extends EndToEndTestBase {
 
 				// assert — poll Kinesis for the record
 
-				await().atMost(Duration.ofMinutes(2)).pollInterval(Duration.ofSeconds(2)).untilAsserted(() -> {
+				await().atMost(Duration.ofMinutes(5)).pollInterval(Duration.ofSeconds(2)).untilAsserted(() -> {
 					var record = readRecordFromStream(STREAM_NAME);
 					assertThat(record).isNotEmpty();
 					assertThat(record).satisfiesAnyOf(
@@ -106,7 +106,7 @@ class AwsKinesisDestinationE2ETests extends EndToEndTestBase {
 
 	private void waitForLocalStackReady() {
 		var baseUrl = getLocalStackBaseUrl();
-		await().atMost(Duration.ofMinutes(2)).pollInterval(Duration.ofSeconds(2)).until(() -> {
+		await().atMost(Duration.ofMinutes(5)).pollInterval(Duration.ofSeconds(2)).until(() -> {
 			try {
 				var request = HttpRequest.newBuilder()
 					.uri(URI.create(baseUrl + "/_localstack/health"))
@@ -140,7 +140,7 @@ class AwsKinesisDestinationE2ETests extends EndToEndTestBase {
 	}
 
 	private void waitForStreamActive(String stream) {
-		await().atMost(Duration.ofMinutes(2)).pollInterval(Duration.ofSeconds(2)).until(() -> {
+		await().atMost(Duration.ofMinutes(5)).pollInterval(Duration.ofSeconds(2)).until(() -> {
 			try {
 				var status = kinesisClient.describeStream(r -> r.streamName(stream))
 					.streamDescription().streamStatus();

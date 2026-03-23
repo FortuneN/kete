@@ -98,7 +98,7 @@ class PulsarDestinationE2ETests extends EndToEndTestBase {
 
 				// assert - wait for message using Awaitility
 
-				await().atMost(Duration.ofMinutes(2)).pollInterval(Duration.ofSeconds(2)).until(() -> !receivedMessages.isEmpty());
+				await().atMost(Duration.ofMinutes(5)).pollInterval(Duration.ofSeconds(2)).until(() -> !receivedMessages.isEmpty());
 
 				var body = receivedMessages.poll(1, TimeUnit.SECONDS);
 

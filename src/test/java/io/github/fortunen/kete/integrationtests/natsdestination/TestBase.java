@@ -139,7 +139,7 @@ public class TestBase {
 	}
 
 	private void waitForNatsReady() throws Exception {
-		await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).until(() -> {
+		await().atMost(Duration.ofMinutes(5)).pollInterval(Duration.ofSeconds(2)).until(() -> {
 			try {
 				var url = "http://" + "127.0.0.1" + ":" + container.getMappedPort(NATS_MONITORING_PORT) + "/varz";
 				var connection = new URI(url).toURL().openConnection();

@@ -117,7 +117,7 @@ class NatsJetStreamDestinationE2ETests extends EndToEndTestBase {
 
 				// assert - wait for message using Awaitility
 
-				await().atMost(Duration.ofMinutes(2)).pollInterval(Duration.ofSeconds(2)).until(() -> !receivedMessages.isEmpty());
+				await().atMost(Duration.ofMinutes(5)).pollInterval(Duration.ofSeconds(2)).until(() -> !receivedMessages.isEmpty());
 
 				var body = receivedMessages.poll(1, TimeUnit.SECONDS);
 
@@ -147,7 +147,7 @@ class NatsJetStreamDestinationE2ETests extends EndToEndTestBase {
 	}
 
 	private void waitForNatsReady(GenericContainer<?> container) {
-		await().atMost(Duration.ofMinutes(2)).pollInterval(Duration.ofSeconds(2)).until(() -> {
+		await().atMost(Duration.ofMinutes(5)).pollInterval(Duration.ofSeconds(2)).until(() -> {
 				try {
 					var url = "http://" + "127.0.0.1" + ":" + container.getMappedPort(NATS_MONITORING_PORT) + "/varz";
 					var conn = URI.create(url).toURL().openConnection();

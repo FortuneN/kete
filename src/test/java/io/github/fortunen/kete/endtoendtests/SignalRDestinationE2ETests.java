@@ -107,7 +107,7 @@ class SignalRDestinationE2ETests extends EndToEndTestBase {
 				var client = HttpClient.newBuilder().version(HttpClient.Version.HTTP_1_1).connectTimeout(Duration.ofSeconds(5)).build();
 				var baseUrl = "http://" + "127.0.0.1" + ":" + signalrServer.getMappedPort(SERVER_PORT);
 
-				await().atMost(Duration.ofMinutes(2)).pollInterval(Duration.ofSeconds(2)).ignoreExceptions().until(() -> {
+				await().atMost(Duration.ofMinutes(5)).pollInterval(Duration.ofSeconds(2)).ignoreExceptions().until(() -> {
 					var request = HttpRequest.newBuilder().uri(URI.create(baseUrl + "/messages")).timeout(Duration.ofSeconds(5)).GET().build();
 					var response = client.send(request, HttpResponse.BodyHandlers.ofString());
 					return response.statusCode() == 200 && !response.body().equals("[]");

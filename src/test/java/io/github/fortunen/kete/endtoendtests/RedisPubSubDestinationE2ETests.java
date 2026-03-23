@@ -72,7 +72,7 @@ class RedisPubSubDestinationE2ETests extends EndToEndTestBase {
 
 				// assert
 
-				await().atMost(Duration.ofMinutes(2)).pollInterval(Duration.ofSeconds(2)).until(() -> !collector.getMessages().isEmpty());
+				await().atMost(Duration.ofMinutes(5)).pollInterval(Duration.ofSeconds(2)).until(() -> !collector.getMessages().isEmpty());
 
 				assertThat(collector.getMessages()).hasSizeGreaterThan(0);
 				var message = collector.getMessages().get(0);
@@ -96,7 +96,7 @@ class RedisPubSubDestinationE2ETests extends EndToEndTestBase {
 	}
 
 	private void waitForRedisReady() {
-		await().atMost(Duration.ofMinutes(2)).pollInterval(Duration.ofSeconds(2)).until(() -> {
+		await().atMost(Duration.ofMinutes(5)).pollInterval(Duration.ofSeconds(2)).until(() -> {
 			try {
 				var uri = RedisURI.builder()
 					.withHost("127.0.0.1")

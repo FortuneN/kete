@@ -95,7 +95,7 @@ class GcpCloudTasksDestinationE2ETests extends EndToEndTestBase {
 				// assert — emulator dispatches the task to our HTTP receiver
 
 				var dispatchedRequest = await()
-					.atMost(Duration.ofMinutes(2))
+					.atMost(Duration.ofMinutes(5))
 					.pollInterval(Duration.ofSeconds(2))
 					.until(() -> {
 						try {

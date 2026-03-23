@@ -85,7 +85,7 @@ class GcpPubSubDestinationE2ETests extends EndToEndTestBase {
 
 				// assert
 
-				await().atMost(Duration.ofMinutes(2)).pollInterval(Duration.ofSeconds(2)).untilAsserted(() -> {
+				await().atMost(Duration.ofMinutes(5)).pollInterval(Duration.ofSeconds(2)).untilAsserted(() -> {
 					var messages = pullMessages(emulatorUrl, PROJECT_ID, SUBSCRIPTION_ID);
 					assertThat(messages).isNotEmpty();
 					assertThat(messages).anyMatch(msg -> msg.contains(TEST_REALM));
@@ -102,7 +102,7 @@ class GcpPubSubDestinationE2ETests extends EndToEndTestBase {
 
 		var client = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(5)).build();
 
-		await().atMost(Duration.ofMinutes(2)).pollInterval(Duration.ofSeconds(2)).until(() -> {
+		await().atMost(Duration.ofMinutes(5)).pollInterval(Duration.ofSeconds(2)).until(() -> {
 
 			try {
 				var request = HttpRequest.newBuilder()

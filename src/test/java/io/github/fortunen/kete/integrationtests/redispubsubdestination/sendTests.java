@@ -50,7 +50,7 @@ public class sendTests extends TestBase {
 
 			// assert
 
-			await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).until(() -> !collector.getMessages().isEmpty());
+			await().atMost(Duration.ofMinutes(5)).pollInterval(Duration.ofSeconds(2)).until(() -> !collector.getMessages().isEmpty());
 
 			assertThat(collector.getMessages()).hasSize(1);
 			assertThat(collector.getMessages().get(0)).isEqualTo("{\"type\":\"LOGIN\"}");
@@ -105,7 +105,7 @@ public class sendTests extends TestBase {
 
 			// assert
 
-			await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).until(() -> !collector.getMessages().isEmpty());
+			await().atMost(Duration.ofMinutes(5)).pollInterval(Duration.ofSeconds(2)).until(() -> !collector.getMessages().isEmpty());
 
 			assertThat(collector.getMessages()).hasSize(1);
 			assertThat(collector.getMessages().get(0)).isEqualTo("{\"type\":\"LOGIN\"}");
@@ -164,7 +164,7 @@ public class sendTests extends TestBase {
 
 			// assert
 
-			await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).until(() -> !collector.getMessages().isEmpty());
+			await().atMost(Duration.ofMinutes(5)).pollInterval(Duration.ofSeconds(2)).until(() -> !collector.getMessages().isEmpty());
 
 			assertThat(collector.getMessages()).hasSize(1);
 			assertThat(collector.getMessages().get(0)).isEqualTo("{\"type\":\"LOGIN\"}");

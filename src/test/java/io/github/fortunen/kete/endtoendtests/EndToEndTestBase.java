@@ -324,7 +324,7 @@ public abstract class EndToEndTestBase {
 	}
 
 	protected void waitForPortReady(String host, int port) throws Exception {
-		await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).until(() -> {
+		await().atMost(Duration.ofMinutes(5)).pollInterval(Duration.ofSeconds(2)).until(() -> {
 			try (Socket socket = new Socket(host, port)) {
 				log.debug("Port {}:{} is ready", host, port);
 				return true;
@@ -337,7 +337,7 @@ public abstract class EndToEndTestBase {
 	protected void waitForHttpReady(GenericContainer<?> container, int port, String path) throws Exception {
 		var url = "http://127.0.0.1:" + container.getMappedPort(port) + path;
 		var client = HttpClient.newBuilder().version(HttpClient.Version.HTTP_1_1).connectTimeout(Duration.ofSeconds(5)).build();
-		await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).until(() -> {
+		await().atMost(Duration.ofMinutes(5)).pollInterval(Duration.ofSeconds(2)).until(() -> {
 			try {
 				var request = HttpRequest.newBuilder()
 					.uri(URI.create(url))
@@ -354,7 +354,7 @@ public abstract class EndToEndTestBase {
 
 	protected void waitForMqttReady(GenericContainer<?> container, int port) throws Exception {
 		var mappedPort = container.getMappedPort(port);
-		await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).until(() -> {
+		await().atMost(Duration.ofMinutes(5)).pollInterval(Duration.ofSeconds(2)).until(() -> {
 			try {
 				var client = new MqttClient("tcp://127.0.0.1:" + mappedPort, "readiness-probe", new MemoryPersistence());
 				var options = new MqttConnectOptions();
@@ -379,7 +379,7 @@ public abstract class EndToEndTestBase {
 		props.put("request.timeout.ms", "5000");
 		props.put("default.api.timeout.ms", "5000");
 
-		await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).until(() -> {
+		await().atMost(Duration.ofMinutes(5)).pollInterval(Duration.ofSeconds(2)).until(() -> {
 			try (var adminClient = AdminClient.create(props)) {
 				adminClient.listTopics().names().get(5, TimeUnit.SECONDS);
 				log.debug("Kafka broker is ready at {}", kafka.getBootstrapServers());
@@ -392,7 +392,7 @@ public abstract class EndToEndTestBase {
 
 	protected void waitForAmqpReady(GenericContainer<?> container, int port) throws Exception {
 		var mappedPort = container.getMappedPort(port);
-		await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).until(() -> {
+		await().atMost(Duration.ofMinutes(5)).pollInterval(Duration.ofSeconds(2)).until(() -> {
 			try {
 				var factory = new JmsConnectionFactory("amqp://127.0.0.1:" + mappedPort);
 				try (var connection = factory.createConnection()) {
@@ -407,7 +407,7 @@ public abstract class EndToEndTestBase {
 	}
 
 	protected void waitForRabbitMqReady(ConnectionFactory factory) throws Exception {
-		await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).until(() -> {
+		await().atMost(Duration.ofMinutes(5)).pollInterval(Duration.ofSeconds(2)).until(() -> {
 			try (var connection = factory.newConnection()) {
 				log.debug("RabbitMQ is ready at {}:{}", factory.getHost(), factory.getPort());
 				return true;

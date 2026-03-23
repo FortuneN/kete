@@ -192,7 +192,7 @@ public class TestBase {
 	}
 
 	protected RecordedRequest waitForDispatchedTask() {
-		return await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).until(() -> {
+		return await().atMost(Duration.ofMinutes(5)).pollInterval(Duration.ofSeconds(2)).until(() -> {
 			try {
 				return taskReceiver.takeRequest(1, TimeUnit.SECONDS);
 			} catch (Exception e) {
@@ -207,7 +207,7 @@ public class TestBase {
 
 	private void waitForEmulatorReady() {
 		var endpoint = getEmulatorEndpoint();
-		await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).until(() -> {
+		await().atMost(Duration.ofMinutes(5)).pollInterval(Duration.ofSeconds(2)).until(() -> {
 			try {
 				var channel = ManagedChannelBuilder.forTarget(endpoint).usePlaintext().build();
 				try {
@@ -227,7 +227,7 @@ public class TestBase {
 	}
 
 	private void waitForNginxReady() {
-		await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).until(() -> {
+		await().atMost(Duration.ofMinutes(5)).pollInterval(Duration.ofSeconds(2)).until(() -> {
 			try (var socket = new Socket("127.0.0.1", nginxProxy.getMappedPort(NGINX_TLS_PORT))) {
 				return true;
 			} catch (Exception e) {

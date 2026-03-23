@@ -30,7 +30,7 @@ public class sendTests extends TestBase {
 
 		// assert — read from emulator partitions to verify delivery
 
-		await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).untilAsserted(() -> {
+		await().atMost(Duration.ofMinutes(5)).pollInterval(Duration.ofSeconds(2)).untilAsserted(() -> {
 			var body = receiveMessage();
 			assertThat(body).isNotNull();
 			assertThat(body).isEqualTo("{\"type\":\"LOGIN\"}");

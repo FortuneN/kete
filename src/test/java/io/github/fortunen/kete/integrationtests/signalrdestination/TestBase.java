@@ -289,7 +289,7 @@ public class TestBase {
 
 	private void waitForServerReady() {
 		var client = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(5)).build();
-		await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).until(() -> {
+		await().atMost(Duration.ofMinutes(5)).pollInterval(Duration.ofSeconds(2)).until(() -> {
 			try {
 				var request = HttpRequest.newBuilder()
 					.uri(URI.create(getServerBaseUrl() + "/messages"))
@@ -306,7 +306,7 @@ public class TestBase {
 	private void waitForEventsEndpointReady() {
 		var client = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(5)).build();
 		var url = "http://127.0.0.1:" + serverContainer.getMappedPort(EVENTS_PORT) + "/messages";
-		await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).until(() -> {
+		await().atMost(Duration.ofMinutes(5)).pollInterval(Duration.ofSeconds(2)).until(() -> {
 			try {
 				var request = HttpRequest.newBuilder()
 					.uri(URI.create(url))

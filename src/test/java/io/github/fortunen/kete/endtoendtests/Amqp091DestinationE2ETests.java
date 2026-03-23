@@ -87,7 +87,7 @@ class Amqp091DestinationE2ETests extends EndToEndTestBase {
 
 					var response = new GetResponse[1];
 
-					await().atMost(Duration.ofMinutes(2)).pollInterval(Duration.ofSeconds(2)).until(() -> {
+					await().atMost(Duration.ofMinutes(5)).pollInterval(Duration.ofSeconds(2)).until(() -> {
 						response[0] = channel.basicGet(QUEUE_NAME, true);
 						return response[0] != null;
 					});

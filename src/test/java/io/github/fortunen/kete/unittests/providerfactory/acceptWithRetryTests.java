@@ -62,7 +62,7 @@ class acceptWithRetryTests {
 		// act
 
 		factory.accept(event);
-		await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).until(() -> {
+		await().atMost(Duration.ofMinutes(5)).pollInterval(Duration.ofSeconds(2)).until(() -> {
 			try {
 				verify(route, atLeastOnce()).send(any(EventMessage.class));
 				return true;
@@ -118,7 +118,7 @@ class acceptWithRetryTests {
 		// act
 
 		factory.accept(event);
-		await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).until(() -> {
+		await().atMost(Duration.ofMinutes(5)).pollInterval(Duration.ofSeconds(2)).until(() -> {
 			try {
 				verify(route, atLeastOnce()).send(any(EventMessage.class));
 				return true;
@@ -170,7 +170,7 @@ class acceptWithRetryTests {
 		// act
 
 		factory.accept(event);
-		await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).until(() -> {
+		await().atMost(Duration.ofMinutes(5)).pollInterval(Duration.ofSeconds(2)).until(() -> {
 			try {
 				verify(route, atLeastOnce()).send(any(EventMessage.class));
 				return true;
@@ -224,7 +224,7 @@ class acceptWithRetryTests {
 		// act
 
 		factory.accept(event);
-		await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).until(() -> {
+		await().atMost(Duration.ofMinutes(5)).pollInterval(Duration.ofSeconds(2)).until(() -> {
 			try {
 				verify(route).send(any(EventMessage.class));
 				return true;

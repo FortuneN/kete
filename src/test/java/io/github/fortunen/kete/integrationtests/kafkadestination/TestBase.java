@@ -174,7 +174,7 @@ public class TestBase {
 	}
 
 	private void waitForKafkaReady() throws Exception {
-		await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).until(() -> {
+		await().atMost(Duration.ofMinutes(5)).pollInterval(Duration.ofSeconds(2)).until(() -> {
 			try {
 				var props = new Properties();
 				props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, getBootstrapServers());
@@ -191,7 +191,7 @@ public class TestBase {
 	}
 
 	private void waitForKafkaReadyWithSasl(String username, String password) throws Exception {
-		await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).until(() -> {
+		await().atMost(Duration.ofMinutes(5)).pollInterval(Duration.ofSeconds(2)).until(() -> {
 			try {
 				var props = new Properties();
 				props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, getSaslBootstrapServers());

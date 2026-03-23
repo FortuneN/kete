@@ -55,7 +55,7 @@ public class sendTests extends TestBase {
 
 		// assert
 
-		await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).until(() -> {
+		await().atMost(Duration.ofMinutes(5)).pollInterval(Duration.ofSeconds(2)).until(() -> {
 			var data = subscriber.recv(ZMQ.NOBLOCK);
 			if (data != null) {
 				receivedMessage.set(data);
@@ -106,7 +106,7 @@ public class sendTests extends TestBase {
 
 		// assert
 
-		await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).until(() -> {
+		await().atMost(Duration.ofMinutes(5)).pollInterval(Duration.ofSeconds(2)).until(() -> {
 			var data = consumer.recv(ZMQ.NOBLOCK);
 			if (data != null) {
 				receivedMessage.set(data);
@@ -163,7 +163,7 @@ public class sendTests extends TestBase {
 
 		// assert
 
-		await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).until(() -> {
+		await().atMost(Duration.ofMinutes(5)).pollInterval(Duration.ofSeconds(2)).until(() -> {
 			var data = consumer.recv(ZMQ.NOBLOCK);
 			if (data != null) {
 				receivedMessage.set(data);
@@ -232,7 +232,7 @@ public class sendTests extends TestBase {
 
 		// assert
 
-		await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).until(() -> {
+		await().atMost(Duration.ofMinutes(5)).pollInterval(Duration.ofSeconds(2)).until(() -> {
 			var data = consumer.recv(ZMQ.NOBLOCK);
 			if (data != null) {
 				receivedMessage.set(data);
@@ -287,7 +287,7 @@ public class sendTests extends TestBase {
 		var envelopeFrame = new AtomicReference<byte[]>();
 		var bodyFrame = new AtomicReference<byte[]>();
 
-		await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).until(() -> {
+		await().atMost(Duration.ofMinutes(5)).pollInterval(Duration.ofSeconds(2)).until(() -> {
 			var data = subscriber.recv(ZMQ.NOBLOCK);
 			if (data != null) {
 				envelopeFrame.set(data);

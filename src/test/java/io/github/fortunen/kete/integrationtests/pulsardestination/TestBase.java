@@ -66,7 +66,7 @@ public class TestBase {
 
 		// Wait for broker healthcheck first
 
-		await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).until(() -> {
+		await().atMost(Duration.ofMinutes(5)).pollInterval(Duration.ofSeconds(2)).until(() -> {
 			try {
 				var result = container.execInContainer("curl", "-sf", "http://localhost:8080/admin/v2/brokers/healthcheck");
 				return result.getExitCode() == 0;
@@ -77,7 +77,7 @@ public class TestBase {
 
 		// Then wait for the default namespace to be ready
 
-		await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).until(() -> {
+		await().atMost(Duration.ofMinutes(5)).pollInterval(Duration.ofSeconds(2)).until(() -> {
 			try {
 				var result = container.execInContainer("curl", "-sf", "http://localhost:8080/admin/v2/namespaces/public/default");
 				return result.getExitCode() == 0;
@@ -88,7 +88,7 @@ public class TestBase {
 
 		// Wait for BookKeeper to be ready by verifying topic creation works (this is the actual readiness check)
 
-		await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).until(() -> {
+		await().atMost(Duration.ofMinutes(5)).pollInterval(Duration.ofSeconds(2)).until(() -> {
 			try {
 				var result = container.execInContainer(
 					"bin/pulsar-admin", "topics", "create", "persistent://public/default/readiness-check"

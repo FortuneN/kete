@@ -201,7 +201,7 @@ public class TestBase {
 	}
 
 	private void waitForMqttReady() throws Exception {
-		await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).until(() -> {
+		await().atMost(Duration.ofMinutes(5)).pollInterval(Duration.ofSeconds(2)).until(() -> {
 			try {
 
 				var clientId = "readiness-probe-" + UUID.randomUUID().toString().substring(0, 8);

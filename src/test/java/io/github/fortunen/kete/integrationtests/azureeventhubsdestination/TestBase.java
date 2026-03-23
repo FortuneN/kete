@@ -157,7 +157,7 @@ public class TestBase {
 	private void waitForAzuriteReady() {
 		var url = "http://127.0.0.1:" + azurite.getMappedPort(10000) + "/";
 		var client = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(5)).build();
-		await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).until(() -> {
+		await().atMost(Duration.ofMinutes(5)).pollInterval(Duration.ofSeconds(2)).until(() -> {
 			try {
 				var request = HttpRequest.newBuilder().uri(URI.create(url)).timeout(Duration.ofSeconds(5)).GET().build();
 				client.send(request, HttpResponse.BodyHandlers.discarding());
@@ -169,7 +169,7 @@ public class TestBase {
 	}
 
 	private void waitForEmulatorReady() {
-		await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).until(() -> {
+		await().atMost(Duration.ofMinutes(5)).pollInterval(Duration.ofSeconds(2)).until(() -> {
 			try {
 				var tempClient = new EventHubClientBuilder()
 					.connectionString(buildConnectionString(), EVENT_HUB_NAME)

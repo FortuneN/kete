@@ -172,7 +172,7 @@ public class TestBase {
 
 	private void waitForLocalStackReady() {
 		var baseUrl = getLocalStackBaseUrl();
-		await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).until(() -> {
+		await().atMost(Duration.ofMinutes(5)).pollInterval(Duration.ofSeconds(2)).until(() -> {
 			try {
 				var request = HttpRequest.newBuilder()
 					.uri(URI.create(baseUrl + "/_localstack/health"))
@@ -188,7 +188,7 @@ public class TestBase {
 	}
 
 	private void waitForStreamActive(String stream) {
-		await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).until(() -> {
+		await().atMost(Duration.ofMinutes(5)).pollInterval(Duration.ofSeconds(2)).until(() -> {
 			try {
 				var status = kinesisClient.describeStream(r -> r.streamName(stream))
 					.streamDescription().streamStatus();

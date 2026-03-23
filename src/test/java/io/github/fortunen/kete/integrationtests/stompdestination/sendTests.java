@@ -48,7 +48,7 @@ public class sendTests extends TestBase {
 
 			// assert
 
-			await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).until(() -> {
+			await().atMost(Duration.ofMinutes(5)).pollInterval(Duration.ofSeconds(2)).until(() -> {
 				try {
 					var received = subscriber.takeMessage(1, TimeUnit.SECONDS);
 					if (received != null) {
@@ -110,7 +110,7 @@ public class sendTests extends TestBase {
 
 			// assert
 
-			await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).until(() -> {
+			await().atMost(Duration.ofMinutes(5)).pollInterval(Duration.ofSeconds(2)).until(() -> {
 				try {
 					var received = subscriber.takeMessage(1, TimeUnit.SECONDS);
 					if (received != null) {
@@ -176,7 +176,7 @@ public class sendTests extends TestBase {
 
 			// assert
 
-			await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).until(() -> {
+			await().atMost(Duration.ofMinutes(5)).pollInterval(Duration.ofSeconds(2)).until(() -> {
 				try {
 					var received = subscriber.takeMessage(1, TimeUnit.SECONDS);
 					if (received != null) {

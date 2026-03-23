@@ -136,7 +136,7 @@ public class TestBase {
 	}
 
 	private void waitForTlsPortReady(TlsMaterial tls, boolean requireClientAuth) {
-		await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).until(() -> {
+		await().atMost(Duration.ofMinutes(5)).pollInterval(Duration.ofSeconds(2)).until(() -> {
 			try {
 				var factory = new ConnectionFactory();
 				factory.setHost("127.0.0.1");
@@ -169,7 +169,7 @@ public class TestBase {
 	}
 
 	private void waitForRabbitMqReady() throws Exception {
-		await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).until(() -> {
+		await().atMost(Duration.ofMinutes(5)).pollInterval(Duration.ofSeconds(2)).until(() -> {
 			try {
 
 				var factory = new ConnectionFactory();

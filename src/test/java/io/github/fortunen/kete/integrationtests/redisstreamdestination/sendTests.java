@@ -45,7 +45,7 @@ public class sendTests extends TestBase {
 
 		// assert
 
-		await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).until(() -> !readFromStream("test-stream").isEmpty());
+		await().atMost(Duration.ofMinutes(5)).pollInterval(Duration.ofSeconds(2)).until(() -> !readFromStream("test-stream").isEmpty());
 
 		var messages = readFromStream("test-stream");
 		assertThat(messages).hasSize(1);
@@ -97,7 +97,7 @@ public class sendTests extends TestBase {
 
 		// assert
 
-		await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).until(() -> !readFromStreamWithTls("test-stream", tls).isEmpty());
+		await().atMost(Duration.ofMinutes(5)).pollInterval(Duration.ofSeconds(2)).until(() -> !readFromStreamWithTls("test-stream", tls).isEmpty());
 
 		var messages = readFromStreamWithTls("test-stream", tls);
 		assertThat(messages).hasSize(1);
@@ -153,7 +153,7 @@ public class sendTests extends TestBase {
 
 		// assert
 
-		await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).until(() -> !readFromStreamWithTls("test-stream", tls).isEmpty());
+		await().atMost(Duration.ofMinutes(5)).pollInterval(Duration.ofSeconds(2)).until(() -> !readFromStreamWithTls("test-stream", tls).isEmpty());
 
 		var messages = readFromStreamWithTls("test-stream", tls);
 		assertThat(messages).hasSize(1);

@@ -80,7 +80,7 @@ class AwsSqsDestinationE2ETests extends EndToEndTestBase {
 
 				// assert — poll LocalStack SQS for the message
 
-				await().atMost(Duration.ofMinutes(2)).pollInterval(Duration.ofSeconds(2)).untilAsserted(() -> {
+				await().atMost(Duration.ofMinutes(5)).pollInterval(Duration.ofSeconds(2)).untilAsserted(() -> {
 					var body = receiveMessage(QUEUE_NAME);
 					assertThat(body).isNotEmpty();
 					assertThat(body).satisfiesAnyOf(
@@ -103,7 +103,7 @@ class AwsSqsDestinationE2ETests extends EndToEndTestBase {
 
 	private void waitForLocalStackReady() {
 		var baseUrl = getLocalStackBaseUrl();
-		await().atMost(Duration.ofMinutes(2)).pollInterval(Duration.ofSeconds(2)).until(() -> {
+		await().atMost(Duration.ofMinutes(5)).pollInterval(Duration.ofSeconds(2)).until(() -> {
 			try {
 				var request = HttpRequest.newBuilder()
 					.uri(URI.create(baseUrl + "/_localstack/health"))

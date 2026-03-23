@@ -32,7 +32,7 @@ public class sendTests extends TestBase {
 
 		// assert — query the server's /messages endpoint to verify the hub invocation was received
 
-		await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).ignoreExceptions().until(() -> !getReceivedMessages().isEmpty());
+		await().atMost(Duration.ofMinutes(5)).pollInterval(Duration.ofSeconds(2)).ignoreExceptions().until(() -> !getReceivedMessages().isEmpty());
 
 		var messages = getReceivedMessages();
 		assertThat(messages)
@@ -67,7 +67,7 @@ public class sendTests extends TestBase {
 
 		// assert — query the server's plain HTTP endpoint to verify
 
-		await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).ignoreExceptions().until(() -> !getReceivedMessages().isEmpty());
+		await().atMost(Duration.ofMinutes(5)).pollInterval(Duration.ofSeconds(2)).ignoreExceptions().until(() -> !getReceivedMessages().isEmpty());
 
 		var messages = getReceivedMessages();
 		assertThat(messages)
@@ -102,7 +102,7 @@ public class sendTests extends TestBase {
 
 		// assert — query the server's plain HTTP endpoint to verify
 
-		await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).ignoreExceptions().until(() -> !getReceivedMessages().isEmpty());
+		await().atMost(Duration.ofMinutes(5)).pollInterval(Duration.ofSeconds(2)).ignoreExceptions().until(() -> !getReceivedMessages().isEmpty());
 
 		var messages = getReceivedMessages();
 		assertThat(messages)

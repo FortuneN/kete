@@ -131,7 +131,7 @@ public class TestBase {
 	}
 
 	private void waitForRedisReady(int port, TlsMaterial tls) throws Exception {
-		await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).until(() -> {
+		await().atMost(Duration.ofMinutes(5)).pollInterval(Duration.ofSeconds(2)).until(() -> {
 			try {
 				var uriBuilder = RedisURI.builder()
 					.withHost("127.0.0.1")

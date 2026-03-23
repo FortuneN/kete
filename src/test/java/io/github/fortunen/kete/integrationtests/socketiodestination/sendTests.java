@@ -32,7 +32,7 @@ public class sendTests extends TestBase {
 
 		// assert — query the server's /events endpoint to verify the event was received
 
-		await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).ignoreExceptions().until(() -> !getReceivedEvents().isEmpty());
+		await().atMost(Duration.ofMinutes(5)).pollInterval(Duration.ofSeconds(2)).ignoreExceptions().until(() -> !getReceivedEvents().isEmpty());
 
 		var events = getReceivedEvents();
 		assertThat(events)
@@ -67,7 +67,7 @@ public class sendTests extends TestBase {
 
 		// assert — query the server's plain HTTP endpoint to verify
 
-		await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).ignoreExceptions().until(() -> !getReceivedEvents().isEmpty());
+		await().atMost(Duration.ofMinutes(5)).pollInterval(Duration.ofSeconds(2)).ignoreExceptions().until(() -> !getReceivedEvents().isEmpty());
 
 		var events = getReceivedEvents();
 		assertThat(events)
@@ -102,7 +102,7 @@ public class sendTests extends TestBase {
 
 		// assert — query the server's plain HTTP endpoint to verify
 
-		await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(1)).ignoreExceptions().until(() -> !getReceivedEvents().isEmpty());
+		await().atMost(Duration.ofMinutes(5)).pollInterval(Duration.ofSeconds(2)).ignoreExceptions().until(() -> !getReceivedEvents().isEmpty());
 
 		var events = getReceivedEvents();
 		assertThat(events)

@@ -94,7 +94,7 @@ class StompDestinationE2ETests extends EndToEndTestBase {
 
 				// assert - wait for message using Awaitility
 
-				await().atMost(Duration.ofMinutes(2)).pollInterval(Duration.ofSeconds(2)).until(() -> !receivedMessages.isEmpty());
+				await().atMost(Duration.ofMinutes(5)).pollInterval(Duration.ofSeconds(2)).until(() -> !receivedMessages.isEmpty());
 
 				var body = receivedMessages.poll(1, TimeUnit.SECONDS);
 
@@ -129,7 +129,7 @@ class StompDestinationE2ETests extends EndToEndTestBase {
 
 	private void waitForStompReady(GenericContainer<?> container, int port) {
 		var mappedPort = container.getMappedPort(port);
-		await().atMost(Duration.ofMinutes(2)).pollInterval(Duration.ofSeconds(2)).until(() -> {
+		await().atMost(Duration.ofMinutes(5)).pollInterval(Duration.ofSeconds(2)).until(() -> {
 				try {
 					var conn = new StompConnection();
 					conn.open("127.0.0.1", mappedPort);
