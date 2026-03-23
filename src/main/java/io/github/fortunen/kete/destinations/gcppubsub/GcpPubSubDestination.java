@@ -8,7 +8,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.google.api.client.http.GenericUrl;
+import org.apache.http.HttpStatus;
+
+import com.google.api.client.http.HttpResponseException;
 import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.services.pubsub.Pubsub;
 import com.google.api.services.pubsub.model.PublishRequest;
@@ -67,10 +69,22 @@ public class GcpPubSubDestination extends Destination<GcpPubSubDestinationConfig
 
 		// verify connection
 
-		httpTransport
-			.createRequestFactory()
-			.buildGetRequest(new GenericUrl(config.getUrl()))
-			.execute();
+		try {
+
+			if (isTopicTemplated) {
+				pubsub.projects().topics().list("projects/" + config.getProject()).setPageSize(1).execute();
+			} else {
+				pubsub.projects().topics().get(publishTopicPrefix + topic).execute();
+			}
+
+		} catch (HttpResponseException exception) {
+
+			if (exception.getStatusCode() != HttpStatus.SC_FORBIDDEN) {
+				throw exception;
+			}
+
+			// connected but no read permission, no problem
+		}
 	}
 
 	@Override

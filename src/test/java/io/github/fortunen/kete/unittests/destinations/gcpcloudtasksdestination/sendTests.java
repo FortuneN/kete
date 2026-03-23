@@ -2,8 +2,10 @@ package io.github.fortunen.kete.unittests.destinations.gcpcloudtasksdestination;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Set;
@@ -17,6 +19,7 @@ import com.google.cloud.tasks.v2.CloudTasksGrpc;
 import com.google.cloud.tasks.v2.CreateTaskRequest;
 
 import io.github.fortunen.kete.Constants;
+import io.grpc.ClientInterceptor;
 import io.github.fortunen.kete.EventMessage;
 import io.github.fortunen.kete.destinations.gcpcloudtasks.GcpCloudTasksDestination;
 import io.github.fortunen.kete.destinations.gcpcloudtasks.GcpCloudTasksDestinationConfig;
@@ -42,6 +45,7 @@ public class sendTests {
 		// arrange
 
 		var stub = mock(CloudTasksGrpc.CloudTasksBlockingStub.class);
+		when(stub.withInterceptors(any(ClientInterceptor[].class))).thenReturn(stub);
 		destination.setConfig(mock(GcpCloudTasksDestinationConfig.class));
 		destination.setStub(stub);
 		destination.setQueue("my-queue");

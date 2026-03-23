@@ -5,11 +5,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-
 import java.util.concurrent.TimeUnit;
 
 import com.google.cloud.tasks.v2.CloudTasksGrpc;
 import com.google.cloud.tasks.v2.CreateTaskRequest;
+import com.google.cloud.tasks.v2.GetQueueRequest;
 import com.google.cloud.tasks.v2.HttpMethod;
 import com.google.cloud.tasks.v2.HttpRequest;
 import com.google.cloud.tasks.v2.ListQueuesRequest;
@@ -23,7 +23,11 @@ import io.github.fortunen.kete.EventMessage;
 import io.github.fortunen.kete.utils.TemplateUtils;
 import io.github.fortunen.kete.utils.ValidationUtils;
 import io.grpc.ManagedChannel;
+import io.grpc.Metadata;
+import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
 import io.grpc.auth.MoreCallCredentials;
+import io.grpc.stub.MetadataUtils;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -68,14 +72,32 @@ public class GcpCloudTasksDestination extends Destination<GcpCloudTasksDestinati
 
 		// verify connection
 
-		var parent = "projects/" + config.getProject() + "/locations/" + config.getLocation();
+		var deadlinedStub = stub.withDeadlineAfter(timeout.toSeconds(), TimeUnit.SECONDS);
 
-		var listRequest = ListQueuesRequest.newBuilder()
-			.setParent(parent)
-			.setPageSize(1)
-			.build();
+		try {
 
-		stub.withDeadlineAfter(timeout.toSeconds(), TimeUnit.SECONDS).listQueues(listRequest);
+			if (isQueueTemplated) {
+				var parent = "projects/" + config.getProject() + "/locations/" + config.getLocation();
+				var listRequest = ListQueuesRequest.newBuilder().setParent(parent).setPageSize(1).build();
+				var metadata = new Metadata();
+				metadata.put(Metadata.Key.of("x-goog-request-params", Metadata.ASCII_STRING_MARSHALLER), "parent=" + parent);
+				deadlinedStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).listQueues(listRequest);
+			} else {
+				var queueName = parentPathPrefix + queue;
+				var getRequest = GetQueueRequest.newBuilder().setName(queueName).build();
+				var metadata = new Metadata();
+				metadata.put(Metadata.Key.of("x-goog-request-params", Metadata.ASCII_STRING_MARSHALLER), "name=" + queueName);
+				deadlinedStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).getQueue(getRequest);
+			}
+
+		} catch (StatusRuntimeException exception) {
+
+			if (exception.getStatus().getCode() != Status.Code.PERMISSION_DENIED) {
+				throw exception;
+			}
+
+			// connected but no read permission, no problem
+		}
 	}
 
 	@Override
@@ -126,7 +148,9 @@ public class GcpCloudTasksDestination extends Destination<GcpCloudTasksDestinati
 			.setParent(parentPath)
 			.build();
 
-		stub.createTask(request);
+		var metadata = new Metadata();
+		metadata.put(Metadata.Key.of("x-goog-request-params", Metadata.ASCII_STRING_MARSHALLER), "parent=" + parentPath);
+		stub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).createTask(request);
 	}
 
 	@Override

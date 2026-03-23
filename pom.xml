@@ -923,6 +923,11 @@
 									<pattern>org.apache.commons.logging</pattern>
 									<shadedPattern>kete.org.apache.commons.logging</shadedPattern>
 								</relocation>
+								<!-- Commons Compress (avro transitive) -->
+								<relocation>
+									<pattern>org.apache.commons.compress</pattern>
+									<shadedPattern>kete.org.apache.commons.compress</shadedPattern>
+								</relocation>
 								<!-- Javassist (reflections transitive) -->
 								<relocation>
 									<pattern>javassist</pattern>
@@ -1069,6 +1074,11 @@
 									<pattern>com.microsoft.aad</pattern>
 									<shadedPattern>kete.com.microsoft.aad</shadedPattern>
 								</relocation>
+								<!-- JNA (azure-identity → msal4j-persistence-extension transitive) -->
+								<relocation>
+									<pattern>com.sun.jna</pattern>
+									<shadedPattern>kete.com.sun.jna</shadedPattern>
+								</relocation>
 								<!-- Google API Client / HTTP Client / Services -->
 								<relocation>
 									<pattern>com.google.api.client</pattern>
@@ -1077,6 +1087,16 @@
 								<relocation>
 									<pattern>com.google.api.services</pattern>
 									<shadedPattern>kete.com.google.api.services</shadedPattern>
+								</relocation>
+								<!-- Google API parent package (proto-google-common-protos has classes in com.google.api directly) -->
+								<relocation>
+									<pattern>com.google.api</pattern>
+									<shadedPattern>kete.com.google.api</shadedPattern>
+								</relocation>
+								<!-- Apache HttpComponents (google-http-client-apache-v2 transitive) -->
+								<relocation>
+									<pattern>org.apache.http</pattern>
+									<shadedPattern>kete.org.apache.http</shadedPattern>
 								</relocation>
 								<!-- Google Cloud Tasks gRPC stubs + protobuf types -->
 								<relocation>
@@ -1130,6 +1150,11 @@
 								<relocation>
 									<pattern>io.grpc</pattern>
 									<shadedPattern>kete.io.grpc</shadedPattern>
+								</relocation>
+								<!-- Animal Sniffer annotations (grpc transitive) -->
+								<relocation>
+									<pattern>org.codehaus.mojo.animal_sniffer</pattern>
+									<shadedPattern>kete.org.codehaus.mojo.animal_sniffer</shadedPattern>
 								</relocation>
 								<!-- Auto Value annotations (google-auth-library transitive) -->
 								<relocation>
