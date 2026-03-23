@@ -67,8 +67,3 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
-
-      - name: Sync release with develop
-        run: |
-          git fetch origin develop
-          git push --force origin origin/develop:refs/heads/release
