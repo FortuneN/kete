@@ -5,8 +5,8 @@ A comprehensive stress testing suite for KETE (Keycloak Events To Everywhere) th
 ## Overview
 
 This stress test simulates real-world high-traffic scenarios by:
-- Running **5 concurrent login repeaters** that continuously authenticate against Keycloak
-- Streaming all authentication events through **KETE to Redis Stream**
+- Running **20 concurrent login repeaters** that continuously authenticate against Keycloak
+- Streaming all authentication events through **KETE to Redis Pub/Sub**
 - Monitoring **throughput and metrics every minute** for 10 minutes
 - Calculating **messages per second** and tracking system health
 
@@ -14,8 +14,8 @@ This stress test simulates real-world high-traffic scenarios by:
 
 ### Infrastructure (`docker-compose.yml`)
 - **Keycloak**: Event source with KETE provider enabled (metrics enabled)
-- **Redis**: Destination system (Redis Stream)
-- **5x Login Repeaters**: Concurrent workers generating authentication events in tight loops
+- **Redis**: Destination system (Redis Pub/Sub)
+- **20x Login Repeaters**: Concurrent workers generating authentication events in tight loops
 
 ### Login Repeater (`login-repeater.sh`)
 - Continuously authenticates against Keycloak using `admin-cli`
@@ -26,7 +26,7 @@ This stress test simulates real-world high-traffic scenarios by:
 - Runs for 10 minutes (configurable)
 - Checks metrics every 60 seconds (configurable)
 - Tracks:
-  - Redis Stream message count
+  - Redis Pub/Sub message count
   - Messages processed since last check
   - Current throughput (msg/s)
   - Average throughput (msg/s)
@@ -107,13 +107,13 @@ The monitor displays real-time updates every minute:
 ═══════════════════════════════════════════════════════════════════════
 Duration       : 10 minutes
 Check Interval : 60 seconds
-Redis Stream   : keycloak-events-stress
+Redis Pub/Sub   : keycloak-events-stress
 Start Time     : 2026-02-01 18:30:00
 
 ───────────────────────────────────────────────────────────────────────
 Check #1 - 18:31:00 - Elapsed: 1.0m / Remaining: 9.0m
 
-  Redis Stream Messages     : 15234
+  Redis Pub/Sub Messages     : 15234
   Messages Since Last Check : 15234
   Current Throughput        : 254.23 msg/s
   Average Throughput        : 254.23 msg/s
@@ -234,7 +234,7 @@ Expected output:
 kete Route 'stress-test' initialized: destination=RedisStreamDestinationConfig
 ```
 
-### Check Redis Stream Manually
+### Check Redis Pub/Sub Manually
 
 ```bash
 docker exec stress-test-redis-1 redis-cli XLEN keycloak-events-stress
@@ -282,7 +282,7 @@ rm stress-test-results-*.csv
 
 - Workers may see connection errors during Keycloak startup (expected, they retry)
 - Very high loads (>1000 msg/s) may require Keycloak tuning
-- Redis Stream is used for easy verification; production systems may use Kafka/NATS
+- Redis Pub/Sub is used for easy verification; production systems may use Kafka/NATS
 - Test runs entirely on localhost; network latency not simulated
 
 ## License

@@ -155,7 +155,7 @@ Headers are included as fields in the Redis stream entry.
 | `cluster-nodes` | _(empty)_ | Comma-separated `host:port` pairs (required for `cluster` mode) | `node1:6379,node2:6379,node3:6379` |
 | `client-name` | `kete` | Client name for connection | `keycloak-events` |
 | `connection-timeout-seconds` | `10` | Connection timeout in seconds | `30` |
-| `command-timeout-seconds` | `60` | Command timeout in seconds | `120` |
+| `command-timeout-seconds` | `10` | Command timeout in seconds (always applied; bounds each send when a connection dies mid-command) | `30` |
 | `max-len` | `0` | Max stream length (0 = no limit) | `10000` |
 | `approximate-trimming` | `true` | Use `~` for efficient trimming | `false` |
 

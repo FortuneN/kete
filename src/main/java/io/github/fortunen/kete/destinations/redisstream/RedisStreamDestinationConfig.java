@@ -40,7 +40,7 @@ public class RedisStreamDestinationConfig extends DestinationConfig {
 	public static final String CLUSTER_NODES = "cluster-nodes";
 	public static final String SENTINEL_NODES = "sentinel-nodes";
 	public static final String SENTINEL_MASTER_ID = "sentinel-master-id";
-	public static final int DEFAULT_COMMAND_TIMEOUT_SECONDS = 60;
+	public static final int DEFAULT_COMMAND_TIMEOUT_SECONDS = 10;
 	public static final boolean DEFAULT_APPROXIMATE_TRIMMING = true;
 	public static final int DEFAULT_CONNECTION_TIMEOUT_SECONDS = 10;
 	public static final String APPROXIMATE_TRIMMING = "approximate-trimming";
@@ -162,9 +162,9 @@ public class RedisStreamDestinationConfig extends DestinationConfig {
 				if (configuration.containsKey(DATABASE)) {
 					uriBuilder.withDatabase(database);
 				}
-				if (configuration.containsKey(COMMAND_TIMEOUT_SECONDS)) {
-					uriBuilder.withTimeout(Duration.ofSeconds(commandTimeoutSeconds));
-				}
+				// always bound commands; the lettuce default (60s) turns a dead connection
+				// into a minute-long stall per send
+				uriBuilder.withTimeout(Duration.ofSeconds(commandTimeoutSeconds));
 				if (ValidationUtils.isNotBlank(password)) {
 					if (ValidationUtils.isNotBlank(username)) {
 						uriBuilder.withAuthentication(username, password.toCharArray());
@@ -213,9 +213,9 @@ public class RedisStreamDestinationConfig extends DestinationConfig {
 				if (configuration.containsKey(DATABASE)) {
 					uriBuilder.withDatabase(database);
 				}
-				if (configuration.containsKey(COMMAND_TIMEOUT_SECONDS)) {
-					uriBuilder.withTimeout(Duration.ofSeconds(commandTimeoutSeconds));
-				}
+				// always bound commands; the lettuce default (60s) turns a dead connection
+				// into a minute-long stall per send
+				uriBuilder.withTimeout(Duration.ofSeconds(commandTimeoutSeconds));
 				if (ValidationUtils.isNotBlank(password)) {
 					if (ValidationUtils.isNotBlank(username)) {
 						uriBuilder.withAuthentication(username, password.toCharArray());
@@ -255,7 +255,8 @@ public class RedisStreamDestinationConfig extends DestinationConfig {
 					var nodeUriBuilder = RedisURI.builder()
 						.withHost(nodeHost)
 						.withPort(nodePort)
-						.withClientName(clientName);
+						.withClientName(clientName)
+						.withTimeout(Duration.ofSeconds(commandTimeoutSeconds));
 
 					if (ValidationUtils.isNotBlank(password)) {
 						if (ValidationUtils.isNotBlank(username)) {
