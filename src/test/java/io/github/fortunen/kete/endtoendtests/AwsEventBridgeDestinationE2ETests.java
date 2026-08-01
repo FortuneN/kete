@@ -116,6 +116,12 @@ class AwsEventBridgeDestinationE2ETests extends EndToEndTestBase {
 	}
 
 	private void waitForLocalStackReady() {
+
+		// require two consecutive successful probes; the emulator can answer once while
+		// still warming up and then fail the next call
+
+		var consecutiveSuccesses = new java.util.concurrent.atomic.AtomicInteger();
+
 		var baseUrl = getLocalStackBaseUrl();
 		await().atMost(Duration.ofMinutes(5)).pollInterval(Duration.ofSeconds(2)).until(() -> {
 			try {
@@ -125,8 +131,13 @@ class AwsEventBridgeDestinationE2ETests extends EndToEndTestBase {
 					.GET()
 					.build();
 				var response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
-				return response.statusCode() == 200;
+				if (response.statusCode() != 200) {
+					consecutiveSuccesses.set(0);
+					return false;
+				}
+				return consecutiveSuccesses.incrementAndGet() >= 2;
 			} catch (Exception e) {
+				consecutiveSuccesses.set(0);
 				return false;
 			}
 		});

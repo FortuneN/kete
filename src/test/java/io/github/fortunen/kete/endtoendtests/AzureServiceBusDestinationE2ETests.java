@@ -21,8 +21,8 @@ class AzureServiceBusDestinationE2ETests extends EndToEndTestBase {
 	private static final int AMQP_PORT = 5672;
 	private static final String SA_PASSWORD = "Password123!";
 	private static final String QUEUE_NAME = "keycloak-events";
-	private static final String SQL_EDGE_IMAGE = "mcr.microsoft.com/azure-sql-edge:latest";
-	private static final String SERVICEBUS_EMULATOR_IMAGE = "mcr.microsoft.com/azure-messaging/servicebus-emulator:latest";
+	private static final String SQL_EDGE_IMAGE = "mcr.microsoft.com/azure-sql-edge:2.0.0";
+	private static final String SERVICEBUS_EMULATOR_IMAGE = "mcr.microsoft.com/azure-messaging/servicebus-emulator:2.0.1";
 	private static final String CONNECTION_STRING = "Endpoint=sb://servicebus-emulator;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=SAS_KEY_VALUE;UseDevelopmentEmulator=true;";
 
 	private static final String CONFIG_JSON = """

@@ -30,7 +30,7 @@ import okhttp3.mockwebserver.RecordedRequest;
 
 public class TestBase {
 
-	private static final String EMULATOR_IMAGE = "ghcr.io/aertje/cloud-tasks-emulator:latest";
+	private static final String EMULATOR_IMAGE = "ghcr.io/aertje/cloud-tasks-emulator:1.2.0";
 	private static final String NGINX_IMAGE = "nginx:1.27-alpine";
 	private static final int EMULATOR_PORT = 8123;
 	private static final int NGINX_TLS_PORT = 8443;
@@ -206,6 +206,12 @@ public class TestBase {
 	}
 
 	private void waitForEmulatorReady() {
+
+		// require two consecutive successful probes; the emulator can answer once while
+		// still warming up and then fail the next call
+
+		var consecutiveSuccesses = new java.util.concurrent.atomic.AtomicInteger();
+
 		var endpoint = getEmulatorEndpoint();
 		await().atMost(Duration.ofMinutes(5)).pollInterval(Duration.ofSeconds(2)).until(() -> {
 			try {
@@ -216,11 +222,12 @@ public class TestBase {
 						.setParent("projects/" + PROJECT + "/locations/" + LOCATION)
 						.build();
 					stub.listQueues(request);
-					return true;
+					return consecutiveSuccesses.incrementAndGet() >= 2;
 				} finally {
 					channel.shutdownNow();
 				}
 			} catch (Exception e) {
+				consecutiveSuccesses.set(0);
 				return false;
 			}
 		});
