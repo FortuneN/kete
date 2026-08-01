@@ -68,10 +68,30 @@ public class isHealthyTests extends TestBase {
 	private void startAuthNats(int hostPort, String password) {
 
 		authContainer = new GenericContainer<>(DockerImageName.parse("nats:2.10-alpine"))
-			.withCommand("--user", USERNAME, "--pass", password)
+			.withCommand("--user", USERNAME, "--pass", password, "--http_port", "8222")
+			.withExposedPorts(NATS_MONITORING_PORT)
 			.withCreateContainerCmdModifier(cmd -> cmd.getHostConfig()
-				.withPortBindings(new PortBinding(Ports.Binding.bindPort(hostPort), new ExposedPort(NATS_PORT))));
+				.withPortBindings(
+					new PortBinding(Ports.Binding.bindPort(hostPort), new ExposedPort(NATS_PORT)),
+					new PortBinding(Ports.Binding.empty(), new ExposedPort(NATS_MONITORING_PORT))));
 		authContainer.start();
+	}
+
+	private int getServerConnectionCount() throws Exception {
+
+		var url = "http://127.0.0.1:" + authContainer.getMappedPort(NATS_MONITORING_PORT) + "/connz";
+
+		try (var stream = java.net.URI.create(url).toURL().openStream()) {
+
+			var body = new String(stream.readAllBytes(), StandardCharsets.UTF_8);
+			var matcher = java.util.regex.Pattern.compile("\"num_connections\"\\s*:\\s*(\\d+)").matcher(body);
+
+			if (!matcher.find()) {
+				throw new IllegalStateException("num_connections not found in " + url + " response");
+			}
+
+			return Integer.parseInt(matcher.group(1));
+		}
 	}
 
 	private void stopAuthNats() {
@@ -183,6 +203,11 @@ public class isHealthyTests extends TestBase {
 			await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofMillis(500)).until(() -> restoredCollector.getMessages().size() == 1);
 
 			assertThat(restoredCollector.getMessages()).hasSize(1);
+
+			// no connection leaks: the broker sees exactly the restored subscriber plus the
+			// fresh destination's connection (the culled instance's connection is gone)
+
+			await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofMillis(500)).until(() -> getServerConnectionCount() == 2);
 		}
 	}
 }
