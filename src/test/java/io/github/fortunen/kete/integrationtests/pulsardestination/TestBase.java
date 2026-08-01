@@ -75,13 +75,21 @@ public class TestBase {
 			}
 		});
 
-		// Then wait for the default namespace to be ready
+		// Then wait for the default namespace to be ready; require two consecutive
+		// successful probes since the admin plane can answer once while still settling
+
+		var consecutiveSuccesses = new java.util.concurrent.atomic.AtomicInteger();
 
 		await().atMost(Duration.ofMinutes(5)).pollInterval(Duration.ofSeconds(2)).until(() -> {
 			try {
 				var result = container.execInContainer("curl", "-sf", "http://localhost:8080/admin/v2/namespaces/public/default");
-				return result.getExitCode() == 0;
+				if (result.getExitCode() != 0) {
+					consecutiveSuccesses.set(0);
+					return false;
+				}
+				return consecutiveSuccesses.incrementAndGet() >= 2;
 			} catch (Exception e) {
+				consecutiveSuccesses.set(0);
 				return false;
 			}
 		});

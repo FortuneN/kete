@@ -35,7 +35,7 @@ public class TestBase {
 
 	private static final int QUEUE_PORT = 10001;
 	protected static final String ACCOUNT_NAME = "devstoreaccount1";
-	private static final String AZURITE_IMAGE = "mcr.microsoft.com/azure-storage/azurite";
+	private static final String AZURITE_IMAGE = "mcr.microsoft.com/azure-storage/azurite:3.36.0";
 	protected static final String ACCOUNT_KEY = "Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==";
 
 	protected GenericContainer<?> azurite;

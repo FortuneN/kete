@@ -19,7 +19,7 @@ import static org.awaitility.Awaitility.await;
 
 class GcpCloudTasksDestinationE2ETests extends EndToEndTestBase {
 
-	private static final String EMULATOR_IMAGE = "ghcr.io/aertje/cloud-tasks-emulator:latest";
+	private static final String EMULATOR_IMAGE = "ghcr.io/aertje/cloud-tasks-emulator:1.2.0";
 	private static final int EMULATOR_PORT = 8123;
 	private static final String PROJECT = "test-project";
 	private static final String LOCATION = "us-central1";

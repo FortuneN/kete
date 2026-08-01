@@ -22,8 +22,8 @@ import io.github.fortunen.kete.destinations.azureservicebus.AzureServiceBusDesti
 
 public class TestBase {
 
-	private static final String SQL_EDGE_IMAGE = "mcr.microsoft.com/azure-sql-edge:latest";
-	private static final String SERVICEBUS_EMULATOR_IMAGE = "mcr.microsoft.com/azure-messaging/servicebus-emulator:latest";
+	private static final String SQL_EDGE_IMAGE = "mcr.microsoft.com/azure-sql-edge:2.0.0";
+	private static final String SERVICEBUS_EMULATOR_IMAGE = "mcr.microsoft.com/azure-messaging/servicebus-emulator:2.0.1";
 	private static final int AMQP_PORT = 5672;
 	private static final String SA_PASSWORD = "Password123!";
 	protected static final String QUEUE_NAME = "keycloak-events";
@@ -149,6 +149,12 @@ public class TestBase {
 	}
 
 	private void waitForEmulatorReady() {
+
+		// the emulator can answer a call once while still warming up and then fail the
+		// next one; require two consecutive successful probes before proceeding
+
+		var consecutiveSuccesses = new java.util.concurrent.atomic.AtomicInteger();
+
 		await().atMost(Duration.ofMinutes(5)).pollInterval(Duration.ofSeconds(2)).until(() -> {
 			try {
 				var tempClient = new ServiceBusClientBuilder()
@@ -158,8 +164,9 @@ public class TestBase {
 					.buildClient();
 				tempClient.peekMessage();
 				tempClient.close();
-				return true;
+				return consecutiveSuccesses.incrementAndGet() >= 2;
 			} catch (Exception e) {
+				consecutiveSuccesses.set(0);
 				return false;
 			}
 		});

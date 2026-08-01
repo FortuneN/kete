@@ -98,7 +98,7 @@ public class TestBase {
 
 		var tlsAuthClients = requireClientCert ? "yes" : "no";
 
-		container = new GenericContainer<>(DockerImageName.parse("bitnami/redis:latest"))
+		container = new GenericContainer<>(DockerImageName.parse("bitnami/redis@sha256:08863c2c3f4e051fb6139b38fa223e9c13be5033326a59bead182860d899bf98") /* redis 8.8.1; bitnami publishes no versioned tags */)
 			.withExposedPorts(REDIS_PORT)
 			.withEnv("ALLOW_EMPTY_PASSWORD", "yes")
 			.withEnv("REDIS_TLS_ENABLED", "yes")

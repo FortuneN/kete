@@ -28,8 +28,8 @@ import io.github.fortunen.kete.destinations.azureeventhubs.AzureEventHubsDestina
 
 public class TestBase {
 
-	private static final String AZURITE_IMAGE = "mcr.microsoft.com/azure-storage/azurite";
-	private static final String EVENTHUBS_EMULATOR_IMAGE = "mcr.microsoft.com/azure-messaging/eventhubs-emulator:latest";
+	private static final String AZURITE_IMAGE = "mcr.microsoft.com/azure-storage/azurite:3.36.0";
+	private static final String EVENTHUBS_EMULATOR_IMAGE = "mcr.microsoft.com/azure-messaging/eventhubs-emulator:2.2.1";
 	private static final int AMQP_PORT = 5672;
 	protected static final String EVENT_HUB_NAME = "keycloak-events";
 	protected static final String CONSUMER_GROUP = "$Default";
@@ -169,6 +169,12 @@ public class TestBase {
 	}
 
 	private void waitForEmulatorReady() {
+
+		// the emulator can answer a management call once while still warming up and then
+		// fail the next one; require two consecutive successful probes before proceeding
+
+		var consecutiveSuccesses = new java.util.concurrent.atomic.AtomicInteger();
+
 		await().atMost(Duration.ofMinutes(5)).pollInterval(Duration.ofSeconds(2)).until(() -> {
 			try {
 				var tempClient = new EventHubClientBuilder()
@@ -177,8 +183,9 @@ public class TestBase {
 					.buildConsumerClient();
 				tempClient.getPartitionIds();
 				tempClient.close();
-				return true;
+				return consecutiveSuccesses.incrementAndGet() >= 2;
 			} catch (Exception e) {
+				consecutiveSuccesses.set(0);
 				return false;
 			}
 		});

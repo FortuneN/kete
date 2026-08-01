@@ -100,6 +100,11 @@ class GcpPubSubDestinationE2ETests extends EndToEndTestBase {
 
 	private void waitForEmulatorReady(String emulatorUrl) {
 
+		// require two consecutive successful probes; the emulator can answer once while
+		// still warming up and then fail the next call
+
+		var consecutiveSuccesses = new java.util.concurrent.atomic.AtomicInteger();
+
 		var client = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(5)).build();
 
 		await().atMost(Duration.ofMinutes(5)).pollInterval(Duration.ofSeconds(2)).until(() -> {
@@ -112,9 +117,10 @@ class GcpPubSubDestinationE2ETests extends EndToEndTestBase {
 					.build();
 
 				client.send(request, HttpResponse.BodyHandlers.discarding());
-				return true;
+				return consecutiveSuccesses.incrementAndGet() >= 2;
 
 			} catch (Exception e) {
+				consecutiveSuccesses.set(0);
 				return false;
 			}
 		});
