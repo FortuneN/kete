@@ -3,7 +3,6 @@ package io.github.fortunen.kete.integrationtests.mqtt3destination;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
-import java.net.ServerSocket;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.HashMap;
@@ -19,10 +18,6 @@ import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.utility.DockerImageName;
 
-import com.github.dockerjava.api.model.ExposedPort;
-import com.github.dockerjava.api.model.PortBinding;
-import com.github.dockerjava.api.model.Ports;
-
 import io.github.fortunen.kete.Constants;
 import io.github.fortunen.kete.Destination;
 import io.github.fortunen.kete.DestinationPooledObjectFactory;
@@ -34,6 +29,10 @@ import io.github.fortunen.kete.utils.DestinationUtils;
  * unhealthy (so the pool stops serving it), and once the broker returns publishing
  * must resume without restarting anything - either via the client's own reconnect
  * or via the pool culling the dead instance and creating a fresh one.
+ *
+ * The outage is induced with docker pause/unpause: the container and its mapped
+ * host port stay alive while all processing freezes, so clients detect a dead
+ * connection and can later reconnect to the same address.
  */
 public class isHealthyTests {
 
@@ -56,30 +55,31 @@ public class isHealthyTests {
 		}
 	}
 
-	private static int findFreePort() throws Exception {
-		try (var socket = new ServerSocket(0)) {
-			return socket.getLocalPort();
-		}
-	}
-
 	@SuppressWarnings("resource")
-	private void startBroker(int hostPort) {
+	private void startBroker() {
 
 		broker = new GenericContainer<>(DockerImageName.parse("hivemq/hivemq-ce:2024.3"))
 			.withEnv("JAVA_OPTS", "-Xms256m -Xmx1g")
 			.withLogConsumer(frame -> System.out.print("[HIVEMQ] " + frame.getUtf8String()))
-			.waitingFor(Wait.forLogMessage(".*Started HiveMQ in.*", 1).withStartupTimeout(Duration.ofMinutes(5)))
-			.withCreateContainerCmdModifier(cmd -> cmd.getHostConfig()
-				.withPortBindings(new PortBinding(Ports.Binding.bindPort(hostPort), new ExposedPort(BROKER_PORT))));
+			.withExposedPorts(BROKER_PORT)
+			.waitingFor(Wait.forLogMessage(".*Started HiveMQ in.*", 1).withStartupTimeout(Duration.ofMinutes(5)));
 		broker.start();
 	}
 
-	private GenericObjectPool<Destination<?>> createPool(int hostPort) {
+	private void pauseBrokerProcess() {
+		broker.getDockerClient().pauseContainerCmd(broker.getContainerId()).exec();
+	}
+
+	private void resumeBrokerProcess() {
+		broker.getDockerClient().unpauseContainerCmd(broker.getContainerId()).exec();
+	}
+
+	private GenericObjectPool<Destination<?>> createPool(int mappedPort) {
 
 		var map = new HashMap<String, Object>();
 		map.put("kind", "mqtt-3");
 		map.put("host", "127.0.0.1");
-		map.put("port", String.valueOf(hostPort));
+		map.put("port", String.valueOf(mappedPort));
 		map.put("topic", "test-topic");
 
 		var destinationConfig = DestinationUtils.createDestinationConfig(new MapConfiguration(map));
@@ -132,28 +132,30 @@ public class isHealthyTests {
 	@Test
 	public void shouldReportUnhealthyDuringBrokerOutageAndResumeAfterRestart() throws Exception {
 
-		// arrange: broker on a fixed host port so clients can reconnect after restart
+		// arrange
 
-		var hostPort = findFreePort();
+		startBroker();
 
-		startBroker(hostPort);
-		pool = createPool(hostPort);
+		var mappedPort = broker.getMappedPort(BROKER_PORT);
+
+		pool = createPool(mappedPort);
 
 		var first = awaitSuccessfulSend("evt-baseline", Duration.ofMinutes(3));
 
 		assertThat(first.isHealthy()).isTrue();
 
-		// act: kill the broker; the idle instance must report unhealthy
+		// act: freeze the broker (docker pause keeps the container and its port mapping
+		// alive but stops all processing); the client's keepalive declares the connection
+		// dead and the idle instance must report unhealthy
 
-		broker.stop();
-		broker = null;
+		pauseBrokerProcess();
 
-		await().atMost(Duration.ofMinutes(2)).pollInterval(Duration.ofSeconds(1)).until(() -> !first.isHealthy());
+		await().atMost(Duration.ofMinutes(3)).pollInterval(Duration.ofSeconds(1)).until(() -> !first.isHealthy());
 
-		// restore the broker on the same port; publishing must resume (client reconnect
-		// or pool cull-and-recreate - either recovery path satisfies the invariant)
+		// unfreeze; same container, same mapped port - publishing must resume via
+		// client reconnect or pool cull-and-recreate, either path counts
 
-		startBroker(hostPort);
+		resumeBrokerProcess();
 
 		awaitSuccessfulSend("evt-resumed", Duration.ofMinutes(3));
 	}
