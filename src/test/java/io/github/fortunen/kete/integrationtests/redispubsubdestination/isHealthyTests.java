@@ -99,8 +99,10 @@ public class isHealthyTests {
 
 		var attempt = new AtomicInteger();
 		var lastUsed = new AtomicReference<Destination<?>>();
+		var lastError = new AtomicReference<Exception>();
 
-		await().atMost(timeout).pollInterval(Duration.ofSeconds(2)).until(() -> {
+		try {
+			await().atMost(timeout).pollInterval(Duration.ofSeconds(2)).until(() -> {
 			Destination<?> destination = null;
 			try {
 				destination = pool.borrowObject();
@@ -109,12 +111,16 @@ public class isHealthyTests {
 				lastUsed.set(destination);
 				return true;
 			} catch (Exception exception) {
+				lastError.set(exception);
 				if (destination != null) {
 					try { pool.invalidateObject(destination); } catch (Exception ignored) { }
 				}
 				return false;
 			}
-		});
+			});
+		} catch (org.awaitility.core.ConditionTimeoutException timeoutException) {
+			throw new AssertionError("no successful send within " + timeout + "; last error: " + lastError.get(), lastError.get());
+		}
 
 		return lastUsed.get();
 	}

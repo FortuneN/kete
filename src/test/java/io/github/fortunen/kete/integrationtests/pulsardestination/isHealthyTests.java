@@ -67,6 +67,8 @@ public class isHealthyTests {
 
 		broker = new GenericContainer<>(DockerImageName.parse("apachepulsar/pulsar:3.3.2"))
 			.withCommand("bin/pulsar", "standalone", "--no-functions-worker")
+			.withEnv("PULSAR_MEM", "-Xms512m -Xmx1g -XX:MaxDirectMemorySize=512m")
+			.withLogConsumer(frame -> System.out.print("[PULSAR] " + frame.getUtf8String()))
 			.waitingFor(Wait.forLogMessage(".*messaging service is ready.*", 1).withStartupTimeout(Duration.ofMinutes(8)))
 			.withCreateContainerCmdModifier(cmd -> cmd.getHostConfig()
 				.withPortBindings(new PortBinding(Ports.Binding.bindPort(hostPort), new ExposedPort(BROKER_PORT))));
@@ -101,8 +103,10 @@ public class isHealthyTests {
 
 		var attempt = new AtomicInteger();
 		var lastUsed = new AtomicReference<Destination<?>>();
+		var lastError = new AtomicReference<Exception>();
 
-		await().atMost(timeout).pollInterval(Duration.ofSeconds(2)).until(() -> {
+		try {
+			await().atMost(timeout).pollInterval(Duration.ofSeconds(2)).until(() -> {
 			Destination<?> destination = null;
 			try {
 				destination = pool.borrowObject();
@@ -111,12 +115,16 @@ public class isHealthyTests {
 				lastUsed.set(destination);
 				return true;
 			} catch (Exception exception) {
+				lastError.set(exception);
 				if (destination != null) {
 					try { pool.invalidateObject(destination); } catch (Exception ignored) { }
 				}
 				return false;
 			}
-		});
+			});
+		} catch (org.awaitility.core.ConditionTimeoutException timeoutException) {
+			throw new AssertionError("no successful send within " + timeout + "; last error: " + lastError.get(), lastError.get());
+		}
 
 		return lastUsed.get();
 	}
