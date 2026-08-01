@@ -80,7 +80,7 @@ public class initializePoolPropertiesTests {
 
 		// assert
 
-		assertThat(destinationConfig.getPoolMaxWaitSeconds()).isEqualTo(-1);
+		assertThat(destinationConfig.getPoolMaxWaitSeconds()).isEqualTo(30);
 	}
 
 	@Test

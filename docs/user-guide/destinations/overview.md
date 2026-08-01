@@ -38,7 +38,7 @@ KETE uses [Apache Commons Pool 2](https://commons.apache.org/proper/commons-pool
 | `destination.pool.min-idle` | `1` | Minimum number of idle connections maintained in the pool |
 | `destination.pool.max-idle` | `10` | Maximum number of idle connections allowed in the pool |
 | `destination.pool.max-total` | `20` | Maximum total connections (active + idle) allowed in the pool |
-| `destination.pool.max-wait-seconds` | `-1` | Maximum seconds to wait when borrowing from an exhausted pool (`-1` = wait indefinitely) |
+| `destination.pool.max-wait-seconds` | `30` | Maximum seconds to wait when borrowing from an exhausted pool (`-1` = wait indefinitely; the finite default converts overload into visible, retryable failures) |
 | `destination.pool.block-when-exhausted` | `true` | Whether to block when the pool is exhausted (if false, throws exception) |
 
 #### Advanced Properties

@@ -49,7 +49,7 @@ public abstract class DestinationConfig {
 	public static final int DEFAULT_POOL_MAX_TOTAL = 20;
 	public static final boolean DEFAULT_POOL_LIFO = true;
 	public static final boolean DEFAULT_POOL_FAIRNESS = false;
-	public static final long DEFAULT_POOL_MAX_WAIT_SECONDS = -1;
+	public static final long DEFAULT_POOL_MAX_WAIT_SECONDS = 30;
 	public static final boolean DEFAULT_POOL_TEST_ON_CREATE = true;
 	public static final boolean DEFAULT_POOL_TEST_ON_BORROW = true;
 	public static final boolean DEFAULT_POOL_TEST_ON_RETURN = true;

@@ -12,13 +12,18 @@ Write-Host "Waiting ${StartupWaitSeconds}s for Keycloak startup...`n" -Foregroun
 
 Start-Sleep -Seconds $StartupWaitSeconds
 
-# Verify route is active
-$route = try {
-    (Invoke-WebRequest -Uri http://localhost:9000/metrics -UseBasicParsing -TimeoutSec 5).Content |
-        Select-String 'kete_routes_active\s+([\d.]+)' |
-        ForEach-Object { $_.Matches.Groups[1].Value }
-} catch {
-    "N/A"
+# Verify route is active (retry - metrics appear once routes initialize)
+$route = "N/A"
+for ($i = 0; $i -lt 24; $i++) {
+    $route = try {
+        (Invoke-WebRequest -Uri http://localhost:9000/metrics -UseBasicParsing -TimeoutSec 5).Content |
+            Select-String 'kete_routes_active\s+([\d.]+)' |
+            ForEach-Object { $_.Matches.Groups[1].Value }
+    } catch {
+        "N/A"
+    }
+    if ($route -eq "1.0") { break }
+    Start-Sleep -Seconds 5
 }
 
 Write-Host "Route active: $route" -ForegroundColor $(if ($route -eq "1.0") { "Green" } else { "Red" })

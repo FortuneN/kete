@@ -126,7 +126,7 @@ Available variables: `${realmLowerCase}`, `${realmUpperCase}`, `${realmKebabCase
 | `cluster-nodes` | _(empty)_ | Comma-separated `host:port` pairs (required for `cluster` mode) | `node1:6379,node2:6379,node3:6379` |
 | `client-name` | `kete` | Client name for connection | `keycloak-events` |
 | `connection-timeout-seconds` | `10` | Connection timeout in seconds | `30` |
-| `command-timeout-seconds` | `60` | Command timeout in seconds | `120` |
+| `command-timeout-seconds` | `10` | Command timeout in seconds (always applied; bounds each send when a connection dies mid-command) | `30` |
 
 ### TLS Properties
 

@@ -655,6 +655,7 @@ public class initializeTests {
 		assertThat(config.getRedisUri().getHost()).isEqualTo("localhost");
 		assertThat(config.getRedisUri().getPort()).isEqualTo(6379);
 		assertThat(config.getRedisUri().getDatabase()).isEqualTo(0);
+		assertThat(config.getRedisUri().getTimeout()).isEqualTo(java.time.Duration.ofSeconds(10));
 	}
 
 	@Test
