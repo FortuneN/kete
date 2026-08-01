@@ -75,6 +75,11 @@ public class HttpDestination extends Destination<HttpDestinationConfig> {
 	}
 
 	@Override
+	public boolean isHealthy() {
+		return true; // stateless HTTP client; nothing to probe
+	}
+
+	@Override
 	@SneakyThrows
 	public void doSend(EventMessage message) {
 

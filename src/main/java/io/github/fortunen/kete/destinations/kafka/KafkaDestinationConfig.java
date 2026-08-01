@@ -82,6 +82,15 @@ public class KafkaDestinationConfig extends DestinationConfig {
 
 		// defaults
 
+		// pin the reliable delivery pair explicitly so a future kafka-clients default change
+		// cannot silently weaken it; only when acks is not user-set, because an explicit
+		// enable.idempotence=true combined with a user-chosen acks=1 would fail construction
+
+		if (!producerConfiguration.containsKey(ProducerConfig.ACKS_CONFIG)) {
+			producerConfiguration.put(ProducerConfig.ACKS_CONFIG, "all");
+			producerConfiguration.put(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG, "true");
+		}
+
 		producerConfiguration.putIfAbsent(ProducerConfig.LINGER_MS_CONFIG, DEFAULT_LINGER_MS);
 		producerConfiguration.putIfAbsent(ProducerConfig.BATCH_SIZE_CONFIG, DEFAULT_BATCH_SIZE);
 		producerConfiguration.putIfAbsent(ProducerConfig.COMPRESSION_TYPE_CONFIG, DEFAULT_COMPRESSION_TYPE);

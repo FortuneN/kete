@@ -4,6 +4,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 
 import com.microsoft.signalr.HubConnection;
+import com.microsoft.signalr.HubConnectionState;
 
 import io.github.fortunen.kete.Component;
 import io.github.fortunen.kete.Destination;
@@ -40,6 +41,15 @@ public class SignalRDestination extends Destination<SignalRDestinationConfig> {
 		// verify connection
 
 		hubConnection.start().blockingAwait(timeoutSeconds, TimeUnit.SECONDS);
+	}
+
+	@Override
+	public boolean isHealthy() {
+
+		// getConnectionState() is an unlocked plain field read (not volatile in signalr 10.0.2; a
+		// stale read is benign); the java client has no auto-reconnect, so DISCONNECTED is terminal
+
+		return ValidationUtils.isNotNull(hubConnection) && hubConnection.getConnectionState() == HubConnectionState.CONNECTED;
 	}
 
 	@Override

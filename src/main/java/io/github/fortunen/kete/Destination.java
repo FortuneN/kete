@@ -16,6 +16,11 @@ public abstract class Destination<TConfig extends DestinationConfig> implements 
 
 	protected abstract void doInitialize();
 
+	// cheap, non-blocking health probe used by the destination pool's test-on-* checks;
+	// implementations must only read client state (no network I/O)
+
+	public abstract boolean isHealthy();
+
 	protected abstract void doSend(EventMessage message);
 
 	public final void initialize() {

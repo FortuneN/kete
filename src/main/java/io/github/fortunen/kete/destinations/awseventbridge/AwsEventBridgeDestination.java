@@ -48,6 +48,11 @@ public class AwsEventBridgeDestination extends Destination<AwsEventBridgeDestina
 	}
 
 	@Override
+	public boolean isHealthy() {
+		return true; // stateless HTTP client; nothing to probe
+	}
+
+	@Override
 	public void doSend(EventMessage message) {
 
 		ValidationUtils.requireNonNull(message, "message is required");

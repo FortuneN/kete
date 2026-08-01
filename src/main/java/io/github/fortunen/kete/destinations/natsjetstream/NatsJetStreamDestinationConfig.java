@@ -91,12 +91,16 @@ public class NatsJetStreamDestinationConfig extends DestinationConfig {
 
 		// natsOptions
 
+		// reconnectBufferSize(0): publishes during a reconnect fail fast instead of silently
+		// buffering into the client (route retry and pool replacement handle the failure)
+
 		var builder = new Options.Builder()
 			.servers(servers)
 			.connectionTimeout(Duration.ofSeconds(connectionTimeoutSeconds))
 			.pingInterval(Duration.ofSeconds(pingIntervalSeconds))
 			.connectionName(connectionName)
-			.maxReconnects(-1);
+			.maxReconnects(-1)
+			.reconnectBufferSize(0);
 
 		if (tls.isEnabled()) {
 			builder.sslContext(tls.isVerifyHostname() ? tls.getHostnameVerifyingSSLContext() : tls.getKeyStoreAndTrustStoreSSLContext());

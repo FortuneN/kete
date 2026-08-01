@@ -83,6 +83,18 @@ public class WebSocketDestination extends Destination<WebSocketDestinationConfig
 	}
 
 	@Override
+	public boolean isHealthy() {
+
+		// templated mode creates per-url clients on demand in doSend
+
+		if (isUrlTemplated) {
+			return true;
+		}
+
+		return ValidationUtils.isNotNull(webSocketClient) && webSocketClient.isOpen();
+	}
+
+	@Override
 	@SneakyThrows
 	public void doSend(EventMessage message) {
 

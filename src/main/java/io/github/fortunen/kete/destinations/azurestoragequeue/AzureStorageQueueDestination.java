@@ -65,6 +65,11 @@ public class AzureStorageQueueDestination extends Destination<AzureStorageQueueD
 	}
 
 	@Override
+	public boolean isHealthy() {
+		return true; // stateless HTTP client; nothing to probe
+	}
+
+	@Override
 	@SneakyThrows
 	public void doSend(EventMessage message) {
 

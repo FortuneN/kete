@@ -88,6 +88,11 @@ public class GcpPubSubDestination extends Destination<GcpPubSubDestinationConfig
 	}
 
 	@Override
+	public boolean isHealthy() {
+		return true; // stateless HTTP client; nothing to probe
+	}
+
+	@Override
 	@SneakyThrows
 	public void doSend(EventMessage message) {
 

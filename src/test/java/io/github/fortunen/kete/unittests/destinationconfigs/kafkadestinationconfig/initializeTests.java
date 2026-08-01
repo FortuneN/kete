@@ -252,7 +252,31 @@ public class initializeTests {
 
 		// assert
 
-		assertThat(config.getProducerConfiguration().containsKey(ProducerConfig.ACKS_CONFIG)).isFalse();
+		assertThat(config.getProducerConfiguration().getProperty(ProducerConfig.ACKS_CONFIG)).isEqualTo("all");
+		assertThat(config.getProducerConfiguration().getProperty(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG)).isEqualTo("true");
+	}
+
+	@Test
+	public void shouldNotPinIdempotenceWhenAcksIsUserSet() {
+
+		// arrange
+
+		var config = new KafkaDestinationConfig();
+		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "kafka",
+			"bootstrap.servers", "localhost:9092",
+			"topic", "test-topic",
+			"acks", "1"
+		)));
+
+		// act
+
+		config.initialize();
+
+		// assert
+
+		assertThat(config.getProducerConfiguration().getProperty(ProducerConfig.ACKS_CONFIG)).isEqualTo("1");
+		assertThat(config.getProducerConfiguration().containsKey(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG)).isFalse();
 	}
 
 	@Test
@@ -336,7 +360,7 @@ public class initializeTests {
 
 		// assert
 
-		assertThat(config.getProducerConfiguration().containsKey(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG)).isFalse();
+		assertThat(config.getProducerConfiguration().getProperty(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG)).isEqualTo("true");
 	}
 
 	@Test

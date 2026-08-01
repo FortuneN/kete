@@ -95,6 +95,11 @@ public class GrpcDestination extends Destination<GrpcDestinationConfig> {
 	}
 
 	@Override
+	public boolean isHealthy() {
+		return true; // gRPC channels re-establish transports on demand; failures surface on send
+	}
+
+	@Override
 	@SneakyThrows
 	public void doSend(EventMessage message) {
 

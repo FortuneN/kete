@@ -68,6 +68,11 @@ public class KafkaDestination extends Destination<KafkaDestinationConfig> {
 	}
 
 	@Override
+	public boolean isHealthy() {
+		return true; // kafka-clients has no non-blocking health API (partitionsFor/flush block; metrics' connection-count legitimately reads 0 on idle-reaped connections); the producer self-heals and failures surface on send
+	}
+
+	@Override
 	@SneakyThrows
 	public void doSend(EventMessage message) {
 

@@ -59,6 +59,11 @@ public class StompDestination extends Destination<StompDestinationConfig> {
 	}
 
 	@Override
+	public boolean isHealthy() {
+		return true; // StompConnection is a raw socket wrapper with no remote-state signal (Socket.isConnected latches true after a remote close); failed sends cull via the pool's invalidate path
+	}
+
+	@Override
 	@SneakyThrows
 	public void doSend(EventMessage message) {
 

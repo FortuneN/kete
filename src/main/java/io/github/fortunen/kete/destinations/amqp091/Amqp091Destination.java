@@ -31,6 +31,8 @@ public class Amqp091Destination extends Destination<Amqp091DestinationConfig> {
 	private String routingKey;
 	private Connection connection;
 	private boolean hasPriority;
+	private boolean publisherConfirms;
+	private long confirmTimeoutMillis;
 	private String timeToLiveExpiration;
 	private boolean isExchangeTemplated;
 	private boolean isRoutingKeyTemplated;
@@ -51,11 +53,22 @@ public class Amqp091Destination extends Destination<Amqp091DestinationConfig> {
 		isExchangeTemplated = config.isExchangeTemplated();
 		isRoutingKeyTemplated = config.isRoutingKeyTemplated();
 		timeToLiveExpiration = config.getTimeToLiveExpiration();
+		publisherConfirms = config.isPublisherConfirms();
+		confirmTimeoutMillis = config.getConfirmTimeoutSeconds() * 1000L;
 
 		// verify connection
 
 		connection = config.getConnectionFactory().newConnection();
 		channel = connection.createChannel();
+
+		if (publisherConfirms) {
+			channel.confirmSelect();
+		}
+	}
+
+	@Override
+	public boolean isHealthy() {
+		return ValidationUtils.isNotNull(connection) && connection.isOpen() && ValidationUtils.isNotNull(channel) && channel.isOpen();
 	}
 
 	@Override
@@ -98,6 +111,13 @@ public class Amqp091Destination extends Destination<Amqp091DestinationConfig> {
 		// publish
 
 		channel.basicPublish(actualExchange, actualRoutingKey, builder.build(), message.eventBody());
+
+		// without confirms basicPublish is fire-and-forget; block until the broker
+		// acknowledges (throws on nack or timeout)
+
+		if (publisherConfirms) {
+			channel.waitForConfirmsOrDie(confirmTimeoutMillis);
+		}
 	}
 
 	@Override

@@ -46,6 +46,11 @@ public class NatsDestination extends Destination<NatsDestinationConfig> {
 	}
 
 	@Override
+	public boolean isHealthy() {
+		return ValidationUtils.isNotNull(connection) && connection.getStatus() == Connection.Status.CONNECTED;
+	}
+
+	@Override
 	@SneakyThrows
 	public void doSend(EventMessage message) {
 

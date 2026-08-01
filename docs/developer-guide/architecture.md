@@ -152,8 +152,8 @@ kete.routes.myroute.destination.pool.max-total=20   # Default: 20
 | `pool.max-total` | 20 |  | Prevent broker overload |
 | Block on Exhaustion | true |  | Wait rather than fail |
 | `pool.max-wait-seconds` | -1 (infinite) |  | Wait indefinitely for available object |
-| `pool.test-on-borrow` | false |  | Skip validation on borrow |
-| `pool.test-on-return` | false |  | Skip validation on return |
+| `pool.test-on-borrow` | true |  | Cull unhealthy instances at borrow (cheap `isHealthy()` state check) |
+| `pool.test-on-return` | true |  | Cull instances whose connection died during send |
 
 **Constraints:**
 - `pool.min-idle` must be > 0

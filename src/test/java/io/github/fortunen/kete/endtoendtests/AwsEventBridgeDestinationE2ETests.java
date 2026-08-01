@@ -26,7 +26,7 @@ import software.amazon.awssdk.services.sqs.SqsClient;
 
 class AwsEventBridgeDestinationE2ETests extends EndToEndTestBase {
 
-	private static final String LOCALSTACK_IMAGE = "localstack/localstack";
+	private static final String LOCALSTACK_IMAGE = "localstack/localstack:4.6";
 	private static final int LOCALSTACK_PORT = 4566;
 	private static final String REGION = "us-east-1";
 	private static final String ACCOUNT_ID = "000000000000";

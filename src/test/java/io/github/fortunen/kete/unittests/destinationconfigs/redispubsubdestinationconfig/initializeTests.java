@@ -10,6 +10,7 @@ import org.apache.commons.configuration2.MapConfiguration;
 import org.junit.jupiter.api.Test;
 
 import io.github.fortunen.kete.destinations.redispubsub.RedisPubSubDestinationConfig;
+import io.lettuce.core.ClientOptions;
 
 public class initializeTests {
 
@@ -755,6 +756,7 @@ public class initializeTests {
 
 		assertThat(config.getClientOptions()).isNotNull();
 		assertThat(config.getClientOptions().isAutoReconnect()).isTrue();
+		assertThat(config.getClientOptions().getDisconnectedBehavior()).isEqualTo(ClientOptions.DisconnectedBehavior.REJECT_COMMANDS);
 	}
 
 	// =========================================================================
