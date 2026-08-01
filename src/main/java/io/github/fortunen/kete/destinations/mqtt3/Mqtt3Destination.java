@@ -48,6 +48,11 @@ public class Mqtt3Destination extends Destination<Mqtt3DestinationConfig> {
 	}
 
 	@Override
+	public boolean isHealthy() {
+		return ValidationUtils.isNotNull(client) && client.isConnected();
+	}
+
+	@Override
 	@SneakyThrows
 	public void doSend(EventMessage message) {
 
@@ -73,14 +78,26 @@ public class Mqtt3Destination extends Destination<Mqtt3DestinationConfig> {
 	@Override
 	@SneakyThrows
 	public void close() {
+
+		if (ValidationUtils.isNull(client)) {
+			return;
+		}
+
 		try {
-			if (ValidationUtils.isNotNull(client) && client.isConnected()) {
-				client.disconnect();
+			if (client.isConnected()) {
+				client.disconnectForcibly(0, 0, true);
 			}
 		} catch (Exception e) {
 			log.warn("Failed to disconnect MQTT3 client: {}", e.getMessage());
-		} finally {
-			ValidationUtils.tryClose(client, "client");
+		}
+
+		// force close: the non-forced close() throws CONNECT_IN_PROGRESS while the client is
+		// auto-reconnecting, which is exactly when the pool culls and destroys this instance
+
+		try {
+			client.close(true);
+		} catch (Exception e) {
+			log.warn("Failed to close MQTT3 client: {}", e.getMessage());
 		}
 	}
 }

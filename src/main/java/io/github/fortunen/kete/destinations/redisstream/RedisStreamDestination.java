@@ -79,6 +79,19 @@ public class RedisStreamDestination extends Destination<RedisStreamDestinationCo
 	}
 
 	@Override
+	public boolean isHealthy() {
+
+		// standalone: tracks the netty channel (false while auto-reconnecting, true again on reconnect)
+		// cluster: tracks only the default endpoint, not the slot-routed node connections
+
+		if (isClusterMode) {
+			return ValidationUtils.isNotNull(clusterConnection) && clusterConnection.isOpen();
+		}
+
+		return ValidationUtils.isNotNull(connection) && connection.isOpen();
+	}
+
+	@Override
 	@SneakyThrows
 	public void doSend(EventMessage message) {
 

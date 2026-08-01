@@ -53,6 +53,11 @@ public class AzureEventHubsDestination extends Destination<AzureEventHubsDestina
 	}
 
 	@Override
+	public boolean isHealthy() {
+		return true; // EventHubProducerClient exposes no cheap connection-state probe; failures surface on send
+	}
+
+	@Override
 	@SneakyThrows
 	public void doSend(EventMessage message) {
 

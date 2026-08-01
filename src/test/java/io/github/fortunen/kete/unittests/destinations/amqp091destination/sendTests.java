@@ -3,8 +3,10 @@ package io.github.fortunen.kete.unittests.destinations.amqp091destination;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 import java.nio.charset.StandardCharsets;
@@ -131,5 +133,66 @@ public class sendTests {
 
 		assertThat(thrown).isInstanceOf(IllegalStateException.class);
 		assertThat(thrown.getMessage()).isEqualTo("message is required");
+	}
+
+	@Test
+	public void shouldWaitForConfirmsWhenPublisherConfirmsEnabled() throws Exception {
+
+		// arrange
+
+		var channel = mock(Channel.class);
+		destination.setChannel(channel);
+		destination.setExchange("test-exchange");
+		destination.setRoutingKey("test-key");
+		destination.setDeliveryMode(2);
+		destination.setExchangeTemplated(false);
+		destination.setRoutingKeyTemplated(false);
+		destination.setHasPriority(false);
+		destination.setTimeToLiveExpiration(null);
+		destination.setStaticHeaders(new HashMap<>());
+		destination.setPublisherConfirms(true);
+		destination.setConfirmTimeoutMillis(30000L);
+
+		var body = "test-body".getBytes(StandardCharsets.UTF_8);
+		var message = new EventMessage("test-realm", "evt-004", body, "LOGIN", "application/json", null, Constants.EVENT, null, null);
+
+		// act
+
+		destination.doSend(message);
+
+		// assert
+
+		verify(channel).basicPublish(eq("test-exchange"), eq("test-key"), any(AMQP.BasicProperties.class), eq(body));
+		verify(channel).waitForConfirmsOrDie(30000L);
+	}
+
+	@Test
+	public void shouldNotWaitForConfirmsWhenPublisherConfirmsDisabled() throws Exception {
+
+		// arrange
+
+		var channel = mock(Channel.class);
+		destination.setChannel(channel);
+		destination.setExchange("test-exchange");
+		destination.setRoutingKey("test-key");
+		destination.setDeliveryMode(2);
+		destination.setExchangeTemplated(false);
+		destination.setRoutingKeyTemplated(false);
+		destination.setHasPriority(false);
+		destination.setTimeToLiveExpiration(null);
+		destination.setStaticHeaders(new HashMap<>());
+		destination.setPublisherConfirms(false);
+
+		var body = "test-body".getBytes(StandardCharsets.UTF_8);
+		var message = new EventMessage("test-realm", "evt-005", body, "LOGIN", "application/json", null, Constants.EVENT, null, null);
+
+		// act
+
+		destination.doSend(message);
+
+		// assert
+
+		verify(channel).basicPublish(eq("test-exchange"), eq("test-key"), any(AMQP.BasicProperties.class), eq(body));
+		verify(channel, never()).waitForConfirmsOrDie(anyLong());
 	}
 }

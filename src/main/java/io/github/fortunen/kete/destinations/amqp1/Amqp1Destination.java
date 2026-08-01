@@ -10,6 +10,9 @@ import io.github.fortunen.kete.Destination;
 import io.github.fortunen.kete.EventMessage;
 import io.github.fortunen.kete.utils.TemplateUtils;
 import io.github.fortunen.kete.utils.ValidationUtils;
+import org.apache.qpid.jms.JmsConnection;
+import org.apache.qpid.jms.JmsSession;
+
 import jakarta.jms.Connection;
 import jakarta.jms.JMSException;
 import jakarta.jms.MessageProducer;
@@ -64,6 +67,24 @@ public class Amqp1Destination extends Destination<Amqp1DestinationConfig> {
 		if (!isQueueOrTopicNameTemplated) {
 			jmsDestination = isDestinationIsQueue ? session.createQueue(queueOrTopicName) : session.createTopic(queueOrTopicName);
 		}
+	}
+
+	@Override
+	public boolean isHealthy() {
+
+		if (ValidationUtils.isNull(connection) || ValidationUtils.isNull(session) || ValidationUtils.isNull(producer)) {
+			return false;
+		}
+
+		// the jakarta.jms API exposes no state, but the Qpid JMS implementation does (atomic
+		// flag reads); with no failover configured a dropped connection is terminal, so probe
+		// the implementation when available and stay portable otherwise
+
+		if (connection instanceof JmsConnection jmsConnection && (jmsConnection.isClosed() || jmsConnection.isFailed() || !jmsConnection.isConnected())) {
+			return false;
+		}
+
+		return !(session instanceof JmsSession jmsSession) || !jmsSession.isClosed();
 	}
 
 	@Override

@@ -61,6 +61,11 @@ public class AzureEventGridDestination extends Destination<AzureEventGridDestina
 	}
 
 	@Override
+	public boolean isHealthy() {
+		return true; // stateless HTTP client; nothing to probe
+	}
+
+	@Override
 	@SneakyThrows
 	public void doSend(EventMessage message) {
 

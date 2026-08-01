@@ -39,6 +39,15 @@ public class DestinationPooledObjectFactory extends BasePooledObjectFactory<Dest
 	}
 
 	@Override
+	public boolean validateObject(PooledObject<Destination<?>> pooledObject) {
+		try {
+			return pooledObject.getObject().isHealthy();
+		} catch (Exception exception) {
+			return false;
+		}
+	}
+
+	@Override
 	public void destroyObject(PooledObject<Destination<?>> pooledObject) {
 		ValidationUtils.tryClose(pooledObject.getObject(), "destination");
 	}

@@ -179,7 +179,10 @@ public class RedisStreamDestinationConfig extends DestinationConfig {
 
 				redisUri = uriBuilder.build();
 
-				var clientOptionsBuilder = ClientOptions.builder().autoReconnect(true);
+				// REJECT_COMMANDS: commands issued while disconnected fail fast instead of
+				// buffering until the timeout (route retry and pool replacement handle it)
+
+				var clientOptionsBuilder = ClientOptions.builder().autoReconnect(true).disconnectedBehavior(ClientOptions.DisconnectedBehavior.REJECT_COMMANDS);
 				if (configuration.containsKey(CONNECTION_TIMEOUT_SECONDS)) {
 					clientOptionsBuilder.timeoutOptions(TimeoutOptions.builder().fixedTimeout(Duration.ofSeconds(connectionTimeoutSeconds)).build());
 				}
@@ -227,7 +230,10 @@ public class RedisStreamDestinationConfig extends DestinationConfig {
 
 				redisUri = uriBuilder.build();
 
-				var clientOptionsBuilder = ClientOptions.builder().autoReconnect(true);
+				// REJECT_COMMANDS: commands issued while disconnected fail fast instead of
+				// buffering until the timeout (route retry and pool replacement handle it)
+
+				var clientOptionsBuilder = ClientOptions.builder().autoReconnect(true).disconnectedBehavior(ClientOptions.DisconnectedBehavior.REJECT_COMMANDS);
 				if (configuration.containsKey(CONNECTION_TIMEOUT_SECONDS)) {
 					clientOptionsBuilder.timeoutOptions(TimeoutOptions.builder().fixedTimeout(Duration.ofSeconds(connectionTimeoutSeconds)).build());
 				}
@@ -265,7 +271,10 @@ public class RedisStreamDestinationConfig extends DestinationConfig {
 					clusterNodeUris.add(nodeUriBuilder.build());
 				}
 
-				var clusterOptionsBuilder = ClusterClientOptions.builder().autoReconnect(true);
+				// REJECT_COMMANDS: commands issued while disconnected fail fast instead of
+				// buffering until the timeout (route retry and pool replacement handle it)
+
+				var clusterOptionsBuilder = ClusterClientOptions.builder().autoReconnect(true).disconnectedBehavior(ClientOptions.DisconnectedBehavior.REJECT_COMMANDS);
 				if (configuration.containsKey(CONNECTION_TIMEOUT_SECONDS)) {
 					clusterOptionsBuilder.timeoutOptions(TimeoutOptions.builder().fixedTimeout(Duration.ofSeconds(connectionTimeoutSeconds)).build());
 				}

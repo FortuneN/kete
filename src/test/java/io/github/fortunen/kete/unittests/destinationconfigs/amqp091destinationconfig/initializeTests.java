@@ -1021,4 +1021,98 @@ public class initializeTests {
 
 		assertThat(config.getTls().isEnabled()).isTrue();
 	}
+
+	// =========================================================================
+	// Publisher Confirms
+	// =========================================================================
+
+	@Test
+	public void shouldDefaultPublisherConfirmsToEnabled() {
+
+		// arrange
+
+		var config = new Amqp091DestinationConfig();
+		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "amqp-0.9.1",
+			"host", "localhost",
+			"exchange", "test-exchange"
+		)));
+
+		// act
+
+		config.initialize();
+
+		// assert
+
+		assertThat(config.isPublisherConfirms()).isTrue();
+		assertThat(config.getConfirmTimeoutSeconds()).isEqualTo(Amqp091DestinationConfig.DEFAULT_CONFIRM_TIMEOUT_SECONDS);
+	}
+
+	@Test
+	public void shouldReadCustomPublisherConfirms() {
+
+		// arrange
+
+		var config = new Amqp091DestinationConfig();
+		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "amqp-0.9.1",
+			"host", "localhost",
+			"exchange", "test-exchange",
+			"publisher-confirms", false
+		)));
+
+		// act
+
+		config.initialize();
+
+		// assert
+
+		assertThat(config.isPublisherConfirms()).isFalse();
+	}
+
+	@Test
+	public void shouldReadCustomConfirmTimeoutSeconds() {
+
+		// arrange
+
+		var config = new Amqp091DestinationConfig();
+		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "amqp-0.9.1",
+			"host", "localhost",
+			"exchange", "test-exchange",
+			"confirm-timeout-seconds", 10
+		)));
+
+		// act
+
+		config.initialize();
+
+		// assert
+
+		assertThat(config.getConfirmTimeoutSeconds()).isEqualTo(10);
+	}
+
+	@Test
+	public void shouldThrowWhenConfirmTimeoutSecondsIsZero() {
+
+		// arrange
+
+		var config = new Amqp091DestinationConfig();
+		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "amqp-0.9.1",
+			"host", "localhost",
+			"exchange", "test-exchange",
+			"confirm-timeout-seconds", 0
+		)));
+
+		// act
+
+		var thrown = catchThrowable(() -> config.initialize());
+
+		// assert
+
+		assertThat(thrown)
+			.isInstanceOf(IllegalStateException.class)
+			.hasMessage("confirm-timeout-seconds must be positive");
+	}
 }

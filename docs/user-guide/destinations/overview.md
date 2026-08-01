@@ -47,13 +47,13 @@ KETE uses [Apache Commons Pool 2](https://commons.apache.org/proper/commons-pool
 |----------|---------|-------------|
 | `destination.pool.lifo` | `true` | Last In First Out - uses recently returned connections first (stack behavior) |
 | `destination.pool.fairness` | `false` | Whether to ensure fairness when threads wait for connections (adds overhead) |
-| `destination.pool.test-on-create` | `false` | Validate connections when created |
-| `destination.pool.test-on-borrow` | `false` | Validate connections before use (recommended for production) |
-| `destination.pool.test-on-return` | `false` | Validate connections when returned to pool |
-| `destination.pool.test-while-idle` | `false` | Validate idle connections proactively (recommended with eviction enabled) |
-| `destination.pool.time-between-eviction-runs-seconds` | `-1` | Seconds between eviction runs (-1 disables, recommended: 60 for 1 minute) |
-| `destination.pool.min-evictable-idle-time-seconds` | `1800` | Minimum idle time in seconds before connection eligible for eviction (30 minutes) |
-| `destination.pool.soft-min-evictable-idle-time-seconds` | `-1` | Soft minimum idle time in seconds (only evicts if min-idle exceeded, -1 disables) |
+| `destination.pool.test-on-create` | `true` | Validate connections when created |
+| `destination.pool.test-on-borrow` | `true` | Validate connections before use (cheap client-state check, no network I/O) |
+| `destination.pool.test-on-return` | `true` | Validate connections when returned to pool |
+| `destination.pool.test-while-idle` | `true` | Validate idle connections proactively during eviction runs |
+| `destination.pool.time-between-eviction-runs-seconds` | `60` | Seconds between eviction runs (`-1` disables the evictor thread) |
+| `destination.pool.min-evictable-idle-time-seconds` | `-1` | Hard idle eviction: evicts even below `min-idle` (`-1` disables) |
+| `destination.pool.soft-min-evictable-idle-time-seconds` | `1800` | Idle time in seconds before excess connections (above `min-idle`) are recycled |
 | `destination.pool.num-tests-per-eviction-run` | `3` | Number of connections to test during each eviction run |
 
 ### Example
@@ -67,16 +67,13 @@ kete.routes.high-volume.destination.pool.min-idle=10
 kete.routes.high-volume.destination.pool.max-idle=25
 kete.routes.high-volume.destination.pool.max-total=50
 
-# Production-ready configuration with validation and eviction
+# Production-ready configuration (validation and idle eviction are on by default)
 kete.routes.production.destination.kind=amqp-0.9.1
 kete.routes.production.destination.host=rabbitmq.prod
 kete.routes.production.destination.exchange=events
 kete.routes.production.destination.pool.min-idle=5
 kete.routes.production.destination.pool.max-idle=15
 kete.routes.production.destination.pool.max-total=30
-kete.routes.production.destination.pool.test-on-borrow=true
-kete.routes.production.destination.pool.test-while-idle=true
-kete.routes.production.destination.pool.time-between-eviction-runs-seconds=60
 ```
 
 ### Tuning Guidelines
@@ -87,15 +84,14 @@ kete.routes.production.destination.pool.time-between-eviction-runs-seconds=60
 | **Medium volume** (10-100 events/sec) | `min-idle=10`, `max-idle=20`, `max-total=30` |
 | **High volume** (> 100 events/sec) | `min-idle=20`, `max-idle=50`, `max-total=100` |
 | **Fixed pool size** | Set `min-idle=max-idle=max-total` (e.g., all to `15`) |
-| **Production environments** | Enable `test-on-borrow=true` and `test-while-idle=true` with `time-between-eviction-runs-seconds=60` |
-| **Unstable networks** | Enable validation (`test-on-borrow=true`) to detect broken connections before use |
+| **Production environments** | Defaults are production-ready: create/borrow/return/idle validation and idle eviction are all on by default |
+| **Unstable networks** | Keep the default validation on; consider a shorter `time-between-eviction-runs-seconds` for faster idle culling |
 
 !!! tip "Performance vs. Reliability"
-    **Default configuration favors performance** with validation disabled. For production:
+    **Validation is on by default** for create, borrow, return, and idle instances. Health checks read client state only (no network I/O), so the cost is negligible; broken connections are destroyed and replaced before they can fail a send, and the evictor (every 60 seconds) proactively culls dead idle connections and recycles excess connections idle for 30+ minutes. To tune:
     
-    - Enable `test-on-borrow=true` (~1-5ms latency per borrow, but prevents broken connections)
-    - Enable `test-while-idle=true` + set `time-between-eviction-runs-seconds=60` (proactive health checks)
     - Reduce `max-idle` to match `max-total` more closely (avoid holding excess idle connections)
+    - Set `time-between-eviction-runs-seconds=-1` to disable the evictor thread, or `test-on-borrow=false` etc. to disable validation per route
 
 !!! note "Validation Rules"
     - `pool.min-idle` must be greater than 0

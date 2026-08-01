@@ -117,6 +117,8 @@ kete.routes.main-rabbitmq.destination.routing-key=events
 | `routing-key` | Routing key (supports templating) | `""` | `${eventTypeLowerCase}` |
 | `priority` | Message priority (0-9, only applied when explicitly set) | _(none)_ | `7` |
 | `delivery-mode` | Message durability: `persistent` or `non-persistent` | `persistent` | `persistent` |
+| `publisher-confirms` | Wait for a broker acknowledgement of each publish (without confirms `basicPublish` is fire-and-forget) | `true` | `false` |
+| `confirm-timeout-seconds` | Timeout waiting for the broker's publish confirmation | `30` | `10` |
 | `time-to-live-seconds` | Message TTL in seconds (0 = never expires) | `0` | `60` |
 | `connection-timeout-seconds` | Connection timeout in seconds | `10` | `30` |
 | `handshake-timeout-seconds` | Handshake timeout in seconds | `10` | `5` |

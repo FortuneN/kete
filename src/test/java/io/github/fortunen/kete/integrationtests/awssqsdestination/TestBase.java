@@ -29,7 +29,7 @@ import software.amazon.awssdk.services.sqs.SqsClient;
 
 public class TestBase {
 
-	private static final String LOCALSTACK_IMAGE = "localstack/localstack";
+	private static final String LOCALSTACK_IMAGE = "localstack/localstack:4.6";
 	private static final int LOCALSTACK_PORT = 4566;
 
 	protected static final String REGION = "us-east-1";

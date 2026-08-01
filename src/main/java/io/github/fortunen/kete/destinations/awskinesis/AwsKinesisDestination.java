@@ -41,6 +41,11 @@ public class AwsKinesisDestination extends Destination<AwsKinesisDestinationConf
 	}
 
 	@Override
+	public boolean isHealthy() {
+		return true; // stateless HTTP client; nothing to probe
+	}
+
+	@Override
 	public void doSend(EventMessage message) {
 
 		ValidationUtils.requireNonNull(message, "message is required");

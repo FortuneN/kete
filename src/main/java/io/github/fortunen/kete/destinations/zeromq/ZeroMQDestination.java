@@ -74,6 +74,11 @@ public class ZeroMQDestination extends Destination<ZeroMQDestinationConfig> {
 	}
 
 	@Override
+	public boolean isHealthy() {
+		return true; // ZeroMQ sockets expose no connection-state probe; failures surface on send
+	}
+
+	@Override
 	@SneakyThrows
 	public void doSend(EventMessage message) {
 

@@ -39,6 +39,10 @@ public class Amqp091DestinationConfig extends DestinationConfig {
 	public static final int DEFAULT_REQUESTED_HEARTBEAT_SECONDS = 30;
 	public static final int DEFAULT_NETWORK_RECOVERY_INTERVAL_SECONDS = 5;
 	public static final String TIME_TO_LIVE_SECONDS = "time-to-live-seconds";
+	public static final boolean DEFAULT_PUBLISHER_CONFIRMS = true;
+	public static final String PUBLISHER_CONFIRMS = "publisher-confirms";
+	public static final int DEFAULT_CONFIRM_TIMEOUT_SECONDS = 30;
+	public static final String CONFIRM_TIMEOUT_SECONDS = "confirm-timeout-seconds";
 	public static final String HANDSHAKE_TIMEOUT_SECONDS = "handshake-timeout-seconds";
 	public static final String TOPOLOGY_RECOVERY_ENABLED = "topology-recovery-enabled";
 	public static final String CONNECTION_TIMEOUT_SECONDS = "connection-timeout-seconds";
@@ -69,6 +73,8 @@ public class Amqp091DestinationConfig extends DestinationConfig {
 	private boolean isRoutingKeyTemplated;
 	private boolean topologyRecoveryEnabled;
 	private boolean automaticRecoveryEnabled;
+	private boolean publisherConfirms;
+	private int confirmTimeoutSeconds;
 	private Map<String, Object> staticHeaders;
 	private int networkRecoveryIntervalSeconds;
 	private ConnectionFactory connectionFactory;
@@ -132,6 +138,11 @@ public class Amqp091DestinationConfig extends DestinationConfig {
 
 			hasPriority = true;
 		}
+
+		// publisherConfirms (broker acks each publish; without them basicPublish is fire-and-forget)
+
+		publisherConfirms = configuration.getBoolean(PUBLISHER_CONFIRMS, DEFAULT_PUBLISHER_CONFIRMS);
+		confirmTimeoutSeconds = ValidationUtils.requirePositive(configuration.getInt(CONFIRM_TIMEOUT_SECONDS, DEFAULT_CONFIRM_TIMEOUT_SECONDS), CONFIRM_TIMEOUT_SECONDS + " must be positive");
 
 		// deliveryMode
 

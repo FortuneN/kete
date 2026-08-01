@@ -67,6 +67,11 @@ public class NatsJetStreamDestination extends Destination<NatsJetStreamDestinati
 	}
 
 	@Override
+	public boolean isHealthy() {
+		return ValidationUtils.isNotNull(connection) && ValidationUtils.isNotNull(jetStream) && connection.getStatus() == Connection.Status.CONNECTED;
+	}
+
+	@Override
 	@SneakyThrows
 	public void doSend(EventMessage message) {
 

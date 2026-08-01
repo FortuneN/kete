@@ -78,6 +78,18 @@ public class PulsarDestination extends Destination<PulsarDestinationConfig> {
 	}
 
 	@Override
+	public boolean isHealthy() {
+
+		// templated mode creates per-topic producers on demand in doSend
+
+		if (isTopicTemplated) {
+			return true;
+		}
+
+		return ValidationUtils.isNotNull(defaultProducer) && defaultProducer.isConnected();
+	}
+
+	@Override
 	@SneakyThrows
 	public void doSend(EventMessage message) {
 

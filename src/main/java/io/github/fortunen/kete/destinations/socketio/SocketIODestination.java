@@ -75,10 +75,20 @@ public class SocketIODestination extends Destination<SocketIODestinationConfig> 
 	}
 
 	@Override
+	public boolean isHealthy() {
+		return ValidationUtils.isNotNull(socket) && socket.connected();
+	}
+
+	@Override
 	@SneakyThrows
 	public void doSend(EventMessage message) {
 
 		ValidationUtils.requireNonNull(message, "message is required");
+
+		// emit() on a disconnected socket buffers silently instead of throwing; fail fast so
+		// route retry and pool replacement handle the outage
+
+		ValidationUtils.requireTrue(socket.connected(), "socket is not connected");
 
 		var actualEventName = isEventNameTemplated ? TemplateUtils.substitute(eventName, message) : eventName;
 

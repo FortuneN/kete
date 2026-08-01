@@ -283,6 +283,8 @@ public class initializeTests {
 		assertThat(config.getPublishTimeout()).isEqualTo(Duration.ofSeconds(10));
 		assertThat(config.getAuthMaterial()).isNotNull();
 		assertThat(config.getNatsOptions()).isNotNull();
+		assertThat(config.getNatsOptions().getMaxReconnect()).isEqualTo(-1);
+		assertThat(config.getNatsOptions().getReconnectBufferSize()).isEqualTo(0);
 	}
 
 	@Test

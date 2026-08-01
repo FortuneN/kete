@@ -194,6 +194,8 @@ public class initializeTests {
 		assertThat(config.getConnectionName()).isEqualTo(Constants.ID);
 		assertThat(config.getAuthMaterial()).isNotNull();
 		assertThat(config.getNatsOptions()).isNotNull();
+		assertThat(config.getNatsOptions().getMaxReconnect()).isEqualTo(-1);
+		assertThat(config.getNatsOptions().getReconnectBufferSize()).isEqualTo(0);
 	}
 
 	@Test

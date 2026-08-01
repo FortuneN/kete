@@ -50,15 +50,15 @@ public abstract class DestinationConfig {
 	public static final boolean DEFAULT_POOL_LIFO = true;
 	public static final boolean DEFAULT_POOL_FAIRNESS = false;
 	public static final long DEFAULT_POOL_MAX_WAIT_SECONDS = -1;
-	public static final boolean DEFAULT_POOL_TEST_ON_CREATE = false;
-	public static final boolean DEFAULT_POOL_TEST_ON_BORROW = false;
-	public static final boolean DEFAULT_POOL_TEST_ON_RETURN = false;
-	public static final boolean DEFAULT_POOL_TEST_WHILE_IDLE = false;
+	public static final boolean DEFAULT_POOL_TEST_ON_CREATE = true;
+	public static final boolean DEFAULT_POOL_TEST_ON_BORROW = true;
+	public static final boolean DEFAULT_POOL_TEST_ON_RETURN = true;
+	public static final boolean DEFAULT_POOL_TEST_WHILE_IDLE = true;
 	public static final int DEFAULT_POOL_NUM_TESTS_PER_EVICTION_RUN = 3;
 	public static final boolean DEFAULT_POOL_BLOCK_WHEN_EXHAUSTED = true;
-	public static final long DEFAULT_POOL_MIN_EVICTABLE_IDLE_TIME_SECONDS = 1800;
-	public static final long DEFAULT_POOL_TIME_BETWEEN_EVICTION_RUNS_SECONDS = -1;
-	public static final long DEFAULT_POOL_SOFT_MIN_EVICTABLE_IDLE_TIME_SECONDS = -1;
+	public static final long DEFAULT_POOL_MIN_EVICTABLE_IDLE_TIME_SECONDS = -1;
+	public static final long DEFAULT_POOL_TIME_BETWEEN_EVICTION_RUNS_SECONDS = 60;
+	public static final long DEFAULT_POOL_SOFT_MIN_EVICTABLE_IDLE_TIME_SECONDS = 1800;
 
 	protected TlsMaterial tls;
 	protected String keycloakRealm;

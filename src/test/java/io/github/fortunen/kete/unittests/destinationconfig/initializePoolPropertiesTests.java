@@ -148,7 +148,7 @@ public class initializePoolPropertiesTests {
 
 		// assert
 
-		assertThat(destinationConfig.isPoolTestOnCreate()).isFalse();
+		assertThat(destinationConfig.isPoolTestOnCreate()).isTrue();
 	}
 
 	@Test
@@ -165,7 +165,7 @@ public class initializePoolPropertiesTests {
 
 		// assert
 
-		assertThat(destinationConfig.isPoolTestOnBorrow()).isFalse();
+		assertThat(destinationConfig.isPoolTestOnBorrow()).isTrue();
 	}
 
 	@Test
@@ -182,7 +182,7 @@ public class initializePoolPropertiesTests {
 
 		// assert
 
-		assertThat(destinationConfig.isPoolTestOnReturn()).isFalse();
+		assertThat(destinationConfig.isPoolTestOnReturn()).isTrue();
 	}
 
 	@Test
@@ -199,7 +199,7 @@ public class initializePoolPropertiesTests {
 
 		// assert
 
-		assertThat(destinationConfig.isPoolTestWhileIdle()).isFalse();
+		assertThat(destinationConfig.isPoolTestWhileIdle()).isTrue();
 	}
 
 	@Test
@@ -216,7 +216,7 @@ public class initializePoolPropertiesTests {
 
 		// assert
 
-		assertThat(destinationConfig.getPoolTimeBetweenEvictionRunsSeconds()).isEqualTo(-1);
+		assertThat(destinationConfig.getPoolTimeBetweenEvictionRunsSeconds()).isEqualTo(60);
 	}
 
 	@Test
@@ -233,7 +233,7 @@ public class initializePoolPropertiesTests {
 
 		// assert
 
-		assertThat(destinationConfig.getPoolMinEvictableIdleTimeSeconds()).isEqualTo(1800);
+		assertThat(destinationConfig.getPoolMinEvictableIdleTimeSeconds()).isEqualTo(-1);
 	}
 
 	@Test
@@ -250,7 +250,7 @@ public class initializePoolPropertiesTests {
 
 		// assert
 
-		assertThat(destinationConfig.getPoolSoftMinEvictableIdleTimeSeconds()).isEqualTo(-1);
+		assertThat(destinationConfig.getPoolSoftMinEvictableIdleTimeSeconds()).isEqualTo(1800);
 	}
 
 	@Test
@@ -397,7 +397,7 @@ public class initializePoolPropertiesTests {
 
 		// arrange
 
-		var config = createConfigWithPoolProperty("test-on-create", true);
+		var config = createConfigWithPoolProperty("test-on-create", false);
 		var destinationConfig = createTestDestinationConfig(config);
 
 		// act
@@ -406,7 +406,7 @@ public class initializePoolPropertiesTests {
 
 		// assert
 
-		assertThat(destinationConfig.isPoolTestOnCreate()).isTrue();
+		assertThat(destinationConfig.isPoolTestOnCreate()).isFalse();
 	}
 
 	@Test
@@ -414,7 +414,7 @@ public class initializePoolPropertiesTests {
 
 		// arrange
 
-		var config = createConfigWithPoolProperty("test-on-borrow", true);
+		var config = createConfigWithPoolProperty("test-on-borrow", false);
 		var destinationConfig = createTestDestinationConfig(config);
 
 		// act
@@ -423,7 +423,7 @@ public class initializePoolPropertiesTests {
 
 		// assert
 
-		assertThat(destinationConfig.isPoolTestOnBorrow()).isTrue();
+		assertThat(destinationConfig.isPoolTestOnBorrow()).isFalse();
 	}
 
 	@Test
@@ -431,7 +431,7 @@ public class initializePoolPropertiesTests {
 
 		// arrange
 
-		var config = createConfigWithPoolProperty("test-on-return", true);
+		var config = createConfigWithPoolProperty("test-on-return", false);
 		var destinationConfig = createTestDestinationConfig(config);
 
 		// act
@@ -440,7 +440,7 @@ public class initializePoolPropertiesTests {
 
 		// assert
 
-		assertThat(destinationConfig.isPoolTestOnReturn()).isTrue();
+		assertThat(destinationConfig.isPoolTestOnReturn()).isFalse();
 	}
 
 	@Test
@@ -448,7 +448,7 @@ public class initializePoolPropertiesTests {
 
 		// arrange
 
-		var config = createConfigWithPoolProperty("test-while-idle", true);
+		var config = createConfigWithPoolProperty("test-while-idle", false);
 		var destinationConfig = createTestDestinationConfig(config);
 
 		// act
@@ -457,7 +457,7 @@ public class initializePoolPropertiesTests {
 
 		// assert
 
-		assertThat(destinationConfig.isPoolTestWhileIdle()).isTrue();
+		assertThat(destinationConfig.isPoolTestWhileIdle()).isFalse();
 	}
 
 	@Test
@@ -465,7 +465,7 @@ public class initializePoolPropertiesTests {
 
 		// arrange
 
-		var config = createConfigWithPoolProperty("time-between-eviction-runs-seconds", 60L);
+		var config = createConfigWithPoolProperty("time-between-eviction-runs-seconds", 120L);
 		var destinationConfig = createTestDestinationConfig(config);
 
 		// act
@@ -474,7 +474,7 @@ public class initializePoolPropertiesTests {
 
 		// assert
 
-		assertThat(destinationConfig.getPoolTimeBetweenEvictionRunsSeconds()).isEqualTo(60);
+		assertThat(destinationConfig.getPoolTimeBetweenEvictionRunsSeconds()).isEqualTo(120);
 	}
 
 	@Test
