@@ -16,6 +16,7 @@ import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.utility.DockerImageName;
 
 import com.github.dockerjava.api.model.ExposedPort;
@@ -66,6 +67,7 @@ public class isHealthyTests {
 
 		broker = new GenericContainer<>(DockerImageName.parse("apachepulsar/pulsar:3.3.2"))
 			.withCommand("bin/pulsar", "standalone", "--no-functions-worker")
+			.waitingFor(Wait.forLogMessage(".*messaging service is ready.*", 1).withStartupTimeout(Duration.ofMinutes(8)))
 			.withCreateContainerCmdModifier(cmd -> cmd.getHostConfig()
 				.withPortBindings(new PortBinding(Ports.Binding.bindPort(hostPort), new ExposedPort(BROKER_PORT))));
 		broker.start();

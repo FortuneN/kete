@@ -16,6 +16,7 @@ import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.utility.DockerImageName;
 
 import com.github.dockerjava.api.model.ExposedPort;
@@ -65,6 +66,7 @@ public class isHealthyTests {
 	private void startBroker(int hostPort) {
 
 		broker = new GenericContainer<>(DockerImageName.parse("hivemq/hivemq-ce:2024.3"))
+			.waitingFor(Wait.forLogMessage(".*Started HiveMQ in.*", 1).withStartupTimeout(Duration.ofMinutes(5)))
 			.withCreateContainerCmdModifier(cmd -> cmd.getHostConfig()
 				.withPortBindings(new PortBinding(Ports.Binding.bindPort(hostPort), new ExposedPort(BROKER_PORT))));
 		broker.start();
