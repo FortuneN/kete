@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/fortunen/kete/schemas/json/admin_event.json",
+  "title": "AdminEvent",
+  "description": "Keycloak admin event (eventkind header = ADMIN_EVENT)",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": ["string", "null"],
+      "description": "Unique event identifier (UUID)"
+    },
+    "time": {
+      "type": ["integer", "null"],
+      "description": "Event timestamp in milliseconds since Unix epoch"
+    },
+    "realmId": {
+      "type": ["string", "null"],
+      "description": "Keycloak realm ID"
+    },
+    "realmName": {
+      "type": ["string", "null"],
+      "description": "Keycloak realm name"
+    },
+    "authDetails": {
+      "description": "Details about the admin who performed the action",
+      "oneOf": [
+        { "type": "null" },
+        { "$ref": "#/$defs/AuthDetails" }
+      ]
+    },
+    "resourceType": {
+      "type": ["string", "null"],
+      "description": "Type of resource affected (e.g. USER, CLIENT, REALM, ROLE, GROUP, …)"
+    },
+    "operationType": {
+      "type": ["string", "null"],
+      "description": "Operation performed (CREATE, UPDATE, DELETE, ACTION)"
+    },
+    "resourcePath": {
+      "type": ["string", "null"],
+      "description": "Path to the affected resource within the realm (e.g. users/uuid)"
+    },
+    "representation": {
+      "type": ["string", "null"],
+      "description": "JSON representation of the resource state after the operation (only when include-representation is enabled)"
+    },
+    "error": {
+      "type": ["string", "null"],
+      "description": "Error code when the event represents a failure (null on success)"
+    }
+  },
+  "$defs": {
+    "AuthDetails": {
+      "title": "AuthDetails",
+      "description": "Identity of the admin who triggered the event",
+      "type": "object",
+      "properties": {
+        "realmId": {
+          "type": ["string", "null"],
+          "description": "Realm ID of the authenticating admin"
+        },
+        "realmName": {
+          "type": ["string", "null"],
+          "description": "Realm name of the authenticating admin"
+        },
+        "clientId": {
+          "type": ["string", "null"],
+          "description": "Client ID used by the admin (e.g. security-admin-console)"
+        },
+        "userId": {
+          "type": ["string", "null"],
+          "description": "Keycloak user ID of the admin (UUID)"
+        },
+        "ipAddress": {
+          "type": ["string", "null"],
+          "description": "IP address of the admin client"
+        }
+      }
+    }
+  }
+}
