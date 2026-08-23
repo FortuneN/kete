@@ -58,7 +58,7 @@ See `pom.xml` → `maven-shade-plugin` → `<relocations>` section. Every runtim
 | Library | Version | Purpose |
 |---------|---------|---------|
 | `kafka-clients` | 4.1.1 | Apache Kafka producer |
-| `amqp-client` | 5.25.0 | RabbitMQ AMQP 0-9-1 client |
+| `amqp-client` | 5.33.1 | RabbitMQ AMQP 0-9-1 client |
 | `org.eclipse.paho.client.mqttv3` | 1.2.5 | MQTT 3.1.1 client |
 | `org.eclipse.paho.mqttv5.client` | 1.2.5 | MQTT 5.0 client |
 | `qpid-jms-client` | 2.9.0 | AMQP 1.0 JMS client |

@@ -213,7 +213,9 @@ public class Amqp091DestinationConfig extends DestinationConfig {
 		}
 
 		if (tls.isEnabled()) {
-			connectionFactory.useSslProtocol(tls.getKeyStoreAndTrustStoreSSLContext());
+			var sslContext = tls.getKeyStoreAndTrustStoreSSLContext();
+			connectionFactory.setSslContextFactory(name -> sslContext);
+			connectionFactory.setSocketFactory(sslContext.getSocketFactory());
 			if (tls.isVerifyHostname()) {
 				connectionFactory.enableHostnameVerification();
 			}
