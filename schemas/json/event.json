@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/fortunen/kete/schemas/json/event.json",
+  "$id": "https://raw.githubusercontent.com/FortuneN/kete/develop/schemas/json/event.json",
   "title": "Event",
-  "description": "Keycloak user/session event (eventkind header = EVENT)",
+  "description": "Keycloak user event as produced by the KETE JSON serializer (message header eventkind = EVENT; x-eventkind for HTTP and SOAP)",
   "type": "object",
   "properties": {
     "id": {
@@ -10,12 +10,12 @@
       "description": "Unique event identifier (UUID)"
     },
     "time": {
-      "type": ["integer", "null"],
-      "description": "Event timestamp in milliseconds since Unix epoch"
+      "type": "integer",
+      "description": "Event timestamp in milliseconds since Unix epoch (0 when unset)"
     },
     "type": {
       "type": ["string", "null"],
-      "description": "Event type (e.g. LOGIN, LOGOUT, REGISTER, CODE_TO_TOKEN, REFRESH_TOKEN, …)"
+      "description": "Event type name (e.g. LOGIN, LOGOUT, REGISTER, CODE_TO_TOKEN, REFRESH_TOKEN, …)"
     },
     "realmId": {
       "type": ["string", "null"],
@@ -47,10 +47,11 @@
     },
     "details": {
       "type": ["object", "null"],
-      "description": "Arbitrary key-value pairs with extra context (e.g. redirect_uri, response_type)",
+      "description": "Arbitrary key-value pairs with extra context (e.g. username, redirect_uri, response_type)",
       "additionalProperties": {
         "type": "string"
       }
     }
-  }
+  },
+  "required": ["id", "time", "type", "realmId", "realmName", "clientId", "userId", "sessionId", "ipAddress", "error", "details"]
 }
