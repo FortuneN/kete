@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/FortuneN/kete/develop/schemas/json/event.json",
+  "title": "Event",
+  "description": "Keycloak user event as produced by the KETE JSON serializer (message header eventkind = EVENT; x-eventkind for HTTP and SOAP)",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": ["string", "null"],
+      "description": "Unique event identifier (UUID)"
+    },
+    "time": {
+      "type": "integer",
+      "description": "Event timestamp in milliseconds since Unix epoch (0 when unset)"
+    },
+    "type": {
+      "type": ["string", "null"],
+      "description": "Event type name (e.g. LOGIN, LOGOUT, REGISTER, CODE_TO_TOKEN, REFRESH_TOKEN, …)"
+    },
+    "realmId": {
+      "type": ["string", "null"],
+      "description": "Keycloak realm ID"
+    },
+    "realmName": {
+      "type": ["string", "null"],
+      "description": "Keycloak realm name"
+    },
+    "clientId": {
+      "type": ["string", "null"],
+      "description": "OAuth2/OIDC client ID that triggered the event"
+    },
+    "userId": {
+      "type": ["string", "null"],
+      "description": "Keycloak user ID (UUID)"
+    },
+    "sessionId": {
+      "type": ["string", "null"],
+      "description": "Keycloak session ID"
+    },
+    "ipAddress": {
+      "type": ["string", "null"],
+      "description": "IP address of the client"
+    },
+    "error": {
+      "type": ["string", "null"],
+      "description": "Error code when the event represents a failure (null on success)"
+    },
+    "details": {
+      "type": ["object", "null"],
+      "description": "Arbitrary key-value pairs with extra context (e.g. username, redirect_uri, response_type)",
+      "additionalProperties": {
+        "type": "string"
+      }
+    }
+  },
+  "required": ["id", "time", "type", "realmId", "realmName", "clientId", "userId", "sessionId", "ipAddress", "error", "details"]
+}
