@@ -7,7 +7,7 @@ import io.github.fortunen.kete.utils.ValidationUtils;
 import io.lettuce.core.ClientOptions;
 import io.lettuce.core.RedisURI;
 import io.lettuce.core.SslOptions;
-import io.lettuce.core.TimeoutOptions;
+import io.lettuce.core.SocketOptions;
 import io.lettuce.core.XAddArgs;
 import io.lettuce.core.cluster.ClusterClientOptions;
 import lombok.Data;
@@ -184,7 +184,7 @@ public class RedisStreamDestinationConfig extends DestinationConfig {
 
 				var clientOptionsBuilder = ClientOptions.builder().autoReconnect(true).disconnectedBehavior(ClientOptions.DisconnectedBehavior.REJECT_COMMANDS);
 				if (configuration.containsKey(CONNECTION_TIMEOUT_SECONDS)) {
-					clientOptionsBuilder.timeoutOptions(TimeoutOptions.builder().fixedTimeout(Duration.ofSeconds(connectionTimeoutSeconds)).build());
+					clientOptionsBuilder.socketOptions(SocketOptions.builder().connectTimeout(Duration.ofSeconds(connectionTimeoutSeconds)).build());
 				}
 				if (sslOptions != null) {
 					clientOptionsBuilder.sslOptions(sslOptions);
@@ -235,7 +235,7 @@ public class RedisStreamDestinationConfig extends DestinationConfig {
 
 				var clientOptionsBuilder = ClientOptions.builder().autoReconnect(true).disconnectedBehavior(ClientOptions.DisconnectedBehavior.REJECT_COMMANDS);
 				if (configuration.containsKey(CONNECTION_TIMEOUT_SECONDS)) {
-					clientOptionsBuilder.timeoutOptions(TimeoutOptions.builder().fixedTimeout(Duration.ofSeconds(connectionTimeoutSeconds)).build());
+					clientOptionsBuilder.socketOptions(SocketOptions.builder().connectTimeout(Duration.ofSeconds(connectionTimeoutSeconds)).build());
 				}
 				if (sslOptions != null) {
 					clientOptionsBuilder.sslOptions(sslOptions);
@@ -277,7 +277,7 @@ public class RedisStreamDestinationConfig extends DestinationConfig {
 
 				var clusterOptionsBuilder = ClusterClientOptions.builder().autoReconnect(true).disconnectedBehavior(ClientOptions.DisconnectedBehavior.REJECT_COMMANDS);
 				if (configuration.containsKey(CONNECTION_TIMEOUT_SECONDS)) {
-					clusterOptionsBuilder.timeoutOptions(TimeoutOptions.builder().fixedTimeout(Duration.ofSeconds(connectionTimeoutSeconds)).build());
+					clusterOptionsBuilder.socketOptions(SocketOptions.builder().connectTimeout(Duration.ofSeconds(connectionTimeoutSeconds)).build());
 				}
 				if (sslOptions != null) {
 					clusterOptionsBuilder.sslOptions(sslOptions);

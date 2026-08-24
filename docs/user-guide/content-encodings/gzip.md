@@ -22,6 +22,7 @@ kete.routes.<name>.destination.content-encoding=gzip
 - Good compression ratio for text-based formats (JSON, XML, YAML)
 - Adds a small overhead for already-compact binary formats (Protobuf, Avro, CBOR)
 - Consumers decompress with any standard gzip library
+- HTTP and SOAP destinations also send a `Content-Encoding: gzip` request header
 
 ## Example
 

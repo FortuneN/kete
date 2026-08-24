@@ -9,7 +9,8 @@ Load Base64-encoded PEM content.
 
 ## Notes
 
-- Supports certificates and private keys
+- Supports certificates and private keys. For key stores the PEM must contain the private key **and** its certificate chain together; a key without a certificate is ignored
+- Private keys must be unencrypted (PKCS#8 `BEGIN PRIVATE KEY` or PKCS#1 `BEGIN RSA PRIVATE KEY`); encrypted keys are rejected
 - Multiple certificates can be concatenated
 - Common extensions: `.pem`, `.crt`, `.cer`, `.key`
 

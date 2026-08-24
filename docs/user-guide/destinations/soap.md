@@ -55,11 +55,12 @@ Stream Keycloak events to SOAP/XML web services.
 
 - SOAP 1.1 and SOAP 1.2 envelope wrapping
 - Serialized event body placed inside `<soap:Body>` as raw content
-- Optional SOAPAction header (SOAP 1.1) or action parameter (SOAP 1.2)
+- Optional `SOAPAction` HTTP header (sent for both SOAP 1.1 and 1.2 when configured)
 - URL templating with event variables
 - OAuth 2.0, Basic, API Key, and X-API-Key authentication
 - Custom headers support
 - Content encoding (gzip) and content transfer encoding (base64)
+- Start-up connectivity check: a `GET` to the URL's scheme, host and port root; an unreachable host fails route initialization
 - TLS/mTLS support
 - Configurable timeouts
 

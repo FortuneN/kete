@@ -39,7 +39,7 @@ Scripts that simulate CI/CD pipeline stages locally.
 |--------|----------------|-------|
 | `run-on-pull-request-push.ps1` | Pull request | Tests → Docker image build → MkDocs build |
 | `run-on-develop-push.ps1` | Merge to develop | Tests + coverage → Docker image build → MkDocs build |
-| `run-on-release-push.ps1` | Merge to release | Tests + coverage → Versioned JAR → Docker push → MkDocs build → GitHub Release |
+| `run-on-release-push.ps1` | Merge to release | Versioned JAR → Docker push → MkDocs build → GitHub Release (tests are not re-run; they already ran on develop) |
 
 ### Utility
 
@@ -50,9 +50,9 @@ Scripts that simulate CI/CD pipeline stages locally.
 
 ## Prerequisites
 
-- PowerShell 5.1 or later
+- PowerShell 7 or later (`pwsh`)
 - Java 21
 - Maven
 - Docker Desktop (for integration tests, E2E tests, quick-starts, and CI/CD scripts)
-- Python with MkDocs (for documentation scripts)
+- Python with `mkdocs-material` and `mkdocs-include-markdown-plugin` (for documentation scripts)
 - GitHub CLI `gh` (for release script)

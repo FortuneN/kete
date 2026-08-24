@@ -131,7 +131,7 @@ kete.routes.secure.destination.tls.trust-store.password=changeit
 
 ### PEM File Path Loader (`pem-file-path`)
 
-Loads certificates and/or private keys from a PEM-formatted file. Supports certificate chains and encrypted private keys.
+Loads certificates and/or private keys from a PEM-formatted file. Supports certificate chains; private keys must be unencrypted (PKCS#8 or PKCS#1) and, for key stores, must be accompanied by their certificate chain in the same PEM.
 
 **Properties:**
 
@@ -149,7 +149,6 @@ kete.routes.secure.destination.tls.trust-store.loader.path=/opt/keycloak/certs/c
 ```bash
 kete.routes.secure.destination.tls.key-store.loader.kind=pem-file-path
 kete.routes.secure.destination.tls.key-store.loader.path=/opt/keycloak/certs/client-combined.pem
-kete.routes.secure.destination.tls.key-store.password=keypassword
 ```
 
 **PEM File Format:**
@@ -199,7 +198,7 @@ Loads raw PEM content directly from configuration. Useful for simple setups or t
 
 | Property | Required | Default | Description |
 |----------|----------|---------|-------------|
-| `text` | Yes | - | Raw PEM content (with newlines escaped) |
+| `text` | Yes | - | Raw PEM content (multi-line; in properties files escape line breaks as `\n`) |
 
 **Example:**
 ```bash
@@ -207,7 +206,7 @@ kete.routes.secure.destination.tls.trust-store.loader.kind=pem-file-text
 kete.routes.secure.destination.tls.trust-store.loader.text=-----BEGIN CERTIFICATE-----\nMIIDXTCC...kWgAwIB\n-----END CERTIFICATE-----
 ```
 
-> **Note:** Newlines in PEM content must be escaped as `\n` when using environment variables or properties files.
+> **Note:** The parser is line-based. In properties files escape line breaks as `\n` (the properties loader unescapes them); environment variables must contain real newline characters — a literal backslash-n in an environment variable yields zero certificates.
 
 
 
@@ -263,7 +262,7 @@ kete.routes.secure.destination.tls.trust-store.loader.kind=pkcs7-file-path
 kete.routes.secure.destination.tls.trust-store.loader.path=/opt/keycloak/certs/ca-chain.p7b
 ```
 
-> **Note:** PKCS#7 files can contain multiple certificates. Aliases are auto-generated from each certificate's Common Name (CN). If no CN is found, the alias is derived from the certificate's serial number.
+> **Note:** PKCS#7 files can contain multiple certificates. Aliases are auto-generated as the lower-cased Common Name with non-alphanumerics replaced by `-`, suffixed with the certificate's index (e.g. `my-ca-0`). If no CN is found, the alias is `cert-<hex-serial>-<index>`.
 
 
 
@@ -283,7 +282,7 @@ kete.routes.secure.destination.tls.trust-store.loader.kind=pkcs7-file-base64
 kete.routes.secure.destination.tls.trust-store.loader.base64=MIIHGgYJKoZIhvcNAQcCoIIHCz...
 ```
 
-> **Note:** Aliases are auto-generated from each certificate's Common Name (CN). If no CN is found, the alias is derived from the certificate's serial number (e.g., `cert-1a2b3c`).
+> **Note:** Aliases are auto-generated as the lower-cased Common Name with non-alphanumerics replaced by `-`, suffixed with the certificate's index (e.g. `my-ca-0`). If no CN is found, the alias is `cert-<hex-serial>-<index>` (e.g. `cert-1a2b3c-0`).
 
 **Encoding a PKCS#7 file:**
 ```bash
@@ -335,8 +334,9 @@ metadata:
 type: Opaque
 stringData:
   client-cert: "MIIKegIBAzCCCj4GCSqGSIb3..."  # Base64 PKCS12
+  client-cert-password: "changeit"
   ca-cert: "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0t..."  # Base64 PEM
-
+---
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -481,3 +481,13 @@ quarkus.log.category."io.github.fortunen.kete".level=DEBUG
 ```
 
 Check the Keycloak server log for detailed TLS initialization messages.
+
+---
+
+## Implementing a Custom Loader
+
+Certificate loaders are ordinary KETE components:
+
+1. Extend `io.github.fortunen.kete.CertificateLoader`. It exposes the loader's own configuration subset as the `configuration` field (`MapConfiguration`) and declares two abstract methods: `initialize()` (read and validate your properties) and `loadKeyStore(KeyStore keyStore, char[] passwordChars)` (populate the store). The same `loadKeyStore` is used for both key stores and trust stores — there is no separate trust-store method.
+2. Annotate the class with `@Component(name = "<kind>")`. The default scope is `transient`, so every `IocUtils.get(...)` call returns a fresh instance. The class must have a public no-args constructor; components are discovered by classpath scanning of the `io.github.fortunen.kete` package.
+3. Users select the loader with `tls.key-store.loader.kind=<kind>` / `tls.trust-store.loader.kind=<kind>`; every other property under `tls.<store>.loader.*` is passed to your loader as its `configuration`. `CertificateUtils.createCertificateLoader` resolves the component by kind, injects the configuration subset and calls `initialize()` before `TlsMaterial` invokes `loadKeyStore`.

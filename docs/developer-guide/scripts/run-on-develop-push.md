@@ -39,4 +39,4 @@ Displays step progress, a summary table, and published artifact names.
 ## Prerequisites
 
 - Java 21, Maven, Docker Desktop
-- Python with MkDocs (`mkdocs` and `mkdocs-material`)
+- Python with MkDocs (`mkdocs-material` and `mkdocs-include-markdown-plugin`)

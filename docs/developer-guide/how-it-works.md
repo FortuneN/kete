@@ -39,9 +39,9 @@ flowchart TD
     L --> M["Send to destination"]
 ```
 
-### Admin Events (CREATE:USER, UPDATE:REALM, etc.)
+### Admin Events (USER_CREATE, REALM_UPDATE, etc.)
 
-Same flow but uses `onEvent(AdminEvent, boolean)` and event type is `OPERATION:RESOURCE`.
+Same flow but uses `onEvent(AdminEvent, boolean)` and the event type is `RESOURCETYPE_OPERATIONTYPE` (e.g. `USER_CREATE`).
 
 ---
 
@@ -69,8 +69,8 @@ flowchart TD
     
     subgraph Shutdown
         M["Keycloak stops"] --> N["ProviderFactory.close()"]
-        N --> O["Close all destinations"]
-        O --> P["Shutdown executor"]
+        N --> O["Shutdown executor (wait for in-flight deliveries)"]
+        O --> P["Close all routes and destinations"]
     end
     
     Startup --> Runtime
@@ -134,7 +134,7 @@ Pool sizes are configurable per route:
 | **Virtual threads** | Parallel destination delivery without blocking |
 | **Destination pooling** | Predictable resource usage, virtual thread compatibility |
 | **Matcher caching** | O(1) lookup after first match per event type |
-| **Serializer singletons** | One instance shared across routes (except TemplateSerializer, which is transient) |
+| **Serializer singletons** | One instance shared across routes (except `template`, `multipart-form` and `url-encoded-form`, which are transient) |
 
 ---
 
@@ -144,7 +144,7 @@ Pool sizes are configurable per route:
 |------------|----------|
 | Destination connection failure | Logged, route skipped |
 | Serialization error | Logged, affects all routes using that serializer |
-| Matcher evaluation error | Treated as "reject" |
+| Matcher evaluation error | Logged as a send failure (`kete.events.failed.total`); the event is skipped for that route |
 | Message send failure | Retry if configured, otherwise logged |
 
 ---

@@ -25,6 +25,6 @@ kete.routes.myroute.destination.tls.key-store.password=changeit
 
 # Trust store (CA certificates)
 kete.routes.myroute.destination.tls.trust-store.loader.kind=pkcs12-file-base64
-kete.routes.myroute.destination.tls.trust-store.loader.base64=MIIFgTCCBGmgAwIBAgIQ...
+kete.routes.myroute.destination.tls.trust-store.loader.base64=MIIKegIBAzCCCj4GCSqGSIb3...
 kete.routes.myroute.destination.tls.trust-store.password=changeit
 ```

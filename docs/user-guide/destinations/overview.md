@@ -20,6 +20,9 @@ All destinations support:
 Most destinations support:
 
 - **Message Headers** - Event metadata sent with each message — see [Per-Destination Details](#per-destination-details) for which destinations support headers
+- **Custom Headers** - `destination.headers.<name>=<value>` adds static headers/properties/attributes to every message (where the protocol supports them). The names `eventkind`, `eventtype` and `contenttype` are reserved for the standard headers and are ignored if used as custom header names
+- **Authentication** - `destination.authentication-type` selects the authentication method; the allowed values and the properties each method needs are destination-specific (see the destination pages)
+- **OAuth 2.0 Client Credentials** - shared `destination.oauth.*` properties (external or Keycloak-internal token issuer) for `http`, `soap`, `websocket`, `signalr`, `socketio` and `pulsar` — see [HTTP → OAuth 2.0 Properties](http.md#oauth-20-properties)
 - **Content Encoding** - Compress payload with gzip or deflate — supported by HTTP-based and SDK-based destinations (HTTP, SOAP, gRPC, AWS EventBridge, AWS SNS, AWS SQS, Azure Event Grid, Azure Storage Queue, Azure Web PubSub, GCP Cloud Tasks) - see [Content Encodings](../content-encodings/overview.md)
 - **Content Transfer Encoding** - Encode payload with base64 — same destinations as Content Encoding - see [Content Transfer Encodings](../content-transfer-encodings/overview.md)
 
@@ -211,9 +214,9 @@ Header names are **all lowercase with no dashes or underscores** for maximum com
 | [Redis Stream](redis-stream.md) | ✅ | `contenttype` field | All three as stream entry fields |
 | [Redis Pub/Sub](redis-pubsub.md) | ❌ | Not supported | Protocol limitation |
 | [HTTP](http.md) | ✅ | Standard `Content-Type` header | `x-eventkind`, `x-eventtype` as custom headers; `Content-Type` as standard header |
-| [WebSocket](websocket.md) | ✅ | `contenttype` header | All three + custom as HTTP headers on WebSocket client (sent during handshake) |
-| [SignalR](signalr.md) | ❌ | Not supported | Message body only |
-| [Socket.IO](socketio.md) | ❌ | Not supported | Message body only |
+| [WebSocket](websocket.md) | ❌ | Not supported | Custom `destination.headers.*` are sent once as HTTP handshake headers; per-event headers cannot be delivered over the long-lived connection |
+| [SignalR](signalr.md) | ❌ | Not supported | Custom `destination.headers.*` are sent as HTTP handshake headers; no per-event headers |
+| [Socket.IO](socketio.md) | ❌ | Not supported | Custom `destination.headers.*` are sent as HTTP handshake headers; no per-event headers |
 | [STOMP](stomp.md) | ✅ | Native `content-type` header | `eventtype` and `eventkind` as STOMP headers |
 | [ZeroMQ](zeromq.md) | ❌ | Not supported | Raw message bytes only |
 | [GCP Pub/Sub](gcp-pubsub.md) | ✅ | `contenttype` attribute | All three as Pub/Sub message attributes |
@@ -238,6 +241,7 @@ Header names are **all lowercase with no dashes or underscores** for maximum com
 Most destinations support TLS encryption via the standard `tls.*` configuration properties. Exceptions:
 
 - **Azure Event Hubs** and **Azure Service Bus** — TLS is handled internally by the Azure SDK (always enabled, no `tls.*` config needed)
+- **Azure Event Grid**, **Azure Storage Queue** and **Azure Web PubSub** — the Azure SDK client uses the JVM default trust store; `tls.*` only affects the start-up connectivity check
 - **ZeroMQ** — uses CurveZMQ for encryption instead of TLS (see [ZeroMQ](zeromq.md))
 
 ### TLS Properties Reference
@@ -249,21 +253,27 @@ Most destinations support TLS encryption via the standard `tls.*` configuration 
 | `destination.tls.verify-hostname` | `false` | Verify the server's hostname against the certificate |
 | `destination.tls.trust-store.loader.kind` | — | Certificate loader kind (see below) |
 | `destination.tls.trust-store.loader.*` | — | Loader-specific properties |
-| `destination.tls.trust-store.password` | _(empty)_ | Trust store password |
+| `destination.tls.trust-store.password` | _(empty)_ | Trust store password (see note on password fallbacks below) |
 | `destination.tls.trust-store.type` | JVM default | Trust store type (e.g., `pkcs12`, `jks`) |
 | `destination.tls.trust-store.trust-manager-algorithm` | JVM default | Trust manager algorithm |
 | `destination.tls.key-store.loader.kind` | — | Certificate loader kind (see below) |
 | `destination.tls.key-store.loader.*` | — | Loader-specific properties |
-| `destination.tls.key-store.password` | _(empty)_ | Key store password |
+| `destination.tls.key-store.password` | _(empty)_ | Key store password (see note on password fallbacks below) |
 | `destination.tls.key-store.key-password` | _(empty)_ | Private key password (if different from key store password) |
 | `destination.tls.key-store.type` | JVM default | Key store type (e.g., `pkcs12`, `jks`) |
 | `destination.tls.key-store.key-manager-algorithm` | JVM default | Key manager algorithm |
+
+!!! note "Password fallbacks"
+    When opening a store, KETE tries the configured password first and then, in order, no password, an empty password, `changeit` and `secret`; the first one that works is used. An unprotected store therefore loads even if the configured password is wrong.
+
+!!! note "Loader configuration is always processed"
+    `tls.key-store.*` and `tls.trust-store.*` loaders are parsed and executed even when `tls.enabled=false`, so an invalid loader configuration fails route start-up regardless of `tls.enabled`.
 
 There are two main scenarios:
 
 ### TLS (Server Authentication)
 
-Your application verifies the server's certificate. Use a **trust store** containing the CA certificate(s) that signed the server's certificate.
+Your application verifies the server's certificate. Use a **trust store** containing the CA certificate(s) that signed the server's certificate. The JVM's default CA certificates are always added to the trust store, so a configured trust store extends (rather than replaces) system trust.
 
 ```bash
 kete.routes.myroute.destination.tls.enabled=true
@@ -342,7 +352,7 @@ For detailed information about each loader and their properties, see **[Certific
 | **[azure-servicebus](azure-servicebus.md)** | Azure Service Bus SDK (AMQP) | Azure Service Bus, Azure Service Bus Emulator |
 | **[azure-eventgrid](azure-eventgrid.md)** | Azure Event Grid REST API (SDK) | Azure Event Grid |
 | **[azure-webpubsub](azure-webpubsub.md)** | Azure Web PubSub REST API (SDK) | Azure Web PubSub |
-| **[gcp-cloud-tasks](gcp-cloud-tasks.md)** | Cloud Tasks REST API (SDK) | Google Cloud Tasks, Cloud Tasks Emulator |
+| **[gcp-cloud-tasks](gcp-cloud-tasks.md)** | Cloud Tasks gRPC API (SDK) | Google Cloud Tasks, Cloud Tasks Emulator |
 | **[grpc](grpc.md)** | gRPC (HTTP/2) | Any gRPC server |
 | **[signalr](signalr.md)** | SignalR (HTTP/WebSocket) | ASP.NET Core SignalR, Azure SignalR Service |
 | **[soap](soap.md)** | SOAP (HTTP/HTTPS) | Any SOAP endpoint |
@@ -584,6 +594,7 @@ kete.routes.events.destination.url=ws://websocket-server:8080/events
 **AWS Kinesis:**
 ```bash
 kete.routes.events.destination.kind=aws-kinesis
+kete.routes.events.destination.region=us-east-1
 kete.routes.events.destination.stream=keycloak-events
 kete.routes.events.destination.partition-key=keycloak
 ```
@@ -591,11 +602,15 @@ kete.routes.events.destination.partition-key=keycloak
 **AWS SNS:**
 ```bash
 kete.routes.events.destination.kind=aws-sns
+kete.routes.events.destination.region=us-east-1
+kete.routes.events.destination.account-id=123456789012
 kete.routes.events.destination.topic=keycloak-events
 ```
 
 **AWS SQS:**
 ```bash
 kete.routes.events.destination.kind=aws-sqs
+kete.routes.events.destination.region=us-east-1
+kete.routes.events.destination.account-id=123456789012
 kete.routes.events.destination.queue=keycloak-events
 ```

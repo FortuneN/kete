@@ -13,10 +13,12 @@ kete.routes.<name>.serializer.kind=cbor
 CBOR produces binary data, not human-readable text:
 
 ```
-A9 62 69 64 6B 65 76 65 6E 74 2D 75 75 69 64 64
-74 69 6D 65 1B 00 00 01 8D 7C E8 90 00 64 74 79
-70 65 65 4C 4F 47 49 4E ...
+BF 62 69 64 78 24 61 37 63 32 66 38 65 31 2D 34
+62 33 64 2D 34 61 39 65 2D 38 66 37 63 2D 32 64
+31 65 35 62 39 61 33 63 34 66 64 74 69 6D 65 1B ...
 ```
+
+Jackson writes an indefinite-length map (`BF` … `FF`) with the same property names and order as the JSON serializer.
 
 ## Binary Format
 

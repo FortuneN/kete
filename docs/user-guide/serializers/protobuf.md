@@ -18,7 +18,7 @@ Protobuf produces compact binary data, not human-readable text. Use a Protobuf l
 - Go: `google.golang.org/protobuf`
 - .NET: `Google.Protobuf`
 
-The `.proto` schema files needed to decode messages are in the [`schemas/protobuf/`](https://github.com/FortuneN/kete/tree/develop/schemas/protobuf) directory.
+The `.proto` schema files needed to decode messages are in the [`schemas/protobuf/`](https://github.com/FortuneN/kete/tree/develop/schemas/protobuf) directory. The compiled descriptor set (`protobuf.desc`) is generated at build time and shipped inside the KETE jar at `schemas/protobuf/protobuf.desc`; extract it from the jar or rebuild it with `protoc --descriptor_set_out=protobuf.desc --include_imports *.proto`.
 
 ## Schemas
 
@@ -91,7 +91,8 @@ from google.protobuf.descriptor_pool import DescriptorPool
 from google.protobuf.descriptor_pb2 import FileDescriptorSet
 from google.protobuf.message_factory import MessageFactory
 
-# Load the descriptor set shipped with KETE
+# Load the descriptor set: extract schemas/protobuf/protobuf.desc from the KETE jar,
+# or build it with: protoc --descriptor_set_out=protobuf.desc --include_imports *.proto
 with open("protobuf.desc", "rb") as f:
     fds = FileDescriptorSet()
     fds.ParseFromString(f.read())

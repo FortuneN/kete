@@ -83,13 +83,13 @@ public final class ConfigurationUtils {
 		// config
 
 		var map = new MapConfiguration(merged);
+		var configValues = ConfigurationUtils.getSubSet(map, Constants.ID);
 
-		if (!map.getBoolean(ENABLED, true)) {
+		if (!configValues.getBoolean(ENABLED, true)) {
 			return null;
 		}
 
 		var config = new Configuration();
-		var configValues = ConfigurationUtils.getSubSet(map, Constants.ID);
 
 		// metrics
 

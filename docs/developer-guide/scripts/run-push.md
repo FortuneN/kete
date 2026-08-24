@@ -33,11 +33,12 @@ The script requires two interactive inputs:
 
 | Code | Meaning |
 |------|---------|
-| `0` | Push completed successfully, or no commits to squash |
+| `0` | Push completed successfully, no commits to squash, or the user declined at the `Proceed?` prompt |
 | `1` | Error (dirty working tree, no merge-base found, or Git operation failed) |
 
 ## Prerequisites
 
+- PowerShell 7+
 - Git
 - Clean working tree (no uncommitted changes)
 - A branch that shares history with `origin/develop`

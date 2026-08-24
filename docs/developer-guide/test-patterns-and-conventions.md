@@ -2,7 +2,7 @@
 
 > **Analysis Date:** January 13, 2026  
 > **Updated:** January 28, 2026 (Added ExecutorUtils tests, renamed serializer folders)
-> **Total Unit Test Files Analyzed:** 247  
+> **Total Unit Test Files Analyzed:** 415  
 > **Framework:** JUnit 5 (Jupiter) + AssertJ + Mockito
 
 
@@ -105,81 +105,94 @@ src/test/java/io/github/fortunen/kete/unittests/
 
 ### 1.2 Package Organization Pattern
 
-**RULE:** Test packages mirror the main source class location, with an additional folder named after the class being tested (in lowercase).
+**RULE:** Test packages mirror the main source class location, with an additional folder named after the class being tested (in lowercase). Top-level classes get a folder directly under `unittests/`; classes in a sub-package get `unittests/<subpackage>/<classname>/`.
 
 ```
 Main Source:                                    Test Location:
-src/main/.../ProviderFactory.java       →       src/test/.../unittests/.../providerfactory/
-src/main/.../Provider.java              →       src/test/.../unittests/.../provider/
-src/main/.../Configuration.java         →       src/test/.../unittests/.../configuration/configuration/
-src/main/.../Route.java                 →       src/test/.../unittests/.../routes/route/
-src/main/.../utils/ValidationUtils.java →       src/test/.../unittests/.../utils/validationutils/
-src/main/.../utils/RouteUtils.java      →       src/test/.../unittests/.../routes/routeutils/
-src/main/.../destinations/HttpDestination.java → src/test/.../unittests/.../destinations/httpdestination/
-src/main/.../serializers/JsonSerializer.java   → src/test/.../unittests/.../serializers/jsonserializer/
-src/main/.../matchers/GlobMatcher.java          → src/test/.../unittests/.../matchers/globmatcher/
+src/main/.../ProviderFactory.java       →       src/test/.../unittests/providerfactory/
+src/main/.../Provider.java              →       src/test/.../unittests/provider/
+src/main/.../Route.java                 →       src/test/.../unittests/route/
+src/main/.../TlsMaterial.java           →       src/test/.../unittests/tlsmaterial/
+src/main/.../utils/ValidationUtils.java →       src/test/.../unittests/utils/validationutils/
+src/main/.../utils/RouteUtils.java      →       src/test/.../unittests/utils/routeutils/
+src/main/.../destinations/http/HttpDestination.java → src/test/.../unittests/destinations/httpdestination/
+src/main/.../destinations/http/HttpDestinationConfig.java → src/test/.../unittests/destinationconfigs/httpdestinationconfig/
+src/main/.../serializers/JsonSerializer.java   → src/test/.../unittests/serializers/jsonserializer/
+src/main/.../matchers/GlobMatcher.java          → src/test/.../unittests/matchers/globmatcher/
 ```
 
 ### 1.3 Folder Naming Rules
 
 | Element | Naming Pattern |
 |---------|----------------|
-| Top-level category folders | lowercase plural (e.g., `destinations/`, `serializers/`, `matchers/`, `utils/`, `routes/`) |
-| Class-under-test folder | lowercase class name (e.g., `httpdestination/`, `jsonserializer/`, `globmatcher/`) |
+| Top-level category folders | lowercase plural for packages (e.g., `destinations/`, `destinationconfigs/`, `serializers/`, `matchers/`, `certificateloaders/`, `utils/`) |
+| Class-under-test folder | lowercase class name (e.g., `httpdestination/`, `jsonserializer/`, `globmatcher/`, `route/`) |
 | Utility class folder | lowercase class name (e.g., `validationutils/`, `templateutils/`, `retryutils/`) |
 
 ### 1.4 Complete Folder Structure
 
 ```
 src/test/java/io/github/fortunen/kete/unittests/
-├── configuration/
-│   ├── configuration/
-│   │   └── constructorTests.java
-│   └── configurationutils/
-│       ├── constructorTests.java
-│       └── getConfigurationTests.java
+├── certificateloaders/
+│   ├── derfilebase64certificateloader/
+│   ├── derfilepathcertificateloader/
+│   ├── jksfilebase64certificateloader/
+│   ├── jksfilepathcertificateloader/
+│   ├── pemfilebase64certificateloader/
+│   ├── pemfilepathcertificateloader/
+│   └── ... (11 folders in total)
+├── contentencodings/
+│   ├── deflatecontentencoding/
+│   └── gzipcontentencoding/
+├── contenttransferencodings/
+│   └── base64contenttransferencoding/
+├── destinationconfig/  (5 files)
+├── destinationconfigs/
+│   ├── amqp091destinationconfig/
+│   ├── amqp1destinationconfig/
+│   ├── awseventbridgedestinationconfig/
+│   ├── awskinesisdestinationconfig/
+│   ├── awssnsdestinationconfig/
+│   ├── awssqsdestinationconfig/
+│   └── ... (29 folders in total)
+├── destinationpooledobjectfactory/  (4 files)
 ├── destinations/
 │   ├── amqp091destination/
 │   ├── amqp1destination/
-│   ├── httpdestination/
-│   ├── kafkadestination/
-│   ├── mqtt3destination/
-│   └── mqtt5destination/
+│   ├── awseventbridgedestination/
+│   ├── awskinesisdestination/
+│   ├── awssnsdestination/
+│   ├── awssqsdestination/
+│   └── ... (29 folders in total)
+├── eventmessage/  (37 files)
 ├── matchers/
 │   ├── globmatcher/
 │   ├── listmatcher/
 │   ├── regexmatcher/
 │   └── sqlmatcher/
-├── provider/
-├── providerfactory/
-├── retries/
-│   └── retryutils/
-├── routes/
-│   ├── route/
-│   └── routeutils/
+├── natsauthmaterial/  (2 files)
+├── oauthmaterial/  (7 files)
+├── provider/  (4 files)
+├── providerfactory/  (14 files)
+├── route/  (6 files)
+├── serializerroutes/  (1 files)
 ├── serializers/
+│   ├── avroserializer/
 │   ├── cborserializer/
 │   ├── csvserializer/
 │   ├── jsonserializer/
+│   ├── multipartformserializer/
 │   ├── propertiesserializer/
-│   ├── smileserializer/
-│   ├── tomlserializer/
-│   ├── xmlserializer/
-│   └── yamlserializer/
+│   └── ... (13 folders in total)
+├── tlsmaterial/  (5 files)
 └── utils/
+    ├── awsutils/
+    ├── azureutils/
+    ├── base64utils/
     ├── certificateutils/
     ├── configurationutils/
     ├── destinationutils/
-    ├── executorutils/
-    ├── fileutils/
-    ├── iocutils/
-    ├── matcherutils/
-    ├── metricsutils/
-    ├── retryutils/
-    ├── routeutils/
-    ├── serializerutils/
-    ├── templateutils/
-    └── validationutils/
+    └── ... (20 folders in total)
 ```
 
 
@@ -1094,17 +1107,21 @@ public class {methodName}Tests {
 
 | Category | Files |
 |----------|-------|
-| utils/validationutils/ | 68 |
-| serializers/ | 16 |
-| matchers/ | 8 |
-| providerfactory/ | 9 |
-| destinations/ | 10 |
-| routes/ | 7 |
-| provider/ | 5 |
-| configuration/ | 3 |
-| retries/ | 2 |
-| utils/ (other) | 12 |
-| **Total** | **140** |
+| utils/ (validationutils/ 97, other 64) | 161 |
+| destinations/ | 70 |
+| eventmessage/ | 37 |
+| serializers/ | 30 |
+| destinationconfigs/ | 29 |
+| certificateloaders/ | 22 |
+| providerfactory/ | 14 |
+| matchers/ | 12 |
+| oauthmaterial/ | 7 |
+| route/ | 6 |
+| destinationconfig/, tlsmaterial/ | 5 each |
+| contentencodings/, destinationpooledobjectfactory/, provider/ | 4 each |
+| contenttransferencodings/, natsauthmaterial/ | 2 each |
+| serializerroutes/ | 1 |
+| **Total** | **415** |
 
 
 
@@ -1268,8 +1285,9 @@ public void shouldSerializeAndDeserializeEventWithAllFields() {
 
 ```
 unittests/destinations/<destination>/
-    sendTests.java   ← tests send() → doSend() (message building, headers, template substitution, payload encoding)
-    closeTests.java  ← tests close() (verifies client cleanup on mocks)
+    sendTests.java       ← tests send() → doSend() (message building, headers, template substitution, payload encoding)
+    closeTests.java      ← tests close() (verifies client cleanup on mocks)
+    isHealthyTests.java  ← tests isHealthy() for destinations with a connection-state probe
 ```
 
 **NEVER in these tests:**
@@ -1334,11 +1352,13 @@ Each destination MUST have exactly **3 integration send tests** in a single `sen
 
 ```
 integrationtests/<destination>/
-    TestBase.java     ← Container lifecycle, TLS/nginx helpers, configureDestination(), verification helpers
-    sendTests.java    ← Exactly 3 tests: shouldSend_NonTls, shouldSend_Tls, shouldSend_mTls
+    TestBase.java        ← Container lifecycle, TLS/nginx helpers, configureDestination(), verification helpers
+    sendTests.java       ← Exactly 3 tests: shouldSend_NonTls, shouldSend_Tls, shouldSend_mTls
+    isHealthyTests.java  ← Broker-outage resilience test (only for the 8 probe-bearing destinations:
+                            amqp091, mqtt3, mqtt5, nats, natsjetstream, pulsar, redispubsub, redisstream)
 ```
 
-**No other integration test files.** No `initializeTests`, `closeTests`, or extra send tests.
+**No other integration test files.** No `initializeTests`, `closeTests`, or extra send tests. The one protocol exception is ZeroMQ, whose `sendTests` covers its socket patterns (`PushPull`, `PublishSubscribe`, `PublishSubscribeWithEnvelope`, `CurveSecurity`, `ConnectMode`) instead of the TLS pair, because ZeroMQ uses CurveZMQ rather than TLS.
 
 #### TLS Test Pattern (Emulator + Nginx)
 
@@ -1414,9 +1434,9 @@ If an official emulator or emulator image exists for a destination system, integ
 | Azure Storage Queue | `mcr.microsoft.com/azure-storage/azurite` | **No** — use Azurite |
 | GCP Pub/Sub | `google/cloud-sdk:emulators` | **No** — use Pub/Sub emulator |
 | HTTP Webhook | N/A (no emulator concept) | **Yes** — MockWebServer IS the target server |
-| Redis | `redis:latest`, `valkey/valkey:latest`, etc. | **No** — use real broker |
-| Kafka | `apache/kafka:latest`, `redpandadata/redpanda`, etc. | **No** — use real broker |
-| MQTT | `eclipse-mosquitto:latest`, `emqx:latest`, etc. | **No** — use real broker |
+| Redis | `redis:7-alpine` (pinned tags, never `latest`) | **No** — use real broker |
+| Kafka | `apache/kafka:3.8.0` | **No** — use real broker |
+| MQTT | `hivemq/hivemq-ce:2024.3` (integration), `eclipse-mosquitto:2.0` (E2E) | **No** — use real broker |
 
 **Why?** MockWebServer validates that your code sends HTTP requests matching your assumptions. A real emulator validates that those requests are actually understood and processed by the target system. Testing against mocks tests your fantasy; testing against emulators tests reality.
 
@@ -1457,15 +1477,15 @@ Do **NOT** rely on MockWebServer request recording to verify delivery. The test 
 
 #### E2E Tests — Exactly 1 Per Destination
 
-Each destination has exactly **1 E2E test** that verifies the full pipeline: Keycloak → KETE plugin → destination broker → message received.
+Each destination has exactly **1 E2E test class** that verifies the full pipeline: Keycloak → KETE plugin → destination broker → message received. The only additions are `HttpDestinationOAuthE2ETests` (OAuth internal/external modes) and `MetricsE2ETests` (Keycloak `/metrics` exposure), which test cross-cutting features rather than a destination.
 
 #### Reference Implementations
 
 | Pattern | Reference |
 |---|---|
-| Emulator + nginx TLS proxy | `integrationtests/azurestoragequeuedestination/` (Azurite) |
-| Emulator + nginx TLS proxy | `integrationtests/gcppubsubdestination/` (GCP Pub/Sub) |
-| Native TLS on broker | `integrationtests/redisdestination/` (Redis with native TLS) |
+| Emulator + nginx TLS proxy | `integrationtests/gcppubsubdestination/` (GCP Pub/Sub emulator) |
+| Emulator + nginx TLS proxy | `integrationtests/gcpcloudtasksdestination/`, `integrationtests/grpcdestination/` |
+| Native TLS on broker | `integrationtests/redispubsubdestination/`, `integrationtests/redisstreamdestination/` (Redis with native TLS) |
 | MockWebServer (target IS the server) | `integrationtests/httpdestination/` |
 
 

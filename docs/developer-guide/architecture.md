@@ -27,10 +27,10 @@ KETE uses a lightweight, custom dependency injection system (`IocUtils`) instead
 - **Fast Startup**: Minimal reflection, no XML parsing, no proxy generation
 - **Keycloak Native**: Works seamlessly as a Keycloak provider extension without conflicts
 
-The implementation is ~200 lines of code that:
+The implementation (`IocUtils`) is ~80 lines of code that:
 1. Scans `io.github.fortunen.kete` package for `@Component` annotations
 2. Registers SINGLETON and TRANSIENT scopes
-3. Instantiates components with constructor injection
+3. Instantiates components through their public no-args constructor (there is no dependency injection)
 
 This approach keeps the plugin lightweight while still providing clean component management.
 
@@ -97,7 +97,7 @@ This ensures events are only processed for **successful operations**.
 ### Virtual Threads
 
 - Used for parallel destination delivery
-- Executor created in `ProviderFactory.run()`
+- Executor created when `ProviderFactory` is instantiated (field initializer)
 - Executor: `Executors.newVirtualThreadPerTaskExecutor()`
 
 
@@ -106,7 +106,7 @@ This ensures events are only processed for **successful operations**.
 
 ### 1. Matcher Result Caching
 
-- Two caches in `Route.accept()`: `acceptRealmCache` and `acceptEventCache`
+- Two caches, one behind `Route.acceptRealm()` and one behind `Route.acceptEvent()`
 - Max 1,000 entries per cache per route
 - Cache key: realm name or event type string
 - O(1) lookup after first match
@@ -145,15 +145,23 @@ kete.routes.myroute.destination.pool.max-idle=10    # Default: 10
 kete.routes.myroute.destination.pool.max-total=20   # Default: 20
 ```
 
-| Setting | Default | Configurable | Rationale |
-|---------|---------|:------------:|----------|
-| `pool.min-idle` | 1 |  | Warm pool for typical workloads |
-| `pool.max-idle` | 10 |  | Limit idle connections |
-| `pool.max-total` | 20 |  | Prevent broker overload |
-| Block on Exhaustion | true |  | Wait rather than fail |
-| `pool.max-wait-seconds` | -1 (infinite) |  | Wait indefinitely for available object |
-| `pool.test-on-borrow` | true |  | Cull unhealthy instances at borrow (cheap `isHealthy()` state check) |
-| `pool.test-on-return` | true |  | Cull instances whose connection died during send |
+| Setting | Default | Rationale |
+|---------|---------|-----------|
+| `pool.min-idle` | 1 | Warm pool for typical workloads |
+| `pool.max-idle` | 10 | Limit idle connections |
+| `pool.max-total` | 20 | Prevent broker overload |
+| `pool.block-when-exhausted` | true | Wait rather than fail |
+| `pool.max-wait-seconds` | 30 | Bounded wait for an available instance (`-1` = wait indefinitely) |
+| `pool.lifo` | true | Reuse the most recently returned instance |
+| `pool.fairness` | false | No FIFO fairness for waiting borrowers |
+| `pool.test-on-create` | true | Validate newly created instances |
+| `pool.test-on-borrow` | true | Cull unhealthy instances at borrow (cheap `isHealthy()` state check) |
+| `pool.test-on-return` | true | Cull instances whose connection died during send |
+| `pool.test-while-idle` | true | Evictor validates idle instances |
+| `pool.num-tests-per-eviction-run` | 3 | Instances checked per evictor run |
+| `pool.time-between-eviction-runs-seconds` | 60 | Evictor interval |
+| `pool.min-evictable-idle-time-seconds` | -1 | Hard idle eviction disabled |
+| `pool.soft-min-evictable-idle-time-seconds` | 1800 | Idle instances above `min-idle` evicted after 30 minutes |
 
 **Constraints:**
 - `pool.min-idle` must be > 0
@@ -163,13 +171,13 @@ kete.routes.myroute.destination.pool.max-total=20   # Default: 20
 
 #### Pooled Objects by Destination
 
-All 29 destinations use Apache Commons Pool2. Each destination pools its primary client/connection object:
+All 29 destinations use Apache Commons Pool2. The pool holds `Destination` instances; each pooled instance owns its own client/connection object:
 
 | Destination(s) | Pooled Object | Notes |
 |----------------|---------------|-------|
 | MQTT 3 | `MqttClient` (Paho v3) | Individual client instances |
 | MQTT 5 | `MqttClient` (Paho v5) | Individual client instances |
-| AMQP 0.9.1 | `Channel` | Channels from shared Connection |
+| AMQP 0.9.1 | `Connection` + `Channel` | One connection and channel per pooled instance |
 | AMQP 1.0 | `JMSContext` | JMS connections via Qpid |
 | Kafka | `KafkaProducer` | Producer instances |
 | HTTP | `HttpClient` | HTTP client instances |
@@ -188,15 +196,14 @@ All 29 destinations use Apache Commons Pool2. Each destination pools its primary
 #### Usage Pattern
 
 ```java
-// Borrow from pool
-Client client = null;
+// Route.send(): borrow a Destination, return it on success, invalidate it on failure
+var destination = pool.borrowObject();
 try {
-    client = clientPool.borrowObject();
-    client.send(message);
-} finally {
-    if (client != null) {
-        clientPool.returnObject(client);
-    }
+    destination.send(message);
+    pool.returnObject(destination);
+} catch (Exception exception) {
+    pool.invalidateObject(destination);   // closes the instance; the next borrow creates a fresh one
+    throw exception;
 }
 ```
 

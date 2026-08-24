@@ -14,6 +14,14 @@ kete.enabled=false
 |----------|---------|-------------|
 | `kete.enabled` | `true` | Master switch for KETE |
 
+When KETE is disabled it removes itself from the event-listener list of every realm at start-up, so no events are delivered to it.
+
+## Automatic Event Listener Registration
+
+When KETE is enabled it registers itself at start-up: for every realm accepted by at least one route it adds the `kete` event listener, enables user events and admin events (with representation details) and enables **all** event types. Realms that no route accepts have the `kete` listener removed. No manual "Event Listeners" configuration in the Admin Console is required.
+
+Only realms that exist when Keycloak starts are processed — after creating a new realm, restart Keycloak for KETE to register on it.
+
 ## Disabling Routes
 
 To disable a specific route while keeping others active:

@@ -103,8 +103,6 @@ public class SoapDestination extends Destination<SoapDestinationConfig> {
 
 		var payload = encodePayload(envelope.getBytes(StandardCharsets.UTF_8));
 
-		var body = new String(payload, StandardCharsets.UTF_8);
-
 		// request
 
 		var requestBuilder = HttpRequest
@@ -147,7 +145,7 @@ public class SoapDestination extends Destination<SoapDestinationConfig> {
 			requestBuilder.header("Content-Transfer-Encoding", config.getContentTransferEncodingName());
 		}
 
-		requestBuilder.method("POST", HttpRequest.BodyPublishers.ofString(body));
+		requestBuilder.method("POST", HttpRequest.BodyPublishers.ofByteArray(payload));
 
 		var response = httpClient.send(requestBuilder.build(), HttpResponse.BodyHandlers.ofString());
 

@@ -500,7 +500,7 @@ See: [SOAP Destination](soap.md)
 Use `destination.kind=socketio`:
 
 - **Socket.IO v3/v4 servers** — Node.js, Python, Java implementations
-- **Any Engine.IO-compatible server** — EIO protocol v3 and v4
+- **Any Engine.IO-compatible server** — as supported by the bundled socket.io-client-java (Engine.IO v4 / Socket.IO v3+ servers)
 
 **Quickstarts available:** [socketio](https://github.com/FortuneN/kete/tree/release/quick-starts/socketio/)
 

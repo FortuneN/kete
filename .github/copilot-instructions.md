@@ -43,7 +43,7 @@
 
 18. **Container `.start()` before `.getMappedPort()`** — When manually managing container lifecycle (not using `@Container`), always call `.start()` before accessing mapped ports. An unstarted container has no port mappings.
 
-19. **Verify connection ordering** — In integration tests, always call `destination.verify()` before `destination.send()`. The verify step validates connectivity and catches configuration errors early.
+19. **Initialize before send** — In integration tests, always call `destination.initialize()` before `destination.send()`. Initialization opens the connection and catches configuration errors early.
 
 20. When you run container-based/involved tests, **always** monitor the docker output in real time as tests execute. Do not wait until things hang and timeouts occur. This allows for faster feedback and quicker debugging when failures occur.
 
@@ -119,7 +119,7 @@ These tests work by:
 
 - **E2E tests**: Exactly **1 test** per destination
 
-- **No other integration test files**: No `initializeTests`, `closeTests`, or extra send tests. Only `TestBase.java` + `sendTests.java`.
+- **No other integration test files**: No `initializeTests`, `closeTests`, or extra send tests. Only `TestBase.java` + `sendTests.java`, plus `isHealthyTests.java` (broker-outage resilience) for destinations that expose a connection-state probe.
 
 - **Real emulator over mocks**: If a real emulator or official emulator image exists for a destination (e.g., Azurite for Azure Storage Queue, `google/cloud-sdk:emulators` for GCP Pub/Sub), integration and E2E tests MUST use it. MockWebServer is only acceptable when the destination has no emulator concept (e.g., HTTP webhooks where MockWebServer IS the target server, not a stand-in). Testing against mocks validates your assumptions; testing against real emulators validates reality.
 

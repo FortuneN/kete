@@ -10,6 +10,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.http.HttpStatus;
 
+import com.google.api.client.http.HttpRequestInitializer;
 import com.google.api.client.http.HttpResponseException;
 import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.services.pubsub.Pubsub;
@@ -53,7 +54,16 @@ public class GcpPubSubDestination extends Destination<GcpPubSubDestinationConfig
 
 		var credentials = config.getCredentials();
 		var httpTransport = config.getHttpTransport();
-		var initializer = ValidationUtils.isNotNull(credentials) ? new HttpCredentialsAdapter(credentials) : null;
+		var timeoutMillis = (int) config.getTimeout().toMillis();
+		var credentialsAdapter = ValidationUtils.isNotNull(credentials) ? new HttpCredentialsAdapter(credentials) : null;
+
+		HttpRequestInitializer initializer = request -> {
+			if (ValidationUtils.isNotNull(credentialsAdapter)) {
+				credentialsAdapter.initialize(request);
+			}
+			request.setConnectTimeout(timeoutMillis);
+			request.setReadTimeout(timeoutMillis);
+		};
 
 		// build Pub/Sub client
 

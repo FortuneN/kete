@@ -44,7 +44,7 @@ services:
 Key conventions:
 
 - **Custom images**: All services use pre-built images from `ghcr.io/fortunen/kete/quick-start-<name>` (built from `quick-starts/$images/<name>/Dockerfile`)
-- **Health checks**: Every broker service defines a health check with `interval: 5s`, `timeout: 5s`, `retries: 30`
+- **Health checks**: Most local broker services define a health check (typically `interval: 5s`, `timeout: 5s`, `retries: 30`); echo servers and cloud-service quick-starts (no local broker) have none
 - **Dependency ordering**: Keycloak depends on the broker becoming healthy before starting
 - **Route name**: All quickstarts use `quick-start` as the route name
 - **Ports**: Keycloak always exposes `8080` (HTTP) and `9000` (health/metrics)
@@ -129,6 +129,7 @@ All Docker images are built from Dockerfiles in `quick-starts/$images/`:
 | Image | Dockerfile | Description |
 |-------|-----------|-------------|
 | `quick-start-azure-queue-setup` | `quick-starts/$images/azure-queue-setup/Dockerfile` | Azure Storage Queue provisioning (Python) |
+| `quick-start-grpc-echo` | `quick-starts/$images/grpc-echo/Dockerfile` | gRPC echo server |
 | `quick-start-http-echo` | `quick-starts/$images/http-echo/Dockerfile` | HTTP echo server |
 | `quick-start-signalr-echo` | `quick-starts/$images/signalr-echo/Dockerfile` | SignalR echo server (.NET) |
 | `quick-start-socketio-echo` | `quick-starts/$images/socketio-echo/Dockerfile` | Socket.IO echo server (Node.js) |

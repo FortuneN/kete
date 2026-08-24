@@ -22,11 +22,11 @@ This version is used for the JAR manifest, Docker image tags, Git tag, and GitHu
 
 ## Pipeline Steps
 
-The script executes 5 steps sequentially. Each step requires all previous steps to have passed — if any step fails, subsequent steps are skipped and the release is aborted.
+The script executes 5 steps sequentially. Step 1 is currently disabled in the script (the full suite runs on every push to `develop`, so a release is cut from an already-tested commit) and is recorded as passed. Steps 3–5 are skipped if any previous step failed.
 
 | Step | Name | Description |
 |------|------|-------------|
-| 1 | Run All Tests (with Coverage) | Executes `run-all-tests.ps1` (unit → integration → E2E), then generates a coverage badge from JaCoCo results |
+| 1 | Run All Tests (with Coverage) | **Disabled** — kept in the script for reference; marked as passed |
 | 2 | Package Versioned JAR | Runs `mvn package -DskipTests -Drevision=<version>` to produce `target/kete.jar` with the version imprinted in `META-INF/MANIFEST.MF` |
 | 3 | Build and Push Docker Images | Auto-discovers images from `quick-starts/$images/`, builds each with Docker, tags as `:<version>` and `:latest`, pushes both tags to `ghcr.io/fortunen/kete` |
 | 4 | Build Documentation Site | Runs `python -m mkdocs build --strict` to validate and build the documentation site |
@@ -34,7 +34,7 @@ The script executes 5 steps sequentially. Each step requires all previous steps 
 
 ## Coverage Badge
 
-After tests pass, the script generates a coverage badge:
+The coverage-badge generation is part of the disabled step 1; the badge is produced by `run-on-develop-push.ps1` instead. For reference, it:
 
 1. Reads `target/site/jacoco/jacoco.csv`
 2. Calculates line coverage percentage from `LINE_MISSED` and `LINE_COVERED` columns
@@ -72,10 +72,11 @@ The release is created using the GitHub CLI (`gh`):
 
 ## Prerequisites
 
+- PowerShell 7+
 - Java 21
 - Maven
 - Docker
-- Python with MkDocs and plugins installed
+- Python with `mkdocs-material` and `mkdocs-include-markdown-plugin`
 - GitHub CLI (`gh`) authenticated
 - Push access to `ghcr.io/fortunen/kete`
 - Push access to the Git repository
@@ -91,15 +92,6 @@ The release is created using the GitHub CLI (`gh`):
 ══════════════════════════════════════════════════════════════════════════════════
 
   ┌──────────────────────────────────────────────────────────────────────────┐
-  │  STEP 1 of 5 │ RUN ALL TESTS (WITH COVERAGE)                           │
-  └──────────────────────────────────────────────────────────────────────────┘
-
-    ...test output...
-
-    ✓ Test execution complete [4.2 min]
-    ✓ Coverage: 85.3% (badge updated)
-
-  ┌──────────────────────────────────────────────────────────────────────────┐
   │  STEP 2 of 5 │ PACKAGE VERSIONED JAR                                   │
   └──────────────────────────────────────────────────────────────────────────┘
 
@@ -112,7 +104,7 @@ The release is created using the GitHub CLI (`gh`):
     ✓ quick-start-keycloak [:2026.01.31.18.45 + :latest]
     ✓ quick-start-activemq-artemis [:2026.01.31.18.45 + :latest]
     ✓ quick-start-mosquitto [:2026.01.31.18.45 + :latest]
-    ...47 more images...
+    ...48 more images...
     ✓ quick-start-zeromq-subscriber [:2026.01.31.18.45 + :latest]
 
   ┌──────────────────────────────────────────────────────────────────────────┐
@@ -140,7 +132,7 @@ The release is created using the GitHub CLI (`gh`):
   Docker Images Published:
     ghcr.io/fortunen/kete/quick-start-keycloak:2026.01.31.18.45
     ghcr.io/fortunen/kete/quick-start-activemq-artemis:2026.01.31.18.45
-    ...and 49 more images
+    ...and 49 more images (51 in total)
 
   GitHub Release:
     https://github.com/FortuneN/kete/releases/tag/2026.01.31.18.45

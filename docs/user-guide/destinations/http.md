@@ -38,6 +38,7 @@ Stream Keycloak events to HTTP/REST endpoints.
     kete.routes.oauth-api.realm-matchers.realm=list:master
     kete.routes.oauth-api.destination.kind=http
     kete.routes.oauth-api.destination.url=https://api.example.com/api/v1/events
+    kete.routes.oauth-api.destination.authentication-type=oauth
     kete.routes.oauth-api.destination.oauth.enabled=true
     kete.routes.oauth-api.destination.oauth.token-url=https://auth.example.com/oauth/token
     kete.routes.oauth-api.destination.oauth.client-id=keycloak-client
@@ -52,8 +53,10 @@ Stream Keycloak events to HTTP/REST endpoints.
     kete.routes.internal-oauth.realm-matchers.realm=list:master
     kete.routes.internal-oauth.destination.kind=http
     kete.routes.internal-oauth.destination.url=https://api.example.com/api/events
+    kete.routes.internal-oauth.destination.authentication-type=oauth
     kete.routes.internal-oauth.destination.oauth.enabled=true
     kete.routes.internal-oauth.destination.oauth.mode=internal
+    kete.routes.internal-oauth.destination.oauth.realm=master
     ```
 
 === "With Custom Retry"
@@ -74,6 +77,7 @@ Stream Keycloak events to HTTP/REST endpoints.
 - OAuth 2.0 Client Credentials with token caching
 - Custom headers and configurable timeouts
 - TLS/SSL with mTLS support
+- Start-up connectivity check: a `GET` to the URL's scheme, host and port root; an unreachable host fails route initialization
 
 
 
@@ -105,7 +109,7 @@ When using `destination.url`:
 - The **host** is extracted from the URL
 - The **port** defaults to 80 for http, 443 for https
 - The **path and query string** are extracted
-- **TLS is auto-enabled** when the scheme is `https`
+- **TLS follows the scheme**: `https` enables TLS and `http` disables it, overriding `tls.enabled` in both directions
 
 If both `url` and individual properties are specified, `url` takes precedence.
 
@@ -123,7 +127,7 @@ Instead of `url`, you can configure each component separately:
 |----------|---------|-------------|---------|
 | `destination.port` | `80` (HTTP) / `443` (HTTPS) | HTTP port | `8080` |
 | `destination.path-and-query` | `/` | URL path and query string | `/api/v1/events?source=keycloak` |
-| `destination.method` | `POST` | HTTP method (POST or PUT) | `PUT` |
+| `destination.method` | `POST` | HTTP method, upper-cased and passed through unvalidated (e.g. `POST`, `PUT`, `PATCH`) | `PUT` |
 | `destination.timeout-seconds` | `10` | Request timeout in seconds | `60` |
 | `destination.content-encoding` | _(empty)_ | Compress body (e.g., `gzip`, `deflate`). Sets `Content-Encoding` header. | `gzip` |
 | `destination.content-transfer-encoding` | _(empty)_ | Encode body (e.g., `base64`). Sets `Content-Transfer-Encoding` header. | `base64` |
@@ -139,6 +143,8 @@ Headers are configured under `destination.headers.<NAME>`:
 kete.routes.my-api.destination.headers.X-API-Key=my-secret-key
 kete.routes.my-api.destination.headers.X-Source=keycloak
 ```
+
+Every request also carries the standard `x-eventkind`, `x-eventtype` and `Content-Type` headers. Custom headers with those names (case-insensitive), or named `eventkind`/`eventtype`/`contenttype`, are ignored.
 
 ### Authentication
 
@@ -173,7 +179,7 @@ kete.routes.my-api.destination.x-api-key-value=sk-1234567890
 
 ### OAuth 2.0 Properties
 
-The HTTP destination supports two OAuth modes:
+OAuth is activated by `destination.authentication-type=oauth`; the `oauth.*` properties below are only read when that is set. The HTTP destination supports two OAuth modes:
 
 #### External Mode (Default)
 
@@ -198,7 +204,8 @@ Use the current Keycloak instance as the OAuth server. This mode **automatically
 |----------|----------|---------|-------------|
 | `destination.oauth.enabled` | Yes | `false` | Enable OAuth 2.0 |
 | `destination.oauth.mode` | Yes | - | Must be `internal` |
-| `destination.oauth.realm` | No | Route realm | Override realm for token URL |
+| `destination.oauth.realm` | Yes | - | Realm that hosts the auto-registered client and issues the tokens |
+| `destination.oauth.token-url` | No | `http://localhost:8080/realms/<realm>/protocol/openid-connect/token` | Token endpoint (override when Keycloak is not reachable on `localhost:8080`) |
 | `destination.oauth.client-id` | No | `kete-oauth-client` | Override auto-generated client ID |
 | `destination.oauth.client-secret` | No | Auto-generated | Override auto-generated secret |
 | `destination.oauth.scope` | No | `""` | Requested OAuth scopes |
@@ -206,14 +213,16 @@ Use the current Keycloak instance as the OAuth server. This mode **automatically
 **Internal Mode Example:**
 
 ```bash
-# Simplest OAuth setup - just 2 properties!
+# Simplest OAuth setup - just 4 properties!
+kete.routes.api.destination.authentication-type=oauth
 kete.routes.api.destination.oauth.enabled=true
 kete.routes.api.destination.oauth.mode=internal
+kete.routes.api.destination.oauth.realm=master
 ```
 
 This automatically:
 
-1. Creates a confidential client `kete-oauth-client` in the route's realm
+1. Creates a confidential client `kete-oauth-client` in the `oauth.realm` realm
 2. Enables service account (client credentials grant)
 3. Generates a secure client secret
 4. Configures the token URL for the realm
@@ -249,8 +258,10 @@ Use the current Keycloak instance for OAuth - no external auth server needed:
 kete.routes.internal-oauth.realm-matchers.realm=list:master
 kete.routes.internal-oauth.destination.kind=http
 kete.routes.internal-oauth.destination.url=https://api.example.com/v1/events
+kete.routes.internal-oauth.destination.authentication-type=oauth
 kete.routes.internal-oauth.destination.oauth.enabled=true
 kete.routes.internal-oauth.destination.oauth.mode=internal
+kete.routes.internal-oauth.destination.oauth.realm=master
 kete.routes.internal-oauth.event-matchers.filter=glob:*
 ```
 
@@ -262,6 +273,7 @@ kete.routes.api.destination.kind=http
 kete.routes.api.destination.url=https://api.example.com/v1/events
 kete.routes.api.destination.method=PUT
 kete.routes.api.destination.timeout-seconds=60
+kete.routes.api.destination.authentication-type=oauth
 kete.routes.api.destination.oauth.enabled=true
 kete.routes.api.destination.oauth.mode=external
 kete.routes.api.destination.oauth.token-url=https://auth.example.com/token

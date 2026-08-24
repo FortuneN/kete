@@ -70,6 +70,11 @@ public class MyDestination extends Destination<MyDestinationConfig> {
     }
     
     @Override
+    public boolean isHealthy() {
+        return client != null && client.isConnected();   // cheap state check, no I/O — used by the pool
+    }
+
+    @Override
     public void close() {
         if (client != null) {
             client.disconnect();
@@ -83,11 +88,12 @@ public class MyDestination extends Destination<MyDestinationConfig> {
 | Aspect | Details |
 |--------|---------|
 | `@Component(name = "xxx")` | The name becomes `destination.kind` value |
-| Scope | Destinations are TRANSIENT by default (new instance per route) |
+| Scope | Destinations are TRANSIENT (a new instance for every pooled object, up to `pool.max-total` per route) |
 | `config` field | Automatically populated before `doInitialize()` is called |
-| `doInitialize()` | Called once at startup, set up connections here |
+| `doInitialize()` | Called each time the pool creates an instance; set up connections here |
 | `doSend(EventMessage)` | Called for each event, send the message here |
-| `close()` | Called on shutdown, clean up resources |
+| `isHealthy()` | Cheap connection-state check used by the pool on borrow/return; must not perform I/O |
+| `close()` | Called by the pool when the instance is destroyed (invalidated, evicted or pool closed) |
 
 ### 4. Use the Destination
 
@@ -221,7 +227,8 @@ public class MyCertificateLoader extends CertificateLoader {
     }
     
     @Override
-    public void loadKeyStore(KeyStore keyStore, char[] password) throws Exception {
+    @SneakyThrows
+    public void loadKeyStore(KeyStore keyStore, char[] password) {
         // Load certificates/keys into the keyStore
         String source = configuration.getString("source");
         // ... parse and add entries to keyStore
@@ -245,6 +252,24 @@ kete.routes.my-route.destination.tls.trust-store.loader.source=/path/to/source
 ```
 
 ---
+
+## Adding a Content Encoding or Content Transfer Encoding
+
+Content encodings (`ContentEncoding`: `encode(byte[])` / `decode(byte[])`) and content transfer encodings (`ContentTransferEncoding`, same two methods) are components as well:
+
+```java
+@Component(name = "my-encoding")
+public class MyContentEncoding extends ContentEncoding {
+
+    @Override
+    public byte[] encode(byte[] bytes) { ... }
+
+    @Override
+    public byte[] decode(byte[] bytes) { ... }
+}
+```
+
+The component name becomes the value of `destination.content-encoding` / `destination.content-transfer-encoding`. Encodings are only applied by the destinations that call `encodePayload()` (see [Content Encodings](../user-guide/content-encodings/overview.md#supported-destinations)).
 
 ## Component Discovery
 

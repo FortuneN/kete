@@ -86,7 +86,7 @@ Stream Keycloak events to Amazon Kinesis Data Streams.
 | `destination.credentials-file-path` | _(empty)_ | Path to AWS credentials file | `/path/to/credentials` |
 | `destination.credentials-file-text` | _(empty)_ | AWS credentials file content inline | `[default]\naws_access_key_id=...` |
 | `destination.credentials-file-base64` | _(empty)_ | Base64-encoded AWS credentials file | `W2RlZmF1bHRd...` |
-| `destination.credentials-profile` | `default` | Profile name within credentials file | `production` |
+| `destination.credentials-profile` | _(`AWS_PROFILE` env var, else the SDK default profile)_ | Profile name within credentials file | `production` |
 | `destination.timeout-seconds` | `10` | HTTP connect and request timeout in seconds | `30` |
 
 ### Dynamic Stream Name (Templating)

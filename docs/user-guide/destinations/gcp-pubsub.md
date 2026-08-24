@@ -26,6 +26,7 @@ Stream Keycloak events to Google Cloud Pub/Sub.
     kete.routes.pubsub.destination.kind=gcp-pubsub
     kete.routes.pubsub.destination.project=my-gcp-project
     kete.routes.pubsub.destination.topic=keycloak-events
+    kete.routes.pubsub.destination.authentication-type=service-account-file-path
     kete.routes.pubsub.destination.credentials-file-path=/secrets/service-account.json
     ```
 
@@ -35,6 +36,7 @@ Stream Keycloak events to Google Cloud Pub/Sub.
     kete.routes.pubsub.destination.kind=gcp-pubsub
     kete.routes.pubsub.destination.project=my-gcp-project
     kete.routes.pubsub.destination.topic=keycloak-events
+    kete.routes.pubsub.destination.authentication-type=service-account-file-base64
     kete.routes.pubsub.destination.credentials-file-base64=ewogICJ0eXBlIjogInNlcnZpY2VfYWNj...
     ```
 
@@ -44,6 +46,7 @@ Stream Keycloak events to Google Cloud Pub/Sub.
     kete.routes.pubsub.destination.kind=gcp-pubsub
     kete.routes.pubsub.destination.project=my-gcp-project
     kete.routes.pubsub.destination.topic=keycloak-events
+    kete.routes.pubsub.destination.authentication-type=service-account-file-text
     kete.routes.pubsub.destination.credentials-file-text={"type":"service_account","project_id":"my-gcp-project",...}
     ```
 
@@ -63,6 +66,7 @@ Stream Keycloak events to Google Cloud Pub/Sub.
     kete.routes.pubsub.destination.kind=gcp-pubsub
     kete.routes.pubsub.destination.project=my-gcp-project
     kete.routes.pubsub.destination.topic=keycloak-events
+    kete.routes.pubsub.destination.authentication-type=service-account-file-path
     kete.routes.pubsub.destination.credentials-file-path=/secrets/service-account.json
     kete.routes.pubsub.destination.ordering-key=keycloak
     ```
@@ -71,7 +75,7 @@ Stream Keycloak events to Google Cloud Pub/Sub.
 
 ## Features
 
-- Google Cloud Pub/Sub REST API integration (no GCP SDK required)
+- Google Cloud Pub/Sub REST API integration via the Google API client library
 - Service account authentication with automatic OAuth 2.0 token management
 - Three credential loading methods (file path, inline text, Base64)
 - Emulator support for local development and testing
@@ -98,7 +102,7 @@ Stream Keycloak events to Google Cloud Pub/Sub.
 | Property | Default | Description | Example |
 |----------|---------|-------------|---------|
 | `destination.url` | `https://pubsub.googleapis.com` | Pub/Sub REST API base URL (override for emulators) | `http://localhost:8085` |
-| `destination.timeout-seconds` | `10` | HTTP request and connect timeout in seconds | `30` |
+| `destination.timeout-seconds` | `10` | HTTP connect and read timeout in seconds, applied to every Pub/Sub request | `30` |
 | `destination.ordering-key` | _(empty)_ | Ordering key for all published messages (supports templating) | `keycloak` |
 | `destination.authentication-type` | _(empty)_ | Authentication method (see [Authentication](#authentication-credentials)) | `service-account-file-path` |
 
@@ -129,7 +133,7 @@ Every published message includes these Pub/Sub message attributes automatically:
 | `eventtype` | The Keycloak event type | `LOGIN`, `USER_CREATE` |
 | `contenttype` | MIME type of the message body | `application/json` |
 
-### Custom Attributes
+### Custom Headers
 
 Custom attributes can be added to Pub/Sub messages using the `headers.*` prefix:
 
@@ -151,19 +155,20 @@ GCP Pub/Sub uses service account credentials for authentication. Set `destinatio
 | `service-account-file-base64` | `destination.credentials-file-base64` | GCP service account JSON provided as a Base64-encoded string |
 | `application-default` | _(none)_ | Uses Application Default Credentials (ADC) |
 
+The three `credentials-file-*` properties are mutually exclusive, and none of them may be set together with `authentication-type=application-default`.
+
 !!! note "Emulator Mode"
     Credentials are **not required** when using the GCP Pub/Sub Emulator. Set `destination.url` to the emulator endpoint (e.g., `http://localhost:8085`) and omit all credential properties.
 
 !!! warning "Credential Validation"
-    If `destination.url` is the default (`https://pubsub.googleapis.com`), at least one credential property must be set. Using the emulator URL without credentials is allowed.
+    If `destination.url` is the default (`https://pubsub.googleapis.com`), `destination.authentication-type` must be set (together with its matching credentials property). Credentials properties alone, without `authentication-type`, are ignored. Using the emulator URL without credentials is allowed.
 
 #### How Authentication Works
 
-1. KETE reads the service account JSON (containing `client_email` and `private_key`)
-2. Creates a signed JWT (RS256) with scope `https://www.googleapis.com/auth/pubsub`
-3. Exchanges the JWT at Google's token endpoint for an OAuth 2.0 access token
-4. Caches and automatically refreshes the access token
-5. Includes the access token as a `Bearer` token in all Pub/Sub API requests
+1. KETE loads the service account JSON into the Google auth library (`ServiceAccountCredentials`) scoped to `https://www.googleapis.com/auth/pubsub`
+2. The auth library signs a JWT (RS256) and exchanges it at Google's token endpoint for an OAuth 2.0 access token
+3. The auth library caches and automatically refreshes the access token
+4. KETE attaches the access token as a `Bearer` token to every Pub/Sub API request
 
 ### TLS Properties
 

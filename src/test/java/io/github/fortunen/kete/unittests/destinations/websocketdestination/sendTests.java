@@ -2,12 +2,13 @@ package io.github.fortunen.kete.unittests.destinations.websocketdestination;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Set;
 
 import org.java_websocket.client.WebSocketClient;
 import org.junit.jupiter.api.AfterAll;
@@ -44,7 +45,6 @@ public class sendTests {
 		destination.setUrlTemplated(false);
 		destination.setBinaryMode(false);
 		destination.setOauthEnabled(false);
-		destination.setCustomHeadersEntrySet(Set.of());
 
 		var body = "test-body".getBytes(StandardCharsets.UTF_8);
 		var message = new EventMessage("test-realm", "evt-001", body, "LOGIN", "application/json", null, Constants.EVENT, null, null);
@@ -56,9 +56,7 @@ public class sendTests {
 		// assert
 
 		verify(wsClient).send(eq("test-body"));
-		verify(wsClient).addHeader(Constants.MESSAGE_HEADER_EVENT_KIND, Constants.EVENT);
-		verify(wsClient).addHeader(Constants.MESSAGE_HEADER_EVENT_TYPE, "LOGIN");
-		verify(wsClient).addHeader(Constants.MESSAGE_HEADER_CONTENT_TYPE, "application/json");
+		verify(wsClient, never()).addHeader(anyString(), anyString());
 	}
 
 	@Test
@@ -72,7 +70,6 @@ public class sendTests {
 		destination.setUrlTemplated(false);
 		destination.setBinaryMode(true);
 		destination.setOauthEnabled(false);
-		destination.setCustomHeadersEntrySet(Set.of());
 
 		var body = new byte[]{0x01, 0x02, 0x03};
 		var message = new EventMessage("test-realm", "evt-001", body, "LOGIN", "application/octet-stream", null, Constants.EVENT, null, null);

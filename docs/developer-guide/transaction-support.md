@@ -107,21 +107,17 @@ To test transaction rollback behavior:
 ```java
 @Test
 public void shouldNotPublishEventWhenTransactionRollsBack() {
-    // Simulate Keycloak session with transaction that will rollback
-    KeycloakSession session = mock(KeycloakSession.class);
-    KeycloakTransactionManager txManager = mock(KeycloakTransactionManager.class);
-    when(session.getTransactionManager()).thenReturn(txManager);
-    
-    // Create provider and trigger event
-    Provider provider = new Provider(..., session);
-    Event event = createTestEvent();
+    // The provider only forwards to the EventListenerTransaction enlisted by ProviderFactory
+    var transaction = mock(EventListenerTransaction.class);
+    var provider = new Provider(transaction);
+    var event = createTestEvent();
     provider.onEvent(event);
-    
-    // Simulate transaction rollback
+
+    // The transaction is enlisted after-completion; simulate a rollback
     capturedTransaction.rollbackImpl();
-    
-    // Verify event was NOT published to destinations
-    verify(mockDestination, never()).sendEvent(...);
+
+    // Verify the event was NOT delivered to any destination
+    verify(mockDestination, never()).send(any(EventMessage.class));
 }
 ```
 

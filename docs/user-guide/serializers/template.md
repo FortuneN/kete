@@ -37,7 +37,7 @@ Exactly **one** template source must be set. This follows the same triple-source
 | `${id}` | Event ID | `evt-abc-123` |
 | `${type}` | Event type name | `LOGIN` |
 | `${realmId}` | Realm ID | `my-realm` |
-| `${realmName}` | Realm display name | `My Realm` |
+| `${realmName}` | Realm name | `my-realm` |
 | `${clientId}` | Client ID | `my-app` |
 | `${userId}` | User ID | `abc-123-def` |
 | `${sessionId}` | Session ID | `sess-456` |
@@ -56,13 +56,13 @@ Event detail keys support both raw (`${details.redirect_uri}`) and camelCase (`$
 | `${operationType}` | Operation type name | `CREATE` |
 | `${resourceType}` | Resource type (raw string) | `USER` |
 | `${realmId}` | Realm ID | `my-realm` |
-| `${realmName}` | Realm display name | `My Realm` |
+| `${realmName}` | Realm name | `my-realm` |
 | `${resourcePath}` | Resource path | `users/abc-123` |
 | `${representation}` | JSON representation | `{"username":"john"}` |
 | `${error}` | Error string (if any) | |
 | `${time}` | Epoch milliseconds | `1707500000000` |
 | `${authDetails.realmId}` | Auth realm | `master` |
-| `${authDetails.realmName}` | Auth realm display name | `Master Realm` |
+| `${authDetails.realmName}` | Authenticating realm name | `master` |
 | `${authDetails.clientId}` | Auth client | `admin-cli` |
 | `${authDetails.userId}` | Auth user | `admin-uuid` |
 | `${authDetails.ipAddress}` | Auth IP | `10.0.0.1` |

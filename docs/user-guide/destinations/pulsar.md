@@ -74,7 +74,7 @@ Stream Keycloak events to Apache Pulsar.
 - ✅ Message batching
 - ✅ Token, Basic, and OAuth 2.0 authentication
 - ✅ TLS/mTLS support
-- ✅ Event metadata in message properties
+- ✅ Event metadata in message properties (`eventkind`, `eventtype`, `contenttype`) and the event type as message key
 
 
 
@@ -140,7 +140,7 @@ When `authentication-type` is `oauth`, the standard `oauth.*` sub-properties app
 
 | Property | Required | Default | Description |
 |----------|----------|---------|-------------|
-| `oauth.enabled` | No | `false` | Enable OAuth 2.0 Client Credentials flow |
+| `oauth.enabled` | Yes | `false` | Must be `true` when `authentication-type=oauth` |
 | `oauth.mode` | No | `external` | `external` or `internal` |
 | `oauth.token-url` | Yes* | - | OAuth token endpoint URL |
 | `oauth.client-id` | Yes* | - | OAuth client ID |
@@ -165,7 +165,7 @@ kete.routes.pulsar.destination.headers.X-Source=keycloak
 kete.routes.pulsar.destination.headers.X-Environment=production
 ```
 
-All custom headers are included in the Pulsar message properties.
+All custom headers are included in the Pulsar message properties, alongside the standard `eventkind`, `eventtype` and `contenttype` properties that are always set. The Pulsar message key is set to the event type.
 
 ### Topic Templating
 

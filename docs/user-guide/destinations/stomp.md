@@ -224,6 +224,7 @@ The following STOMP headers are always included with each message:
 | `content-length` | Message body size in bytes |
 | `eventtype` | Keycloak event type (e.g., `LOGIN`, `LOGOUT`) |
 | `eventkind` | Event kind (`EVENT` or `ADMIN_EVENT`) |
+| `receipt` | Event ID, requesting a broker RECEIPT frame (only when `receipt-enabled=true`, the default) |
 
 
 
@@ -262,7 +263,8 @@ kete.routes.secure-stomp.destination.destination=/queue/keycloak-events
 kete.routes.secure-stomp.destination.username=admin
 kete.routes.secure-stomp.destination.password=secret
 kete.routes.secure-stomp.destination.tls.enabled=true
-kete.routes.secure-stomp.destination.tls.trust-store.path=/certs/ca.pem
+kete.routes.secure-stomp.destination.tls.trust-store.loader.kind=pem-file-path
+kete.routes.secure-stomp.destination.tls.trust-store.loader.path=/certs/ca.pem
 ```
 
 ### With Heart-Beat
