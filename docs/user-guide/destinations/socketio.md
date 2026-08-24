@@ -49,6 +49,7 @@ Stream Keycloak events to Socket.IO servers.
     kete.routes.socketio-tls.destination.kind=socketio
     kete.routes.socketio-tls.destination.url=https://socketio-server.example.com
     kete.routes.socketio-tls.destination.event-name=keycloak-event
+    kete.routes.socketio-tls.destination.tls.enabled=true
     kete.routes.socketio-tls.destination.tls.trust-store.loader.kind=pem-file-path
     kete.routes.socketio-tls.destination.tls.trust-store.loader.path=/certs/ca.pem
     ```
@@ -178,7 +179,7 @@ See [TLS & mTLS](overview.md#tls-mtls) for full details on TLS options.
 
 | Property | Default | Description |
 |----------|---------|-------------|
-| `destination.tls.enabled` | `false` | Enable TLS (auto-enabled when using `https://` URL) |
+| `destination.tls.enabled` | `false` | Enable TLS — required for `tls.*` stores to be applied (otherwise the JVM default trust store is used) |
 | `destination.tls.key-store.*` | - | Client certificate for mTLS |
 | `destination.tls.trust-store.*` | - | CA certificates |
 
@@ -210,11 +211,12 @@ kete.routes.ns-events.destination.path=/ws/
 kete.routes.secure.destination.kind=socketio
 kete.routes.secure.destination.url=https://socketio.internal.example.com
 kete.routes.secure.destination.event-name=keycloak-event
+kete.routes.secure.destination.tls.enabled=true
 kete.routes.secure.destination.tls.trust-store.loader.kind=pem-file-path
 kete.routes.secure.destination.tls.trust-store.loader.path=/certs/ca.pem
 kete.routes.secure.destination.tls.key-store.loader.kind=pkcs12-file-path
 kete.routes.secure.destination.tls.key-store.loader.path=/certs/client.p12
-kete.routes.secure.destination.tls.key-store.loader.password=changeit
+kete.routes.secure.destination.tls.key-store.password=changeit
 ```
 
 ### Example 4: High-Throughput Dashboard

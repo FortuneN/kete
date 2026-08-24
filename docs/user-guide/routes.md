@@ -29,8 +29,8 @@ flowchart LR
 ```
 
 1. **Event arrives** from Keycloak
-2. **Matchers filter** — does this route want this event?
-3. **Serializer formats** — convert to JSON, XML, etc.
+2. **Serializer formats** — the event is serialized once per distinct serializer (JSON, XML, etc.)
+3. **Matchers filter** — does this route want this event?
 4. **Destination sends** — deliver to Kafka, RabbitMQ, etc.
 
 ## Quick Example
@@ -55,6 +55,34 @@ kete.routes.my-route.enabled=false
 ```
 
 To disable KETE entirely, see [Enabling & Disabling](enabling-disabling.md).
+
+## Delivery Semantics
+
+- Delivery happens **after the Keycloak transaction commits**, asynchronously on a virtual-thread executor — events never block the Keycloak request, and routes never see events from rolled-back transactions.
+- Routes are independent: a failing route does not affect the others, and there is no ordering guarantee across routes.
+- Delivery is best-effort: after the route's [retry](retry.md) attempts are exhausted the event is logged at `WARN` and dropped (there is no dead-letter queue).
+- A route whose destination fails to initialize at start-up is dropped with `WARN Failed to initialize route : <name>`; the remaining routes start normally.
+
+## Route Properties
+
+| Property | Default | Description |
+|----------|---------|-------------|
+| `kete.routes.<name>.enabled` | `true` | Enable/disable the route |
+| `kete.routes.<name>.realm-matchers.<id>` | _(all realms)_ | Realm matcher — see [Matchers](matchers/overview.md) |
+| `kete.routes.<name>.realm-match-mode` | `any` | `any` or `all` |
+| `kete.routes.<name>.event-matchers.<id>` | _(all events)_ | Event matcher — see [Matchers](matchers/overview.md) |
+| `kete.routes.<name>.event-match-mode` | `any` | `any` or `all` |
+| `kete.routes.<name>.serializer.kind` | `json` | Serializer — see [Serializers](serializers/overview.md) |
+| `kete.routes.<name>.serializer.*` | - | Serializer-specific properties |
+| `kete.routes.<name>.destination.kind` | _(required)_ | Destination — see [Destinations](destinations/overview.md) |
+| `kete.routes.<name>.destination.*` | - | Destination-specific properties |
+| `kete.routes.<name>.destination.authentication-type` | - | Destination authentication method (values are destination-specific) |
+| `kete.routes.<name>.destination.headers.<header>` | - | Custom headers (`eventkind`, `eventtype`, `contenttype` are reserved and ignored) |
+| `kete.routes.<name>.destination.content-encoding` | - | `gzip` or `deflate` — see [Content Encodings](content-encodings/overview.md) |
+| `kete.routes.<name>.destination.content-transfer-encoding` | - | `base64` — see [Content Transfer Encodings](content-transfer-encodings/overview.md) |
+| `kete.routes.<name>.destination.tls.*` | - | TLS/mTLS — see [TLS & mTLS](destinations/overview.md#tls-mtls) |
+| `kete.routes.<name>.destination.pool.*` | - | Destination pool — see [Destination Pool](destinations/overview.md#destination-pool) |
+| `kete.routes.<name>.retry.*` | - | Retry — see [Retry](retry.md) |
 
 ## Multiple Routes
 

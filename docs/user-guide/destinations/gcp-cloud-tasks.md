@@ -28,6 +28,7 @@ Stream Keycloak events to Google Cloud Tasks.
     kete.routes.tasks.destination.location=us-central1
     kete.routes.tasks.destination.queue=keycloak-events
     kete.routes.tasks.destination.target-url=https://my-service.run.app/events
+    kete.routes.tasks.destination.authentication-type=service-account-file-path
     kete.routes.tasks.destination.credentials-file-path=/secrets/service-account.json
     ```
 
@@ -39,6 +40,7 @@ Stream Keycloak events to Google Cloud Tasks.
     kete.routes.tasks.destination.location=us-central1
     kete.routes.tasks.destination.queue=keycloak-events
     kete.routes.tasks.destination.target-url=https://my-service.run.app/events
+    kete.routes.tasks.destination.authentication-type=service-account-file-base64
     kete.routes.tasks.destination.credentials-file-base64=ewogICJ0eXBlIjogInNlcnZpY2VfYWNj...
     ```
 
@@ -59,7 +61,7 @@ Stream Keycloak events to Google Cloud Tasks.
 
 ## Features
 
-- Google Cloud Tasks REST API integration via official SDK
+- Google Cloud Tasks gRPC API integration via the official SDK stubs
 - Creates HTTP tasks that invoke a target URL with the event payload
 - Message headers (`eventkind`, `eventtype`, `contenttype`) sent as HTTP headers on the task request
 - Custom headers support via `destination.headers.*`
@@ -91,7 +93,7 @@ Stream Keycloak events to Google Cloud Tasks.
 | `destination.endpoint` | `cloudtasks.googleapis.com:443` | Cloud Tasks gRPC API endpoint (override for emulators/testing) | `localhost:8090` |
 | `destination.use-plaintext` | `false` | Use plaintext gRPC (no TLS) — for emulators | `true` |
 | `destination.http-method` | `POST` | HTTP method for the target invocation | `PUT` |
-| `destination.timeout-seconds` | `10` | HTTP request timeout in seconds | `30` |
+| `destination.timeout-seconds` | `10` | gRPC deadline for the start-up queue check (task creation calls are not deadlined) | `30` |
 | `destination.authentication-type` | _(empty)_ | Authentication method (see [Authentication](#authentication-credentials)) | `service-account-file-path` |
 
 ### Dynamic Queue Name (Templating)
@@ -116,11 +118,13 @@ GCP Cloud Tasks uses service account credentials for authentication. Set `destin
 | `service-account-file-base64` | `destination.credentials-file-base64` | GCP service account JSON provided as a Base64-encoded string |
 | `application-default` | _(none)_ | Uses Application Default Credentials (ADC) |
 
+The three `credentials-file-*` properties are mutually exclusive, and none of them may be set together with `authentication-type=application-default`.
+
 !!! note "Custom Endpoint Mode"
     Credentials are **not required** when using a custom `destination.endpoint` (e.g., a local emulator). Set `destination.endpoint` to the custom endpoint, enable `destination.use-plaintext=true`, and omit all credential properties.
 
 !!! warning "Credential Validation"
-    If `destination.endpoint` is the default (`cloudtasks.googleapis.com:443`), at least one credential property must be set.
+    If `destination.endpoint` is the default (`cloudtasks.googleapis.com:443`), `destination.authentication-type` must be set (together with its matching credentials property). Credentials properties alone, without `authentication-type`, are ignored.
 
 ### Custom Headers
 
@@ -144,7 +148,7 @@ See [TLS & mTLS](overview.md#tls-mtls) for full details on TLS options.
 | `destination.tls.trust-store.*` | - | CA certificates |
 
 !!! note "Google Cloud Tasks TLS"
-    When connecting to the real Google Cloud Tasks service (`https://cloudtasks.googleapis.com`), TLS is handled automatically via HTTPS — no explicit TLS configuration needed. TLS properties are useful when connecting through a proxy or custom endpoint.
+    When connecting to the real Google Cloud Tasks service (`cloudtasks.googleapis.com:443`), the gRPC channel negotiates TLS with the system trust store — no explicit TLS configuration needed. `tls.*` properties supply a custom trust store / client certificate for the gRPC channel, which is useful when connecting through a proxy or custom endpoint.
 
 
 

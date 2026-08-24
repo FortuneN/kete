@@ -13,10 +13,12 @@ kete.routes.<name>.serializer.kind=smile
 Smile produces binary data, not human-readable text:
 
 ```
-3A 29 0A 00 80 69 64 FA 65 76 65 6E 74 2D 75 75
-69 64 80 74 69 6D 65 25 00 00 01 8D 7C E8 90 00
-80 74 79 70 65 FA 4C 4F 47 49 4E ...
+3A 29 0A 01 FA 81 69 64 63 61 37 63 32 66 38 65
+31 2D 34 62 33 64 2D 34 61 39 65 2D 38 66 37 63
+2D 32 64 31 65 35 62 39 61 33 63 34 66 83 74 69 ...
 ```
+
+The stream starts with the Smile header `3A 29 0A 01` followed by a start-object marker (`FA`) and the same property names and order as the JSON serializer.
 
 ## Binary Format
 

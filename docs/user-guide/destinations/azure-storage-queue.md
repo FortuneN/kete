@@ -71,9 +71,11 @@ Stream Keycloak events to Azure Storage Queue.
 ### Optional Properties
 
 | Property | Default | Description | Example |
-|----------|---------|-------------|---------|| `destination.endpoint` | _(empty)_ | Storage account queue endpoint (required for `managed-identity` / `default-azure-credential` auth) | `https://mystorageaccount.queue.core.windows.net` |
+|----------|---------|-------------|---------|
+| `destination.endpoint` | _(empty)_ | Storage account queue endpoint (required for `managed-identity` / `default-azure-credential` auth) | `https://mystorageaccount.queue.core.windows.net` |
 | `destination.authentication-type` | _(empty)_ | Authentication method: `connection-string`, `managed-identity`, `default-azure-credential` | `managed-identity` |
-| `destination.managed-identity-client-id` | _(empty)_ | Client ID for user-assigned managed identity | `your-client-id` || `destination.message-ttl` | `0` | Message TTL in seconds (`0` = Azure default 7 days, `-1` = no expiry) | `3600` |
+| `destination.managed-identity-client-id` | _(empty)_ | Client ID for user-assigned managed identity | `your-client-id` |
+| `destination.message-ttl` | `0` | Message TTL in seconds (`0` = Azure default 7 days, `-1` = no expiry) | `3600` |
 | `destination.timeout-seconds` | `10` | HTTP connect and request timeout in seconds | `30` |
 
 ### Dynamic Queue Name (Templating)
@@ -122,6 +124,8 @@ QueueEndpoint=https://myaccount.queue.core.windows.net;SharedAccessSignature=sv=
 AccountName=myaccount;SharedAccessSignature=sv=2024-08-04&ss=q&sig=...
 ```
 
+The SAS token is appended as query parameters to each request. No signing is needed.
+
 #### Managed Identity
 
 ```bash
@@ -139,8 +143,6 @@ kete.routes.asq.destination.authentication-type=default-azure-credential
 kete.routes.asq.destination.endpoint=https://mystorageaccount.queue.core.windows.net
 kete.routes.asq.destination.queue=keycloak-events
 ```
-
-The SAS token is appended as query parameters to each request. No signing is needed.
 
 !!! note "Emulator Mode"
     When using Azurite, use the well-known Azurite development connection string with an explicit `QueueEndpoint` pointing to the emulator:

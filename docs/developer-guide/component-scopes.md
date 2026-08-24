@@ -32,7 +32,8 @@ Inspired by .NET Core DI concepts (Transient/Scoped/Singleton):
 - Stateless services
 - Request-scoped operations
 - Operations that should not share state
-- Most destinations (all 27 are TRANSIENT)\n- TemplateSerializer (the only TRANSIENT serializer; the other 8 are SINGLETON)
+- All 29 destinations, the 4 matchers and the 11 certificate loaders
+- The `template`, `multipart-form` and `url-encoded-form` serializers (the other 10 serializers are SINGLETON)
 
 **Lifecycle**:
 ```
@@ -42,7 +43,7 @@ Request 3: Container.get(Component) → New Instance C created
 ```
 
 **Important**: 
--  The instance is **NOT** disposed after use - it remains until GC
+-  The container never disposes instances; pooled destinations are closed by the destination pool (`destroyObject` → `close()`) when invalidated, evicted or when the pool shuts down
 -  Multiple calls create multiple independent instances
 -  Each instance has its own state
 -  Does NOT mean "temporary" or "disposable"
@@ -64,10 +65,8 @@ public class HttpDestination extends Destination {
 **Analogy (.NET Core)**: Similar to `services.AddSingleton<T>()`
 
 **Use Cases**:
-- Global shared state
-- Expensive resources (connection pools, caches)
-- Configuration managers
-- Logger instances
+- Stateless, thread-safe services shared by all routes (the singleton serializers)
+- Expensive, immutable resources (e.g. Jackson `ObjectMapper`/`ObjectWriter`)
 
 **Lifecycle**:
 ```
@@ -76,12 +75,12 @@ Request 2: Container.get(Component) → Same Instance A returned
 Request 3: Container.get(Component) → Same Instance A returned
 ```
 
-**Example**:
+**Example** (`JsonSerializer`):
 ```java
-@Component(name = "logger", scope = Component.SINGLETON)
-public class GlobalLogger {
-    // Single shared instance across all components
-    private static final Map<String, Level> logLevels = new ConcurrentHashMap<>();
+@Component(name = "json", scope = Component.SINGLETON)
+public class JsonSerializer extends Serializer {
+    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private String contentType = "application/json";
 }
 ```
 
@@ -146,19 +145,9 @@ With **SINGLETON** scope:
 - Reduces memory footprint
 - Jackson serializers are immutable after configuration
 
-## Why SINGLETON for Logger?
-
-Loggers are:
-- Stateless (log messages don't require instance state)
-- Expensive to create (but lightweight to use)
-- Shared across all components
-
-With **SINGLETON** scope:
-- All components share one logger instance
-- Reduces memory footprint
-- Consistent logging configuration
-
 ## Common Patterns
+
+The examples below are illustrative shapes, not classes that exist in KETE.
 
 ### Pattern 1: Stateless Service (TRANSIENT)
 
@@ -182,9 +171,9 @@ public class RabbitMqDestination extends Destination {
     private String cachedAccessToken;    // State: unique per destination
     
     @Override
-    public void initialize(Configuration config) {
-        // Each instance initializes with its own config
-        this.connection = factory.newConnection();
+    protected void doInitialize() {
+        // Each instance initializes with its own config (the `config` field)
+        this.connection = config.getConnectionFactory().newConnection();
         this.channel = connection.createChannel();
     }
 }
@@ -247,17 +236,17 @@ public class HttpDestination extends Destination { }
 public class KafkaDestination extends Destination { }
 ```
 
-**Container behavior**:
+**Container behavior** (`IocUtils.get(name, type)`):
 ```java
 // SINGLETON: Same instance returned
-JsonSerializer s1 = container.get(JsonSerializer.class);  // Instance A
-JsonSerializer s2 = container.get(JsonSerializer.class);  // Same Instance A
-assert s1 == s2;  //  Same SINGLETON instance
+var s1 = IocUtils.get("json", Serializer.class);  // Instance A
+var s2 = IocUtils.get("json", Serializer.class);  // Same Instance A
+assert s1 == s2;
 
 // TRANSIENT: New instance each time
-HttpDestination d1 = container.get(HttpDestination.class);  // Instance B
-HttpDestination d2 = container.get(HttpDestination.class);  // Instance C
-assert d1 != d2;  //  Different TRANSIENT instances
+var d1 = IocUtils.get("http", Destination.class);  // Instance B
+var d2 = IocUtils.get("http", Destination.class);  // Instance C
+assert d1 != d2;
 ```
 
 ## Debugging
@@ -265,22 +254,11 @@ assert d1 != d2;  //  Different TRANSIENT instances
 ### Check Component Scope
 
 ```java
-Class<?> componentClass = MyComponent.class;
-Component annotation = componentClass.getAnnotation(Component.class);
-String scope = annotation.scope();
-System.out.println("Scope: " + scope);  // "TRANSIENT" or "SINGLETON"
+var annotation = MyComponent.class.getAnnotation(Component.class);
+System.out.println("Scope: " + annotation.scope());  // "transient" (default) or "singleton"
 ```
 
-### Verify Instance Creation
-
-```java
-// Enable debug logging
-logger.setLevel(Level.FINE);
-
-// Component creation will be logged
-Component instance = container.get("component-name");
-// Log: "Created new TRANSIENT instance of component-name"
-```
+Component creation is not logged; `IocUtils` scans `io.github.fortunen.kete` with the Reflections library once and instantiates components through their public no-args constructor.
 
 ## Related Documentation
 

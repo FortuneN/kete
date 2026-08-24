@@ -91,8 +91,10 @@ Stream Keycloak events to Amazon EventBridge.
 | `destination.credentials-file-path` | _(empty)_ | Path to AWS credentials file | `/path/to/credentials` |
 | `destination.credentials-file-text` | _(empty)_ | AWS credentials file content inline | `[default]\naws_access_key_id=...` |
 | `destination.credentials-file-base64` | _(empty)_ | Base64-encoded AWS credentials file | `W2RlZmF1bHRd...` |
-| `destination.credentials-profile` | `default` | Profile name within credentials file | `production` |
+| `destination.credentials-profile` | _(`AWS_PROFILE` env var, else the SDK default profile)_ | Profile name within credentials file | `production` |
 | `destination.timeout-seconds` | `10` | HTTP connect and request timeout in seconds | `30` |
+| `destination.content-encoding` | _(empty)_ | Compress the event payload (`gzip`, `deflate`) — see [Content Encodings](../content-encodings/overview.md) | `gzip` |
+| `destination.content-transfer-encoding` | _(empty)_ | Encode the event payload (`base64`) — see [Content Transfer Encodings](../content-transfer-encodings/overview.md) | `base64` |
 
 ### Dynamic Event Bus (Templating)
 
@@ -137,8 +139,10 @@ AWS authentication is controlled by the `authentication-type` property:
 | `credentials-file-text` | AWS credentials file content inline | `credentials-file-text`, optionally `credentials-profile` |
 | `credentials-file-base64` | Base64-encoded AWS credentials file | `credentials-file-base64`, optionally `credentials-profile` |
 | `default-credentials-chain` | Full AWS default credential provider chain | — |
-| `web-identity-token` | OIDC Web Identity Token (EKS IRSA) | `AWS_WEB_IDENTITY_TOKEN_FILE` env var |
+| `web-identity-token` | OIDC Web Identity Token (EKS IRSA) | `AWS_WEB_IDENTITY_TOKEN_FILE` and `AWS_ROLE_ARN` env vars |
 | _(not set)_ | Anonymous credentials (e.g., LocalStack) | — |
+
+Credential properties must match the selected `authentication-type`: for example `access-key-id` is rejected when `authentication-type=credentials-file-path`, and the `credentials-file-*` properties are rejected when `authentication-type=access-key`. `access-key-id` and `secret-access-key` must be set together.
 
 #### Access Key
 

@@ -6,36 +6,47 @@ Complete guide to testing Keycloak Events to Everywhere.
 
 ## Test Types
 
+All tests live under `src/test/java/io/github/fortunen/kete/` and are run by Maven Surefire. There is no Failsafe plugin and no include filter, so a bare `mvn test` runs **all three categories** (unit, integration and end-to-end — the latter two need Docker). Use the `-Dtest` package filters below, or the `run-*.ps1` scripts that wrap them.
+
 ### Unit Tests
 
 **Location:** `src/test/java/io/github/fortunen/kete/unittests/`  
 **Framework:** JUnit 5 + AssertJ + Mockito  
-**Purpose:** Test individual components in isolation
+**Purpose:** Test individual components in isolation — zero I/O (no containers, sockets, servers or Docker)
 
 **Run:**
 ```bash
-mvn test
+mvn test -Dtest="io.github.fortunen.kete.unittests.**"
+# or
+.\run-unit-tests.ps1
 ```
 
 ### Integration Tests
 
-**Purpose:** Test extension with real message brokers  
-**Uses:** Testcontainers for Kafka, RabbitMQ, MQTT, etc.
+**Location:** `src/test/java/io/github/fortunen/kete/integrationtests/<destination>destination/`  
+**Purpose:** Exercise each `Destination` class directly against a real broker, emulator or target server started with Testcontainers (no Keycloak involved)  
+**Files:** `TestBase.java` (container lifecycle, TLS/nginx helpers, verification helpers) + `sendTests.java` (`shouldSend_NonTls`, `shouldSend_Tls`, `shouldSend_mTls`), plus `isHealthyTests.java` for the probe-bearing destinations (broker-outage resilience)
 
 **Run:**
 ```bash
-mvn verify
+mvn test -Dtest="io.github.fortunen.kete.integrationtests.**"
+# or
+.\run-integration-tests.ps1
 ```
+
+See [Integration Tests](integration-tests.md) for the conventions.
 
 ### End-to-End Tests
 
 **Location:** `src/test/java/io/github/fortunen/kete/endtoendtests/`  
-**Purpose:** Test full event flow from serialization to destination delivery
-**Uses:** Testcontainers with actual brokers
+**Purpose:** Full pipeline — the shaded `target/kete.jar` is deployed into a real Keycloak container (`quay.io/keycloak/keycloak:26.0.0`), a login is triggered through the admin client, and the event is read back from the destination container  
+**Uses:** `KeycloakContainer` (`testcontainers-keycloak`) + broker/emulator containers on a shared network; the jar is built on demand with `mvn package -DskipTests` if missing
 
 **Run:**
 ```bash
-mvn test -Dtest="io.github.fortunen.kete.endtoendtests.*"
+mvn test -Dtest="io.github.fortunen.kete.endtoendtests.**"
+# or
+.\run-end-to-end-tests.ps1
 ```
 
 
@@ -45,24 +56,21 @@ mvn test -Dtest="io.github.fortunen.kete.endtoendtests.*"
 ### All Tests
 
 ```bash
-# Unit + Integration
-mvn clean verify
-
-# With coverage
-mvn clean test jacoco:report
+# Unit → Integration → E2E, stopping at the first failing category
+.\run-all-tests.ps1
 ```
 
 ### Specific Test Class
 
 ```bash
-mvn test -Dtest=io.github.fortunen.kete.provider.onEventTests
-mvn test -Dtest=io.github.fortunen.kete.destinations.kafkadestination.sendTests
+mvn test -Dtest=io.github.fortunen.kete.unittests.provider.onEventTests
+mvn test -Dtest=io.github.fortunen.kete.unittests.destinations.kafkadestination.sendTests
 ```
 
 ### Specific Test Method
 
 ```bash
-mvn test -Dtest=io.github.fortunen.kete.provider.onEventTests#shouldProcessEventSuccessfully
+mvn test -Dtest="io.github.fortunen.kete.unittests.provider.onEventTests#should*"
 ```
 
 ### Skip Tests
@@ -70,6 +78,8 @@ mvn test -Dtest=io.github.fortunen.kete.provider.onEventTests#shouldProcessEvent
 ```bash
 mvn clean package -DskipTests
 ```
+
+All scripts pass `-Dsurefire.skipAfterFailureCount=1`, so a run stops at the first failure.
 
 
 
@@ -89,7 +99,6 @@ src/test/java/io/github/fortunen/kete/unittests/
 ├── providerfactory/
 │   ├── initTests.java              # Tests ProviderFactory.init()
 │   ├── postInitTests.java          # Tests ProviderFactory.postInit()
-│   ├── runTests.java               # Tests ProviderFactory.run()
 │   └── closeTests.java             # Tests ProviderFactory.close()
 └── ...
 ```
@@ -100,7 +109,7 @@ src/test/java/io/github/fortunen/kete/unittests/
 
 **Examples:**
 - `serializeTests.java` - Tests `serialize()` method
-- `acceptTests.java` - Tests `accept()` method
+- `acceptRealmTests.java` - Tests `acceptRealm()` method
 - `initializeTests.java` - Tests `initialize()` method
 
 ### Overloaded Methods
@@ -112,6 +121,8 @@ isEmpty_ArrayTests.java         # Tests isEmpty(Object[])
 isEmpty_CollectionTests.java    # Tests isEmpty(Collection<?>)
 isEmpty_StringTests.java        # Tests isEmpty(String)
 ```
+
+The full rule set (AAA layout, whitespace, naming, assertions, mocking) is in [Test Patterns and Conventions](test-patterns-and-conventions.md).
 
 
 
@@ -139,18 +150,6 @@ public void shouldDoSomethingWhenConditionMet() {
 }
 ```
 
-### Whitespace Rules
-
-| Location | Rule |
-|----------|------|
-| After method opening `{` | ONE blank line |
-| After `// arrange` comment | ONE blank line |
-| Before `// act` comment | ONE blank line |
-| After `// act` comment | ONE blank line |
-| Before `// assert` comment | ONE blank line |
-| After `// assert` comment | ONE blank line |
-| Before method closing `}` | ZERO blank lines |
-
 ### Exception Testing
 
 ```java
@@ -175,71 +174,21 @@ public void shouldThrowWhenConfigurationIsNull() {
 
 
 
-## Test Configuration
-
-### testcontainers.properties
-
-**Location:** `src/test/resources/testcontainers.properties`
-
-```properties
-# Testcontainers configuration
-testcontainers.reuse.enable=true
-testcontainers.labels.project=kete
-```
-
-**Properties:**
-- `reuse.enable=true` - Reuse containers across test runs
-- Faster test execution
-- Containers persist between runs
-
-
-
 ## Test Environment
 
-### Start Test Infrastructure
+Integration and E2E tests manage their own infrastructure with Testcontainers: every container is started by the test (`TestBase` / `EndToEndTestBase`), exposed on a random mapped port and removed by Ryuk afterwards. The only prerequisite is a running Docker daemon; nothing needs to be started or cleaned up by hand, and no fixed host ports are used.
 
-```powershell
-# Start Kafka and RabbitMQ
-.\docker-infra.ps1 start
-
-# Start Keycloak
-.\docker-run.ps1
-
-# Run tests
-mvn test
-```
-
-### Clean Test Environment
-
-```powershell
-# Stop all
-.\docker-infra.ps1 stop
-docker stop keycloak-kete
-
-# Clean volumes
-.\docker-infra.ps1 clean
-```
+Container readiness is verified with Awaitility probes using the highest-level client available (SDK client → HTTP → socket) rather than Testcontainers wait strategies — see [Integration Tests](integration-tests.md#container-readiness-checks).
 
 
 
 ## Coverage Reports
 
-### Generate Coverage
+JaCoCo is bound to the `test` phase, so every test run produces a report (XML, CSV and HTML):
 
 ```bash
-mvn clean test jacoco:report
+mvn test -Dtest="io.github.fortunen.kete.unittests.**"
 ```
-
-### View Reports
-
-```bash
-# Open in browser
-start target/site/jacoco/index.html       # Windows
-open target/site/jacoco/index.html        # macOS
-xdg-open target/site/jacoco/index.html    # Linux
-```
-
-### Coverage Files
 
 ```
 target/
@@ -248,8 +197,10 @@ target/
     └── jacoco/
         ├── index.html        # Main report
         ├── jacoco.xml        # XML format
-        └── jacoco.csv        # CSV format
+        └── jacoco.csv        # CSV format (source of the README coverage badge)
 ```
+
+`run-on-develop-push.ps1` turns `jacoco.csv` into `coverage-badge.json` after the full suite.
 
 
 
@@ -265,12 +216,7 @@ surefire-reports/
 └── *.txt                      # Text reports
 ```
 
-### View Test Results
-
 ```powershell
-# All test results
-Get-ChildItem target\surefire-reports\*.txt | ForEach-Object { Get-Content $_ }
-
 # Failed tests only
 Get-Content target\surefire-reports\*.txt | Select-String "FAILURE"
 ```
@@ -279,51 +225,59 @@ Get-Content target\surefire-reports\*.txt | Select-String "FAILURE"
 
 ## Writing Tests
 
-### Unit Test Example
+### Unit Test Example (destination, zero I/O)
 
 ```java
 @Test
-void testConfiguration() {
-    Configuration config = new Configuration();
-    
-    // Test destination names
-    Set<String> names = config.getDestinationNames();
-    assertNotNull(names);
-    assertTrue(names.contains("kafka-1"));
+public void shouldPublishToSubject() {
+
+    // arrange
+
+    var connection = mock(Connection.class);
+    var destination = new NatsDestination();
+    destination.setConnection(connection);
+    destination.setSubject("keycloak.events");
+    destination.setSubjectTemplated(false);
+    destination.setCustomHeadersEntrySet(Set.of());
+    var message = new EventMessage("master", "evt-1", "{}".getBytes(UTF_8), "LOGIN", "application/json", null, Constants.EVENT, null, Constants.SUCCESS);
+
+    // act
+
+    destination.doSend(message);
+
+    // assert
+
+    verify(connection).publish(eq("keycloak.events"), any(Headers.class), eq("{}".getBytes(UTF_8)));
 }
 ```
 
-### Integration Test Example
+### E2E Test Skeleton
 
 ```java
-@Testcontainers
-class IntegrationTest {
-    
-    @Container
-    static KeycloakContainer keycloak = new KeycloakContainer()
-        .withProviders(Path.of("target/kete.jar"));
-    
+public class MyDestinationE2ETests extends EndToEndTestBase {
+
     @Test
-    void testExtensionLoaded() {
-        // Test extension functionality
+    public void shouldDeliverLoginEvent() throws Exception {
+
+        // arrange — start the broker on the shared network, then Keycloak with the route configured
+
+        var broker = new GenericContainer<>("my/broker:1.0").withNetwork(createNetwork()).withNetworkAliases("broker");
+        broker.start();
+        var keycloak = createKeycloakContainer(Map.of(
+            "kete.routes.e2e.destination.kind", "my-destination",
+            "kete.routes.e2e.destination.host", "broker"));
+        keycloak.start();
+
+        // act
+
+        triggerLoginEvent(keycloak);
+
+        // assert — read the event back from the broker
     }
 }
 ```
 
-### Playwright UI Test Example
-
-```java
-@Test
-void testAdminConsole() {
-    page.navigate("http://localhost:7070/admin");
-    page.fill("#username", "admin");
-    page.fill("#password", "admin");
-    page.click("button[type='submit']");
-    
-    // Verify extension appears
-    assertTrue(page.isVisible("text=events-to-everywhere"));
-}
-```
+`EndToEndTestBase` creates the `KeycloakContainer` from `KEYCLOAK_IMAGE` with `withProviderLibsFrom(List.of(new File("target/kete.jar")))` and passes the route configuration as environment variables.
 
 
 
@@ -332,23 +286,20 @@ void testAdminConsole() {
 ### Mock Events
 
 ```java
-Event event = new Event();
-event.setType("LOGIN");
+var event = new Event();
+event.setType(EventType.LOGIN);
 event.setRealmId("master");
 event.setUserId("user-123");
 event.setTime(System.currentTimeMillis());
-
-Map<String, String> details = new HashMap<>();
-details.put("username", "testuser");
-event.setDetails(details);
+event.setDetails(Map.of("username", "testuser"));
 ```
 
 ### Mock Admin Events
 
 ```java
-AdminEvent adminEvent = new AdminEvent();
-adminEvent.setOperationType("CREATE");
-adminEvent.setResourceType("USER");
+var adminEvent = new AdminEvent();
+adminEvent.setOperationType(OperationType.CREATE);
+adminEvent.setResourceTypeAsString("USER");
 adminEvent.setRealmId("master");
 ```
 
@@ -358,30 +309,15 @@ adminEvent.setRealmId("master");
 
 ### Debug in IDE
 
-**IntelliJ IDEA:**
-1. Right-click test class
-2. Select "Debug 'TestClass'"
-3. Set breakpoints as needed
-
-**VS Code:**
-```json
-{
-    "type": "java",
-    "request": "launch",
-    "mainClass": "org.junit.platform.console.ConsoleLauncher",
-    "args": [
-        "--select-class", "io.github.fortunen.kete.ConfigurationTest"
-    ]
-}
-```
+Right-click the test class and choose Debug; every test class is a plain JUnit 5 class.
 
 ### Debug with Maven
 
 ```bash
-mvn test -Dmaven.surefire.debug
+mvn test -Dmaven.surefire.debug -Dtest=io.github.fortunen.kete.unittests.provider.onEventTests
 ```
 
-Connect debugger to port 5005.
+Connect a debugger to port 5005.
 
 ### Verbose Output
 
@@ -390,29 +326,7 @@ mvn test -X  # Debug output
 mvn test -e  # Error details
 ```
 
-
-
-## Continuous Testing
-
-### Watch Mode
-
-```bash
-# Using Maven
-mvn test -Dcontinuous
-
-# Using IntelliJ
-# Enable "Run tests automatically"
-```
-
-### Fast Feedback
-
-```bash
-# Run only modified tests
-mvn test -Dsurefire.failIfNoSpecifiedTests=false
-
-# Parallel execution
-mvn test -DforkCount=4
-```
+When running container-based tests, follow the Docker output while they run (`docker ps`, `docker logs <container>`) rather than waiting for a timeout.
 
 
 
@@ -420,88 +334,33 @@ mvn test -DforkCount=4
 
 ### Tests Fail - Containers Not Starting
 
-**Check:**
 ```bash
 docker ps -a
 docker logs <container-name>
 ```
 
-**Solution:**
-```bash
-# Clean and restart
-.\docker-infra.ps1 clean
-.\docker-infra.ps1 start
-```
-
-### Tests Fail - Port Conflicts
-
-**Check:**
-```powershell
-Get-NetTCPConnection -LocalPort 7070
-Get-NetTCPConnection -LocalPort 9092
-```
-
-**Solution:**
-Stop conflicting services or change test ports.
+Check that Docker is running and has enough memory; broker containers in the outage-resilience tests are memory-capped.
 
 ### Tests Timeout
 
-**Increase timeout:**
-```java
-@Test
-@Timeout(value = 5, unit = TimeUnit.MINUTES)
-void testLongRunning() {
-    // ...
-}
-```
+Readiness probes wait up to several minutes for slow images (first pull). Re-run after the image is cached; do not add fixed sleeps.
 
 ### Flaky Tests
 
-**Common causes:**
-- Timing issues
-- Shared state
-- Resource contention
+**Common causes:** timing assumptions, shared state between tests, host resource contention.
 
-**Solutions:**
-- Add proper waits
-- Isolate test data
-- Use test containers
+**Solutions:** use Awaitility probes for every wait, keep tests independent (no shared fixtures), and verify delivery through the destination's own API.
 
 
 
 ## CI/CD Integration
 
-### GitHub Actions
+GitHub Actions runs the PowerShell pipelines (see `.github/workflows/`):
 
-```yaml
-name: Tests
+| Workflow | Trigger | Script | What runs |
+|----------|---------|--------|-----------|
+| `pull-request.yml` | PR to `develop`/`release` | `run-on-pull-request-push.ps1` | All tests → quick-start image build → `mkdocs build --strict` |
+| `develop.yml` | Push to `develop` | `run-on-develop-push.ps1` | All tests + coverage badge → image build → docs validation |
+| `release.yml` | Push to `release` | `run-on-release-push.ps1` | Versioned JAR → Docker push → docs deploy → tag + GitHub Release (tests are not re-run) |
 
-on: [push, pull_request]
-
-jobs:
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-java@v3
-        with:
-          java-version: '21'
-      - name: Run Tests
-        run: mvn clean verify
-      - name: Upload Coverage
-        uses: codecov/codecov-action@v3
-```
-
-### GitLab CI
-
-```yaml
-test:
-  stage: test
-  script:
-    - mvn clean verify
-  artifacts:
-    reports:
-      junit: target/surefire-reports/TEST-*.xml
-    paths:
-      - target/site/jacoco/
-```
+See [Scripts](scripts/overview.md) for details.

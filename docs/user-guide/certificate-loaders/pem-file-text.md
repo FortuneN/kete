@@ -9,8 +9,9 @@ Embed raw PEM content directly in configuration.
 
 ## Notes
 
-- Newlines must be escaped as `\n` in environment variables and single-line configs
-- Supports certificates and private keys
+- The value must contain real line breaks: in properties files escape them as `\n`; environment variables must carry actual newline characters (e.g. multi-line values from a Kubernetes secret) — a literal backslash-n is not unescaped
+- Supports certificates and private keys. For key stores the PEM must contain the private key **and** its certificate chain together; a key without a certificate is ignored
+- Private keys must be unencrypted (PKCS#8 `BEGIN PRIVATE KEY` or PKCS#1 `BEGIN RSA PRIVATE KEY`); encrypted keys are rejected
 - Common extensions: `.pem`, `.crt`, `.cer`, `.key`
 
 ## Example

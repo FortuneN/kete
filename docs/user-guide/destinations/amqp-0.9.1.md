@@ -81,35 +81,15 @@ This destination uses AMQP 0.9.1 (RabbitMQ's native protocol). For AMQP 1 broker
 
 ### Required Properties
 
-```bash
-kete.routes.<NAME>.destination.kind=amqp-0.9.1
-kete.routes.<NAME>.destination.host=<RABBITMQ_HOST>
-kete.routes.<NAME>.destination.exchange=<EXCHANGE_NAME>
-```
+| Property | Description | Example |
+|----------|-------------|---------|
+| `host` | RabbitMQ server hostname | `rabbitmq.example.com` |
+| `exchange` | Exchange name (supports templating) | `keycloak-${realmLowerCase}` |
 
-### Basic Example
-
-```bash
-# Configure AMQP 0.9.1 destination
-kete.routes.main-rabbitmq.destination.kind=amqp-0.9.1
-kete.routes.main-rabbitmq.realm-matchers.realm=list:master
-kete.routes.main-rabbitmq.event-matchers.filter=glob:*
-
-# RabbitMQ-specific configuration
-kete.routes.main-rabbitmq.destination.host=localhost
-kete.routes.main-rabbitmq.destination.port=5672
-kete.routes.main-rabbitmq.destination.username=guest
-kete.routes.main-rabbitmq.destination.password=guest
-kete.routes.main-rabbitmq.destination.exchange=keycloak-events
-kete.routes.main-rabbitmq.destination.routing-key=events
-```
-
-### All RabbitMQ Properties
+### Optional Properties
 
 | Property | Description | Default | Example |
 |----------|-------------|---------|---------|
-| `host` | RabbitMQ server hostname (required) | - | `rabbitmq.example.com` |
-| `exchange` | Exchange name, required (supports templating) | - | `keycloak-${realmLowerCase}` |
 | `port` | RabbitMQ server port | `5672` | `5671` (AMQPS) |
 | `username` | Authentication username | `""` | `keycloak` |
 | `password` | Authentication password | `""` | `secret123` |
@@ -130,18 +110,6 @@ kete.routes.main-rabbitmq.destination.routing-key=events
 | `pool.min-idle` | Minimum idle connections in pool | `1` | `5` |
 | `pool.max-idle` | Maximum idle connections in pool | `10` | `20` |
 | `pool.max-total` | Maximum total connections in pool | `20` | `50` |
-| `tls.*` | TLS/SSL configuration | - | See [TLS & mTLS](overview.md#tls-mtls) |
-
-### Custom Headers
-
-Custom headers can be added to AMQP messages:
-
-```bash
-kete.routes.rabbitmq.destination.headers.X-Source=keycloak
-kete.routes.rabbitmq.destination.headers.X-Environment=production
-```
-
-Headers are included in the AMQP message properties.
 
 ### Dynamic Exchange/Routing Key (Templating)
 
@@ -161,6 +129,17 @@ kete.routes.rabbitmq.destination.routing-key=${realmLowerCase}.${eventTypeLowerC
 
 Available variables: `${realmLowerCase}`, `${realmUpperCase}`, `${realmKebabCase}`, `${realmPascalCase}`, `${realmCamelCase}`, `${eventTypeLowerCase}`, `${eventTypeUpperCase}`, `${eventTypeKebabCase}`, `${eventTypePascalCase}`, `${eventTypeCamelCase}`, `${kindLowerCase}`, `${kindUpperCase}`, `${kindKebabCase}`, `${kindPascalCase}`, `${kindCamelCase}`, `${resourceTypeLowerCase}`, `${resourceTypeUpperCase}`, `${resourceTypeKebabCase}`, `${resourceTypePascalCase}`, `${resourceTypeCamelCase}`, `${operationTypeLowerCase}`, `${operationTypeUpperCase}`, `${operationTypeKebabCase}`, `${operationTypePascalCase}`, `${operationTypeCamelCase}`, `${resultLowerCase}`, `${resultUpperCase}`, `${resultKebabCase}`, `${resultPascalCase}`, `${resultCamelCase}`
 
+### Custom Headers
+
+Custom headers can be added to AMQP messages:
+
+```bash
+kete.routes.rabbitmq.destination.headers.X-Source=keycloak
+kete.routes.rabbitmq.destination.headers.X-Environment=production
+```
+
+Headers are included in the AMQP message `headers` table, alongside the standard `eventkind` and `eventtype` headers that are always set; the content type goes into the native `content-type` message property. Custom headers named `eventkind`, `eventtype` or `contenttype` are ignored.
+
 ### Delivery Modes
 
 | Mode | Description | Use Case |
@@ -168,91 +147,16 @@ Available variables: `${realmLowerCase}`, `${realmUpperCase}`, `${realmKebabCase
 | `persistent` | Messages survive broker restart | Audit logs, critical events |
 | `non-persistent` | Messages lost on broker restart | High-throughput, non-critical events |
 
-### Configuration Examples
+### TLS Properties
 
-#### Production Configuration
+See [TLS & mTLS](overview.md#tls-mtls) for full details on TLS options.
 
-```bash
-kete.routes.prod.destination.host=rabbitmq-cluster.prod.internal
-kete.routes.prod.destination.port=5672
-kete.routes.prod.destination.username=keycloak-prod
-kete.routes.prod.destination.password=secure-password
-kete.routes.prod.destination.virtual-host=/production
-kete.routes.prod.destination.exchange=keycloak-events
-kete.routes.prod.destination.routing-key=events.production
-```
-
-#### TLS/SSL Configuration - File Path
-
-```bash
-kete.routes.secure.destination.host=rabbitmq-secure.example.com
-kete.routes.secure.destination.port=5671
-kete.routes.secure.destination.username=keycloak
-kete.routes.secure.destination.password=secret
-kete.routes.secure.destination.exchange=keycloak-events
-kete.routes.secure.destination.tls.enabled=true
-kete.routes.secure.destination.tls.trust-store.loader.kind=jks-file-path
-kete.routes.secure.destination.tls.trust-store.loader.path=/opt/keycloak/certs/truststore.jks
-kete.routes.secure.destination.tls.trust-store.password=truststorepass
-
-# With client certificate authentication (mTLS)
-kete.routes.secure-mutual.destination.host=rabbitmq-secure.example.com
-kete.routes.secure-mutual.destination.port=5671
-kete.routes.secure-mutual.destination.exchange=keycloak-events
-kete.routes.secure-mutual.destination.tls.enabled=true
-kete.routes.secure-mutual.destination.tls.key-store.loader.kind=pkcs12-file-path
-kete.routes.secure-mutual.destination.tls.key-store.loader.path=/opt/keycloak/certs/client.p12
-kete.routes.secure-mutual.destination.tls.key-store.password=keystorepass
-kete.routes.secure-mutual.destination.tls.trust-store.loader.kind=jks-file-path
-kete.routes.secure-mutual.destination.tls.trust-store.loader.path=/opt/keycloak/certs/truststore.jks
-kete.routes.secure-mutual.destination.tls.trust-store.password=truststorepass
-```
-
-#### TLS/SSL Configuration - Base64 Encoded
-
-```bash
-kete.routes.secure-b64.destination.host=rabbitmq-secure.example.com
-kete.routes.secure-b64.destination.port=5671
-kete.routes.secure-b64.destination.username=keycloak
-kete.routes.secure-b64.destination.password=secret
-kete.routes.secure-b64.destination.exchange=keycloak-events
-kete.routes.secure-b64.destination.tls.enabled=true
-# Base64-encoded client certificate (PKCS12 keystore)
-kete.routes.secure-b64.destination.tls.key-store.loader.kind=pkcs12-file-base64
-kete.routes.secure-b64.destination.tls.key-store.loader.base64=MIIKegIBAzCCCj4GCSqGSIb3DQEHAaCCCi8EggorMII...
-kete.routes.secure-b64.destination.tls.key-store.password=keystorepass
-# Base64-encoded CA trust store (JKS)
-kete.routes.secure-b64.destination.tls.trust-store.loader.kind=jks-file-base64
-kete.routes.secure-b64.destination.tls.trust-store.loader.base64=/u3+7QAAAAIAAAABAAAA...
-kete.routes.secure-b64.destination.tls.trust-store.password=truststorepass
-```
-
-**Tip**: Generate base64-encoded keystores:
-```bash
-# Linux/Mac
-base64 -i client-keystore.p12 -o keystore-base64.txt
-base64 -i truststore.jks -o truststore-base64.txt
-
-# Windows PowerShell
-[Convert]::ToBase64String([IO.File]::ReadAllBytes("client-keystore.p12")) | Out-File keystore-base64.txt
-[Convert]::ToBase64String([IO.File]::ReadAllBytes("truststore.jks")) | Out-File truststore-base64.txt
-```
-
-#### Multi-VHost Setup
-
-```bash
-# Production vhost
-kete.routes.prod-example.destination.host=rabbitmq
-kete.routes.prod-example.destination.virtual-host=/production
-kete.routes.prod-example.destination.exchange=events
-
-# Development vhost
-kete.routes.dev-example.destination.host=rabbitmq
-kete.routes.dev-example.destination.virtual-host=/development
-kete.routes.dev-example.destination.exchange=events
-```
-
-
+| Property | Default | Description |
+|----------|---------|-------------|
+| `tls.enabled` | `false` | Enable TLS (use port `5671` for AMQPS) |
+| `tls.verify-hostname` | `false` | Verify the server hostname against its certificate |
+| `tls.key-store.*` | - | Client certificate for mTLS |
+| `tls.trust-store.*` | - | CA certificates |
 
 ## Exchange Patterns
 
@@ -504,6 +408,97 @@ kete.routes.ha.destination.routing-key=events
     rabbitmqadmin declare queue name=keycloak-events-ha `
       arguments='{"x-ha-policy":"all","x-ha-sync-mode":"automatic"}'
     ```
+
+
+
+
+### Example 4: Production Configuration
+
+```bash
+kete.routes.prod.destination.kind=amqp-0.9.1
+kete.routes.prod.destination.host=rabbitmq-cluster.prod.internal
+kete.routes.prod.destination.port=5672
+kete.routes.prod.destination.username=keycloak-prod
+kete.routes.prod.destination.password=secure-password
+kete.routes.prod.destination.virtual-host=/production
+kete.routes.prod.destination.exchange=keycloak-events
+kete.routes.prod.destination.routing-key=events.production
+```
+
+### Example 5: TLS/SSL Configuration - File Path
+
+```bash
+kete.routes.secure.destination.kind=amqp-0.9.1
+kete.routes.secure.destination.host=rabbitmq-secure.example.com
+kete.routes.secure.destination.port=5671
+kete.routes.secure.destination.username=keycloak
+kete.routes.secure.destination.password=secret
+kete.routes.secure.destination.exchange=keycloak-events
+kete.routes.secure.destination.tls.enabled=true
+kete.routes.secure.destination.tls.trust-store.loader.kind=jks-file-path
+kete.routes.secure.destination.tls.trust-store.loader.path=/opt/keycloak/certs/truststore.jks
+kete.routes.secure.destination.tls.trust-store.password=truststorepass
+
+# With client certificate authentication (mTLS)
+kete.routes.secure-mutual.destination.kind=amqp-0.9.1
+kete.routes.secure-mutual.destination.host=rabbitmq-secure.example.com
+kete.routes.secure-mutual.destination.port=5671
+kete.routes.secure-mutual.destination.exchange=keycloak-events
+kete.routes.secure-mutual.destination.tls.enabled=true
+kete.routes.secure-mutual.destination.tls.key-store.loader.kind=pkcs12-file-path
+kete.routes.secure-mutual.destination.tls.key-store.loader.path=/opt/keycloak/certs/client.p12
+kete.routes.secure-mutual.destination.tls.key-store.password=keystorepass
+kete.routes.secure-mutual.destination.tls.trust-store.loader.kind=jks-file-path
+kete.routes.secure-mutual.destination.tls.trust-store.loader.path=/opt/keycloak/certs/truststore.jks
+kete.routes.secure-mutual.destination.tls.trust-store.password=truststorepass
+```
+
+### Example 6: TLS/SSL Configuration - Base64 Encoded
+
+```bash
+kete.routes.secure-b64.destination.kind=amqp-0.9.1
+kete.routes.secure-b64.destination.host=rabbitmq-secure.example.com
+kete.routes.secure-b64.destination.port=5671
+kete.routes.secure-b64.destination.username=keycloak
+kete.routes.secure-b64.destination.password=secret
+kete.routes.secure-b64.destination.exchange=keycloak-events
+kete.routes.secure-b64.destination.tls.enabled=true
+# Base64-encoded client certificate (PKCS12 keystore)
+kete.routes.secure-b64.destination.tls.key-store.loader.kind=pkcs12-file-base64
+kete.routes.secure-b64.destination.tls.key-store.loader.base64=MIIKegIBAzCCCj4GCSqGSIb3DQEHAaCCCi8EggorMII...
+kete.routes.secure-b64.destination.tls.key-store.password=keystorepass
+# Base64-encoded CA trust store (JKS)
+kete.routes.secure-b64.destination.tls.trust-store.loader.kind=jks-file-base64
+kete.routes.secure-b64.destination.tls.trust-store.loader.base64=/u3+7QAAAAIAAAABAAAA...
+kete.routes.secure-b64.destination.tls.trust-store.password=truststorepass
+```
+
+**Tip**: Generate base64-encoded keystores:
+```bash
+# Linux/Mac
+base64 -i client-keystore.p12 -o keystore-base64.txt
+base64 -i truststore.jks -o truststore-base64.txt
+
+# Windows PowerShell
+[Convert]::ToBase64String([IO.File]::ReadAllBytes("client-keystore.p12")) | Out-File keystore-base64.txt
+[Convert]::ToBase64String([IO.File]::ReadAllBytes("truststore.jks")) | Out-File truststore-base64.txt
+```
+
+### Example 7: Multi-VHost Setup
+
+```bash
+# Production vhost
+kete.routes.prod-example.destination.kind=amqp-0.9.1
+kete.routes.prod-example.destination.host=rabbitmq
+kete.routes.prod-example.destination.virtual-host=/production
+kete.routes.prod-example.destination.exchange=events
+
+# Development vhost
+kete.routes.dev-example.destination.kind=amqp-0.9.1
+kete.routes.dev-example.destination.host=rabbitmq
+kete.routes.dev-example.destination.virtual-host=/development
+kete.routes.dev-example.destination.exchange=events
+```
 
 
 

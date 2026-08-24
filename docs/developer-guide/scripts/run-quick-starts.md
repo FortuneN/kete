@@ -36,7 +36,7 @@ Tests quick-start Docker Compose stacks by starting containers, triggering a Key
 
 The script discovers quickstarts from `quick-starts/` by:
 
-- Listing all subdirectories except `$images`
+- Listing all subdirectories except `$images` and any named `quick-start-*`
 - Excluding folders containing a `dont-run-this-quickstart` marker file
 - Applying the `-Filter` wildcard pattern
 - Sorting alphabetically
@@ -68,6 +68,6 @@ The script displays a branded KETE banner, per-quickstart test progress with spi
 ## Prerequisites
 
 - Docker Desktop
-- PowerShell 5.1 or later
+- PowerShell 7 or later
 - Ports 8080 and 9000 available (Keycloak)
-- Quick-start Docker images pre-built (see `quick-starts/$images/`)
+- Access to `ghcr.io/fortunen/kete/quick-start-*` images (pulled by Docker Compose; or build them locally from `quick-starts/$images/` with the same tags)

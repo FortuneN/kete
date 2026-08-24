@@ -21,7 +21,7 @@ Wait for all containers to be healthy:
 docker compose ps
 ```
 
-Most quickstarts use Keycloak on port 8080. Some use 8180 or other ports.
+Every quickstart maps Keycloak to `8080` (HTTP) and `9000` (health/metrics). Where a broker admin UI is exposed on `8180` it is the broker, not Keycloak.
 
 ### 3. Trigger an Event
 
@@ -36,13 +36,12 @@ curl -X POST 'http://localhost:8080/realms/master/protocol/openid-connect/token'
   -d 'grant_type=password'
 ```
 
-Replace `8080` with the appropriate port for the quickstart.
 
 ### 4. Verify Event Delivery
 
 #### For Message Brokers (Kafka, MQTT, AMQP, etc.)
 
-Each quickstart README contains broker-specific commands to consume messages. Examples:
+Almost every quickstart (87 of 89) ships a `check-event-reception.ps1` that consumes from the destination and reports whether the event arrived; run it after triggering the login. Cloud-service quickstarts also carry a `GUIDE.md` and `.env.example`. Manual equivalents:
 
 **Kafka:**
 ```bash
@@ -118,7 +117,7 @@ If you're running multiple quickstarts simultaneously, you may encounter port co
 
 ## Quickstart Inventory
 
-Total quickstarts: 83
+Total quickstarts: 89 (plus `$images/` with the 51 Dockerfiles they use)
 
 ### AMQP 0.9.1 (4)
 - amqp-0.9.1-amazon-mq
@@ -126,7 +125,7 @@ Total quickstarts: 83
 - amqp-0.9.1-lavinmq
 - amqp-0.9.1-rabbitmq
 
-### AMQP 1.0 (8)
+### AMQP 1.0 (9)
 - amqp-1-activemq
 - amqp-1-amazon-mq
 - amqp-1-azure-event-hubs
@@ -135,6 +134,7 @@ Total quickstarts: 83
 - amqp-1-azure-service-bus-emulator
 - amqp-1-qpid
 - amqp-1-rabbitmq
+- amqp-1-solace
 
 ### AWS (8)
 - aws-eventbridge
@@ -158,6 +158,9 @@ Total quickstarts: 83
 - gcp-pubsub
 - gcp-pubsub-emulator
 
+### gRPC (1)
+- grpc
+
 ### HTTP (2)
 - http-azure-event-grid
 - http-webhook
@@ -170,16 +173,17 @@ Total quickstarts: 83
 - kafka-confluent
 - kafka-redpanda
 
-### MQTT 3 (7)
+### MQTT 3 (8)
 - mqtt-3-activemq-artemis
 - mqtt-3-emqx
 - mqtt-3-hivemq
 - mqtt-3-mosquitto
 - mqtt-3-nanomq
 - mqtt-3-rabbitmq
+- mqtt-3-solace
 - mqtt-3-vernemq
 
-### MQTT 5 (8)
+### MQTT 5 (9)
 - mqtt-5-activemq-artemis
 - mqtt-5-azure-event-grid
 - mqtt-5-emqx
@@ -187,6 +191,7 @@ Total quickstarts: 83
 - mqtt-5-mosquitto
 - mqtt-5-nanomq
 - mqtt-5-rabbitmq
+- mqtt-5-solace
 - mqtt-5-vernemq
 
 ### NATS (4)
@@ -195,8 +200,9 @@ Total quickstarts: 83
 - nats-nats-server
 - nats-synadia-cloud
 
-### Pulsar (1)
+### Pulsar (2)
 - pulsar-apache
+- pulsar-datastax
 
 ### Redis Pub/Sub (9)
 - redis-pubsub-amazon-elasticache
@@ -222,6 +228,9 @@ Total quickstarts: 83
 ### SignalR (1)
 - signalr
 
+### SOAP (1)
+- soap-webhook
+
 ### Socket.IO (1)
 - socketio
 
@@ -241,26 +250,17 @@ Total quickstarts: 83
 
 ## Automated Testing
 
-The `test-all-quickstarts.ps1` script provides basic automated testing functionality. However, manual verification of event delivery is recommended for thorough testing.
-
-### Usage
-
-Test a single quickstart:
+`run-quick-starts.ps1` (repository root) runs quickstarts end to end: it starts each compose stack, waits for Keycloak, triggers a login, checks the `kete_events_forwarded_total` metric on port 9000 and then runs the quickstart's `check-event-reception.ps1` to confirm the event reached the destination. Quickstarts containing a `dont-run-this-quickstart` marker (the 29 cloud-service ones that need real credentials) are skipped.
 
 ```powershell
-.\test-all-quickstarts.ps1 -QuickStart mqtt-3-mosquitto
+# One quickstart
+.\run-quick-starts.ps1 -Filter mqtt-3-mosquitto
+
+# All runnable quickstarts
+.\run-quick-starts.ps1
 ```
 
-Test all quickstarts:
-
-```powershell
-.\test-all-quickstarts.ps1
-```
-
-**Note:** The automated script has limitations:
-- Does not verify actual message delivery to destinations
-- Only checks that Keycloak starts and can be accessed
-- May have false negatives if services take longer to initialize
+See [run-quick-starts](scripts/run-quick-starts.md) for the options and output.
 
 ## Manual Test Checklist
 
@@ -313,12 +313,12 @@ docker compose restart <service-name>
 
 When adding a new quickstart:
 
-1. Create folder in `quick-starts/` following naming convention
-2. Add `docker-compose.yml` with all required services
-3. Add `README.md` with specific testing instructions
-4. Test manually following this guide
+1. Create folder in `quick-starts/` following the `<destination>-<system>` naming convention
+2. Add `docker-compose.yml` with all required services (route name `quick-start`, Keycloak on `8080`/`9000`)
+3. Add `check-event-reception.ps1` that reads the event back from the destination; for cloud services add `GUIDE.md`, `.env.example` and a `dont-run-this-quickstart` marker
+4. Test with `.\run-quick-starts.ps1 -Filter <name>`
 5. Update this document with new quickstart entry
-6. Update `docs/user-guide/destinations/<destination>.md` with quickstart link
+6. Update `docs/user-guide/destinations/<destination>.md` and `docs/user-guide/destinations/support-matrix.md` with the quickstart link
 
 ## See Also
 

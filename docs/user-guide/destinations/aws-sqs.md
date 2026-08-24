@@ -80,7 +80,7 @@ Stream Keycloak events to Amazon Simple Queue Service (SQS).
 | Property | Default | Description | Example |
 |----------|---------|-------------|---------|
 | `destination.region` | _(from env)_ | AWS region (falls back to `AWS_REGION` / `AWS_DEFAULT_REGION`) | `us-east-1` |
-| `destination.account-id` | _(required for real AWS)_ | AWS account ID | `123456789012` |
+| `destination.account-id` | _(required for real AWS; `000000000000` when `endpoint-url` is set)_ | AWS account ID used to build the queue URL | `123456789012` |
 | `destination.endpoint-url` | _(empty)_ | Custom endpoint URL (for LocalStack or VPC endpoints) | `http://localstack:4566` |
 | `destination.authentication-type` | _(empty)_ | Authentication type (see [EventBridge Authentication](aws-eventbridge.md#authentication)) | `access-key` |
 | `destination.access-key-id` | _(empty)_ | AWS access key ID (required when `authentication-type=access-key`) | `AKIAIOSFODNN7EXAMPLE` |
@@ -88,10 +88,12 @@ Stream Keycloak events to Amazon Simple Queue Service (SQS).
 | `destination.credentials-file-path` | _(empty)_ | Path to AWS credentials file | `/path/to/credentials` |
 | `destination.credentials-file-text` | _(empty)_ | AWS credentials file content inline | `[default]\naws_access_key_id=...` |
 | `destination.credentials-file-base64` | _(empty)_ | Base64-encoded AWS credentials file | `W2RlZmF1bHRd...` |
-| `destination.credentials-profile` | `default` | Profile name within credentials file | `production` |
+| `destination.credentials-profile` | _(`AWS_PROFILE` env var, else the SDK default profile)_ | Profile name within credentials file | `production` |
 | `destination.timeout-seconds` | `10` | HTTP connect and request timeout in seconds | `30` |
-| `destination.message-group-id` | _(empty)_ | Message group ID (required for FIFO queues) | `keycloak` |
-| `destination.message-deduplication-id` | _(empty)_ | Message deduplication ID for FIFO queues | `${eventTypeLowerCase}` |
+| `destination.content-encoding` | _(empty)_ | Compress the event payload (`gzip`, `deflate`) — see [Content Encodings](../content-encodings/overview.md) | `gzip` |
+| `destination.content-transfer-encoding` | _(empty)_ | Encode the event payload (`base64`) — see [Content Transfer Encodings](../content-transfer-encodings/overview.md) | `base64` |
+| `destination.message-group-id` | _(empty)_ | Message group ID (supports templating; required for `.fifo` queues, rejected for non-FIFO queues) | `keycloak` |
+| `destination.message-deduplication-id` | _(empty)_ | Message deduplication ID for `.fifo` queues (supports templating) | `${eventTypeLowerCase}` |
 
 ### Dynamic Queue Name (Templating)
 
@@ -121,7 +123,7 @@ kete.routes.sqs.destination.headers.X-Source=keycloak
 kete.routes.sqs.destination.headers.X-Environment=production
 ```
 
-Both `attributes.*` and `headers.*` entries are sent as SQS message attributes. On key conflict, `headers.*` values take precedence.
+Both `attributes.*` and `headers.*` entries are sent as SQS message attributes. On key conflict, `headers.*` values take precedence. The standard `eventkind`, `eventtype` and `contenttype` attributes are always added and override any custom attribute with the same name.
 
 ### Authentication
 

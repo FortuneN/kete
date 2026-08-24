@@ -8,6 +8,11 @@ Content encodings apply compression to the serialized event body. They're **opti
 
 Content encoding runs **after** serialization but **before** content transfer encoding.
 
+
+## Supported Destinations
+
+Encodings are applied by the destinations that carry an opaque payload over HTTP-style or SDK transports: `http`, `soap`, `grpc`, `aws-eventbridge`, `aws-sns`, `aws-sqs`, `azure-eventgrid`, `azure-storage-queue`, `azure-webpubsub` and `gcp-cloud-tasks`. All other destinations accept the property but do not apply it (the payload is sent unencoded).
+
 ## Available Content Encodings
 
 | Encoding | Config | Algorithm |

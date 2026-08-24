@@ -326,7 +326,7 @@ These enhancements are ideas for future development based on common use cases. I
 1. Community demand
 2. Contributor availability
 3. Complexity vs. value
-4. Existing workarounds (e.g., Azure Service Bus works via AMQP 1.0)
+4. Existing workarounds (e.g., ActiveMQ Artemis is already reachable via AMQP 1.0, MQTT and STOMP)
 
 ### Implementation Strategy
 

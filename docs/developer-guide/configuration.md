@@ -188,11 +188,19 @@ Each route is configured with a unique name under `kete.routes.<NAME>`.
 | `kete.routes.<NAME>.realm-match-mode` | String | `any` | How to evaluate realm matchers: `any` or `all` |
 | `kete.routes.<NAME>.event-match-mode` | String | `any` | How to evaluate event matchers: `any` or `all` |
 
+### Global Configuration
+
+| Property | Type | Default | Description |
+|----------|------|---------|-------------|
+| `kete.enabled` | Boolean | `true` | Master switch; when `false` KETE removes itself from every realm's event listeners |
+| `kete.metrics.enabled` | Boolean | `false` | Register Micrometer meters (Keycloak metrics must also be enabled) |
+| `kete.support-the-project-message` | Boolean | `true` | Log the support/sponsorship banner at start-up |
+
 ### Serializer Configuration
 
 | Property | Type | Default | Description |
 |----------|------|---------|-------------|
-| `kete.routes.<NAME>.serializer.kind` | String | `json` | Serializer kind: `json`, `xml`, `yaml`, `csv`, `toml`, `smile`, `cbor`, `properties`, `template` |
+| `kete.routes.<NAME>.serializer.kind` | String | `json` | Serializer kind: `json`, `xml`, `yaml`, `csv`, `toml`, `smile`, `cbor`, `properties`, `template`, `avro`, `protobuf`, `multipart-form`, `url-encoded-form` |
 
 JSON serialization is used by default if no serializer is specified.
 
@@ -200,10 +208,26 @@ JSON serialization is used by default if no serializer is specified.
 
 | Property | Type | Default | Description |
 |----------|------|---------|-------------|
-| `kete.routes.<NAME>.destination.kind` | String | - | Destination kind (required): `kafka`, `amqp-0.9.1`, `amqp-1`, `mqtt-3`, `mqtt-5`, `http`, `websocket`, `nats`, `nats-jetstream`, `redis-pubsub`, `redis-stream`, `pulsar`, `stomp`, `zeromq`, `signalr`, `socketio`, `aws-sns`, `aws-sqs`, `aws-kinesis`, `aws-eventbridge`, `gcp-pubsub`, `gcp-cloud-tasks`, `azure-storage-queue`, `azure-webpubsub`, `azure-eventhubs`, `azure-servicebus`, `azure-eventgrid` |
+| `kete.routes.<NAME>.destination.kind` | String | - | Destination kind (required): `kafka`, `amqp-0.9.1`, `amqp-1`, `mqtt-3`, `mqtt-5`, `http`, `websocket`, `nats`, `nats-jetstream`, `redis-pubsub`, `redis-stream`, `pulsar`, `stomp`, `zeromq`, `signalr`, `socketio`, `aws-sns`, `aws-sqs`, `aws-kinesis`, `aws-eventbridge`, `gcp-pubsub`, `gcp-cloud-tasks`, `azure-storage-queue`, `azure-webpubsub`, `azure-eventhubs`, `azure-servicebus`, `azure-eventgrid`, `grpc`, `soap` |
+| `kete.routes.<NAME>.destination.authentication-type` | String | - | Authentication method (allowed values are destination-specific) |
+| `kete.routes.<NAME>.destination.headers.<header>` | String | - | Custom header/property/attribute; `eventkind`, `eventtype`, `contenttype` are reserved and ignored |
+| `kete.routes.<NAME>.destination.content-encoding` | String | - | `gzip` or `deflate` |
+| `kete.routes.<NAME>.destination.content-transfer-encoding` | String | - | `base64` |
 | `kete.routes.<NAME>.destination.pool.min-idle` | Integer | `1` | Minimum idle pool size. Must be > 0. |
 | `kete.routes.<NAME>.destination.pool.max-idle` | Integer | `10` | Maximum idle pool size. |
 | `kete.routes.<NAME>.destination.pool.max-total` | Integer | `20` | Maximum total pool size. Must be >= min-idle. |
+| `kete.routes.<NAME>.destination.pool.max-wait-seconds` | Integer | `30` | Max wait for an instance when exhausted (`-1` = indefinitely) |
+| `kete.routes.<NAME>.destination.pool.block-when-exhausted` | Boolean | `true` | Wait (rather than fail) when the pool is exhausted |
+| `kete.routes.<NAME>.destination.pool.lifo` | Boolean | `true` | Last-in-first-out reuse |
+| `kete.routes.<NAME>.destination.pool.fairness` | Boolean | `false` | FIFO fairness for waiting borrowers |
+| `kete.routes.<NAME>.destination.pool.test-on-create` | Boolean | `true` | Validate on creation |
+| `kete.routes.<NAME>.destination.pool.test-on-borrow` | Boolean | `true` | Validate (`isHealthy()`) on borrow |
+| `kete.routes.<NAME>.destination.pool.test-on-return` | Boolean | `true` | Validate on return |
+| `kete.routes.<NAME>.destination.pool.test-while-idle` | Boolean | `true` | Validate idle instances during eviction runs |
+| `kete.routes.<NAME>.destination.pool.num-tests-per-eviction-run` | Integer | `3` | Instances tested per eviction run |
+| `kete.routes.<NAME>.destination.pool.time-between-eviction-runs-seconds` | Integer | `60` | Eviction interval |
+| `kete.routes.<NAME>.destination.pool.min-evictable-idle-time-seconds` | Integer | `-1` | Hard idle eviction (disabled) |
+| `kete.routes.<NAME>.destination.pool.soft-min-evictable-idle-time-seconds` | Integer | `1800` | Soft idle eviction above `min-idle` |
 | `kete.routes.<NAME>.destination.*` | Various | - | Destination-specific properties (see destination guides) |
 
 ```bash
@@ -384,16 +408,18 @@ flowchart LR
             KT["type"]
             KP["password"]
             KKP["key-password"]
+            KMA["key-manager-algorithm"]
             subgraph KL["loader"]
-                KLT["type"]
+                KLT["kind"]
                 KLP["...properties"]
             end
         end
         subgraph TS["trust-store"]
             TT["type"]
             TP["password"]
+            TMA["trust-manager-algorithm"]
             subgraph TL["loader"]
-                TLT["type"]
+                TLT["kind"]
                 TLP["...properties"]
             end
         end
@@ -623,20 +649,19 @@ docker logs keycloak 2>&1 | grep kete
 ### Destination Not Creating
 
 **Check**:
-1. All required properties set (kind, realm)
+1. `destination.kind` is set (realm matchers are optional — none means all realms)
 2. Destination-specific properties (bootstrap.servers, host, etc.)
-3. Destination-specific properties (bootstrap.servers, host, etc.)
 
 **Logs**:
 ```
-Failed to create destination 'name': ...
+WARN  Failed to initialize route : <name>
 ```
 
 ### Events Not Streaming
 
 **Check**:
-1. Realm listener registered: Admin Console → Realm → Events → Event Listeners
-2. Event types enabled: Admin Console → Realm → Events → Event Configs
+1. The realm existed when Keycloak started — KETE registers its listener and enables all event types automatically at start-up, but only for realms that exist at that time (restart after creating a realm)
+2. At least one route accepts the realm (realms no route accepts have the `kete` listener removed)
 3. Filters not too restrictive
 4. Destination connection working
 
@@ -660,12 +685,12 @@ IllegalStateException: 'bootstrap.servers' is not configured
 IllegalStateException: 'exchange' is not configured
 → Check rabbitmq.exchange property
 
-IllegalStateException: Unknown filter type: xxxxx
-→ Check filter syntax: glob: or regex:
+IllegalStateException: matcher kind 'xxxx' not found
+→ Check matcher syntax: list:, glob:, regex: or sql:
 
-Destination 'name' references unknown serializer 'xxxx'
-→ Check serializer kind is valid (json, xml, yaml, csv, toml, smile, cbor, properties, template)
+IllegalStateException: serializer kind 'xxxx' not found
+→ Check serializer kind is valid (json, xml, yaml, csv, toml, smile, cbor, properties, template, avro, protobuf, multipart-form, url-encoded-form)
 
-Destination 'name' is configured for non-existent realm 'xxxx'
-→ Check realm name matches exactly (case-sensitive)
+IllegalStateException: destination kind 'xxxx' not found
+→ Check destination kind against the destination pages
 ```

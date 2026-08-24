@@ -21,6 +21,7 @@ kete.routes.<name>.destination.content-transfer-encoding=base64
 - Increases payload size by ~33%
 - Essential for binary payloads (Protobuf, Avro, CBOR, Smile) over text-only transports
 - Consumers decode with any standard Base64 library
+- HTTP and SOAP destinations also send a `Content-Transfer-Encoding: base64` request header
 - Often combined with gzip content encoding to offset the size increase
 
 ## Examples

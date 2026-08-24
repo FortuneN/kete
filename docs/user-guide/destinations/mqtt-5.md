@@ -101,11 +101,10 @@ MQTT 5 adds features not available in MQTT 3:
 
 - All MQTT 3 features plus:
 - User properties (custom headers)
-- Message expiry interval
 - Configurable QoS levels (0, 1, 2)
 - TLS/SSL support with mutual TLS (mTLS)
 - Automatic reconnection
-- Clean start / session expiry
+- Clean start
 
 
 
@@ -140,11 +139,11 @@ Available variables: `${realmLowerCase}`, `${realmUpperCase}`, `${realmKebabCase
 | `transport-type` | `tcp` | Transport: `tcp` or `websocket` | `websocket` |
 | `qos` | `1` | Quality of Service (0, 1, or 2) | `2` |
 | `retained` | `false` | Retain message on broker | `true` |
-| `client-id-prefix` | _(auto-generated)_ | Client ID prefix — auto-generates `kete-<UUID>` when not set | `keycloak-` |
+| `client-id-prefix` | `kete-<UUID>` | Client ID prefix; each pooled connection uses `<prefix>-<n>` as its client ID | `keycloak` |
 | `clean-session` | `true` | Clean start (MQTT 5 term) | `false` |
 | `connection-timeout-seconds` | `10` | Connection timeout in seconds | `60` |
 | `keep-alive-interval-seconds` | `60` | Keep-alive ping interval in seconds | `120` |
-| `max-inflight` | `2048` | Maximum number of in-flight messages (QoS 1/2) | `4096` |
+| `max-inflight` | `2048` | Maximum number of in-flight messages (QoS 1/2), 1–65535 | `4096` |
 | `username` | `""` | MQTT username | `admin` |
 | `password` | `""` | MQTT password | `secret123` |
 | `pool.min-idle` | `1` | Minimum idle connections in pool | `5` |
@@ -160,7 +159,7 @@ kete.routes.mqtt.destination.headers.X-Source=keycloak
 kete.routes.mqtt.destination.headers.X-Environment=production
 ```
 
-These are included as MQTT 5 User Properties in the message.
+These are included as MQTT 5 User Properties in the message, alongside the standard `eventkind` and `eventtype` User Properties that are always set; the content type is sent as the native MQTT 5 `Content Type` property.
 
 ### TLS Properties
 
@@ -168,7 +167,7 @@ See [TLS & mTLS](overview.md#tls-mtls) for full details on TLS options.
 
 | Property | Default | Description |
 |----------|---------|-------------|
-| `tls.enabled` | `false` | Enable TLS (auto-enabled for port 8883) |
+| `tls.enabled` | `false` | Enable TLS (`ssl://`; the default port becomes `8883` when enabled) |
 | `tls.key-store.*` | - | Client certificate for mTLS |
 | `tls.trust-store.*` | - | CA certificates |
 
@@ -181,6 +180,9 @@ See [TLS & mTLS](overview.md#tls-mtls) for full details on TLS options.
 | 0 | At most once | Fire and forget, no acknowledgment | Non-critical events, high throughput |
 | 1 | At least once | Guaranteed delivery, possible duplicates | Standard event streaming |
 | 2 | Exactly once | Guaranteed delivery, no duplicates | Critical audit events |
+
+!!! note "In-memory persistence"
+    In-flight QoS 1/2 state is kept in memory (`MemoryPersistence`). Delivery guarantees hold for a live client session; messages in flight when the Keycloak process stops are not redelivered.
 
 
 

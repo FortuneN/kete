@@ -14,12 +14,12 @@ kete.routes.reliable.retry.wait-duration=PT2S
 | Property | Default | Description |
 |----------|---------|-------------|
 | `retry.enabled` | `true` | Enable retry |
-| `retry.max-attempts` | `3` | Maximum number of attempts (including initial call) |
-| `retry.wait-duration` | `500ms` | Time between retries |
+| `retry.max-attempts` | `3` | Maximum number of attempts (including initial call); must be an integer > 0 |
+| `retry.wait-duration` | `500ms` | Time between retries; must be a non-zero duration |
 
 ## Retry Behavior
 
-Retry uses [Resilience4j](https://resilience4j.readme.io/docs/retry). By default, any exception thrown during event delivery triggers a retry (up to `max-attempts`). There is no distinction between error types — all failures are retried equally.
+Retry uses [Resilience4j](https://resilience4j.readme.io/docs/retry). By default, any exception thrown during event delivery triggers a retry (up to `max-attempts`). There is no distinction between error types — all failures are retried equally. Every failed attempt discards the borrowed destination instance (its connection is closed) and the next attempt borrows or creates a fresh one from the pool. Invalid retry values fail route creation at start-up.
 
 To disable retry for a specific route:
 

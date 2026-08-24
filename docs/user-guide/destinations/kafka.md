@@ -85,6 +85,8 @@ Stream Keycloak events to Kafka-compatible systems.
 
 ## Features
 
+- Every record is keyed by the event type (`LOGIN`, `USER_CREATE`, …), giving per-event-type partition affinity
+- Cluster reachability is verified at start-up with `AdminClient.describeCluster()` (10 second timeout); unreachable brokers fail route initialization
 - ✅ Full Kafka producer configuration support
 - ✅ Idempotent producer (exactly-once semantics)
 - ✅ Topic templating with variables
@@ -100,26 +102,12 @@ Stream Keycloak events to Kafka-compatible systems.
 
 ### Required Properties
 
-```bash
-kete.routes.<NAME>.destination.kind=kafka
-kete.routes.<NAME>.destination.bootstrap.servers=<KAFKA_BROKERS>
-kete.routes.<NAME>.destination.topic=<TOPIC_NAME>
-```
+| Property | Description | Example |
+|----------|-------------|---------|
+| `bootstrap.servers` | Comma-separated Kafka broker list | `kafka1:9092,kafka2:9092` |
+| `topic` | Topic to publish to (supports templating) | `keycloak-events` |
 
-### Basic Example
-
-```bash
-# Configure Kafka destination
-kete.routes.main-kafka.destination.kind=kafka
-kete.routes.main-kafka.realm-matchers.realm=list:master
-kete.routes.main-kafka.event-matchers.filter=glob:*
-
-# Kafka-specific configuration
-kete.routes.main-kafka.destination.bootstrap.servers=localhost:9092
-kete.routes.main-kafka.destination.topic=keycloak-events
-```
-
-### All Kafka Properties
+### Optional Properties
 
 Any property under `kete.routes.<NAME>.destination.*` is passed directly to the Kafka producer, except for `topic` which is used internally.
 
@@ -135,15 +123,17 @@ These properties are explicitly configured by KETE via `putIfAbsent` (can be ove
 | `key.serializer` | StringSerializer |
 | `value.serializer` | ByteArraySerializer |
 
-#### Kafka Client Defaults
+#### Reliability Defaults
 
-These are not set by KETE but are the Kafka client's own defaults (since Kafka 3.0+):
+When `acks` is **not** configured, KETE sets `acks=all` and `enable.idempotence=true` as a pair. If you set `acks` yourself, `enable.idempotence` is left to the Kafka client default (an explicit `enable.idempotence=true` with `acks=1` would fail producer construction).
 
 | Property | Default |
 |----------|---------|
-| `acks` | `all` |
-| `enable.idempotence` | `true` |
-| `max.in.flight.requests.per.connection` | `5` |
+| `acks` | `all` (only when not configured) |
+| `enable.idempotence` | `true` (only when `acks` is not configured) |
+| `max.in.flight.requests.per.connection` | `5` (Kafka client default) |
+
+`sasl.jaas.config` values that reference `org.apache.kafka.*` login modules are rewritten to the shaded class names automatically, so the standard unshaded names can be used.
 
 #### Common Properties
 
@@ -163,17 +153,6 @@ These are not set by KETE but are the Kafka client's own defaults (since Kafka 3
 | `pool.max-idle` | Maximum idle connections in pool | `10` | `20` |
 | `pool.max-total` | Maximum total connections in pool | `20` | `50` |
 
-### Custom Headers
-
-Custom headers can be added to Kafka messages:
-
-```bash
-kete.routes.kafka.destination.headers.X-Source=keycloak
-kete.routes.kafka.destination.headers.X-Environment=production
-```
-
-All custom headers are included in the Kafka message headers.
-
 ### Topic Templating
 
 The topic name supports variable substitution:
@@ -188,55 +167,33 @@ kete.routes.kafka.destination.topic=keycloak-${eventTypeLowerCase}
 
 Available variables: `${realmLowerCase}`, `${realmUpperCase}`, `${realmKebabCase}`, `${realmPascalCase}`, `${realmCamelCase}`, `${eventTypeLowerCase}`, `${eventTypeUpperCase}`, `${eventTypeKebabCase}`, `${eventTypePascalCase}`, `${eventTypeCamelCase}`, `${kindLowerCase}`, `${kindUpperCase}`, `${kindKebabCase}`, `${kindPascalCase}`, `${kindCamelCase}`, `${resourceTypeLowerCase}`, `${resourceTypeUpperCase}`, `${resourceTypeKebabCase}`, `${resourceTypePascalCase}`, `${resourceTypeCamelCase}`, `${operationTypeLowerCase}`, `${operationTypeUpperCase}`, `${operationTypeKebabCase}`, `${operationTypePascalCase}`, `${operationTypeCamelCase}`, `${resultLowerCase}`, `${resultUpperCase}`, `${resultKebabCase}`, `${resultPascalCase}`, `${resultCamelCase}`
 
-### Configuration Examples
+### Custom Headers
 
-#### Production Configuration (High Reliability)
-
-```bash
-kete.routes.prod.destination.bootstrap.servers=kafka1:9092,kafka2:9092,kafka3:9092
-kete.routes.prod.destination.topic=keycloak-events
-kete.routes.prod.destination.acks=all
-kete.routes.prod.destination.compression.type=snappy
-kete.routes.prod.destination.enable.idempotence=true
-kete.routes.prod.destination.max.in.flight.requests.per.connection=5
-kete.routes.prod.destination.retries=10
-```
-
-#### High Throughput Configuration
+Custom headers can be added to Kafka messages:
 
 ```bash
-kete.routes.throughput.destination.bootstrap.servers=kafka:9092
-kete.routes.throughput.destination.topic=keycloak-events
-kete.routes.throughput.destination.acks=1
-kete.routes.throughput.destination.compression.type=lz4
-kete.routes.throughput.destination.batch.size=65536
-kete.routes.throughput.destination.linger.ms=10
-kete.routes.throughput.destination.buffer.memory=67108864
+kete.routes.kafka.destination.headers.X-Source=keycloak
+kete.routes.kafka.destination.headers.X-Environment=production
 ```
 
-#### Low Latency Configuration
+All custom headers are included in the Kafka message headers.
 
-```bash
-kete.routes.lowlatency.destination.bootstrap.servers=kafka:9092
-kete.routes.lowlatency.destination.topic=keycloak-events
-kete.routes.lowlatency.destination.acks=1
-kete.routes.lowlatency.destination.linger.ms=0
-kete.routes.lowlatency.destination.compression.type=none
-```
+### TLS Properties
 
-#### Security Configuration (TLS/SASL)
+See [TLS & mTLS](overview.md#tls-mtls) for full details on TLS options. KETE maps the standard `tls.*` properties onto the Kafka producer's `ssl.*` settings; when `tls.enabled=true`, `security.protocol` **must** be set to `SSL` or `SASL_SSL`.
 
-```bash
-kete.routes.secure.destination.bootstrap.servers=kafka-secure:9093
-kete.routes.secure.destination.topic=keycloak-events
-kete.routes.secure.destination.security.protocol=SASL_SSL
-kete.routes.secure.destination.sasl.mechanism=SCRAM-SHA-512
-kete.routes.secure.destination.sasl.jaas.config=org.apache.kafka.common.security.scram.ScramLoginModule required username="keycloak" password="secret";
-kete.routes.secure.destination.ssl.truststore.location=/path/to/truststore.jks
-kete.routes.secure.destination.ssl.truststore.password=truststore-password
-```
+| `tls.*` property | Kafka producer property |
+|------------------|-------------------------|
+| `tls.enabled=true` | requires `security.protocol=SSL` or `SASL_SSL` |
+| `tls.version` | `ssl.protocol` |
+| `tls.verify-hostname=true` | `ssl.endpoint.identification.algorithm=https` |
+| `tls.trust-store.loader.*`, `tls.trust-store.password`, `tls.trust-store.type` | `ssl.truststore.location`, `ssl.truststore.password`, `ssl.truststore.type` |
+| `tls.trust-store.trust-manager-algorithm` | `ssl.trustmanager.algorithm` |
+| `tls.key-store.loader.*`, `tls.key-store.password`, `tls.key-store.type` | `ssl.keystore.location`, `ssl.keystore.password`, `ssl.keystore.type` |
+| `tls.key-store.key-password` | `ssl.key.password` |
+| `tls.key-store.key-manager-algorithm` | `ssl.keymanager.algorithm` |
 
-
+The raw `ssl.*` producer properties can also be set directly (see the security example below).
 
 ## Configuration Examples
 
@@ -292,6 +249,58 @@ kete.routes.dev-example.realm-matchers.realm=list:development
 kete.routes.dev-example.event-matchers.filter=glob:*
 kete.routes.dev-example.destination.bootstrap.servers=kafka:9092
 kete.routes.dev-example.destination.topic=dev-events
+```
+
+
+
+#
+
+
+
+### Example 4: Production Configuration (High Reliability)
+
+```bash
+kete.routes.prod.destination.bootstrap.servers=kafka1:9092,kafka2:9092,kafka3:9092
+kete.routes.prod.destination.topic=keycloak-events
+kete.routes.prod.destination.acks=all
+kete.routes.prod.destination.compression.type=snappy
+kete.routes.prod.destination.enable.idempotence=true
+kete.routes.prod.destination.max.in.flight.requests.per.connection=5
+kete.routes.prod.destination.retries=10
+```
+
+### Example 5: High Throughput Configuration
+
+```bash
+kete.routes.throughput.destination.bootstrap.servers=kafka:9092
+kete.routes.throughput.destination.topic=keycloak-events
+kete.routes.throughput.destination.acks=1
+kete.routes.throughput.destination.compression.type=lz4
+kete.routes.throughput.destination.batch.size=65536
+kete.routes.throughput.destination.linger.ms=10
+kete.routes.throughput.destination.buffer.memory=67108864
+```
+
+### Example 6: Low Latency Configuration
+
+```bash
+kete.routes.lowlatency.destination.bootstrap.servers=kafka:9092
+kete.routes.lowlatency.destination.topic=keycloak-events
+kete.routes.lowlatency.destination.acks=1
+kete.routes.lowlatency.destination.linger.ms=0
+kete.routes.lowlatency.destination.compression.type=none
+```
+
+### Example 7: Security Configuration (TLS/SASL)
+
+```bash
+kete.routes.secure.destination.bootstrap.servers=kafka-secure:9093
+kete.routes.secure.destination.topic=keycloak-events
+kete.routes.secure.destination.security.protocol=SASL_SSL
+kete.routes.secure.destination.sasl.mechanism=SCRAM-SHA-512
+kete.routes.secure.destination.sasl.jaas.config=org.apache.kafka.common.security.scram.ScramLoginModule required username="keycloak" password="secret";
+kete.routes.secure.destination.ssl.truststore.location=/path/to/truststore.jks
+kete.routes.secure.destination.ssl.truststore.password=truststore-password
 ```
 
 

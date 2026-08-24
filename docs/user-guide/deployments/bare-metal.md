@@ -77,13 +77,14 @@ Add configuration to your environment or startup script:
 
 === "Linux/macOS"
 
-    Add to `/etc/environment` or your startup script:
+    Variable names contain dots, which `export` rejects, so pass them with `env` (or use the systemd unit below):
 
     ```bash
-    export kete.routes.kafka-example.destination.kind=kafka
-    export kete.routes.kafka-example.destination.bootstrap.servers=localhost:9092
-    export kete.routes.kafka-example.destination.topic=keycloak-events
-    export kete.routes.kafka-example.event-matchers.filter=list:LOGIN,LOGOUT
+    env 'kete.routes.kafka-example.destination.kind=kafka' \
+        'kete.routes.kafka-example.destination.bootstrap.servers=localhost:9092' \
+        'kete.routes.kafka-example.destination.topic=keycloak-events' \
+        'kete.routes.kafka-example.event-matchers.filter=list:LOGIN,LOGOUT' \
+        /opt/keycloak/bin/kc.sh start
     ```
 
 === "Windows (PowerShell)"
@@ -125,40 +126,7 @@ Add configuration to your environment or startup script:
 
 ## Configuration Methods
 
-### Method 1: Environment Variables
-
-Set in your shell profile, systemd service file, or Windows environment variables.
-
-### Method 2: Configuration File
-
-Create a properties file and reference it:
-
-**keycloak.conf** or custom properties file:
-```properties
-kete.routes.kafka-example.destination.kind=kafka
-kete.routes.kafka-example.destination.bootstrap.servers=localhost:9092
-kete.routes.kafka-example.destination.topic=keycloak-events
-```
-
-### Method 3: Startup Arguments
-
-Pass directly to Keycloak:
-
-=== "Linux/macOS"
-
-    ```bash
-    /opt/keycloak/bin/kc.sh start \
-      -Dkete.routes.kafka-example.destination.kind=kafka \
-      -Dkete.routes.kafka-example.destination.bootstrap.servers=localhost:9092
-    ```
-
-=== "Windows (PowerShell)"
-
-    ```powershell
-    C:\keycloak\bin\kc.bat start `
-      -Dkete.routes.kafka-example.destination.kind=kafka `
-      -Dkete.routes.kafka-example.destination.bootstrap.servers=localhost:9092
-    ```
+KETE reads its configuration from the **environment variables** of the Keycloak process only. Options in `keycloak.conf`, `--spi-events-listener-kete-…` CLI flags and `-D` system properties are not read (see [Configuration](../configuration.md)). Set the variables in a systemd unit, a Windows service environment, or via `env` as shown above.
 
 ## Systemd Service Configuration
 

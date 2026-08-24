@@ -77,7 +77,7 @@ One of the following authentication configurations is required — see [Authenti
 | `destination.partition-key` | _(empty)_ | Partition key for routing (supports templating). Mutually exclusive with `partition-id`. | `${realmLowerCase}` |
 | `destination.partition-id` | _(empty)_ | Specific partition ID to target. Mutually exclusive with `partition-key`. | `0` |
 | `destination.custom-endpoint-address` | _(empty)_ | Custom endpoint for emulators. Must be a valid URL if set. | `http://localhost:5672` |
-| `destination.timeout-seconds` | `10` | Timeout in seconds | `30` |
+| `destination.timeout-seconds` | `10` | Per-operation (AMQP try) timeout in seconds for sends and the start-up connection check | `30` |
 
 ### Dynamic Partition Key (Templating)
 

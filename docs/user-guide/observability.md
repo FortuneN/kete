@@ -4,7 +4,7 @@ KETE provides opt-in metrics and always-on logging.
 
 ## Metrics
 
-Enable metrics to expose KETE statistics at Keycloak's `/metrics` endpoint:
+KETE registers its meters with Keycloak's Micrometer registry. Two switches are needed: Keycloak's own metrics (`--metrics-enabled=true` / `KC_METRICS_ENABLED=true`, exposed on the management port `9000` at `/metrics`) and KETE's:
 
 ```bash
 kete.metrics.enabled=true
@@ -28,9 +28,11 @@ kete.metrics.enabled=true
 scrape_configs:
   - job_name: 'keycloak'
     static_configs:
-      - targets: ['keycloak:8080']
+      - targets: ['keycloak:9000']
     metrics_path: '/metrics'
 ```
+
+`error_type` is the simple class name of the failure; because delivery failures are wrapped before being recorded, it is `RuntimeException` for send failures.
 
 ## Logging
 
@@ -38,12 +40,22 @@ KETE logs lifecycle events at INFO level (always enabled):
 
 ```
 INFO  kete (1.0.0) initializing
-INFO  kete Route 'my-route' initialized: destination=KafkaDestination, serializer=JsonSerializer, realmMatchers=1, eventMatchers=2
+INFO  kete Route 'my-route' initialized: destination=kafka, serializer=json, realmMatchers=1, eventMatchers=2
 INFO  kete initialized
 ...
 INFO  kete closing
 INFO  kete closed
 ```
+
+Messages worth alerting on (all `WARN`):
+
+| Message | Meaning |
+|---------|---------|
+| `Failed to initialize route : <name>` | The route's destination could not be initialized; the route is skipped |
+| `Failed to send <type> : <id> : to route : <name>` | Delivery failed after all retry attempts; the event is dropped |
+| `event executor did not terminate gracefully within 30 seconds` | Shutdown timed out waiting for in-flight deliveries |
+
+`INFO kete (<version>) disabled` is logged when `kete.enabled=false`. A support/sponsorship banner is logged at start-up unless `kete.support-the-project-message=false`.
 
 Use standard Keycloak/Quarkus logging configuration to adjust log levels:
 

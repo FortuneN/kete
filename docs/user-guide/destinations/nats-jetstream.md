@@ -79,7 +79,7 @@ Stream Keycloak events to NATS JetStream for persistent, at-least-once delivery.
 - Subject-based routing with wildcards
 - TLS/SSL support with mutual TLS (mTLS)
 - Multiple authentication methods
-- Automatic reconnection and failover
+- Automatic reconnection and failover (publishes attempted while a reconnect is in progress fail fast instead of being buffered — configure route `retry.*` to cover reconnect windows)
 - Message headers support
 - Dynamic subject names (templating)
 
@@ -113,17 +113,6 @@ kete.routes.jetstream.destination.subject=keycloak.events.${eventTypeLowerCase}
 
 Available variables: `${realmLowerCase}`, `${realmUpperCase}`, `${realmKebabCase}`, `${realmPascalCase}`, `${realmCamelCase}`, `${eventTypeLowerCase}`, `${eventTypeUpperCase}`, `${eventTypeKebabCase}`, `${eventTypePascalCase}`, `${eventTypeCamelCase}`, `${kindLowerCase}`, `${kindUpperCase}`, `${kindKebabCase}`, `${kindPascalCase}`, `${kindCamelCase}`, `${resourceTypeLowerCase}`, `${resourceTypeUpperCase}`, `${resourceTypeKebabCase}`, `${resourceTypePascalCase}`, `${resourceTypeCamelCase}`, `${operationTypeLowerCase}`, `${operationTypeUpperCase}`, `${operationTypeKebabCase}`, `${operationTypePascalCase}`, `${operationTypeCamelCase}`, `${resultLowerCase}`, `${resultUpperCase}`, `${resultKebabCase}`, `${resultPascalCase}`, `${resultCamelCase}`
 
-### Custom Headers
-
-Custom headers can be added to NATS JetStream messages:
-
-```bash
-kete.routes.jetstream.destination.headers.X-Source=keycloak
-kete.routes.jetstream.destination.headers.X-Environment=production
-```
-
-Headers are included in the NATS message headers.
-
 ### Optional Properties
 
 | Property | Default | Description | Example |
@@ -135,7 +124,18 @@ Headers are included in the NATS message headers.
 
 
 
-## Authentication Methods
+### Custom Headers
+
+Custom headers can be added to NATS JetStream messages:
+
+```bash
+kete.routes.jetstream.destination.headers.X-Source=keycloak
+kete.routes.jetstream.destination.headers.X-Environment=production
+```
+
+Headers are included in the NATS message headers.
+
+### Authentication
 
 JetStream uses the same authentication methods as [NATS Core](nats.md#authentication-methods):
 
@@ -151,7 +151,7 @@ JetStream uses the same authentication methods as [NATS Core](nats.md#authentica
 
 
 
-## TLS Properties
+### TLS Properties
 
 See [TLS & mTLS](overview.md#tls-mtls) for full details on TLS options.
 

@@ -87,20 +87,6 @@ This destination uses AMQP 1.0 (OASIS standard). For RabbitMQ 3.x or LavinMQ, se
 | `host` | AMQP broker hostname | `artemis.example.com` |
 | `destination-name` | Queue or topic name (supports templating) | `keycloak.${realmLowerCase}.events` |
 
-### Dynamic Destination Names (Templating)
-
-The `destination-name` property supports template variables:
-
-```bash
-# Dynamic queue per realm
-kete.routes.amqp.destination.destination-name=keycloak.${realmLowerCase}.events
-
-# Dynamic queue per event type
-kete.routes.amqp.destination.destination-name=keycloak.events.${eventTypeLowerCase}
-```
-
-Available variables: `${realmLowerCase}`, `${realmUpperCase}`, `${realmKebabCase}`, `${realmPascalCase}`, `${realmCamelCase}`, `${eventTypeLowerCase}`, `${eventTypeUpperCase}`, `${eventTypeKebabCase}`, `${eventTypePascalCase}`, `${eventTypeCamelCase}`, `${kindLowerCase}`, `${kindUpperCase}`, `${kindKebabCase}`, `${kindPascalCase}`, `${kindCamelCase}`, `${resourceTypeLowerCase}`, `${resourceTypeUpperCase}`, `${resourceTypeKebabCase}`, `${resourceTypePascalCase}`, `${resourceTypeCamelCase}`, `${operationTypeLowerCase}`, `${operationTypeUpperCase}`, `${operationTypeKebabCase}`, `${operationTypePascalCase}`, `${operationTypeCamelCase}`, `${resultLowerCase}`, `${resultUpperCase}`, `${resultKebabCase}`, `${resultPascalCase}`, `${resultCamelCase}`
-
 ### Optional Properties
 
 | Property | Default | Description | Example |
@@ -121,6 +107,20 @@ Available variables: `${realmLowerCase}`, `${realmUpperCase}`, `${realmKebabCase
 
 **Note**: Retry configuration (`retry.enabled`, `retry.max-attempts`, `retry.wait-duration`) is configured at the route level. See [Routes - Retry](../routes.md#retry) for details.
 
+### Dynamic Destination Names (Templating)
+
+The `destination-name` property supports template variables:
+
+```bash
+# Dynamic queue per realm
+kete.routes.amqp.destination.destination-name=keycloak.${realmLowerCase}.events
+
+# Dynamic queue per event type
+kete.routes.amqp.destination.destination-name=keycloak.events.${eventTypeLowerCase}
+```
+
+Available variables: `${realmLowerCase}`, `${realmUpperCase}`, `${realmKebabCase}`, `${realmPascalCase}`, `${realmCamelCase}`, `${eventTypeLowerCase}`, `${eventTypeUpperCase}`, `${eventTypeKebabCase}`, `${eventTypePascalCase}`, `${eventTypeCamelCase}`, `${kindLowerCase}`, `${kindUpperCase}`, `${kindKebabCase}`, `${kindPascalCase}`, `${kindCamelCase}`, `${resourceTypeLowerCase}`, `${resourceTypeUpperCase}`, `${resourceTypeKebabCase}`, `${resourceTypePascalCase}`, `${resourceTypeCamelCase}`, `${operationTypeLowerCase}`, `${operationTypeUpperCase}`, `${operationTypeKebabCase}`, `${operationTypePascalCase}`, `${operationTypeCamelCase}`, `${resultLowerCase}`, `${resultUpperCase}`, `${resultKebabCase}`, `${resultPascalCase}`, `${resultCamelCase}`
+
 ### Custom Headers
 
 Custom headers can be added to AMQP 1.0 messages:
@@ -130,7 +130,18 @@ kete.routes.amqp.destination.headers.X-Source=keycloak
 kete.routes.amqp.destination.headers.X-Environment=production
 ```
 
-Headers are included in the JMS message properties.
+Headers are included in the JMS message properties, alongside the standard `eventkind`, `eventtype` and `contenttype` properties that are always set (and win over custom headers with the same name).
+
+### TLS Properties
+
+See [TLS & mTLS](overview.md#tls-mtls) for full details on TLS options.
+
+| Property | Default | Description |
+|----------|---------|-------------|
+| `tls.enabled` | `false` | Enable TLS (`amqps://`; default port becomes `5671`, or `443` for WebSockets) |
+| `tls.verify-hostname` | `false` | Verify the broker hostname against its certificate |
+| `tls.key-store.*` | - | Client certificate for mTLS |
+| `tls.trust-store.*` | - | CA certificates |
 
 
 
@@ -165,7 +176,7 @@ kete.routes.azure-sb.realm-matchers.realm=list:master
 kete.routes.azure-sb.retry.max-attempts=3
 kete.routes.azure-sb.retry.wait-duration=PT1S
 kete.routes.azure-sb.destination.host=your-namespace.servicebus.windows.net
-kete.routes.azure-sb.destination.port=5671
+kete.routes.azure-sb.destination.tls.enabled=true
 kete.routes.azure-sb.destination.destination-name=keycloak-events
 kete.routes.azure-sb.destination.destination-type=queue
 kete.routes.azure-sb.destination.username=RootManageSharedAccessKey
@@ -186,7 +197,7 @@ kete.routes.qpid-topics.destination.username=admin
 kete.routes.qpid-topics.destination.password=admin123
 ```
 
-### Example 3b: AMQP with Mutual TLS (mTLS) - File Path
+### Example 4: AMQP with Mutual TLS (mTLS) - File Path
 
 ```bash
 kete.routes.secure-amqp.destination.kind=amqp-1
@@ -206,7 +217,7 @@ kete.routes.secure-amqp.destination.tls.trust-store.loader.path=/path/to/trustst
 kete.routes.secure-amqp.destination.tls.trust-store.password=truststorePassword
 ```
 
-### Example 3c: AMQP with Mutual TLS (mTLS) - Base64 Encoded
+### Example 5: AMQP with Mutual TLS (mTLS) - Base64 Encoded
 
 ```bash
 kete.routes.secure-amqp-b64.destination.kind=amqp-1
@@ -237,7 +248,7 @@ base64 -i truststore.jks -o truststore-base64.txt
 [Convert]::ToBase64String([IO.File]::ReadAllBytes("truststore.jks")) | Out-File truststore-base64.txt
 ```
 
-### Example 4: High-Priority Events with TTL
+### Example 6: High-Priority Events with TTL
 
 ```bash
 kete.routes.priority-events.destination.kind=amqp-1
@@ -252,7 +263,7 @@ kete.routes.priority-events.destination.priority=9
 kete.routes.priority-events.destination.time-to-live-seconds=300
 ```
 
-### Example 5: Non-Persistent High-Throughput
+### Example 7: Non-Persistent High-Throughput
 
 ```bash
 kete.routes.fast-events.destination.kind=amqp-1
@@ -312,13 +323,14 @@ kete.routes.amqp.destination.time-to-live-seconds=300
 
 ## Azure Service Bus Configuration {#azure-servicebus}
 
-Azure Service Bus is fully supported via the `amqp-1` destination. TLS is auto-enabled when the hostname contains `servicebus`.
+Azure Service Bus is fully supported via the `amqp-1` destination. Service Bus only accepts TLS connections, so `tls.enabled=true` is required (the port then defaults to `5671`, or `443` with `transport-type=amqp-web-sockets`).
 
 ### Basic Azure Service Bus Example
 
 ```bash
 kete.routes.azure-events.destination.kind=amqp-1
 kete.routes.azure-events.destination.host=your-namespace.servicebus.windows.net
+kete.routes.azure-events.destination.tls.enabled=true
 kete.routes.azure-events.destination.username=RootManageSharedAccessKey
 kete.routes.azure-events.destination.password=your-shared-access-key
 kete.routes.azure-events.destination.destination-name=keycloak-events
@@ -329,6 +341,7 @@ kete.routes.azure-events.destination.destination-name=keycloak-events
 ```bash
 kete.routes.azure-ws.destination.kind=amqp-1
 kete.routes.azure-ws.destination.host=your-namespace.servicebus.windows.net
+kete.routes.azure-ws.destination.tls.enabled=true
 kete.routes.azure-ws.destination.username=RootManageSharedAccessKey
 kete.routes.azure-ws.destination.password=your-shared-access-key
 kete.routes.azure-ws.destination.destination-name=keycloak-events

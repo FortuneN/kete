@@ -44,6 +44,7 @@ Stream Keycloak events to ASP.NET SignalR hubs.
     kete.routes.signalr-tls.destination.kind=signalr
     kete.routes.signalr-tls.destination.url=https://signalr-server.example.com/hub
     kete.routes.signalr-tls.destination.hub-method=SendEvent
+    kete.routes.signalr-tls.destination.tls.enabled=true
     kete.routes.signalr-tls.destination.tls.trust-store.loader.kind=pem-file-path
     kete.routes.signalr-tls.destination.tls.trust-store.loader.path=/certs/ca.pem
     ```
@@ -67,7 +68,7 @@ Stream Keycloak events to ASP.NET SignalR hubs.
 - ✅ OAuth 2.0 Client Credentials with token caching (external and internal modes)
 - ✅ Access token authentication (Bearer)
 - ✅ Custom headers (connection-level, sent during handshake)
-- ✅ Automatic reconnection on connection loss
+- ✅ Dead connections are detected by the pool health check and replaced (the SignalR Java client has no auto-reconnect)
 - ✅ Configurable connection and handshake timeout
 - ✅ JSON message body passthrough
 
@@ -190,7 +191,7 @@ See [TLS & mTLS](overview.md#tls-mtls) for full details on TLS options.
 
 | Property | Default | Description |
 |----------|---------|-------------|
-| `destination.tls.enabled` | `false` | Enable TLS (auto-enabled when using `https://` URL) |
+| `destination.tls.enabled` | `false` | Enable TLS — required for `tls.*` stores to be applied (otherwise the JVM default trust store is used) |
 | `destination.tls.key-store.*` | - | Client certificate for mTLS |
 | `destination.tls.trust-store.*` | - | CA certificates |
 
@@ -222,11 +223,12 @@ kete.routes.azure.destination.timeout-seconds=15
 kete.routes.secure.destination.kind=signalr
 kete.routes.secure.destination.url=https://signalr.internal.example.com/hub
 kete.routes.secure.destination.hub-method=SendEvent
+kete.routes.secure.destination.tls.enabled=true
 kete.routes.secure.destination.tls.trust-store.loader.kind=pem-file-path
 kete.routes.secure.destination.tls.trust-store.loader.path=/certs/ca.pem
 kete.routes.secure.destination.tls.key-store.loader.kind=pkcs12-file-path
 kete.routes.secure.destination.tls.key-store.loader.path=/certs/client.p12
-kete.routes.secure.destination.tls.key-store.loader.password=changeit
+kete.routes.secure.destination.tls.key-store.password=changeit
 ```
 
 

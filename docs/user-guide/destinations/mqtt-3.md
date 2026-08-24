@@ -129,7 +129,7 @@ Available variables: `${realmLowerCase}`, `${realmUpperCase}`, `${realmKebabCase
 | `transport-type` | `tcp` | Transport: `tcp` or `websocket` | `websocket` |
 | `qos` | `1` | Quality of Service (0, 1, or 2) | `2` |
 | `retained` | `false` | Retain message on broker | `true` |
-| `client-id-prefix` | _(auto-generated)_ | Client ID prefix — auto-generates `kete-<UUID>` when not set | `keycloak-` |
+| `client-id-prefix` | `kete-<UUID>` | Client ID prefix; each pooled connection uses `<prefix>-<n>` as its client ID | `keycloak` |
 | `clean-session` | `true` | Start with clean session | `false` |
 | `connection-timeout-seconds` | `10` | Connection timeout in seconds | `60` |
 | `keep-alive-interval-seconds` | `60` | Keep-alive ping interval in seconds | `120` |
@@ -141,7 +141,7 @@ Available variables: `${realmLowerCase}`, `${realmUpperCase}`, `${realmKebabCase
 | `pool.max-total` | `20` | Maximum total connections in pool | `50` |
 
 !!! note "No Message Headers"
-    MQTT 3.1.1 does not support message headers (this is a protocol limitation). For header support, use [MQTT 5](mqtt-5.md).
+    MQTT 3.1.1 does not support message headers (this is a protocol limitation); `destination.headers.*` entries are ignored. For header support, use [MQTT 5](mqtt-5.md).
 
 ### TLS Properties
 
@@ -149,7 +149,7 @@ See [TLS & mTLS](overview.md#tls-mtls) for full details on TLS options.
 
 | Property | Default | Description |
 |----------|---------|-------------|
-| `tls.enabled` | `false` | Enable TLS (auto-enabled for port 8883) |
+| `tls.enabled` | `false` | Enable TLS (`ssl://`; the default port becomes `8883` when enabled) |
 | `tls.key-store.*` | - | Client certificate for mTLS |
 | `tls.trust-store.*` | - | CA certificates |
 
@@ -162,6 +162,9 @@ See [TLS & mTLS](overview.md#tls-mtls) for full details on TLS options.
 | 0 | At most once | Fire and forget, no acknowledgment | Non-critical events, high throughput |
 | 1 | At least once | Guaranteed delivery, possible duplicates | Standard event streaming |
 | 2 | Exactly once | Guaranteed delivery, no duplicates | Critical audit events |
+
+!!! note "In-memory persistence"
+    In-flight QoS 1/2 state is kept in memory (`MemoryPersistence`). Delivery guarantees hold for a live client session; messages in flight when the Keycloak process stops are not redelivered.
 
 
 

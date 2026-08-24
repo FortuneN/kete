@@ -23,8 +23,8 @@ The quick start image is for demos only. For production, see the deployment guid
 
     ```bash
     docker run -d -p 8080:8080 \
-      -e KEYCLOAK_ADMIN=admin \
-      -e KEYCLOAK_ADMIN_PASSWORD=admin \
+      -e KC_BOOTSTRAP_ADMIN_USERNAME=admin \
+      -e KC_BOOTSTRAP_ADMIN_PASSWORD=admin \
       -e kete.routes.demo.destination.kind=http \
       -e kete.routes.demo.destination.url=https://webhook.site/YOUR-ID \
       ghcr.io/fortunen/kete/quick-start-keycloak:latest start-dev
@@ -34,8 +34,8 @@ The quick start image is for demos only. For production, see the deployment guid
 
     ```powershell
     docker run -d -p 8080:8080 `
-      -e KEYCLOAK_ADMIN=admin `
-      -e KEYCLOAK_ADMIN_PASSWORD=admin `
+      -e KC_BOOTSTRAP_ADMIN_USERNAME=admin `
+      -e KC_BOOTSTRAP_ADMIN_PASSWORD=admin `
       -e kete.routes.demo.destination.kind=http `
       -e kete.routes.demo.destination.url=https://webhook.site/YOUR-ID `
       ghcr.io/fortunen/kete/quick-start-keycloak:latest start-dev

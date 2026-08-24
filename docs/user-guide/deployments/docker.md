@@ -43,8 +43,8 @@ RUN /opt/keycloak/bin/kc.sh build
 
     docker run -d \
       -p 8080:8080 \
-      -e KEYCLOAK_ADMIN=admin \
-      -e KEYCLOAK_ADMIN_PASSWORD=admin \
+      -e KC_BOOTSTRAP_ADMIN_USERNAME=admin \
+      -e KC_BOOTSTRAP_ADMIN_PASSWORD=admin \
       -e kete.routes.events.destination.kind=http \
       -e kete.routes.events.destination.url=https://webhook.site/YOUR-ID \
       my-keycloak start-dev
@@ -57,8 +57,8 @@ RUN /opt/keycloak/bin/kc.sh build
 
     docker run -d `
       -p 8080:8080 `
-      -e KEYCLOAK_ADMIN=admin `
-      -e KEYCLOAK_ADMIN_PASSWORD=admin `
+      -e KC_BOOTSTRAP_ADMIN_USERNAME=admin `
+      -e KC_BOOTSTRAP_ADMIN_PASSWORD=admin `
       -e kete.routes.events.destination.kind=http `
       -e kete.routes.events.destination.url=https://webhook.site/YOUR-ID `
       my-keycloak start-dev
@@ -77,8 +77,8 @@ Pass KETE configuration as environment variables:
     ```bash
     docker run -d \
       -p 8080:8080 \
-      -e KEYCLOAK_ADMIN=admin \
-      -e KEYCLOAK_ADMIN_PASSWORD=admin \
+      -e KC_BOOTSTRAP_ADMIN_USERNAME=admin \
+      -e KC_BOOTSTRAP_ADMIN_PASSWORD=admin \
       -e kete.routes.kafka.destination.kind=kafka \
       -e kete.routes.kafka.destination.bootstrap.servers=kafka:9092 \
       -e kete.routes.kafka.destination.topic=keycloak-events \
@@ -91,8 +91,8 @@ Pass KETE configuration as environment variables:
     ```powershell
     docker run -d `
       -p 8080:8080 `
-      -e KEYCLOAK_ADMIN=admin `
-      -e KEYCLOAK_ADMIN_PASSWORD=admin `
+      -e KC_BOOTSTRAP_ADMIN_USERNAME=admin `
+      -e KC_BOOTSTRAP_ADMIN_PASSWORD=admin `
       -e kete.routes.kafka.destination.kind=kafka `
       -e kete.routes.kafka.destination.bootstrap.servers=kafka:9092 `
       -e kete.routes.kafka.destination.topic=keycloak-events `
@@ -158,16 +158,15 @@ To upgrade KETE:
 | Image | Description |
 |-------|-------------|
 | `ghcr.io/fortunen/kete/quick-start-keycloak:latest` | Latest stable release |
-| `ghcr.io/fortunen/kete/quick-start-keycloak:X.Y.Z` | Specific version |
-| `ghcr.io/fortunen/kete/quick-start-keycloak:develop` | Latest development build |
+| `ghcr.io/fortunen/kete/quick-start-keycloak:<yyyy.MM.dd.HH.mm>` | Specific release (timestamp version, e.g. `2026.08.24.00.43`) |
 
 === "Linux/macOS"
 
     ```bash
     docker run -d \
       -p 8080:8080 \
-      -e KEYCLOAK_ADMIN=admin \
-      -e KEYCLOAK_ADMIN_PASSWORD=admin \
+      -e KC_BOOTSTRAP_ADMIN_USERNAME=admin \
+      -e KC_BOOTSTRAP_ADMIN_PASSWORD=admin \
       -e kete.routes.demo.destination.kind=http \
       -e kete.routes.demo.destination.url=https://webhook.site/YOUR-ID \
       ghcr.io/fortunen/kete/quick-start-keycloak:latest \
@@ -179,8 +178,8 @@ To upgrade KETE:
     ```powershell
     docker run -d `
       -p 8080:8080 `
-      -e KEYCLOAK_ADMIN=admin `
-      -e KEYCLOAK_ADMIN_PASSWORD=admin `
+      -e KC_BOOTSTRAP_ADMIN_USERNAME=admin `
+      -e KC_BOOTSTRAP_ADMIN_PASSWORD=admin `
       -e kete.routes.demo.destination.kind=http `
       -e kete.routes.demo.destination.url=https://webhook.site/YOUR-ID `
       ghcr.io/fortunen/kete/quick-start-keycloak:latest `

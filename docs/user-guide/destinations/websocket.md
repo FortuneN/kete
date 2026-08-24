@@ -13,13 +13,7 @@ Stream Keycloak events to WebSocket servers.
 
 | System | Notes |
 |--------|-------|
-| **Eclipse Mosquitto** | MQTT over WebSocket (port 9001) |
-| **HiveMQ** | MQTT over WebSocket |
-| **EMQX** | MQTT over WebSocket (port 8083/8084) |
-| **VerneMQ** | MQTT over WebSocket |
-| **RabbitMQ** | Via `rabbitmq_web_stomp` or `rabbitmq_web_mqtt` plugins |
 | **Azure Web PubSub** | Managed WebSocket service |
-| **Azure Event Grid** | WebSocket support for MQTT |
 | **Any WebSocket server** | Standard RFC 6455 compatible |
 | **Custom backends** | Node.js, Python, Go, Java WebSocket servers |
 | **Real-time dashboards** | Live event monitoring applications |
@@ -95,10 +89,9 @@ Stream Keycloak events to WebSocket servers.
 
 - ✅ Text and binary message modes
 - ✅ TLS/SSL support with mutual TLS (mTLS)
-- ✅ OAuth 2.0 Client Credentials with token caching
-- ✅ Standard message headers (`eventkind`, `eventtype`, `contenttype`)
-- ✅ Custom headers for authentication
-- ✅ Automatic reconnection on connection loss
+- ✅ OAuth 2.0 Client Credentials (bearer token sent as an `Authorization` handshake header)
+- ✅ Custom headers for authentication (sent during the WebSocket handshake)
+- ✅ Dead connections are detected by the pool health check and replaced
 - ✅ Configurable connection timeout
 - ✅ Ping/pong heartbeat for connection health detection
 
@@ -151,7 +144,7 @@ If both `url` and individual properties are specified, `url` takes precedence.
 | `destination.binary-mode` | `false` | Send as binary frames (not text) | `true` |
 | `destination.subprotocol` | _(empty)_ | Comma-separated WebSocket subprotocols (RFC 6455 Sec-WebSocket-Protocol) | `graphql-ws,mqtt` |
 | `destination.connection-timeout-seconds` | `10` | Connection timeout in seconds | `30` |
-| `destination.connection-lost-timeout-seconds` | _(inactive)_ | Heartbeat timeout in seconds (0 = disabled). Uses WebSocket ping/pong to detect dead connections. Only active when explicitly set. | `60` |
+| `destination.connection-lost-timeout-seconds` | `60` | Heartbeat timeout in seconds; uses WebSocket ping/pong to detect dead connections. Set to `0` to disable. | `120` |
 | `destination.pool.min-idle` | `1` | Minimum idle connections in pool | `5` |
 | `destination.pool.max-idle` | `10` | Maximum idle connections in pool | `20` |
 | `destination.pool.max-total` | `20` | Maximum total connections in pool | `50` |
@@ -165,7 +158,7 @@ kete.routes.ws.destination.headers.Authorization=Bearer my-token
 kete.routes.ws.destination.headers.X-Custom-Header=value
 ```
 
-In addition to custom headers, KETE automatically adds the standard message headers (`eventkind`, `eventtype`, `contenttype`) to the WebSocket client for each message. All headers are HTTP-level headers sent during the WebSocket handshake and on reconnection.
+Headers are HTTP-level headers sent once, during the WebSocket handshake. Because the connection is long-lived, the per-event `eventkind`, `eventtype` and `contenttype` headers used by other destinations cannot be delivered over WebSocket — consumers must derive that information from the message body (or from a templated URL).
 
 ### OAuth 2.0 Properties
 
@@ -254,7 +247,9 @@ kete.routes.secure-ws.destination.kind=websocket
 kete.routes.secure-ws.realm-matchers.realm=list:master
 kete.routes.secure-ws.destination.url=wss://api.example.com/events
 kete.routes.secure-ws.destination.headers.Authorization=Bearer eyJhbGc...
-kete.routes.secure-ws.destination.tls.trust-store.path=/certs/ca.pem
+kete.routes.secure-ws.destination.tls.enabled=true
+kete.routes.secure-ws.destination.tls.trust-store.loader.kind=pem-file-path
+kete.routes.secure-ws.destination.tls.trust-store.loader.path=/certs/ca.pem
 ```
 
 ### With OAuth 2.0

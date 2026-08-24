@@ -1,57 +1,13 @@
 # Configuration
 
-KETE reads configuration from **two sources**:
+KETE reads its configuration from the **environment variables** of the Keycloak process. Every setting is an environment variable whose name is the dotted property key (for example `kete.routes.myroute.destination.kind`) and whose value is the setting value.
 
-1. **Keycloak SPI Configuration** — XML/properties
-2. **Environment Variables** — override SPI config
-
-## Priority
-
-Environment variables **override** SPI configuration. Use SPI for base settings and environment variables for per-deployment overrides.
-
-## Keycloak SPI Configuration
-
-For bare metal and standalone deployments, configure via Keycloak's native configuration.
-
-=== "Quarkus Keycloak (v17+)"
-
-    In `conf/keycloak.conf`:
-    ```properties
-    spi-events-listener-kete-enabled=true
-    spi-events-listener-kete-metrics-enabled=true
-    spi-events-listener-kete-routes-myroute-destination-kind=kafka
-    spi-events-listener-kete-routes-myroute-destination-bootstrap-servers=localhost:9092
-    spi-events-listener-kete-routes-myroute-destination-topic=keycloak-events
-    ```
-
-    Or via CLI:
-    ```bash
-    bin/kc.sh start \
-      --spi-events-listener-kete-enabled=true \
-      --spi-events-listener-kete-routes-myroute-destination-kind=kafka \
-      ...
-    ```
-
-=== "Legacy WildFly Keycloak"
-
-    In `standalone.xml`:
-    ```xml
-    <spi name="eventsListener">
-        <provider name="kete" enabled="true">
-            <properties>
-                <property name="enabled" value="true"/>
-                <property name="metrics.enabled" value="true"/>
-                <property name="routes.myroute.destination.kind" value="kafka"/>
-                <property name="routes.myroute.destination.bootstrap.servers" value="localhost:9092"/>
-                <property name="routes.myroute.destination.topic" value="keycloak-events"/>
-            </properties>
-        </provider>
-    </spi>
-    ```
+!!! note "Keycloak SPI options are not read"
+    Keycloak exposes provider options to the extension as `kc.spi-events-listener-kete-…` keys in dash-case. KETE looks for dotted `kete.*` keys, so options placed in `keycloak.conf`, passed as `--spi-events-listener-kete-…` CLI flags or as `-D` system properties are **not** picked up. Use environment variables (or a container/orchestrator secret/config map that becomes an environment variable).
 
 ## Environment Variables
 
-Environment variables override SPI configuration. Ideal for containerized deployments:
+Names contain dots and hyphens, so set them with a tool that accepts arbitrary variable names — Docker/Compose `environment:`, Kubernetes `env:`/`envFrom:`, systemd `Environment=`, or `env 'name=value' kc.sh start`. Plain `export name=value` is rejected by POSIX shells because of the dots.
 
 ```bash
 kete.enabled=true
@@ -60,6 +16,8 @@ kete.routes.myroute.destination.kind=kafka
 kete.routes.myroute.destination.bootstrap.servers=kafka:9092
 kete.routes.myroute.destination.topic=keycloak-events
 ```
+
+Values are trimmed of surrounding whitespace. Unknown keys are ignored.
 
 ## Configuration Pattern
 

@@ -92,7 +92,7 @@ Stream Keycloak events to NATS messaging system.
 - Subject-based routing with wildcards
 - TLS/SSL support with mutual TLS (mTLS)
 - Multiple authentication methods
-- Automatic reconnection and failover
+- Automatic reconnection and failover (publishes attempted while a reconnect is in progress fail fast instead of being buffered — configure route `retry.*` to cover reconnect windows)
 - Message headers support (NATS 2.2+)
 - Dynamic subject names (templating)
 
@@ -122,6 +122,16 @@ kete.routes.nats.destination.subject=keycloak.events.${eventTypeLowerCase}
 
 Available variables: `${realmLowerCase}`, `${realmUpperCase}`, `${realmKebabCase}`, `${realmPascalCase}`, `${realmCamelCase}`, `${eventTypeLowerCase}`, `${eventTypeUpperCase}`, `${eventTypeKebabCase}`, `${eventTypePascalCase}`, `${eventTypeCamelCase}`, `${kindLowerCase}`, `${kindUpperCase}`, `${kindKebabCase}`, `${kindPascalCase}`, `${kindCamelCase}`, `${resourceTypeLowerCase}`, `${resourceTypeUpperCase}`, `${resourceTypeKebabCase}`, `${resourceTypePascalCase}`, `${resourceTypeCamelCase}`, `${operationTypeLowerCase}`, `${operationTypeUpperCase}`, `${operationTypeKebabCase}`, `${operationTypePascalCase}`, `${operationTypeCamelCase}`, `${resultLowerCase}`, `${resultUpperCase}`, `${resultKebabCase}`, `${resultPascalCase}`, `${resultCamelCase}`
 
+### Optional Properties
+
+| Property | Default | Description | Example |
+|----------|---------|-------------|---------|
+| `connection-timeout-seconds` | `10` | Connection timeout in seconds | `30` |
+| `ping-interval-seconds` | `60` | Ping interval for health checks | `120` |
+| `connection-name` | `kete` | Client connection name | `keycloak-events` |
+
+
+
 ### Custom Headers
 
 Custom headers can be added to NATS messages:
@@ -133,17 +143,7 @@ kete.routes.nats.destination.headers.X-Environment=production
 
 Headers are included in the NATS message headers.
 
-### Optional Properties
-
-| Property | Default | Description | Example |
-|----------|---------|-------------|---------|
-| `connection-timeout-seconds` | `10` | Connection timeout in seconds | `30` |
-| `ping-interval-seconds` | `60` | Ping interval for health checks | `120` |
-| `connection-name` | `kete` | Client connection name | `keycloak-events` |
-
-
-
-## Authentication Methods
+### Authentication
 
 NATS supports multiple authentication methods via the `authentication-method` property:
 
@@ -157,7 +157,7 @@ NATS supports multiple authentication methods via the `authentication-method` pr
 | `credentials-file-text` | Credentials file content inline | `credentials-file-text` |
 | `credentials-file-base64` | Base64-encoded credentials file | `credentials-file-base64` |
 
-### Username/Password Authentication
+#### Username/Password Authentication
 
 ```bash
 kete.routes.nats.destination.authentication-method=username-and-password
@@ -165,14 +165,14 @@ kete.routes.nats.destination.username=keycloak
 kete.routes.nats.destination.password=secret
 ```
 
-### Token Authentication
+#### Token Authentication
 
 ```bash
 kete.routes.nats.destination.authentication-method=token
 kete.routes.nats.destination.token=myAuthToken
 ```
 
-### NKey Authentication
+#### NKey Authentication
 
 ```bash
 kete.routes.nats.destination.authentication-method=nkey
@@ -182,7 +182,7 @@ kete.routes.nats.destination.nkey-seed=SUAM...
 !!! note "NKey Seed Format"
     NKey seeds start with `S` followed by the key type (e.g., `SU` for user keys).
 
-### Credentials File Authentication
+#### Credentials File Authentication
 
 === "File Path"
 
@@ -210,7 +210,7 @@ kete.routes.nats.destination.nkey-seed=SUAM...
 
 
 
-## TLS Properties
+### TLS Properties
 
 See [TLS & mTLS](overview.md#tls-mtls) for full details on TLS options.
 

@@ -40,7 +40,7 @@ Result: **Zero classpath conflicts** - Our libraries are completely isolated fro
 ### Multi-Version Keycloak Compatibility
 
 - Extension compiles against: **Keycloak 25.0.6** (minimum supported)
-- Extension tested with: **Keycloak 26.0.0** (latest stable)
+- Extension tested with: **Keycloak 26.0.0** (end-to-end tests) and **26.0.7** (quick-start image)
 - Shading enables: **Same JAR works on both** without recompilation
 
 ### Implementation
@@ -57,7 +57,7 @@ See `pom.xml` → `maven-shade-plugin` → `<relocations>` section. Every runtim
 
 | Library | Version | Purpose |
 |---------|---------|---------|
-| `kafka-clients` | 4.1.1 | Apache Kafka producer |
+| `kafka-clients` | 4.1.2 | Apache Kafka producer |
 | `amqp-client` | 5.33.1 | RabbitMQ AMQP 0-9-1 client |
 | `org.eclipse.paho.client.mqttv3` | 1.2.5 | MQTT 3.1.1 client |
 | `org.eclipse.paho.mqttv5.client` | 1.2.5 | MQTT 5.0 client |
@@ -118,6 +118,20 @@ See `pom.xml` → `maven-shade-plugin` → `<relocations>` section. Every runtim
 | `jackson-dataformat-cbor` | 2.19.2 | CBOR (binary) serialization |
 | `jackson-dataformat-properties` | 2.19.2 | Java Properties serialization |
 
+### Serialization (Avro & Protobuf)
+
+| Library | Version | Purpose |
+|---------|---------|---------|
+| `avro` | 1.12.0 | Avro serializer (schema-based, `GenericRecord`) |
+| `protobuf-java` | 4.33.2 | Protobuf serializer (`DynamicMessage` from the bundled descriptor set) |
+
+### gRPC
+
+| Library | Version | Purpose |
+|---------|---------|---------|
+| `grpc-api`, `grpc-core`, `grpc-stub`, `grpc-context`, `grpc-util` | 1.79.0 | gRPC runtime for the gRPC and GCP Cloud Tasks destinations |
+| `grpc-protobuf`, `grpc-protobuf-lite` | 1.79.0 | Protobuf marshalling for gRPC stubs |
+
 ### HTTP, OAuth & Resilience
 
 | Library | Version | Purpose |
@@ -133,7 +147,7 @@ See `pom.xml` → `maven-shade-plugin` → `<relocations>` section. Every runtim
 | `commons-lang3` | 3.20.0 | String utilities |
 | `commons-io` | 2.21.0 | File utilities |
 | `commons-text` | 1.15.0 | Template interpolation (StringSubstitutor) |
-| `commons-configuration2` | 2.13.0 | Configuration parsing |
+| `commons-configuration2` | 2.15.0 | Configuration parsing |
 | `commons-pool2` | 2.13.1 | Destination pooling |
 | `reflections` | 0.10.2 | Component discovery |
 | `glob` | 0.9.0 | Unix glob pattern matching |
@@ -144,8 +158,9 @@ See `pom.xml` → `maven-shade-plugin` → `<relocations>` section. Every runtim
 
 | Library | Version | Purpose |
 |---------|---------|---------|
-| `bcprov-jdk18on` | 1.80 | Bouncy Castle crypto provider |
-| `bcpkix-jdk18on` | 1.80 | Bouncy Castle PKIX/CMS |
+| `bcprov-jdk18on` | 1.84 | Bouncy Castle crypto provider |
+| `bcpkix-jdk18on` | 1.84 | Bouncy Castle PKIX/CMS |
+| `bcutil-jdk18on` | 1.84 | Bouncy Castle utilities |
 
 ### Code Generation
 

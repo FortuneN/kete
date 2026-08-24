@@ -15,6 +15,15 @@ glob:<pattern>
 
 Underscores (`_`) are treated as literal characters, not wildcards.
 
+## Escaping Wildcards
+
+To match a literal `*` or `?`, escape it with a backslash:
+
+```bash
+# Match "USER_*" literally
+glob:USER_\*
+```
+
 ## Examples
 
 ### Prefix Matching

@@ -1,6 +1,6 @@
 # Dockerfile Reference
 
-Multi-stage Dockerfile for building Keycloak with the extension.
+Multi-stage Dockerfile (`quick-starts/$images/keycloak/Dockerfile`) for building the quick-start Keycloak image with the extension. It is built with the repository root as context: `docker build -f "quick-starts/$images/keycloak/Dockerfile" .`
 
 
 
@@ -26,6 +26,7 @@ WORKDIR /src
 COPY pom.xml .
 RUN mvn -q -DskipTests dependency:go-offline
 COPY . .
+RUN mvn clean
 RUN mvn -B -DskipTests package
 ```
 
@@ -42,13 +43,15 @@ RUN mvn -B -DskipTests package
 
 ### Stage 2: keycloak-build
 
-**Base Image:** `quay.io/keycloak/keycloak:26.0.0`  
+**Base Image:** `quay.io/keycloak/keycloak:26.0.7`  
 **Purpose:** Install extension and build Keycloak
 
 ```dockerfile
-FROM quay.io/keycloak/keycloak:26.0.0 AS keycloak-build
+FROM quay.io/keycloak/keycloak:26.0.7 AS keycloak-build
 COPY --from=maven-build --chown=keycloak:keycloak /src/target/kete.jar /opt/keycloak/providers/kete.jar
-RUN /opt/keycloak/bin/kc.sh build --verbose
+ENV KC_HEALTH_ENABLED=true
+ENV KC_METRICS_ENABLED=true
+RUN /opt/keycloak/bin/kc.sh build --health-enabled=true --metrics-enabled=true
 ```
 
 **What it does:**
@@ -64,17 +67,27 @@ RUN /opt/keycloak/bin/kc.sh build --verbose
 
 ### Stage 3: final
 
-**Base Image:** `quay.io/keycloak/keycloak:26.0.0`  
+**Base Image:** `quay.io/keycloak/keycloak:26.0.7`  
 **Purpose:** Create minimal runtime image
 
 ```dockerfile
-FROM quay.io/keycloak/keycloak:26.0.0 AS final
+FROM quay.io/keycloak/keycloak:26.0.7 AS final
 COPY --from=keycloak-build /opt/keycloak/ /opt/keycloak/
+ENV KC_HTTP_ENABLED=true
+ENV KC_HEALTH_ENABLED=true
+ENV KC_METRICS_ENABLED=true
+ENV kete.metrics.enabled=true
+ENV KC_BOOTSTRAP_ADMIN_USERNAME=admin
+ENV KC_BOOTSTRAP_ADMIN_PASSWORD=admin
+ENTRYPOINT ["/opt/keycloak/bin/kc.sh"]
+CMD ["start-dev"]
 ```
 
 **What it does:**
 1. Starts with fresh Keycloak base image
 2. Copies only the built Keycloak directory from keycloak-build
+3. Enables HTTP, health and metrics endpoints, KETE metrics, and the demo `admin`/`admin` bootstrap account
+4. Starts Keycloak in dev mode by default
 
 **Result:** Clean image without build artifacts
 
@@ -85,23 +98,16 @@ COPY --from=keycloak-build /opt/keycloak/ /opt/keycloak/
 ### Manual Build
 
 ```bash
-docker build -t keycloak:kete .
+docker build -f "quick-starts/$images/keycloak/Dockerfile" -t keycloak:kete .
 ```
 
 ### Build with Script
 
-```powershell
-.\docker-build.ps1
-```
+The image is built (and, on release, pushed) by `run-on-pull-request-push.ps1`, `run-on-develop-push.ps1` and `run-on-release-push.ps1` — see [Scripts](scripts/overview.md).
 
 ### Build with Specific Version
 
-```bash
-docker build \
-  --build-arg KEYCLOAK_VERSION=26.0.0 \
-  -t keycloak:custom \
-  .
-```
+The Dockerfile pins the Keycloak version in its `FROM` lines; to build against another version, edit those lines (there is no `ARG`).
 
 
 
@@ -262,11 +268,8 @@ trivy image keycloak:kete
 # Check internet connection
 ping repo.maven.apache.org
 
-# Use local Maven repo
-docker build \
-  -v ~/.m2:/root/.m2 \
-  -t keycloak:kete \
-  .
+# Use a BuildKit cache mount for the Maven repository (docker build has no -v flag)
+# RUN --mount=type=cache,target=/root/.m2 mvn -B -DskipTests package
 ```
 
 ### Build Fails at Keycloak Build
@@ -299,21 +302,7 @@ docker history keycloak:kete
 
 ## .dockerignore
 
-Create `.dockerignore` to exclude files:
-
-```
-.git
-.github
-target/
-.idea/
-*.iml
-.vscode/
-docs/
-*.md
-LICENSE
-.gitignore
-docker-*.ps1
-```
+The repository has no `.dockerignore`; because the build context is the repository root, adding one that excludes `.git`, `target/`, `docs/` and IDE folders would shrink the context sent to the daemon.
 
 
 

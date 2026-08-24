@@ -16,10 +16,10 @@ For authoritative details, see the Keycloak Javadocs:
 
 Keycloak emits two kinds of events:
 
-| Kind | Template Variable | Description | Event Type Format |
-|------|-------------------|-------------|-------------------|
-| **User Events** | `event` | Authentication and account events | Single word: `LOGIN`, `LOGOUT`, `REGISTER` |
-| **Admin Events** | `admin_event` | Administrative operations via Admin Console/API | Combined: `USER_CREATE`, `CLIENT_UPDATE` |
+| Kind | `eventkind` header / `${kindUpperCase}` | Description | Event Type Format |
+|------|------------------------------------------|-------------|-------------------|
+| **User Events** | `EVENT` | Authentication and account events | Single word: `LOGIN`, `LOGOUT`, `REGISTER` |
+| **Admin Events** | `ADMIN_EVENT` | Administrative operations via Admin Console/API | Combined: `USER_CREATE`, `CLIENT_UPDATE` |
 
 Use the `${kindLowerCase}`, `${kindUpperCase}`, `${kindKebabCase}`, `${kindPascalCase}`, or `${kindCamelCase}` template variables to route events by kind.
 
@@ -142,8 +142,6 @@ Use the `${kindLowerCase}`, `${kindUpperCase}`, `${kindKebabCase}`, `${kindPasca
 |------------|----------------|
 | `DELETE_ACCOUNT` | User deletes account |
 | `DELETE_ACCOUNT_ERROR` | Account deletion fails |
-| `DELETE_CREDENTIAL` | User deletes credential |
-| `DELETE_CREDENTIAL_ERROR` | Credential deletion fails |
 
 ### Custom Authentication
 
@@ -221,17 +219,17 @@ Use the `${kindLowerCase}`, `${kindUpperCase}`, `${kindKebabCase}`, `${kindPasca
 
 | Event Type | Triggered When |
 |------------|----------------|
-| `USER_SESSION_DELETED` | User session deleted |
-| `USER_SESSION_DELETED_ERROR` | Session deletion fails |
+| `USER_SESSION_DELETED` | User session deleted (Keycloak 26.5+) |
+| `USER_SESSION_DELETED_ERROR` | Session deletion fails (Keycloak 26.5+) |
 
 ### Credential Management
 
 | Event Type | Triggered When |
 |------------|----------------|
-| `UPDATE_CREDENTIAL` | User updates credential |
-| `UPDATE_CREDENTIAL_ERROR` | Credential update fails |
-| `REMOVE_CREDENTIAL` | User removes credential |
-| `REMOVE_CREDENTIAL_ERROR` | Credential removal fails |
+| `UPDATE_CREDENTIAL` | User updates credential (Keycloak 26.0+) |
+| `UPDATE_CREDENTIAL_ERROR` | Credential update fails (Keycloak 26.0+) |
+| `REMOVE_CREDENTIAL` | User removes credential (Keycloak 26.0+) |
+| `REMOVE_CREDENTIAL_ERROR` | Credential removal fails (Keycloak 26.0+) |
 
 ### Cluster
 
@@ -273,7 +271,7 @@ Use the `${kindLowerCase}`, `${kindUpperCase}`, `${kindKebabCase}`, `${kindPasca
 
 ## Admin Events
 
-Keycloak admin events have separate `resourceType` and `operationType` fields. KETE concatenates these into a single `eventType` field as `RESOURCETYPE_OPERATIONTYPE` (e.g., `USER_CREATE`, `CLIENT_UPDATE`, `REALM_DELETE`), so all events have a consistent `eventType` property for filtering.
+Keycloak admin events have separate `resourceType` and `operationType` fields. KETE concatenates these into a single event type value, `RESOURCETYPE_OPERATIONTYPE` (e.g., `USER_CREATE`, `CLIENT_UPDATE`, `REALM_DELETE`), which is used for event matchers, the `eventtype` message header and the `${eventType…}` template variables. The serialized message body is unchanged (it keeps the separate `resourceType` and `operationType` fields).
 
 ### Operation Types
 
@@ -289,14 +287,15 @@ Keycloak admin events have separate `resourceType` and `operationType` fields. K
 | Category | Resources |
 |----------|-----------|
 | Realm | `REALM`, `REALM_ROLE`, `REALM_ROLE_MAPPING`, `REALM_SCOPE_MAPPING` |
-| Client | `CLIENT`, `CLIENT_ROLE`, `CLIENT_ROLE_MAPPING`, `CLIENT_SCOPE`, `CLIENT_SCOPE_MAPPING`, `CLIENT_INITIAL_ACCESS_MODEL` |
-| User | `USER`, `USER_FEDERATION_PROVIDER`, `USER_FEDERATION_MAPPER` |
+| Client | `CLIENT`, `CLIENT_ROLE`, `CLIENT_ROLE_MAPPING`, `CLIENT_SCOPE`, `CLIENT_SCOPE_MAPPING`, `CLIENT_SCOPE_CLIENT_MAPPING`, `CLIENT_INITIAL_ACCESS_MODEL` |
+| User | `USER`, `USER_LOGIN_FAILURE`, `USER_SESSION`, `USER_PROFILE`, `USER_FEDERATION_PROVIDER`, `USER_FEDERATION_MAPPER` |
 | Group | `GROUP`, `GROUP_MEMBERSHIP` |
+| Organization | `ORGANIZATION`, `ORGANIZATION_MEMBERSHIP` (Keycloak 26.0+) |
 | Identity Provider | `IDENTITY_PROVIDER`, `IDENTITY_PROVIDER_MAPPER` |
-| Authentication | `AUTH_FLOW`, `AUTH_EXECUTION_FLOW`, `AUTH_EXECUTION`, `AUTHENTICATOR_CONFIG`, `REQUIRED_ACTION` |
+| Authentication | `AUTH_FLOW`, `AUTH_EXECUTION_FLOW`, `AUTH_EXECUTION`, `AUTHENTICATOR_CONFIG`, `REQUIRED_ACTION`, `REQUIRED_ACTION_CONFIG` |
 | Component | `COMPONENT`, `PROTOCOL_MAPPER` |
 | Authorization | `AUTHORIZATION_RESOURCE_SERVER`, `AUTHORIZATION_RESOURCE`, `AUTHORIZATION_SCOPE`, `AUTHORIZATION_POLICY` |
-| Other | `CLUSTER_NODE` |
+| Other | `CLUSTER_NODE`, `CUSTOM` (raw value not recognised by Keycloak; the original string is kept in `resourceTypeAsString`) |
 
 
 
@@ -365,8 +364,10 @@ kete.routes.admin.event-matchers.user=sql:USER_%
 
 | Field | Description |
 |-------|-------------|
+| `id` | Event identifier (UUID) |
 | `type` | EventType (e.g., LOGIN, REGISTER) |
 | `realmId` | Realm identifier |
+| `realmName` | Realm name |
 | `clientId` | Client application ID |
 | `userId` | User identifier |
 | `sessionId` | Session identifier |
@@ -379,12 +380,16 @@ kete.routes.admin.event-matchers.user=sql:USER_%
 
 | Field | Description |
 |-------|-------------|
+| `id` | Event identifier (UUID) |
 | `operationType` | CREATE, UPDATE, DELETE, ACTION |
-| `resourceType` | Type of resource affected |
+| `resourceType` | Type of resource affected (`CUSTOM` when not recognised) |
+| `resourceTypeAsString` | Raw resource type string |
 | `resourcePath` | Path to the resource |
 | `realmId` | Realm identifier |
+| `realmName` | Realm name |
 | `time` | Timestamp (epoch ms) |
 | `authDetails.realmId` | Authenticating realm |
+| `authDetails.realmName` | Authenticating realm name |
 | `authDetails.clientId` | Client performing action |
 | `authDetails.userId` | Admin user ID |
 | `authDetails.ipAddress` | Admin IP address |

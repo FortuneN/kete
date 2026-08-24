@@ -1,56 +1,46 @@
-# OAuth Authentication for HTTP Destinations
+# OAuth 2.0 Client Credentials
 
 ## Overview
 
-The HTTP destination supports **OAuth 2.0 Client Credentials** flow for authenticating with protected APIs with two modes:
+KETE ships one OAuth 2.0 **Client Credentials** implementation (`OAuthMaterial`) that is shared by every destination with an `oauth` authentication type: `http`, `soap`, `websocket`, `signalr`, `socketio` and `pulsar`. It supports two modes:
 
-- **Internal Mode**: Uses the current Keycloak instance as the OAuth server (simplest setup)
-- **External Mode**: Uses an external OAuth 2.0 authorization server
+- **Internal Mode**: uses the current Keycloak instance as the authorization server and auto-registers a service-account client
+- **External Mode** (default): uses any external OAuth 2.0 authorization server
 
 Features:
 
-- Automatic token management with built-in expiry handling
-- Thread-safe token caching
-- Fully RFC 6749 compliant
-- Tokens refreshed 30 seconds before expiry
+- Automatic token retrieval with the Client Credentials grant (Nimbus `oauth2-oidc-sdk`)
+- Thread-safe token caching with expiry tracking; tokens are refreshed 30 seconds before they expire
+- Default lifetime of 3600 seconds when the token response carries no `expires_in`
+
+
+
+## Activation
+
+OAuth is only wired in when the destination's `authentication-type` is `oauth`. The `oauth.*` properties are ignored otherwise.
+
+```bash
+kete.routes.<name>.destination.authentication-type=oauth
+kete.routes.<name>.destination.oauth.enabled=true
+```
 
 
 
 ## OAuth Modes
 
-### Internal Mode (Recommended for Same-Keycloak APIs)
-
-Use the current Keycloak instance as the OAuth server. This mode **automatically registers a service account client** during initialization:
-
-```bash
-# Simplest OAuth setup - just 2 properties!
-kete.routes.api.destination.oauth.enabled=true
-kete.routes.api.destination.oauth.mode=internal
-```
-
-This automatically:
-
-1. Creates a confidential client `kete-oauth-client` in the route's realm
-2. Enables service account (client credentials grant)
-3. Generates a secure client secret (UUID)
-4. Configures the token URL for the realm
-
-**Internal Mode Properties:**
+### External Mode (Default)
 
 | Property | Required | Default | Description |
 |----------|----------|---------|-------------|
-| `oauth.enabled` | Yes | `false` | Enable OAuth |
-| `oauth.mode` | Yes | - | Must be `internal` |
-| `oauth.realm` | No | Route realm | Override realm for token URL |
-| `oauth.client-id` | No | `kete-oauth-client` | Override client ID |
-| `oauth.client-secret` | No | Auto-generated | Override client secret |
-| `oauth.scope` | No | `""` | Requested OAuth scopes |
-
-### External Mode
-
-Use an external OAuth 2.0 authorization server:
+| `oauth.enabled` | Yes | `false` | Must be `true` |
+| `oauth.mode` | No | `external` | `external` or `internal` (case-insensitive; unknown values fall back to `external`) |
+| `oauth.token-url` | Yes | - | Token endpoint URL |
+| `oauth.client-id` | Yes | - | Client ID |
+| `oauth.client-secret` | Yes | - | Client secret |
+| `oauth.scope` | No | `""` | Requested scopes (space-separated) |
 
 ```bash
+kete.routes.api.destination.authentication-type=oauth
 kete.routes.api.destination.oauth.enabled=true
 kete.routes.api.destination.oauth.mode=external
 kete.routes.api.destination.oauth.token-url=https://auth.example.com/token
@@ -58,28 +48,35 @@ kete.routes.api.destination.oauth.client-id=my-client
 kete.routes.api.destination.oauth.client-secret=my-secret
 ```
 
-**External Mode Properties:**
+### Internal Mode
+
+Uses the current Keycloak instance as the authorization server. During initialization KETE registers a confidential client with service accounts enabled in the configured realm (or reuses it if it already exists).
 
 | Property | Required | Default | Description |
 |----------|----------|---------|-------------|
-| `oauth.enabled` | Yes | `false` | Enable OAuth |
-| `oauth.mode` | Yes | `internal` | OAuth mode (`internal` or `external`) |
-| `oauth.token-url` | Yes | - | OAuth token endpoint URL |
-| `oauth.client-id` | Yes | - | OAuth client ID |
-| `oauth.client-secret` | Yes | - | OAuth client secret |
-| `oauth.scope` | No | `""` | Requested OAuth scopes |
+| `oauth.enabled` | Yes | `false` | Must be `true` |
+| `oauth.mode` | Yes | - | Must be `internal` |
+| `oauth.realm` | Yes | - | Realm that hosts the client and issues the tokens |
+| `oauth.token-url` | No | `http://localhost:8080/realms/<realm>/protocol/openid-connect/token` | Override when Keycloak is not reachable on `localhost:8080` from inside the Keycloak process |
+| `oauth.client-id` | No | `kete-oauth-client` | Client ID to register/reuse |
+| `oauth.client-secret` | No | Auto-generated (UUID) | Client secret to register/reuse |
+| `oauth.scope` | No | `""` | Requested scopes |
 
+```bash
+kete.routes.api.destination.authentication-type=oauth
+kete.routes.api.destination.oauth.enabled=true
+kete.routes.api.destination.oauth.mode=internal
+kete.routes.api.destination.oauth.realm=master
+```
 
+This automatically:
 
-## Token Management
+1. Creates (or reuses) the confidential client `kete-oauth-client` in the `oauth.realm` realm
+2. Enables its service account (client credentials grant)
+3. Generates a client secret unless `oauth.client-secret` is set
+4. Derives the token URL for the realm unless `oauth.token-url` is set
 
-Token management features:
-
-- **Automatic Token Retrieval**: Tokens fetched using Client Credentials flow
-- **Token Caching**: Access tokens cached with expiry tracking
-- **Automatic Refresh**: Tokens refreshed 30 seconds before expiry
-- **Thread-Safe**: Safe for concurrent event publishing
-- **Default Lifetime**: Assumes 3600 seconds if not in response
+If the realm does not exist, or client registration fails, a warning is logged and the route fails to initialize.
 
 
 
@@ -87,29 +84,24 @@ Token management features:
 
 ### Example 1: Internal Mode (Same Keycloak)
 
-Send events to an API protected by the same Keycloak instance:
-
 ```bash
 kete.routes.internal-api.realm-matchers.realm=list:master
 kete.routes.internal-api.destination.kind=http
-kete.routes.internal-api.destination.host=api.internal.com
-kete.routes.internal-api.destination.port=443
-kete.routes.internal-api.destination.tls.enabled=true
+kete.routes.internal-api.destination.url=https://api.internal.com/events
+kete.routes.internal-api.destination.authentication-type=oauth
 kete.routes.internal-api.destination.oauth.enabled=true
 kete.routes.internal-api.destination.oauth.mode=internal
+kete.routes.internal-api.destination.oauth.realm=master
 kete.routes.internal-api.event-matchers.filter=glob:*
 ```
 
 ### Example 2: External Mode (External OAuth Provider)
 
-Send events to an API protected by an external OAuth provider:
-
 ```bash
 kete.routes.external-api.realm-matchers.realm=list:master
 kete.routes.external-api.destination.kind=http
-kete.routes.external-api.destination.host=api.external.com
-kete.routes.external-api.destination.port=443
-kete.routes.external-api.destination.tls.enabled=true
+kete.routes.external-api.destination.url=https://api.external.com/events
+kete.routes.external-api.destination.authentication-type=oauth
 kete.routes.external-api.destination.oauth.enabled=true
 kete.routes.external-api.destination.oauth.mode=external
 kete.routes.external-api.destination.oauth.token-url=https://auth.example.com/oauth/token
@@ -119,73 +111,7 @@ kete.routes.external-api.destination.oauth.scope=events:write
 kete.routes.external-api.event-matchers.filter=glob:*
 ```
 
-### Example 3: Kubernetes with Internal OAuth
-
-```yaml
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: keycloak-events-config
-data:
-  kete.routes.api.realm-matchers.realm: "list:production"
-  kete.routes.api.destination.kind: "http"
-  kete.routes.api.destination.host: "api.company.com"
-  kete.routes.api.destination.port: "443"
-  kete.routes.api.destination.tls.enabled: "true"
-  kete.routes.api.destination.oauth.enabled: "true"
-  kete.routes.api.destination.oauth.mode: "internal"
-  kete.routes.api.event-matchers.all: "glob:*"
-```
-
-
-
-## Setting Up OAuth Client Manually
-
-If using External mode or overriding Internal mode settings:
-
-### Create OAuth Client in Keycloak
-
-1. **Log into Keycloak Admin Console**
-
-2. **Navigate to Clients**: Go to your realm → Clients → Create
-
-3. **Configure Client**:
-   - **Client ID**: `keycloak-events-publisher`
-   - **Client Protocol**: `openid-connect`
-   - **Access Type**: `confidential`
-   - **Service Accounts Enabled**: `ON`
-   - **Standard Flow Enabled**: `OFF`
-   - **Direct Access Grants Enabled**: `OFF`
-
-4. **Get Client Secret**: Go to Credentials tab → Copy secret
-
-5. **Assign Roles** (if needed): Go to Service Account Roles tab
-
-### Token URL Format
-
-For Keycloak, the token URL format is:
-```
-https://{keycloak-host}/realms/{realm-name}/protocol/openid-connect/token
-
-export kete.routes.my-api.destination.oauth.client-id=events-client
-export kete.routes.my-api.destination.oauth.client-secret=your-client-secret
-export kete.routes.my-api.destination.oauth.scope="email profile"
-```
-
-### Example 2: Authenticate with External OAuth Provider
-
-Send events to an API protected by an external OAuth 2.0 provider (e.g., Auth0, Okta):
-
-```bash
-export kete.routes.external-api.destination.kind=http
-export kete.routes.external-api.destination.url=https://api.external.com/webhooks/keycloak
-export kete.routes.external-api.destination.oauth.enabled=true
-export kete.routes.external-api.destination.oauth.token-url=https://oauth-provider.com/oauth/token
-export kete.routes.external-api.destination.oauth.client-id=my-app-client
-export kete.routes.external-api.destination.oauth.client-secret=super-secret-key
-```
-
-### Example 3: Kubernetes ConfigMap with OAuth
+### Example 3: Kubernetes ConfigMap and Secret
 
 ```yaml
 apiVersion: v1
@@ -195,15 +121,12 @@ metadata:
 data:
   kete.routes.protected-api.destination.kind: "http"
   kete.routes.protected-api.destination.url: "https://api.company.com/events"
-  kete.routes.protected-api.destination.method: "POST"
-  kete.routes.protected-api.destination.timeout-seconds: "10"
-  kete.routes.protected-api.retry.max-attempts: "3"
-  kete.routes.protected-api.retry.wait-duration: "PT2S"
+  kete.routes.protected-api.destination.authentication-type: "oauth"
   kete.routes.protected-api.destination.oauth.enabled: "true"
   kete.routes.protected-api.destination.oauth.token-url: "https://keycloak.company.com/realms/production/protocol/openid-connect/token"
   kete.routes.protected-api.destination.oauth.client-id: "keycloak-events-publisher"
   kete.routes.protected-api.destination.oauth.scope: "api:write events:publish"
-
+---
 apiVersion: v1
 kind: Secret
 metadata:
@@ -226,103 +149,37 @@ envFrom:
     name: keycloak-events-config
 ```
 
-## Setting Up OAuth in Keycloak
 
-### Create OAuth Client for Event Publishing
 
-1. **Log into Keycloak Admin Console**
+## Setting Up an OAuth Client Manually
 
-2. **Navigate to Clients**:
-   - Go to your realm → Clients → Create
+For external mode against a Keycloak realm (or to pre-create the internal-mode client):
 
-3. **Configure Client**:
-   - **Client ID**: `keycloak-events-publisher`
-   - **Client Protocol**: `openid-connect`
-   - **Access Type**: `confidential`
-   - **Service Accounts Enabled**: `ON`
-   - **Authorization Enabled**: `OFF`
-   - **Standard Flow Enabled**: `OFF`
-   - **Direct Access Grants Enabled**: `OFF`
+1. Log into the Keycloak Admin Console and open the realm
+2. **Clients → Create client**: Client ID `keycloak-events-publisher`, protocol `openid-connect`
+3. Enable **Client authentication** (confidential client) and **Service accounts roles**; leave Standard flow and Direct access grants off
+4. Copy the secret from the **Credentials** tab
+5. Assign roles on the **Service account roles** tab if your API requires them
 
-4. **Set Valid Redirect URIs**:
-   - Not needed for client credentials flow
+Keycloak token URLs have the form `https://{keycloak-host}/realms/{realm}/protocol/openid-connect/token`.
 
-5. **Get Client Secret**:
-   - Go to Credentials tab
-   - Copy the secret value
 
-6. **Assign Roles** (if your API requires specific roles):
-   - Go to Service Account Roles tab
-   - Assign necessary roles
-
-### Token URL Format
-
-For Keycloak, the token URL format is:
-```
-https://{keycloak-host}/realms/{realm-name}/protocol/openid-connect/token
-```
-
-Examples:
-- `https://keycloak.example.com/realms/master/protocol/openid-connect/token`
-- `https://auth.company.com/realms/production/protocol/openid-connect/token`
 
 ## Troubleshooting
 
-### Token Request Failures
+| Symptom | Meaning / Fix |
+|---------|---------------|
+| `OAuth token request failed: <error object>` | The token endpoint rejected the request. The error object carries the OAuth error code (`invalid_client`, `invalid_scope`, …). Check client ID/secret, that the client is confidential with service accounts enabled, and that the requested scopes are allowed. |
+| `oauth configuration is required when authentication-type is 'oauth'` (Pulsar) | `oauth.enabled` must be `true` when `authentication-type=oauth`. |
+| `realm is required for INTERNAL mode` | Set `oauth.realm` in internal mode. |
+| Requests fail once the first token expires | Check the authorization server's `expires_in`; tokens are refreshed 30 seconds before expiry, so synchronise clocks (NTP). |
+| Token request hangs | The token request uses the HTTP client's default timeout (it is not governed by `destination.timeout-seconds`). Check network connectivity and firewall rules to `oauth.token-url`. |
 
-**Symptom**: `OAuth token request failed with status 401`
+Internal-mode problems are logged at `WARN` by `io.github.fortunen.kete.OAuthMaterial` (realm not found, client registration failed). Raise that category's log level to `DEBUG` in Keycloak (`--log-level=INFO,io.github.fortunen.kete:DEBUG`) for more detail.
 
-**Solutions**:
-- Verify `destination.oauth.client-id` and `destination.oauth.client-secret` are correct
-- Check client configuration in Keycloak (Access Type: confidential)
-- Ensure Service Accounts are enabled
 
-### Invalid Scope
-
-**Symptom**: `OAuth token request failed with status 400: invalid_scope`
-
-**Solutions**:
-- Verify the scopes are valid for your OAuth provider
-- Check client has permission to request those scopes
-- Try without `destination.oauth.scope` (will use default scopes)
-
-### Token Expiry Issues
-
-**Symptom**: Events fail after token expires
-
-**Solutions**:
-- Check OAuth server token expiry time (`expires_in` in response)
-- The destination refreshes tokens 30 seconds before expiry automatically
-- Verify system clocks are synchronized (NTP)
-
-### Connection Timeouts
-
-**Symptom**: `OAuth token request timed out`
-
-**Solutions**:
-- Increase `destination.timeout-seconds` configuration
-- Check network connectivity to `destination.oauth.token-url`
-- Verify firewall rules allow HTTPS outbound
-
-## Logging
-
-Enable detailed OAuth logging:
-
-```bash
-# Set log level to FINE for HTTP destination
--Djava.util.logging.config.file=/path/to/logging.properties
-```
-
-logging.properties:
-```properties
-io.github.fortunen.kete.destinations.impl.HttpDestination.level=FINE
-```
-
-OAuth log messages:
-- `OAuth enabled for HTTP destination: token-url=...`
-- `Fetching new OAuth access token from {url}`
-- `OAuth access token obtained, expires in {seconds} seconds`
 
 ## Related Documentation
 
-- [Configuration Reference](configuration.md) - Environment variable patterns
+- [HTTP Destination → OAuth 2.0 Properties](../user-guide/destinations/http.md#oauth-20-properties)
+- [Configuration Reference](configuration.md)

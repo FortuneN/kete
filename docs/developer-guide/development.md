@@ -67,6 +67,8 @@ kete/
 │   │   │   ├── Component.java                    # DI annotation
 │   │   │   ├── Configuration.java                # Config parser
 │   │   │   ├── Constants.java                    # Constants
+│   │   │   ├── ContentEncoding.java              # Abstract content encoding
+│   │   │   ├── ContentTransferEncoding.java      # Abstract content transfer encoding
 │   │   │   ├── Destination.java                  # Abstract destination
 │   │   │   ├── DestinationConfig.java            # Destination config base
 │   │   │   ├── DestinationPooledObjectFactory.java # Destination pooling
@@ -93,6 +95,8 @@ kete/
 │   │   │   │   ├── Pkcs12FilePathCertificateLoader.java
 │   │   │   │   ├── Pkcs7FileBase64CertificateLoader.java
 │   │   │   │   └── Pkcs7FilePathCertificateLoader.java
+│   │   │   ├── contentencodings/                 # gzip, deflate
+│   │   │   ├── contenttransferencodings/         # base64
 │   │   │   ├── destinations/                     # Destination implementations (29 destinations)
 │   │   │   │   ├── amqp091/                      # AMQP 0-9-1 (RabbitMQ)
 │   │   │   │   ├── amqp1/                        # AMQP 1.0 (Qpid JMS)
@@ -169,14 +173,18 @@ kete/
 │   │   │       └── ValidationUtils.java
 │   │   └── resources/
 │   │       └── META-INF/services/
-│   │           └── org.keycloak.events.EventListenerProviderFactory
+│   │           ├── org.keycloak.events.EventListenerProviderFactory
+│   │           └── kete/org/apache/qpid/jms/**  # relocated Qpid JMS service files
 │   └── test/
 │       ├── java/io/github/fortunen/kete/
 │       │   ├── unittests/                        # Unit tests
 │       │   │   ├── certificateloaders/
+│       │   │   ├── contentencodings/
+│       │   │   ├── contenttransferencodings/
 │       │   │   ├── destinationconfig/
 │       │   │   ├── destinationconfigs/
 │       │   │   ├── destinationpooledobjectfactory/
+│       │   │   ├── destinations/                 # zero-I/O destination tests (29)
 │       │   │   ├── eventmessage/
 │       │   │   ├── matchers/
 │       │   │   ├── natsauthmaterial/
@@ -218,12 +226,17 @@ kete/
 │       │   │   ├── stompdestination/
 │       │   │   ├── websocketdestination/
 │       │   │   └── zeromqdestination/
-│       │   ├── endtoendtests/                    # End-to-end tests
-│       │   └── utils/                            # Test utility classes
-│       └── resources/
-│           └── testcontainers.properties         # Test config
-├── docs/                                         # Documentation
-├── Dockerfile                                    # Container image
+│       │   └── endtoendtests/                    # End-to-end tests (Keycloak container + broker)
+│       └── resources/                            # (empty)
+├── docs/                                         # Documentation (MkDocs)
+├── quick-starts/                                 # 89 runnable quick-starts + $images/ (51 Dockerfiles)
+├── schemas/                                      # avro/, json/, protobuf/ message schemas
+├── stress-test/                                  # Stress-test harness
+├── logo/                                         # Logo assets
+├── .github/workflows/                            # CI pipelines (develop, pull-request, release)
+├── run-*.ps1                                     # Build/test/release scripts (see Scripts)
+├── mkdocs.yml                                    # Documentation site config
+├── coverage-badge.json                           # Coverage badge data (updated on develop)
 ├── pom.xml                                       # Maven config
 └── README.md                                     # Main documentation
 ```
@@ -258,7 +271,7 @@ kete/
 **What is shaded:**
 Every dependency without `<scope>provided</scope>` or `<scope>test</scope>` is relocated under `kete.*`
 
-**See:** `pom.xml` → `maven-shade-plugin` → `<relocations>` section (92 libraries relocated)
+**See:** `pom.xml` → `maven-shade-plugin` → `<relocations>` section (98 relocations)
 
 **NEVER:** Add runtime dependencies without corresponding `<relocation>` entries.
 
@@ -326,22 +339,24 @@ Runs all tests and creates the final JAR.
 
 ### Unit Tests
 
-Run all unit tests:
+Run all unit tests (a bare `mvn test` would also run the container-based integration and E2E tests):
 
 ```bash
-mvn test
+.\run-unit-tests.ps1
+# or
+mvn test -Dtest="io.github.fortunen.kete.unittests.**"
 ```
 
 Run specific test:
 
 ```bash
-mvn test -Dtest=Provider_onEvent
+mvn test -Dtest=io.github.fortunen.kete.unittests.provider.onEventTests
 ```
 
 Run tests in a package:
 
 ```bash
-mvn test -Dtest=io.github.fortunen.kete.provider.*
+mvn test -Dtest="io.github.fortunen.kete.unittests.provider.**"
 ```
 
 ### Test Naming Convention
@@ -439,10 +454,12 @@ Integration tests use Testcontainers for Kafka, RabbitMQ, etc.:
 
 ```bash
 # Requires Docker
-mvn verify
+.\run-integration-tests.ps1
+# or
+mvn test -Dtest="io.github.fortunen.kete.integrationtests.**"
 ```
 
-Tests automatically start containers, run tests, and clean up.
+Tests automatically start containers, run tests, and clean up. End-to-end tests (`.\run-end-to-end-tests.ps1`) additionally deploy the shaded jar into a Keycloak container.
 
 ### Coverage Reports
 
@@ -452,7 +469,7 @@ open target/site/jacoco/index.html  # macOS/Linux
 start target/site/jacoco/index.html # Windows
 ```
 
-**Current Coverage**: ~90% (check latest report)
+**Current Coverage**: see the badge in the README (`coverage-badge.json`, regenerated by the develop pipeline)
 
 
 
@@ -474,23 +491,25 @@ start target/site/jacoco/index.html # Windows
 ### Code Example
 
 ```java
+@Slf4j
+@Data
+@NoArgsConstructor(force = true)
 public class MyComponent {
-    
+
     private static final String CONSTANT_VALUE = "value";
-    
-    private final Logger logger;
-    private final String configuration;
-    
-    public MyComponent(Logger logger, String configuration) {
-        this.logger = Objects.requireNonNull(logger, "logger is required");
-        this.configuration = Objects.requireNonNull(configuration, "configuration is required");
+
+    private String configuration;
+
+    public void initialize() {
+        ValidationUtils.requireNonBlank(configuration, "configuration is required");
     }
-    
+
     public void processEvent(Event event) {
         try {
+            var type = ValidationUtils.requireNonNull(event, "event is required").getType();
             // Process event
         } catch (Exception exception) {
-            logger.log(Level.WARNING, "Failed to process event", exception);
+            log.warn("Failed to process event", exception);
         }
     }
 }
@@ -557,7 +576,7 @@ See [Extending KETE](extending.md) for comprehensive details.
 
 1. Create class extending `Serializer`
 2. Add `@Component(name = "xxx", scope = Component.SINGLETON)`
-3. Set `contentType` in constructor
+3. Set `contentType` via a field initializer (e.g. `private String contentType = "application/json";`)
 4. Implement `serialize(Event)` and `serialize(AdminEvent)`
 5. Add tests
 
@@ -585,14 +604,14 @@ mvn clean package
 
 2. Copy to local Keycloak:
 ```bash
-cp target/kete.jar ~/keycloak-26.0.0/providers/
+cp target/kete.jar ~/keycloak-26.0.7/providers/
 ```
 
 3. Start Keycloak in debug mode:
 ```bash
 export KC_LOG_LEVEL=DEBUG
 export JAVA_OPTS="-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
-~/keycloak-26.0.0/bin/kc.sh start-dev
+~/keycloak-26.0.7/bin/kc.sh start-dev
 ```
 
 4. Attach debugger:
@@ -618,7 +637,7 @@ export JAVA_OPTS="-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=
 1. Build Docker image with debug enabled:
 
 ```dockerfile
-FROM quay.io/keycloak/keycloak:26.0.0
+FROM quay.io/keycloak/keycloak:26.0.7
 COPY target/kete.jar /opt/keycloak/providers/
 ENV JAVA_OPTS="-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
 RUN /opt/keycloak/bin/kc.sh build
@@ -636,8 +655,7 @@ docker run -p 8080:8080 -p 5005:5005 keycloak-debug start-dev
 Enable detailed logging:
 
 ```bash
-export kete.log.level=DEBUG
-export KC_LOG_LEVEL=DEBUG,io.github.fortunen.kete:TRACE
+export KC_LOG_LEVEL=INFO,io.github.fortunen.kete:DEBUG
 ```
 
 View logs:
@@ -751,7 +769,7 @@ Fixes #123
 
 ### Code Review Process
 
-1. Automated checks run (tests, coverage)
+1. The pull-request workflow runs `run-on-pull-request-push.ps1` (all tests, quick-start image build, `mkdocs build --strict`)
 2. Maintainer reviews code
 3. Address feedback
 4. Approval → Merge
