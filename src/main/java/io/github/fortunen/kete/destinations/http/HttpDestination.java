@@ -93,8 +93,6 @@ public class HttpDestination extends Destination<HttpDestinationConfig> {
 
 		var payload = encodePayload(message.eventBody());
 
-		var body = new String(payload, StandardCharsets.UTF_8);
-
 		// request
 
 		var requestBuilder = HttpRequest
@@ -127,7 +125,7 @@ public class HttpDestination extends Destination<HttpDestinationConfig> {
 			requestBuilder.header("Content-Transfer-Encoding", config.getContentTransferEncodingName());
 		}
 
-		requestBuilder.method(method, HttpRequest.BodyPublishers.ofString(body));
+		requestBuilder.method(method, HttpRequest.BodyPublishers.ofByteArray(payload));
 
 		var response = httpClient.send(requestBuilder.build(), HttpResponse.BodyHandlers.ofString());
 

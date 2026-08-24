@@ -54,7 +54,7 @@ class createConfigurationTests {
 		when(scope.getPropertyNames()).thenReturn(Set.of());
 
 		var environment = new HashMap<String, String>();
-		environment.put("enabled", "false");
+		environment.put("kete.enabled", "false");
 
 		// act
 

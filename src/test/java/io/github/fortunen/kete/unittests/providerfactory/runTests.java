@@ -141,7 +141,7 @@ class runTests {
 		// arrange
 
 		var env = new HashMap<String, String>();
-		env.put("enabled", "false"); // This makes ConfigurationUtils.createConfiguration return null
+		env.put("kete.enabled", "false"); // This makes ConfigurationUtils.createConfiguration return null
 
 		var factory = new ProviderFactory();
 		var scope = mock(Scope.class);

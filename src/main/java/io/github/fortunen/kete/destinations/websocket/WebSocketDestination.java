@@ -4,8 +4,8 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
@@ -16,7 +16,6 @@ import org.java_websocket.drafts.Draft_6455;
 import org.java_websocket.handshake.ServerHandshake;
 
 import io.github.fortunen.kete.Component;
-import io.github.fortunen.kete.Constants;
 import io.github.fortunen.kete.Destination;
 import io.github.fortunen.kete.EventMessage;
 import io.github.fortunen.kete.OAuthMaterial;
@@ -48,7 +47,6 @@ public class WebSocketDestination extends Destination<WebSocketDestinationConfig
 	private int connectionLostTimeoutSeconds;
 	private Draft_6455 draft;
 	private Map<String, String> customHeaders;
-	private Set<Map.Entry<String, String>> customHeadersEntrySet;
 	private ConcurrentHashMap<String, WebSocketClient> clientCache = new ConcurrentHashMap<>();
 
 	@Override
@@ -66,7 +64,6 @@ public class WebSocketDestination extends Destination<WebSocketDestinationConfig
 		isUrlTemplated = config.isUrlTemplated();
 		draft = config.getDraft();
 		connectionTimeoutUnit = config.getConnectionTimeoutUnit();
-		customHeadersEntrySet = config.getCustomHeadersEntrySet();
 		connectionTimeoutSeconds = config.getConnectionTimeoutSeconds();
 		hasConnectionLostTimeout = config.isHasConnectionLostTimeout();
 		connectionLostTimeoutSeconds = config.getConnectionLostTimeoutSeconds();
@@ -106,20 +103,6 @@ public class WebSocketDestination extends Destination<WebSocketDestinationConfig
 
 		var client = isUrlTemplated ? clientCache.computeIfAbsent(actualUrl, this::createAndConnect) : webSocketClient;
 
-		client.clearHeaders();
-
-		if (isOauthEnabled) {
-			client.addHeader("Authorization", oauth.getAccessToken().toAuthorizationHeader());
-		}
-
-		for (var entry : customHeadersEntrySet) {
-			client.addHeader(entry.getKey(), entry.getValue());
-		}
-
-		client.addHeader(Constants.MESSAGE_HEADER_EVENT_KIND, message.kind());
-		client.addHeader(Constants.MESSAGE_HEADER_EVENT_TYPE, message.eventType());
-		client.addHeader(Constants.MESSAGE_HEADER_CONTENT_TYPE, message.contentType());
-
 		if (isBinaryMode) {
 			client.send(message.eventBody());
 		} else {
@@ -130,8 +113,14 @@ public class WebSocketDestination extends Destination<WebSocketDestinationConfig
 	@SneakyThrows
 	private WebSocketClient createAndConnect(String targetUrl) {
 
+		var handshakeHeaders = new HashMap<>(customHeaders);
+
+		if (isOauthEnabled) {
+			handshakeHeaders.put("Authorization", oauth.getAccessToken().toAuthorizationHeader());
+		}
+
 		var wsClient = ValidationUtils.isNotNull(draft)
-			? new WebSocketClient(URI.create(targetUrl), draft, customHeaders, connectionTimeoutSeconds * 1000) {
+			? new WebSocketClient(URI.create(targetUrl), draft, handshakeHeaders, connectionTimeoutSeconds * 1000) {
 
 				@Override
 				public void onOpen(ServerHandshake handshake) {}
@@ -149,7 +138,7 @@ public class WebSocketDestination extends Destination<WebSocketDestinationConfig
 					log.warn("WebSocket error", exception);
 				}
 			}
-			: new WebSocketClient(URI.create(targetUrl), customHeaders) {
+			: new WebSocketClient(URI.create(targetUrl), handshakeHeaders) {
 
 				@Override
 				public void onOpen(ServerHandshake handshake) {}

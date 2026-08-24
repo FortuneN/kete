@@ -2,6 +2,7 @@ package io.github.fortunen.kete.destinations.azureeventhubs;
 
 import java.time.Duration;
 
+import com.azure.core.amqp.AmqpRetryOptions;
 import com.azure.messaging.eventhubs.EventHubClientBuilder;
 
 import io.github.fortunen.kete.DestinationConfig;
@@ -110,7 +111,7 @@ public class AzureEventHubsDestinationConfig extends DestinationConfig {
 
 		// Event Hub client builder (destination calls .buildProducerClient())
 
-		eventHubClientBuilder = new EventHubClientBuilder();
+		eventHubClientBuilder = new EventHubClientBuilder().retryOptions(new AmqpRetryOptions().setTryTimeout(timeout));
 
 		if (hasAuthenticationType) {
 			AzureUtils.configureAuthentication(authenticationType, configuration, "connection-string",
