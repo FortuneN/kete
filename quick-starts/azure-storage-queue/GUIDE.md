@@ -81,7 +81,7 @@ AZURE_STORAGE_CONNECTION_STRING=DefaultEndpointsProtocol=https;AccountName=mykey
 ## Running
 
 ```bash
-docker-compose up -d
+docker compose up -d
 ```
 
 ## Testing
@@ -110,7 +110,7 @@ Navigate to your storage account → Queues → `keycloak-events` to view messag
 ### Check Keycloak Logs
 
 ```bash
-docker-compose logs keycloak
+docker compose logs keycloak
 ```
 
 Look for:
@@ -129,7 +129,7 @@ Look for:
 ## Cleanup
 
 ```bash
-docker-compose down
+docker compose down
 
 # Remove Azure resources (optional)
 az storage queue delete \

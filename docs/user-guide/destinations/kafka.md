@@ -152,7 +152,7 @@ When `acks` is **not** configured, KETE sets `acks=all` and `enable.idempotence=
 | `enable.idempotence` | Idempotent producer | `true` | `true`, `false` |
 | `pool.min-idle` | Minimum idle connections in pool | `1` | `5` |
 | `pool.max-idle` | Maximum idle connections in pool | `10` | `20` |
-| `pool.max-total` | Maximum total connections in pool | `20` | `50` |
+| `pool.max-total` | Maximum total instances in the pool — each one is a full `KafkaProducer` with its own I/O thread and 32 MiB buffer; it multiplexes, so `2`–`4` is plenty | `20` | `4` |
 
 ### Topic Templating
 

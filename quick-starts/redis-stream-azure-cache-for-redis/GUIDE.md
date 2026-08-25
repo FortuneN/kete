@@ -75,7 +75,7 @@ AZURE_REDIS_KEY=your-primary-access-key
 ## Running
 
 ```bash
-docker-compose up -d
+docker compose up -d
 ```
 
 ## Testing

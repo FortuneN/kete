@@ -116,7 +116,7 @@ kete.routes.main-pulsar.destination.topic=persistent://public/default/keycloak-e
 | `keep-alive-interval-seconds` | Keep-alive interval | `30` | `60` |
 | `pool.min-idle` | Minimum idle connections in pool | `1` | `5` |
 | `pool.max-idle` | Maximum idle connections in pool | `10` | `20` |
-| `pool.max-total` | Maximum total connections in pool | `20` | `50` |
+| `pool.max-total` | Maximum total instances in the pool — each one is a full `PulsarClient` with its own connection and thread pools; it multiplexes, so `2`–`4` is plenty | `20` | `4` |
 
 #### Batching Properties
 

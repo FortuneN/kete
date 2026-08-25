@@ -55,7 +55,7 @@ UPSTASH_REDIS_PASSWORD=your-upstash-password
 ## Running
 
 ```bash
-docker-compose up -d
+docker compose up -d
 ```
 
 ## Testing

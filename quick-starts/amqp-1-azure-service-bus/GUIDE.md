@@ -98,7 +98,7 @@ environment:
 ## Running
 
 ```bash
-docker-compose up -d
+docker compose up -d
 ```
 
 ## Testing
@@ -124,7 +124,7 @@ Or use [Azure Service Bus Explorer](https://github.com/paolosalvatori/ServiceBus
 ### Check Keycloak Logs
 
 ```bash
-docker-compose logs keycloak
+docker compose logs keycloak
 ```
 
 Look for:
@@ -142,7 +142,7 @@ Look for:
 ## Cleanup
 
 ```bash
-docker-compose down
+docker compose down
 
 # Remove Azure resources (optional)
 az group delete --name keycloak-events-rg --yes

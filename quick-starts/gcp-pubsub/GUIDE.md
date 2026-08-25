@@ -93,7 +93,7 @@ GCP_SA_KEY_BASE64=ewogICJ0eXBlIjog...
 ## Running
 
 ```bash
-docker-compose up -d
+docker compose up -d
 ```
 
 ## Testing
@@ -117,7 +117,7 @@ Or use the [Google Cloud Console](https://console.cloud.google.com/cloudpubsub) 
 ### Check Keycloak Logs
 
 ```bash
-docker-compose logs keycloak
+docker compose logs keycloak
 ```
 
 Look for:
@@ -136,7 +136,7 @@ Look for:
 ## Cleanup
 
 ```bash
-docker-compose down
+docker compose down
 
 # Remove GCP resources (optional)
 gcloud pubsub subscriptions delete keycloak-events-sub

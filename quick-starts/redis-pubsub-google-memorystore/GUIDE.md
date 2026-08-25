@@ -66,7 +66,7 @@ Edit `.env` and fill in your values.
 ## Running
 
 ```bash
-docker-compose up -d
+docker compose up -d
 ```
 
 ## Testing
@@ -94,7 +94,7 @@ SUBSCRIBE keycloak-events
 ## Cleanup
 
 ```bash
-docker-compose down
+docker compose down
 
 # Remove GCP resources (optional)
 gcloud redis instances delete keycloak-redis --region=us-central1

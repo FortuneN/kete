@@ -81,7 +81,7 @@ Edit `.env` and fill in your values.
 ## Running
 
 ```bash
-docker-compose up -d
+docker compose up -d
 ```
 
 ## Testing
@@ -106,7 +106,7 @@ Or use the [AWS Console](https://console.aws.amazon.com/events/) to view the eve
 ### Check Keycloak Logs
 
 ```bash
-docker-compose logs keycloak
+docker compose logs keycloak
 ```
 
 ### Common Issues
@@ -121,7 +121,7 @@ docker-compose logs keycloak
 ## Cleanup
 
 ```bash
-docker-compose down
+docker compose down
 
 # Remove AWS resources (optional)
 aws events remove-targets --rule catch-all --event-bus-name keycloak-events --ids 1

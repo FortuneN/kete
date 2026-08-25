@@ -84,11 +84,14 @@ kete.routes.production.destination.pool.max-total=30
 | Scenario | Recommendation |
 |----------|----------------|
 | **Low volume** (< 10 events/sec) | Default values are sufficient (`min-idle=1`, `max-idle=10`, `max-total=20`) |
-| **Medium volume** (10-100 events/sec) | `min-idle=10`, `max-idle=20`, `max-total=30` |
-| **High volume** (> 100 events/sec) | `min-idle=20`, `max-idle=50`, `max-total=100` |
+| **Medium volume** (10-100 events/sec) | Per-connection clients (MQTT, STOMP, AMQP 0.9.1 channels, ZeroMQ): `min-idle=10`, `max-idle=20`, `max-total=30`. Multiplexing clients: leave the defaults or lower `max-total` — see below |
+| **High volume** (> 100 events/sec) | Per-connection clients: `min-idle=20`, `max-idle=50`, `max-total=100`. Multiplexing clients: `max-total` no higher than the number of sends you want in flight at once (typically `2`–`4`) |
 | **Fixed pool size** | Set `min-idle=max-idle=max-total` (e.g., all to `15`) |
 | **Production environments** | Defaults are production-ready: create/borrow/return/idle validation and idle eviction are all on by default |
 | **Unstable networks** | Keep the default validation on; consider a shorter `time-between-eviction-runs-seconds` for faster idle culling |
+
+!!! warning "Match the pool to the client"
+    Every pooled instance is a complete client. For **multiplexing** clients that is expensive and unnecessary: a `KafkaProducer` (own I/O thread and 32 MiB buffer), a `PulsarClient`, a Lettuce Redis connection, a Java `HttpClient` (HTTP, SOAP, Azure and GCP REST clients), a NATS connection or a gRPC channel already pipelines many concurrent sends over one connection, so 20 of them per route only multiply threads, buffers and broker connections. Keep `pool.max-total` small (`2`–`4`) for those destinations. **Per-connection** clients — MQTT (Paho serialises publishes), STOMP, ZeroMQ, AMQP 0.9.1 channels — do gain throughput from more instances.
 
 !!! tip "Performance vs. Reliability"
     **Validation is on by default** for create, borrow, return, and idle instances. Health checks read client state only (no network I/O), so the cost is negligible; broken connections are destroyed and replaced before they can fail a send, and the evictor (every 60 seconds) proactively culls dead idle connections and recycles excess connections idle for 30+ minutes. To tune:
