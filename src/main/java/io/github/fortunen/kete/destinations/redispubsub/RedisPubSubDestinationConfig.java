@@ -11,6 +11,7 @@ import io.lettuce.core.cluster.ClusterClientOptions;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import lombok.SneakyThrows;
 
 import java.time.Duration;
@@ -20,6 +21,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor(force = true)
 @EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true, exclude = {"password"})
 public class RedisPubSubDestinationConfig extends DestinationConfig {
 
 	public static final String HOST = "host";

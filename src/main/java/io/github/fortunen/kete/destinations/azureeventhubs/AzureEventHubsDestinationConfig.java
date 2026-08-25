@@ -12,10 +12,12 @@ import io.github.fortunen.kete.utils.ValidationUtils;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Data
 @NoArgsConstructor(force = true)
 @EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true, exclude = {"connectionString"})
 public class AzureEventHubsDestinationConfig extends DestinationConfig {
 
 	public static final String EVENT_HUB = "event-hub";

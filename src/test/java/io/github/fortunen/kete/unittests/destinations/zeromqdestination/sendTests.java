@@ -3,10 +3,12 @@ package io.github.fortunen.kete.unittests.destinations.zeromqdestination;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.nio.charset.StandardCharsets;
 
@@ -40,6 +42,8 @@ public class sendTests {
 		// arrange
 
 		var socket = mock(ZMQ.Socket.class);
+		when(socket.send(any(byte[].class))).thenReturn(true);
+		when(socket.send(any(byte[].class), anyInt())).thenReturn(true);
 		destination.setSocket(socket);
 		destination.setHasEnvelope(false);
 
@@ -56,11 +60,35 @@ public class sendTests {
 	}
 
 	@Test
+	public void shouldThrowWhenSendFails() {
+
+		// arrange
+
+		var socket = mock(ZMQ.Socket.class);
+		when(socket.send(any(byte[].class))).thenReturn(false);
+		destination.setSocket(socket);
+		destination.setHasEnvelope(false);
+
+		var body = "test-body".getBytes(StandardCharsets.UTF_8);
+		var message = new EventMessage("test-realm", "evt-001", body, "LOGIN", "application/json", null, Constants.EVENT, null, null);
+
+		// act
+
+		var thrown = catchThrowable(() -> destination.doSend(message));
+
+		// assert
+
+		assertThat(thrown).isInstanceOf(IllegalStateException.class).hasMessage("failed to send message");
+	}
+
+	@Test
 	public void shouldSendWithEnvelope() {
 
 		// arrange
 
 		var socket = mock(ZMQ.Socket.class);
+		when(socket.send(any(byte[].class))).thenReturn(true);
+		when(socket.send(any(byte[].class), anyInt())).thenReturn(true);
 		destination.setSocket(socket);
 		destination.setHasEnvelope(true);
 		destination.setEnvelope("test-envelope");
@@ -85,6 +113,8 @@ public class sendTests {
 		// arrange
 
 		var socket = mock(ZMQ.Socket.class);
+		when(socket.send(any(byte[].class))).thenReturn(true);
+		when(socket.send(any(byte[].class), anyInt())).thenReturn(true);
 		destination.setSocket(socket);
 		destination.setHasEnvelope(true);
 		destination.setEnvelope("events-${realmLowerCase}");
@@ -109,6 +139,8 @@ public class sendTests {
 		// arrange
 
 		var socket = mock(ZMQ.Socket.class);
+		when(socket.send(any(byte[].class))).thenReturn(true);
+		when(socket.send(any(byte[].class), anyInt())).thenReturn(true);
 		destination.setSocket(socket);
 		destination.setHasEnvelope(false);
 

@@ -13,11 +13,13 @@ import io.grpc.okhttp.OkHttpChannelBuilder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import lombok.SneakyThrows;
 
 @Data
 @NoArgsConstructor(force = true)
 @EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true, exclude = {"credentials"})
 public class GcpCloudTasksDestinationConfig extends DestinationConfig {
 
 	public static final String QUEUE = "queue";
@@ -41,6 +43,7 @@ public class GcpCloudTasksDestinationConfig extends DestinationConfig {
 	private String targetUrl;
 	private String httpMethod;
 	private int timeoutSeconds;
+	private boolean hasTimeoutSeconds;
 	private boolean usePlaintext;
 	private boolean authenticated;
 	private String parentPathPrefix;
@@ -102,6 +105,7 @@ public class GcpCloudTasksDestinationConfig extends DestinationConfig {
 		// timeout
 
 		timeout = Duration.ofSeconds(timeoutSeconds);
+		hasTimeoutSeconds = configuration.containsKey(TIMEOUT_SECONDS);
 
 		// precomputed fields
 

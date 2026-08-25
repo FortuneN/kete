@@ -41,6 +41,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
+import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.tls.HeldCertificate;
 
@@ -48,6 +49,7 @@ import okhttp3.tls.HeldCertificate;
 @Slf4j
 @NoArgsConstructor(access = lombok.AccessLevel.PRIVATE)
 @AllArgsConstructor(access = lombok.AccessLevel.PRIVATE)
+@ToString(exclude = {"keyPassword", "keyStorePassword", "trustStorePassword", "keyStoreBytes", "keyStoreBase64", "clientPrivateKeyPemBytes", "clientPrivateKeyPemBase64", "clientPrivateKeyPkcs1PemBytes", "clientPrivateKeyPkcs1PemBase64", "serverKeyStoreBytes", "serverKeyStoreBase64", "serverPrivateKeyPemBytes", "serverPrivateKeyPemBase64", "serverPrivateKeyPkcs1PemBytes", "serverPrivateKeyPkcs1PemBase64"})
 public class TlsMaterial {
 
 	public static final String TYPE = "type";

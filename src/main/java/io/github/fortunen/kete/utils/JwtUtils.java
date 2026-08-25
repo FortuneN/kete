@@ -2,6 +2,7 @@ package io.github.fortunen.kete.utils;
 
 import java.io.IOException;
 import java.time.Instant;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Supplier;
 
@@ -20,12 +21,25 @@ public final class JwtUtils {
 
 	private JwtUtils() {}
 
-	@SneakyThrows
 	public static AccessToken exchange(TokenRequest tokenRequest) {
+		return exchange(tokenRequest, 0);
+	}
+
+	@SneakyThrows
+	public static AccessToken exchange(TokenRequest tokenRequest, int timeoutSeconds) {
 
 		ValidationUtils.requireNonNull(tokenRequest, "tokenRequest is required");
+		ValidationUtils.requireNonNegative(timeoutSeconds, "timeoutSeconds must be non-negative");
 
-		var tokenResponse = TokenResponse.parse(tokenRequest.toHTTPRequest().send());
+		var httpRequest = tokenRequest.toHTTPRequest();
+
+		if (timeoutSeconds > 0) {
+			var timeoutMillis = (int) TimeUnit.SECONDS.toMillis(timeoutSeconds);
+			httpRequest.setConnectTimeout(timeoutMillis);
+			httpRequest.setReadTimeout(timeoutMillis);
+		}
+
+		var tokenResponse = TokenResponse.parse(httpRequest.send());
 
 		ValidationUtils.requireTrue(tokenResponse.indicatesSuccess(), () -> new IOException("OAuth token request failed: " + tokenResponse.toErrorResponse().getErrorObject()));
 
@@ -38,8 +52,12 @@ public final class JwtUtils {
 		private AccessToken cachedAccessToken;
 		private final ReentrantLock lock = new ReentrantLock();
 
-		@SneakyThrows
 		public AccessToken getToken(Supplier<TokenRequest> tokenRequestFactory) {
+			return getToken(0, tokenRequestFactory);
+		}
+
+		@SneakyThrows
+		public AccessToken getToken(int timeoutSeconds, Supplier<TokenRequest> tokenRequestFactory) {
 
 			ValidationUtils.requireNonNull(tokenRequestFactory, "tokenRequestFactory is required");
 
@@ -55,7 +73,7 @@ public final class JwtUtils {
 
 				// fetch new
 
-				cachedAccessToken = exchange(tokenRequestFactory.get());
+				cachedAccessToken = exchange(tokenRequestFactory.get(), timeoutSeconds);
 
 				var lifetimeSeconds = cachedAccessToken.getLifetime() > 0 ? cachedAccessToken.getLifetime() : DEFAULT_TOKEN_LIFETIME_SECONDS;
 

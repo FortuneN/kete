@@ -19,12 +19,14 @@ import io.github.fortunen.kete.utils.ValidationUtils;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import lombok.SneakyThrows;
 
 @Data
 @Component(name = "http")
 @NoArgsConstructor(force = true)
 @EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true, exclude = {"authHeaderValue"})
 public class HttpDestination extends Destination<HttpDestinationConfig> {
 
 	public static final String AUTHORIZATION = "Authorization";

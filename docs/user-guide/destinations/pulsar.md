@@ -28,7 +28,7 @@ Stream Keycloak events to Apache Pulsar.
     kete.routes.pulsar.destination.kind=pulsar
     kete.routes.pulsar.destination.service-url=pulsar://localhost:6650
     kete.routes.pulsar.destination.topic=persistent://public/default/keycloak-events
-    # Defaults: compression=LZ4, batching enabled
+    # Defaults: compression=LZ4, batching off (set a batching-* option to enable it)
     ```
 
 === "Pulsar with TLS"
@@ -71,7 +71,7 @@ Stream Keycloak events to Apache Pulsar.
 - ✅ Full Pulsar producer configuration support
 - ✅ Topic templating with variables
 - ✅ Multiple compression types (LZ4, ZSTD, ZLIB, Snappy)
-- ✅ Message batching
+- ✅ Message batching (opt-in)
 - ✅ Token, Basic, and OAuth 2.0 authentication
 - ✅ TLS/mTLS support
 - ✅ Event metadata in message properties (`eventkind`, `eventtype`, `contenttype`) and the event type as message key
@@ -122,8 +122,8 @@ kete.routes.main-pulsar.destination.topic=persistent://public/default/keycloak-e
 
 | Property | Description | Default | Example |
 |----------|-------------|---------|---------|
-| `batching-max-messages` | Maximum messages per batch | `1000` | `2000` |
-| `batching-max-publish-delay-seconds` | Maximum batch delay | `1` | `5` |
+| `batching-max-messages` | Maximum messages per batch. Setting this (or `batching-max-publish-delay-seconds`) enables producer batching | `1000` | `2000` |
+| `batching-max-publish-delay-seconds` | Maximum batch delay. Setting this (or `batching-max-messages`) enables producer batching; sends are synchronous, so every send then waits for its batch to flush | `1` | `5` |
 | `max-pending-messages` | Maximum pending messages | `1000` | `5000` |
 | `block-if-queue-full` | Block if queue is full | `true` | `false` |
 
@@ -145,6 +145,7 @@ When `authentication-type` is `oauth`, the standard `oauth.*` sub-properties app
 | `oauth.token-url` | Yes* | - | OAuth token endpoint URL |
 | `oauth.client-id` | Yes* | - | OAuth client ID |
 | `oauth.client-secret` | Yes* | - | OAuth client secret |
+| `oauth.timeout-seconds` | No | _(none)_ | Connect and read timeout in seconds for the token request; applied only when set |
 | `oauth.scope` | No | `""` | Requested OAuth scopes |
 
 *Required when `oauth.mode=external`.

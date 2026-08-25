@@ -192,6 +192,7 @@ Use an external OAuth 2.0 authorization server:
 | `destination.oauth.token-url` | Yes* | - | OAuth token endpoint URL |
 | `destination.oauth.client-id` | Yes* | - | OAuth client ID |
 | `destination.oauth.client-secret` | Yes* | - | OAuth client secret |
+| `destination.oauth.timeout-seconds` | No | _(none)_ | Connect and read timeout in seconds for the token request; applied only when set |
 | `destination.oauth.scope` | No | `""` | Requested OAuth scopes (space-separated) |
 
 *Required when `oauth.enabled=true` and `oauth.mode=external`.
@@ -208,6 +209,7 @@ Use the current Keycloak instance as the OAuth server. This mode **automatically
 | `destination.oauth.token-url` | No | `http://localhost:8080/realms/<realm>/protocol/openid-connect/token` | Token endpoint (override when Keycloak is not reachable on `localhost:8080`) |
 | `destination.oauth.client-id` | No | `kete-oauth-client` | Override auto-generated client ID |
 | `destination.oauth.client-secret` | No | Auto-generated | Provide the secret of an existing client; when set, KETE does not register a client and the client must already exist |
+| `destination.oauth.timeout-seconds` | No | _(none)_ | Connect and read timeout in seconds for the token request; applied only when set |
 | `destination.oauth.scope` | No | `""` | Requested OAuth scopes |
 
 **Internal Mode Example:**
@@ -361,7 +363,6 @@ kete.routes.azure.destination.headers.x-functions-key=your-function-key
 | Quick Start | Description |
 |-------------|-------------|
 | [http-webhook](https://github.com/FortuneN/kete/tree/release/quick-starts/http-webhook/) | HTTP webhook endpoint |
-| [http-azure-event-grid](https://github.com/FortuneN/kete/tree/release/quick-starts/http-azure-event-grid/) | Azure Event Grid |
 
 
 

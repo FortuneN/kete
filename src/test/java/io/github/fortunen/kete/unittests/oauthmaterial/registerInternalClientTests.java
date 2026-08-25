@@ -3,6 +3,9 @@ package io.github.fortunen.kete.unittests.oauthmaterial;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import io.github.fortunen.kete.OAuthMaterial;
@@ -185,6 +188,78 @@ class registerInternalClientTests {
 		assertThat(oauth.isClientRegistered())
 			.as("Should mark as registered when client already exists")
 			.isTrue();
+	}
+
+	@Test
+	void shouldAdoptSecretOfExistingClient() {
+
+		// arrange
+
+		var map = new HashMap<String, Object>();
+		map.put("enabled", "true");
+		map.put("mode", "internal");
+		map.put("realm", "test-realm");
+		var config = new MapConfiguration(map);
+
+		var oauth = OAuthMaterial.builder()
+			.withConfiguration(config)
+			.build();
+
+		var session = mock(KeycloakSession.class);
+		var realmProvider = mock(RealmProvider.class);
+		var realmModel = mock(RealmModel.class);
+		var existingClient = mock(ClientModel.class);
+
+		when(session.realms()).thenReturn(realmProvider);
+		when(realmProvider.getRealmByName("test-realm")).thenReturn(realmModel);
+		when(realmModel.getClientByClientId("kete-oauth-client")).thenReturn(existingClient);
+		when(existingClient.getSecret()).thenReturn("stored-secret");
+
+		// act
+
+		var result = oauth.registerInternalClient(session);
+
+		// assert
+
+		assertThat(result).isTrue();
+		assertThat(oauth.getClientSecret().getValue()).isEqualTo("stored-secret");
+		assertThat(oauth.getAutoRegisteredClientSecret()).isEqualTo("stored-secret");
+		verify(existingClient, never()).setSecret(anyString());
+	}
+
+	@Test
+	void shouldStoreGeneratedSecretWhenExistingClientHasNone() {
+
+		// arrange
+
+		var map = new HashMap<String, Object>();
+		map.put("enabled", "true");
+		map.put("mode", "internal");
+		map.put("realm", "test-realm");
+		var config = new MapConfiguration(map);
+
+		var oauth = OAuthMaterial.builder()
+			.withConfiguration(config)
+			.build();
+
+		var session = mock(KeycloakSession.class);
+		var realmProvider = mock(RealmProvider.class);
+		var realmModel = mock(RealmModel.class);
+		var existingClient = mock(ClientModel.class);
+
+		when(session.realms()).thenReturn(realmProvider);
+		when(realmProvider.getRealmByName("test-realm")).thenReturn(realmModel);
+		when(realmModel.getClientByClientId("kete-oauth-client")).thenReturn(existingClient);
+		when(existingClient.getSecret()).thenReturn(null);
+
+		// act
+
+		var result = oauth.registerInternalClient(session);
+
+		// assert
+
+		assertThat(result).isTrue();
+		verify(existingClient).setSecret(oauth.getAutoRegisteredClientSecret());
 	}
 
 	@Test

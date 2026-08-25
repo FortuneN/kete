@@ -15,11 +15,13 @@ import io.github.fortunen.kete.utils.ValidationUtils;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import lombok.SneakyThrows;
 
 @Data
 @NoArgsConstructor(force = true)
 @EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true, exclude = {"password"})
 public class Mqtt5DestinationConfig extends DestinationConfig {
 
 	public static final int MIN_QOS = 0;

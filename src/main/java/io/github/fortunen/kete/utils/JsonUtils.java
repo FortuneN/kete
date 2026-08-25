@@ -1,5 +1,6 @@
 package io.github.fortunen.kete.utils;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -9,6 +10,7 @@ import lombok.SneakyThrows;
 public final class JsonUtils {
 
 	private static final ObjectMapper MAPPER = new ObjectMapper();
+	private static final ObjectMapper COPY_MAPPER = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
 	private JsonUtils() {}
 
@@ -18,6 +20,14 @@ public final class JsonUtils {
 		ValidationUtils.requireNonNull(json, "json is required");
 
 		return MAPPER.readTree(json);
+	}
+
+	public static <T> T copy(T value, Class<T> type) {
+
+		ValidationUtils.requireNonNull(value, "value is required");
+		ValidationUtils.requireNonNull(type, "type is required");
+
+		return COPY_MAPPER.convertValue(value, type);
 	}
 
 	public static ObjectNode createObjectNode() {

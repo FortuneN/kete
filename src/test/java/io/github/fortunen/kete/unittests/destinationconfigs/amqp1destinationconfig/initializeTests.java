@@ -1192,6 +1192,75 @@ public class initializeTests {
 	// =========================================================================
 
 	@Test
+	public void shouldNotSetSendTimeoutByDefault() {
+
+		// arrange
+
+		var config = new Amqp1DestinationConfig();
+		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "amqp-1",
+			"host", "localhost",
+			"destination-name", "test-queue"
+		)));
+
+		// act
+
+		config.initialize();
+
+		// assert
+
+		assertThat(config.isHasSendTimeout()).isFalse();
+		assertThat(config.getUrl()).doesNotContain("jms.sendTimeout");
+	}
+
+	@Test
+	public void shouldAppendSendTimeoutToUrlWhenConfigured() {
+
+		// arrange
+
+		var config = new Amqp1DestinationConfig();
+		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "amqp-1",
+			"host", "localhost",
+			"destination-name", "test-queue",
+			"idle-timeout-seconds", "30",
+			"send-timeout-seconds", "15"
+		)));
+
+		// act
+
+		config.initialize();
+
+		// assert
+
+		assertThat(config.isHasSendTimeout()).isTrue();
+		assertThat(config.getSendTimeoutSeconds()).isEqualTo(15);
+		assertThat(config.getUrl()).isEqualTo("amqp://localhost:5672?amqp.idleTimeout=30000&jms.sendTimeout=15000");
+	}
+
+	@Test
+	public void shouldThrowWhenSendTimeoutIsZero() {
+
+		// arrange
+
+		var config = new Amqp1DestinationConfig();
+		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "amqp-1",
+			"host", "localhost",
+			"destination-name", "test-queue",
+			"send-timeout-seconds", "0"
+		)));
+
+		// act
+
+		var thrown = catchThrowable(config::initialize);
+
+		// assert
+
+		assertThat(thrown).isInstanceOf(IllegalStateException.class).hasMessage("send-timeout-seconds must be positive");
+	}
+
+	@Test
 	public void shouldUseDefaultIdleTimeout() {
 
 		// arrange

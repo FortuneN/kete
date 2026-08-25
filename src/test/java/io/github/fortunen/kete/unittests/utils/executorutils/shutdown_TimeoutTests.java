@@ -4,7 +4,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 
 import io.github.fortunen.kete.utils.ExecutorUtils;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.junit.jupiter.api.Test;
 
@@ -63,6 +65,37 @@ public class shutdown_TimeoutTests {
 
 		assertThatCode(() -> ExecutorUtils.shutdown(executor, 5, "already shutdown"))
 			.doesNotThrowAnyException();
+	}
+
+	@Test
+	public void shouldForceShutdownWhenTasksOutliveTheGracePeriod() throws Exception {
+
+		// arrange
+
+		ExecutorService executor = ExecutorUtils.createService();
+		var interrupted = new AtomicBoolean(false);
+		var started = new CountDownLatch(1);
+		var blocker = new CountDownLatch(1);
+
+		executor.submit(() -> {
+			started.countDown();
+			try {
+				blocker.await();
+			} catch (InterruptedException e) {
+				interrupted.set(true);
+			}
+		});
+
+		started.await(5, TimeUnit.SECONDS);
+
+		// act
+
+		ExecutorUtils.shutdown(executor, 1, "blocked executor");
+
+		// assert
+
+		assertThat(executor.awaitTermination(5, TimeUnit.SECONDS)).isTrue();
+		assertThat(interrupted).isTrue();
 	}
 
 	@Test

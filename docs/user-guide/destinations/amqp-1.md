@@ -100,6 +100,7 @@ This destination uses AMQP 1.0 (OASIS standard). For RabbitMQ 3.x or LavinMQ, se
 | `priority` | _(none)_ | Message priority (0-9, only applied when explicitly set) | `7` |
 | `time-to-live-seconds` | `0` | Message TTL in seconds (0 = never expires) | `60` |
 | `idle-timeout-seconds` | _(none)_ | Connection idle timeout in seconds — only applied when explicitly set (0 = disabled) | `30` |
+| `send-timeout-seconds` | _(none — wait for the broker)_ | Seconds a synchronous send waits for the broker's acknowledgement before failing (`jms.sendTimeout`) — only applied when explicitly set | `15` |
 | `pool.min-idle` | `1` | Minimum idle connections in pool | `5` |
 | `pool.max-idle` | `10` | Maximum idle connections in pool | `20` |
 | `pool.max-total` | `20` | Maximum total connections in pool | `50` |

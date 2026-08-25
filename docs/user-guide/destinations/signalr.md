@@ -146,6 +146,7 @@ Use an external OAuth 2.0 authorization server:
 | `destination.oauth.token-url` | Yes* | - | OAuth token endpoint URL |
 | `destination.oauth.client-id` | Yes* | - | OAuth client ID |
 | `destination.oauth.client-secret` | Yes* | - | OAuth client secret |
+| `destination.oauth.timeout-seconds` | No | _(none)_ | Connect and read timeout in seconds for the token request; applied only when set |
 | `destination.oauth.scope` | No | `""` | Requested OAuth scopes (space-separated) |
 
 *Required when `oauth.enabled=true` and `oauth.mode=external`.
@@ -169,6 +170,7 @@ Use the current Keycloak instance as the OAuth server. Automatically registers a
 | `destination.oauth.realm` | No | Route realm | Override realm for token URL |
 | `destination.oauth.client-id` | No | `kete-oauth-client` | Override auto-generated client ID |
 | `destination.oauth.client-secret` | No | Auto-generated | Override auto-generated secret |
+| `destination.oauth.timeout-seconds` | No | _(none)_ | Connect and read timeout in seconds for the token request; applied only when set |
 | `destination.oauth.scope` | No | `""` | Requested OAuth scopes |
 
 ```bash

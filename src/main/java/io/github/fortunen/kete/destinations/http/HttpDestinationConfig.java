@@ -20,6 +20,7 @@ import io.github.fortunen.kete.utils.ValidationUtils;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
@@ -27,6 +28,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @NoArgsConstructor(force = true)
 @EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true, exclude = {"authHeaderValue", "filteredCustomHeaders"})
 public class HttpDestinationConfig extends DestinationConfig {
 
 	public static final String URL = "url";

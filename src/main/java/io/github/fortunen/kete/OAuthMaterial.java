@@ -5,6 +5,7 @@ import java.util.Locale;
 import java.util.UUID;
 
 import org.apache.commons.configuration2.MapConfiguration;
+import org.keycloak.models.ClientModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.services.managers.ClientManager;
 import org.keycloak.services.managers.RealmManager;
@@ -43,6 +44,7 @@ public class OAuthMaterial {
 	public static final String TOKEN_URL = "token-url";
 	public static final String CLIENT_ID = "client-id";
 	public static final String CLIENT_SECRET = "client-secret";
+	public static final String TIMEOUT_SECONDS = "timeout-seconds";
 
 
 
@@ -59,6 +61,7 @@ public class OAuthMaterial {
 	private String realm;
 	private OAuthMode mode;
 	private boolean enabled;
+	private int timeoutSeconds;
 	private ClientID clientId;
 	private Secret clientSecret;
 	private boolean clientRegistered;
@@ -83,13 +86,28 @@ public class OAuthMaterial {
 		this.clientRegistered = true;
 	}
 
+	private void adoptExistingClientSecret(ClientModel existingClient) {
+
+		// the client outlives restarts but the generated secret does not: use the stored one so token requests keep working
+
+		var existingSecret = existingClient.getSecret();
+
+		if (ValidationUtils.isBlank(existingSecret)) {
+			existingClient.setSecret(autoRegisteredClientSecret);
+			return;
+		}
+
+		clientSecret = new Secret(existingSecret);
+		autoRegisteredClientSecret = existingSecret;
+	}
+
 	public AccessToken getAccessToken() {
 
 		if (!enabled) {
 			return null;
 		}
 
-		return tokenHolder.getToken(() -> {
+		return tokenHolder.getToken(timeoutSeconds, () -> {
 
 			var grant = new ClientCredentialsGrant();
 			var clientAuth = new ClientSecretBasic(clientId, clientSecret);
@@ -131,6 +149,7 @@ public class OAuthMaterial {
 		var existingClient = realmModel.getClientByClientId(clientIdValue);
 
 		if (ValidationUtils.isNotNull(existingClient)) {
+			adoptExistingClientSecret(existingClient);
 			markClientRegistered();
 			return true;
 		}
@@ -240,6 +259,10 @@ public class OAuthMaterial {
 			var modeStr = configuration.getString(MODE, OAuthMode.EXTERNAL.name()).trim().toUpperCase(Locale.ROOT);
 
 			material.mode = ValidationUtils.tryParseEnum(OAuthMode.class, modeStr, true).orElse(OAuthMode.EXTERNAL);
+
+			// timeout (applied to the token request only when set)
+
+			material.timeoutSeconds = ValidationUtils.requireNonNegative(configuration.getInt(TIMEOUT_SECONDS, 0), TIMEOUT_SECONDS + " must be non-negative");
 
 			// scope
 

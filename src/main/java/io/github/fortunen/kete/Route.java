@@ -38,8 +38,13 @@ public class Route implements AutoCloseable {
 	private Cache<String, Boolean> acceptRealmCache = CacheBuilder.newBuilder().maximumSize(ACCEPT_CACHE_MAX_SIZE).build();
 	private Cache<String, Boolean> acceptEventCache = CacheBuilder.newBuilder().maximumSize(ACCEPT_CACHE_MAX_SIZE).build();
 
-	@SneakyThrows
 	public void initialize(KeycloakSession session) {
+
+		initializeConfig(session);
+		initializeDestinations();
+	}
+
+	public void initializeConfig(KeycloakSession session) {
 
 		ValidationUtils.requireNonNull(session, "session is required");
 		ValidationUtils.requireNonNull(serializer, "serializer is required");
@@ -47,7 +52,7 @@ public class Route implements AutoCloseable {
 		ValidationUtils.requireNonNull(eventMatchers, "eventMatchers is required");
 		ValidationUtils.requireNonNull(destinationConfig, "destinationConfig is required");
 
-		// initialize destination config
+		// initialize destination config (may read or write the Keycloak model, so it stays on the caller's thread)
 
 		destinationConfig.setKeycloakSession(session);
 		destinationConfig.initialize();
@@ -55,6 +60,12 @@ public class Route implements AutoCloseable {
 		// destinationKind
 
 		destinationKind = destinationConfig.getDestinationKind();
+	}
+
+	@SneakyThrows
+	public void initializeDestinations() {
+
+		ValidationUtils.requireNonNull(destinationConfig, "destinationConfig is required");
 
 		// create destination pool (only if not already set - for testing)
 
