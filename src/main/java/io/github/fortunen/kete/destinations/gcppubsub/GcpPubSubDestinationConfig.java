@@ -35,6 +35,7 @@ public class GcpPubSubDestinationConfig extends DestinationConfig {
 	private Duration timeout;
 	private String orderingKey;
 	private int timeoutSeconds;
+	private boolean hasTimeoutSeconds;
 	private boolean authenticated;
 	private boolean hasOrderingKey;
 	private boolean isTopicTemplated;
@@ -79,6 +80,7 @@ public class GcpPubSubDestinationConfig extends DestinationConfig {
 		// timeout
 
 		timeout = Duration.ofSeconds(timeoutSeconds);
+		hasTimeoutSeconds = configuration.containsKey(TIMEOUT_SECONDS);
 
 		// precomputed fields
 

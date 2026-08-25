@@ -8,7 +8,6 @@ import io.lettuce.core.ClientOptions;
 import io.lettuce.core.RedisURI;
 import io.lettuce.core.SslOptions;
 import io.lettuce.core.SocketOptions;
-import io.lettuce.core.SslVerifyMode;
 import io.lettuce.core.XAddArgs;
 import io.lettuce.core.cluster.ClusterClientOptions;
 import lombok.Data;
@@ -175,7 +174,7 @@ public class RedisStreamDestinationConfig extends DestinationConfig {
 				}
 				if (tls.isEnabled()) {
 					uriBuilder.withSsl(true);
-					uriBuilder.withVerifyPeer(tls.isVerifyHostname() ? SslVerifyMode.FULL : SslVerifyMode.CA);
+					uriBuilder.withVerifyPeer(tls.isVerifyHostname());
 				}
 
 				redisUri = uriBuilder.build();
@@ -226,7 +225,7 @@ public class RedisStreamDestinationConfig extends DestinationConfig {
 				}
 				if (tls.isEnabled()) {
 					uriBuilder.withSsl(true);
-					uriBuilder.withVerifyPeer(tls.isVerifyHostname() ? SslVerifyMode.FULL : SslVerifyMode.CA);
+					uriBuilder.withVerifyPeer(tls.isVerifyHostname());
 				}
 
 				redisUri = uriBuilder.build();
@@ -268,7 +267,7 @@ public class RedisStreamDestinationConfig extends DestinationConfig {
 					}
 					if (tls.isEnabled()) {
 						nodeUriBuilder.withSsl(true);
-						nodeUriBuilder.withVerifyPeer(tls.isVerifyHostname() ? SslVerifyMode.FULL : SslVerifyMode.CA);
+						nodeUriBuilder.withVerifyPeer(tls.isVerifyHostname());
 					}
 					clusterNodeUris.add(nodeUriBuilder.build());
 				}

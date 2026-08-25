@@ -103,6 +103,7 @@ public class initializeTests {
 
 		assertThat(config.getTimeoutSeconds()).isEqualTo(10);
 		assertThat(config.getTimeout()).isEqualTo(Duration.ofSeconds(10));
+		assertThat(config.isHasTimeoutSeconds()).isFalse();
 	}
 
 	@Test
@@ -203,6 +204,7 @@ public class initializeTests {
 
 		assertThat(config.getTimeoutSeconds()).isEqualTo(30);
 		assertThat(config.getTimeout()).isEqualTo(Duration.ofSeconds(30));
+		assertThat(config.isHasTimeoutSeconds()).isTrue();
 	}
 
 	@Test

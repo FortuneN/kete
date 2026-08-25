@@ -85,7 +85,7 @@ public final class ConfigurationUtils {
 		var map = new MapConfiguration(merged);
 		var configValues = ConfigurationUtils.getSubSet(map, Constants.ID);
 
-		if (!configValues.getBoolean(ENABLED, true)) {
+		if (!configValues.getBoolean(ENABLED, true) || !map.getBoolean(ENABLED, true)) {
 			return null;
 		}
 

@@ -102,7 +102,7 @@ Stream Keycloak events to Google Cloud Pub/Sub.
 | Property | Default | Description | Example |
 |----------|---------|-------------|---------|
 | `destination.url` | `https://pubsub.googleapis.com` | Pub/Sub REST API base URL (override for emulators) | `http://localhost:8085` |
-| `destination.timeout-seconds` | `10` | HTTP connect and read timeout in seconds, applied to every Pub/Sub request | `30` |
+| `destination.timeout-seconds` | _(Google HTTP client default: 20)_ | HTTP connect and read timeout in seconds for every Pub/Sub request. Applied only when set; otherwise the Google HTTP client default is kept. | `30` |
 | `destination.ordering-key` | _(empty)_ | Ordering key for all published messages (supports templating) | `keycloak` |
 | `destination.authentication-type` | _(empty)_ | Authentication method (see [Authentication](#authentication-credentials)) | `service-account-file-path` |
 
