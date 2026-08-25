@@ -1,5 +1,6 @@
 package io.github.fortunen.kete.certificateloaders;
 
+import java.nio.charset.StandardCharsets;
 import java.security.KeyStore;
 import java.security.cert.Certificate;
 
@@ -38,7 +39,7 @@ public class PemFileBase64CertificateLoader extends CertificateLoader {
 
 		ValidationUtils.requireNonNull(keyStore, "keyStore is required");
 
-		var pemContent = new String(Base64Utils.decode(base64));
+		var pemContent = new String(Base64Utils.decode(base64), StandardCharsets.UTF_8);
 		var certificates = CertificateUtils.parsePemCertificates(pemContent);
 		var privateKey = CertificateUtils.parsePemPrivateKey(pemContent);
 

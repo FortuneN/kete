@@ -1,5 +1,6 @@
 package io.github.fortunen.kete.destinations.stomp;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -86,7 +87,18 @@ public class StompDestination extends Destination<StompDestinationConfig> {
 			headers.put("receipt", message.eventId());
 		}
 
-		connection.send(actualDestination, new String(body), null, headers);
+		// the body goes out as raw bytes under content-length so binary and compressed payloads arrive intact
+		// (StompConnection.send() would decode them as text); the frame ends with the STOMP NUL byte
+
+		var frame = new StringBuilder("SEND\n").append("destination:").append(actualDestination).append('\n');
+
+		for (var header : headers.entrySet()) {
+			frame.append(header.getKey()).append(':').append(header.getValue()).append('\n');
+		}
+
+		frame.append('\n');
+
+		connection.sendFrame(frame.toString(), Arrays.copyOf(body, body.length + 1));
 
 		if (isReceiptEnabled) {
 			var receipt = connection.receive();

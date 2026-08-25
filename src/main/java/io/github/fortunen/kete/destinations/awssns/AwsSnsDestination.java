@@ -1,5 +1,6 @@
 package io.github.fortunen.kete.destinations.awssns;
 
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -95,7 +96,7 @@ public class AwsSnsDestination extends Destination<AwsSnsDestinationConfig> {
 
 		var requestBuilder = PublishRequest.builder()
 			.topicArn(actualTopicArn)
-			.message(new String(payload))
+			.message(new String(payload, StandardCharsets.UTF_8))
 			.messageAttributes(attributes);
 
 		// subject (optional)

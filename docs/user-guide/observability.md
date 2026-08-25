@@ -18,8 +18,11 @@ kete.metrics.enabled=true
 | `kete.events.failed.total` | route, event_type, realm, error_type | Events that failed |
 | `kete.events.serialization.failed.total` | serializer, event_type, realm, error_type | Events that could not be serialized (never reach a destination) |
 | `kete.forward.duration.seconds` | route | Time to send event |
+| `kete.retries.total` | route | Delivery attempts that were retried |
+| `kete.pool.wait.seconds` | route | Time spent waiting for a pooled destination client |
+| `kete.events.inflight` | route | Events currently being delivered by the route |
 | `kete.routes.active` | — | Number of active routes |
-| `kete.routes.failed` | — | Routes that failed to initialize at start-up |
+| `kete.routes.failed` | — | Routes not delivering: destinations still being retried in the background plus routes with invalid configuration |
 | `kete.pool.idle` | route | Idle connections in pool |
 | `kete.pool.active` | route | Active connections in pool |
 | `kete.pool.total` | route | Maximum pool size |
@@ -53,7 +56,7 @@ Messages worth alerting on (all `WARN`):
 
 | Message | Meaning |
 |---------|---------|
-| `Failed to initialize route : <name>` | The route's destination could not be initialized; the route is skipped |
+| `Failed to initialize route : <name>` | The route's configuration is invalid (dropped) or its destination is unreachable (`(will retry in the background)` — retried at 30 s, then doubling up to 5 min, until it comes up) |
 | `Failed to send <type> : <id> : to route : <name>` | Delivery failed after all retry attempts; the event is dropped |
 | `event executor did not terminate gracefully within 30 seconds` | Shutdown timed out waiting for in-flight deliveries |
 

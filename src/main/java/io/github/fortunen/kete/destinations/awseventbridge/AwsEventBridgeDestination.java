@@ -1,5 +1,6 @@
 package io.github.fortunen.kete.destinations.awseventbridge;
 
+import java.nio.charset.StandardCharsets;
 import java.io.IOException;
 
 import io.github.fortunen.kete.Component;
@@ -72,7 +73,7 @@ public class AwsEventBridgeDestination extends Destination<AwsEventBridgeDestina
 
 		var payload = encodePayload(message.eventBody());
 
-		var builtEntry = entry.detail(new String(payload)).build();
+		var builtEntry = entry.detail(new String(payload, StandardCharsets.UTF_8)).build();
 
 		var request = PutEventsRequest.builder().entries(builtEntry).build();
 

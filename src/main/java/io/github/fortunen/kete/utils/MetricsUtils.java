@@ -1,5 +1,6 @@
 package io.github.fortunen.kete.utils;
 
+import java.time.Duration;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.pool2.impl.GenericObjectPool;
@@ -114,6 +115,41 @@ public final class MetricsUtils {
 		}
 
 		Metrics.counter(Constants.ID + ".events.serialization.failed.total", "serializer", serializer, "event_type", eventType, "realm", realm, "error_type", errorType).increment();
+	}
+
+	public static void recordRetry(String route) {
+
+		ValidationUtils.requireNonNull(route, "route is required");
+
+		if (!enabled) {
+			return;
+		}
+
+		Metrics.counter(Constants.ID + ".retries.total", "route", route).increment();
+	}
+
+	public static void recordPoolWait(String route, Duration duration) {
+
+		ValidationUtils.requireNonNull(route, "route is required");
+		ValidationUtils.requireNonNull(duration, "duration is required");
+
+		if (!enabled) {
+			return;
+		}
+
+		Metrics.timer(Constants.ID + ".pool.wait.seconds", "route", route).record(duration);
+	}
+
+	public static void registerInFlight(String route, AtomicInteger inFlight) {
+
+		ValidationUtils.requireNonBlank(route, "route is required");
+		ValidationUtils.requireNonNull(inFlight, "inFlight is required");
+
+		if (!enabled) {
+			return;
+		}
+
+		Metrics.gauge(Constants.ID + ".events.inflight", Tags.of("route", route), inFlight);
 	}
 
 	public static void registerPoolMetrics(String route, GenericObjectPool<Destination<?>> pool) {

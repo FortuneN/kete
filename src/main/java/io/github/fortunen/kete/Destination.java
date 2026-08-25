@@ -1,5 +1,6 @@
 package io.github.fortunen.kete;
 
+import io.github.fortunen.kete.utils.ContentTypeUtils;
 import io.github.fortunen.kete.utils.ValidationUtils;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -44,5 +45,16 @@ public abstract class Destination<TConfig extends DestinationConfig> implements 
 		}
 
 		return payload;
+	}
+
+	// character data can travel over text-only transports; a content encoding makes the body binary unless a transfer encoding turns it back into text
+
+	protected boolean isTextPayload(String contentType) {
+
+		if (config.getContentEncoding() != null && config.getContentTransferEncoding() == null) {
+			return false;
+		}
+
+		return ContentTypeUtils.isText(contentType);
 	}
 }

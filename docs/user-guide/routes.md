@@ -61,7 +61,7 @@ To disable KETE entirely, see [Enabling & Disabling](enabling-disabling.md).
 - Delivery happens **after the Keycloak transaction commits**, asynchronously on a virtual-thread executor — events never block the Keycloak request, and routes never see events from rolled-back transactions.
 - Routes are independent: a failing route does not affect the others, and there is no ordering guarantee across routes.
 - Delivery is best-effort: after the route's [retry](retry.md) attempts are exhausted the event is logged at `WARN` and dropped (there is no dead-letter queue).
-- A route whose destination fails to initialize at start-up is dropped with `WARN Failed to initialize route : <name>`; the remaining routes start normally.
+- A route whose destination is unreachable at start-up logs `WARN Failed to initialize route : <name> (will retry in the background)` and is retried after 30 seconds, then at doubling intervals up to every 5 minutes, until it initializes; events for that route are not delivered until then and `kete.routes.failed` counts it. A route whose *configuration* is invalid is dropped permanently. The remaining routes start normally.
 
 ## Route Properties
 

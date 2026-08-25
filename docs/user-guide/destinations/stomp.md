@@ -221,7 +221,7 @@ The following STOMP headers are always included with each message:
 | Header | Description |
 |--------|-------------|
 | `content-type` | MIME type from serializer (e.g., `application/json`) |
-| `content-length` | Message body size in bytes |
+| `content-length` | Message body size in bytes — the body is sent as raw bytes, so binary serializers and compressed payloads arrive intact |
 | `eventtype` | Keycloak event type (e.g., `LOGIN`, `LOGOUT`) |
 | `eventkind` | Event kind (`EVENT` or `ADMIN_EVENT`) |
 | `receipt` | Event ID, requesting a broker RECEIPT frame (only when `receipt-enabled=true`, the default) |

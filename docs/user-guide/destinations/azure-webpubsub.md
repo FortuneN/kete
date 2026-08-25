@@ -60,7 +60,7 @@ Stream Keycloak events to Azure Web PubSub.
 
 - Azure Web PubSub SDK integration
 - Send messages to all connected clients or a specific group
-- Automatic JSON/text content type detection
+- Automatic content type detection: JSON and text payloads are sent as text messages, binary and compressed payloads as binary (`application/octet-stream`) messages
 - Three authentication methods: connection string, managed identity, default Azure credential
 - Hub and group name templating with variables
 - TLS/mTLS support

@@ -1,6 +1,7 @@
 package io.github.fortunen.kete;
 
 import java.time.Duration;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.pool2.impl.GenericObjectPool;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
@@ -10,6 +11,7 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 
 import io.github.fortunen.kete.utils.MatcherUtils;
+import io.github.fortunen.kete.utils.MetricsUtils;
 import io.github.fortunen.kete.utils.ValidationUtils;
 import io.github.resilience4j.retry.Retry;
 import lombok.Data;
@@ -35,6 +37,7 @@ public class Route implements AutoCloseable {
 	private MatchMode realmMatchMode = MatchMode.DEFAULT;
 	private MatchMode eventMatchMode = MatchMode.DEFAULT;
 	private GenericObjectPool<Destination<?>> destinationPool;
+	private AtomicInteger inFlight = new AtomicInteger();
 	private Cache<String, Boolean> acceptRealmCache = CacheBuilder.newBuilder().maximumSize(ACCEPT_CACHE_MAX_SIZE).build();
 	private Cache<String, Boolean> acceptEventCache = CacheBuilder.newBuilder().maximumSize(ACCEPT_CACHE_MAX_SIZE).build();
 
@@ -60,6 +63,16 @@ public class Route implements AutoCloseable {
 		// destinationKind
 
 		destinationKind = destinationConfig.getDestinationKind();
+
+		// retries are counted per route
+
+		if (ValidationUtils.isNotNull(retry)) {
+			retry.getEventPublisher().onRetry(event -> {
+				if (ValidationUtils.isNotNull(name)) {
+					MetricsUtils.recordRetry(name);
+				}
+			});
+		}
 	}
 
 	@SneakyThrows
@@ -152,17 +165,25 @@ public class Route implements AutoCloseable {
 
 		ValidationUtils.requireNonNull(message, "message is required");
 
-		if (ValidationUtils.isNotNull(retry)) {
+		inFlight.incrementAndGet();
 
-			retry.executeCallable(() -> {
+		try {
+
+			if (ValidationUtils.isNotNull(retry)) {
+
+				retry.executeCallable(() -> {
+					doSend(message);
+					return null;
+				});
+
+			} else {
+
 				doSend(message);
-				return null;
-			});
 
-		} else {
+			}
 
-			doSend(message);
-
+		} finally {
+			inFlight.decrementAndGet();
 		}
 	}
 
@@ -176,7 +197,14 @@ public class Route implements AutoCloseable {
 
 		try {
 
+			var waitStart = System.nanoTime();
+
 			destination = destinationPool.borrowObject();
+
+			if (ValidationUtils.isNotNull(name)) {
+				MetricsUtils.recordPoolWait(name, Duration.ofNanos(System.nanoTime() - waitStart));
+			}
+
 			destination.send(message);
 			destinationPool.returnObject(destination);
 
@@ -192,6 +220,23 @@ public class Route implements AutoCloseable {
 
 			throw exception;
 		}
+	}
+
+	// discards the destination pool so that initializeDestinations() can try again later
+
+	public void resetDestinations() {
+
+		if (ValidationUtils.isNull(destinationPool)) {
+			return;
+		}
+
+		try {
+			destinationPool.close();
+		} catch (Exception exception) {
+			log.debug("Failed to close destination pool for route: " + name, exception);
+		}
+
+		destinationPool = null;
 	}
 
 	@Override
