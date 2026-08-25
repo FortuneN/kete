@@ -12,11 +12,13 @@ import io.github.fortunen.kete.utils.ValidationUtils;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import lombok.SneakyThrows;
 
 @Data
 @NoArgsConstructor(force = true)
 @EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true, exclude = {"curveServerKey", "curvePublicKey", "curveSecretKey"})
 public class ZeroMQDestinationConfig extends DestinationConfig {
 
 	public static final String PUSH = "PUSH";
@@ -33,6 +35,7 @@ public class ZeroMQDestinationConfig extends DestinationConfig {
 	public static final String DEFAULT_CONNECTION_MODE = CONNECT;
 	public static final String CONNECTION_MODE = "connection-mode";
 	public static final String SEND_HIGH_WATER_MARK = "send-high-water-mark";
+	public static final String SEND_TIMEOUT_SECONDS = "send-timeout-seconds";
 
 	private int linger;
 	private String endpoint;
@@ -48,6 +51,8 @@ public class ZeroMQDestinationConfig extends DestinationConfig {
 	private SocketType socketTypeValue;
 	private boolean isEnvelopeTemplated;
 	private boolean hasSendHighWaterMark;
+	private int sendTimeoutSeconds;
+	private boolean hasSendTimeout;
 
 	@Override
 	@SneakyThrows
@@ -86,6 +91,13 @@ public class ZeroMQDestinationConfig extends DestinationConfig {
 		if (configuration.containsKey(SEND_HIGH_WATER_MARK)) {
 			sendHighWaterMark = ValidationUtils.requireNonNegative(configuration.getInt(SEND_HIGH_WATER_MARK, 1000), SEND_HIGH_WATER_MARK + " must be non-negative");
 			hasSendHighWaterMark = true;
+		}
+
+		// send-timeout-seconds (maps to ZMQ_SNDTIMEO; 0 = fail immediately when the message cannot be queued)
+
+		if (configuration.containsKey(SEND_TIMEOUT_SECONDS)) {
+			sendTimeoutSeconds = ValidationUtils.requireNonNegative(configuration.getInt(SEND_TIMEOUT_SECONDS, 0), SEND_TIMEOUT_SECONDS + " must be non-negative");
+			hasSendTimeout = true;
 		}
 
 		// authentication-type

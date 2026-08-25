@@ -24,7 +24,7 @@ Stream Keycloak events to Azure Web PubSub.
     ```bash
     kete.routes.wps.destination.kind=azure-webpubsub
     kete.routes.wps.destination.connection-string=Endpoint=https://my-webpubsub.webpubsub.azure.com;AccessKey=your-access-key;Version=1.0;
-    kete.routes.wps.destination.hub=keycloak-events
+    kete.routes.wps.destination.hub=keycloak_events
     ```
 
 === "Send to Group"
@@ -32,7 +32,7 @@ Stream Keycloak events to Azure Web PubSub.
     ```bash
     kete.routes.wps.destination.kind=azure-webpubsub
     kete.routes.wps.destination.connection-string=Endpoint=https://my-webpubsub.webpubsub.azure.com;AccessKey=your-access-key;Version=1.0;
-    kete.routes.wps.destination.hub=keycloak-events
+    kete.routes.wps.destination.hub=keycloak_events
     kete.routes.wps.destination.group=admin-events
     ```
 
@@ -42,7 +42,7 @@ Stream Keycloak events to Azure Web PubSub.
     kete.routes.wps.destination.kind=azure-webpubsub
     kete.routes.wps.destination.authentication-type=managed-identity
     kete.routes.wps.destination.endpoint=https://my-webpubsub.webpubsub.azure.com
-    kete.routes.wps.destination.hub=keycloak-events
+    kete.routes.wps.destination.hub=keycloak_events
     ```
 
 === "Default Azure Credential"
@@ -51,7 +51,7 @@ Stream Keycloak events to Azure Web PubSub.
     kete.routes.wps.destination.kind=azure-webpubsub
     kete.routes.wps.destination.authentication-type=default-azure-credential
     kete.routes.wps.destination.endpoint=https://my-webpubsub.webpubsub.azure.com
-    kete.routes.wps.destination.hub=keycloak-events
+    kete.routes.wps.destination.hub=keycloak_events
     ```
 
 
@@ -74,7 +74,7 @@ Stream Keycloak events to Azure Web PubSub.
 | Property | Description | Example |
 |----------|-------------|---------|
 | `destination.kind` | Must be `azure-webpubsub` | `azure-webpubsub` |
-| `destination.hub` | Hub name for message routing (supports templating) | `keycloak-events` |
+| `destination.hub` | Hub name for message routing (supports templating). Must start with a letter and contain only letters, digits and `_` — the service rejects hyphens | `keycloak_events` |
 | `destination.connection-string` | Azure Web PubSub connection string (required for `connection-string` auth) | `Endpoint=https://...;AccessKey=...;Version=1.0;` |
 | `destination.endpoint` | Azure Web PubSub endpoint URL (required for `managed-identity` / `default-azure-credential` auth) | `https://my-webpubsub.webpubsub.azure.com` |
 
@@ -89,11 +89,11 @@ Stream Keycloak events to Azure Web PubSub.
 
 ### Dynamic Hub / Group (Templating)
 
-The `hub` and `group` properties support template variables:
+The `hub` and `group` properties support template variables (the substituted hub name must still contain only letters, digits and `_`):
 
 ```bash
 # Dynamic hub per realm
-kete.routes.wps.destination.hub=keycloak-events-${realmLowerCase}
+kete.routes.wps.destination.hub=keycloak_events_${realmLowerCase}
 
 # Dynamic group per event type
 kete.routes.wps.destination.group=${eventTypeLowerCase}
@@ -155,7 +155,7 @@ kete.routes.prod.destination.kind=azure-webpubsub
 kete.routes.prod.realm-matchers.realm=list:master
 kete.routes.prod.event-matchers.filter=glob:*
 kete.routes.prod.destination.connection-string=Endpoint=https://prod-webpubsub.webpubsub.azure.com;AccessKey=your-production-key;Version=1.0;
-kete.routes.prod.destination.hub=keycloak-events
+kete.routes.prod.destination.hub=keycloak_events
 kete.routes.prod.destination.timeout-seconds=30
 ```
 
@@ -166,7 +166,7 @@ kete.routes.admin.destination.kind=azure-webpubsub
 kete.routes.admin.realm-matchers.realm=list:master
 kete.routes.admin.event-matchers.filter=glob:ADMIN_*
 kete.routes.admin.destination.connection-string=Endpoint=https://my-webpubsub.webpubsub.azure.com;AccessKey=your-key;Version=1.0;
-kete.routes.admin.destination.hub=keycloak-events
+kete.routes.admin.destination.hub=keycloak_events
 kete.routes.admin.destination.group=admin-events
 ```
 
@@ -178,7 +178,7 @@ kete.routes.mi.realm-matchers.realm=list:master
 kete.routes.mi.event-matchers.filter=glob:*
 kete.routes.mi.destination.authentication-type=managed-identity
 kete.routes.mi.destination.endpoint=https://my-webpubsub.webpubsub.azure.com
-kete.routes.mi.destination.hub=keycloak-events
+kete.routes.mi.destination.hub=keycloak_events
 ```
 
 ### Example 4: Connection String from Environment Variable
@@ -188,7 +188,7 @@ kete.routes.env.destination.kind=azure-webpubsub
 kete.routes.env.realm-matchers.realm=list:master
 kete.routes.env.event-matchers.filter=glob:*
 kete.routes.env.destination.connection-string=${AZURE_WEBPUBSUB_CONNECTION_STRING}
-kete.routes.env.destination.hub=keycloak-events
+kete.routes.env.destination.hub=keycloak_events
 ```
 
 KETE does not expand `${VARIABLE}` references itself — the value must be substituted by whatever sets the environment variable (Docker Compose, Kubernetes, a shell), otherwise the literal text is used.

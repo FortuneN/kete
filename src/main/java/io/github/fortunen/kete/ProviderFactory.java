@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -30,6 +31,7 @@ import org.keycloak.provider.ProviderEventListener;
 
 import io.github.fortunen.kete.utils.ConfigurationUtils;
 import io.github.fortunen.kete.utils.ExecutorUtils;
+import io.github.fortunen.kete.utils.JsonUtils;
 import io.github.fortunen.kete.utils.MetricsUtils;
 import io.github.fortunen.kete.utils.ValidationUtils;
 import lombok.Data;
@@ -76,6 +78,11 @@ public class ProviderFactory implements EventListenerProviderFactory, ProviderEv
 
 		if (providerEvent instanceof PostMigrationEvent) {
 			KeycloakModelUtils.runJobInTransaction(postInitSessionFactory, this);
+			return;
+		}
+
+		if (providerEvent instanceof RealmModel.RealmPostCreateEvent realmPostCreateEvent) {
+			registerRealm(ValidationUtils.requireNonNull(realmPostCreateEvent.getCreatedRealm(), "created realm is required"));
 		}
 	}
 
@@ -118,24 +125,39 @@ public class ProviderFactory implements EventListenerProviderFactory, ProviderEv
 		// routes
 
 		var routes = configuration.getRoutes();
-		var routeRealms = ConcurrentHashMap.newKeySet();
+		var failedRoutes = new AtomicInteger();
+		var configuredRoutes = new ArrayList<Route>();
 		var serializersWithRoutesMap = new ConcurrentHashMap<Serializer, List<Route>>();
 
 		if (ValidationUtils.isNotNull(routes)) {
-			ExecutorUtils.forEach(eventExecutor, routes, route -> {
+
+			// destination configs first, one after another: they may read or write the Keycloak model through this thread's session
+
+			for (var route : routes) {
 				try {
 
-					route.initialize(session);
+					route.initializeConfig(session);
+					configuredRoutes.add(route);
+
+				} catch (Exception exception) {
+
+					failedRoutes.incrementAndGet();
+					log.warn("Failed to initialize route : " + route.getName(), exception);
+					ValidationUtils.tryClose(route, "route : " + route.getName());
+
+				}
+			}
+
+			// then the destination handshakes, in parallel
+
+			ExecutorUtils.forEach(eventExecutor, configuredRoutes, route -> {
+				try {
+
+					route.initializeDestinations();
 
 					MetricsUtils.registerPoolMetrics(route.getName(), route.getDestinationPool());
 
 					var serializer = route.getSerializer();
-
-					for (var realm : realms) {
-						if (route.acceptRealm(realm.getName())) {
-							routeRealms.add(realm.getName());
-						}
-					}
 
 					serializersWithRoutesMap.computeIfAbsent(serializer, k -> new ArrayList<>()).add(route);
 
@@ -149,6 +171,7 @@ public class ProviderFactory implements EventListenerProviderFactory, ProviderEv
 
 				} catch (Exception exception) {
 
+					failedRoutes.incrementAndGet();
 					log.warn("Failed to initialize route : " + route.getName(), exception);
 					ValidationUtils.tryClose(route, "route : " + route.getName());
 
@@ -165,27 +188,38 @@ public class ProviderFactory implements EventListenerProviderFactory, ProviderEv
 		}
 
 		MetricsUtils.recordActiveRoutes(serializersWithRoutesMap.values().stream().mapToInt(List::size).sum());
+		MetricsUtils.recordFailedRoutes(failedRoutes.get());
 
 		// listeners
 
 		for (var realm : realms) {
-
-			var realmEventListeners = ValidationUtils.requireNonNull(realm.getEventsListenersStream(), "events listeners for realm " + realm.getName() + " are required").collect(Collectors.toSet());
-
-			if (!routeRealms.contains(realm.getName())) {
-				realmEventListeners.remove(Constants.ID);
-				continue;
-			}
-
-			realmEventListeners.add(Constants.ID);
-
-			realm.setEventsEnabled(true);
-			realm.setAdminEventsEnabled(true);
-			realm.setEnabledEventTypes(ALL_EVENT_TYPES);
-			realm.setAdminEventsDetailsEnabled(true);
-
-			realm.setEventsListeners(realmEventListeners);
+			registerRealm(realm);
 		}
+	}
+
+	private void registerRealm(RealmModel realm) {
+
+		var realmName = ValidationUtils.requireNonNull(realm.getName(), "realm name is required");
+		var realmEventListeners = ValidationUtils.requireNonNull(realm.getEventsListenersStream(), "events listeners for realm " + realmName + " are required").collect(Collectors.toSet());
+
+		var accepted = ValidationUtils.isNotNullOrEmpty(serializersWithRoutes)
+			&& Arrays.stream(serializersWithRoutes).flatMap(serializerRoutes -> serializerRoutes.routes().stream()).anyMatch(route -> route.acceptRealm(realmName));
+
+		if (!accepted) {
+			if (realmEventListeners.remove(Constants.ID)) {
+				realm.setEventsListeners(realmEventListeners);
+			}
+			return;
+		}
+
+		realmEventListeners.add(Constants.ID);
+
+		realm.setEventsEnabled(true);
+		realm.setAdminEventsEnabled(true);
+		realm.setEnabledEventTypes(ALL_EVENT_TYPES);
+		realm.setAdminEventsDetailsEnabled(true);
+
+		realm.setEventsListeners(realmEventListeners);
 	}
 
 	@Override
@@ -220,13 +254,7 @@ public class ProviderFactory implements EventListenerProviderFactory, ProviderEv
 
 								if (route.acceptRealm(realm) && route.acceptEvent(eventType)) {
 
-									MetricsUtils.timeForward(route.getName(), () -> {
-										try {
-											route.send(message);
-										} catch (Exception e) {
-											throw new RuntimeException(e);
-										}
-									});
+									MetricsUtils.timeForward(route.getName(), () -> route.send(message));
 
 									MetricsUtils.recordEventForwarded(route.getName(), eventType, realm);
 								}
@@ -239,7 +267,9 @@ public class ProviderFactory implements EventListenerProviderFactory, ProviderEv
 					}
 
 				} catch (Exception exception) {
-					log.warn("Unhandled exception in " + eventType + " processing", exception);
+					var serializerName = serializerWithRoutes.serializer().getClass().getSimpleName();
+					MetricsUtils.recordSerializationFailed(serializerName, eventType, realm, exception.getClass().getSimpleName());
+					log.warn("Failed to serialize " + eventType + " : " + eventId + " : with " + serializerName, exception);
 				}
 			});
 		}
@@ -291,8 +321,24 @@ public class ProviderFactory implements EventListenerProviderFactory, ProviderEv
 		var operationType = event.getOperationType().name();
 		var eventType = resourceType + '_' + operationType;
 		var result = ValidationUtils.isBlank(event.getError()) ? "SUCCESS" : "ERROR";
+		var eventToSerialize = Boolean.FALSE.equals(includeRepresentation) ? withoutRepresentation(event) : event;
 
-		sendMessage(eventId, realm, eventType, result, true, resourceType, operationType, serializer -> serializer.serialize(event));
+		sendMessage(eventId, realm, eventType, result, true, resourceType, operationType, serializer -> serializer.serialize(eventToSerialize));
+	}
+
+	private static AdminEvent withoutRepresentation(AdminEvent event) {
+
+		if (ValidationUtils.isNull(event.getRepresentation())) {
+			return event;
+		}
+
+		// the realm asked for no representation: serialize a copy without it (a Jackson round trip keeps runtime-only fields such as `details`)
+
+		var copy = JsonUtils.copy(event, AdminEvent.class);
+
+		copy.setRepresentation(null);
+
+		return copy;
 	}
 
 	@Override

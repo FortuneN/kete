@@ -46,6 +46,7 @@ public class GcpCloudTasksDestination extends Destination<GcpCloudTasksDestinati
 	private ManagedChannel channel;
 	private String parentPathPrefix;
 	private boolean isQueueTemplated;
+	private boolean hasTimeoutSeconds;
 	private CloudTasksGrpc.CloudTasksBlockingStub stub;
 	private Set<Map.Entry<String, String>> customHeadersEntrySet;
 	private final ConcurrentHashMap<String, String> parentPathCache = new ConcurrentHashMap<>();
@@ -58,6 +59,7 @@ public class GcpCloudTasksDestination extends Destination<GcpCloudTasksDestinati
 
 		queue = config.getQueue();
 		timeout = config.getTimeout();
+		hasTimeoutSeconds = config.isHasTimeoutSeconds();
 		targetUrl = config.getTargetUrl();
 		httpMethod = config.getHttpMethod();
 		isQueueTemplated = config.isQueueTemplated();
@@ -155,7 +157,9 @@ public class GcpCloudTasksDestination extends Destination<GcpCloudTasksDestinati
 
 		var metadata = new Metadata();
 		metadata.put(Metadata.Key.of("x-goog-request-params", Metadata.ASCII_STRING_MARSHALLER), "parent=" + parentPath);
-		stub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).createTask(request);
+		var callStub = hasTimeoutSeconds ? stub.withDeadlineAfter(timeout.toSeconds(), TimeUnit.SECONDS) : stub;
+
+		callStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata)).createTask(request);
 	}
 
 	@Override

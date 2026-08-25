@@ -13,11 +13,13 @@ import io.github.fortunen.kete.utils.ValidationUtils;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import lombok.SneakyThrows;
 
 @Data
 @NoArgsConstructor(force = true)
 @EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true, exclude = {"credentials"})
 public class GcpPubSubDestinationConfig extends DestinationConfig {
 
 	public static final String URL = "url";
@@ -35,6 +37,7 @@ public class GcpPubSubDestinationConfig extends DestinationConfig {
 	private Duration timeout;
 	private String orderingKey;
 	private int timeoutSeconds;
+	private boolean hasTimeoutSeconds;
 	private boolean authenticated;
 	private boolean hasOrderingKey;
 	private boolean isTopicTemplated;
@@ -79,6 +82,7 @@ public class GcpPubSubDestinationConfig extends DestinationConfig {
 		// timeout
 
 		timeout = Duration.ofSeconds(timeoutSeconds);
+		hasTimeoutSeconds = configuration.containsKey(TIMEOUT_SECONDS);
 
 		// precomputed fields
 

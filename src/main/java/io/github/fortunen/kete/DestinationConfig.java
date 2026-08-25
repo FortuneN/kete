@@ -18,7 +18,7 @@ import lombok.ToString;
 
 @Data
 @NoArgsConstructor(force = true)
-@ToString(exclude = "keycloakSession")
+@ToString(exclude = {"keycloakSession", "configuration", "customHeaders", "customHeadersEntrySet"})
 @EqualsAndHashCode(callSuper = false, exclude = "keycloakSession")
 public abstract class DestinationConfig {
 

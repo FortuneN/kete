@@ -81,7 +81,7 @@ One of the following authentication configurations is also required — see [Aut
 | `destination.subject` | _(empty)_ | Message subject/label (supports templating) | `keycloak/${eventTypeLowerCase}` |
 | `destination.session-id` | _(empty)_ | Session ID for session-enabled queues/topics (supports templating) | `${realmLowerCase}` |
 | `destination.custom-endpoint-address` | _(empty)_ | Custom endpoint for emulators. Must be a valid URL if set. | `http://localhost:5672` |
-| `destination.timeout-seconds` | `10` | TCP connection timeout in seconds | `30` |
+| `destination.timeout-seconds` | `10` | TCP connection timeout in seconds for the start-up check. When set explicitly it is also used as the AMQP try timeout of every send | `30` |
 
 ### Dynamic Queue, Topic, Subject, and Session ID (Templating)
 

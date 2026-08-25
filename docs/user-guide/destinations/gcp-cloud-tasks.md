@@ -93,7 +93,7 @@ Stream Keycloak events to Google Cloud Tasks.
 | `destination.endpoint` | `cloudtasks.googleapis.com:443` | Cloud Tasks gRPC API endpoint (override for emulators/testing) | `localhost:8090` |
 | `destination.use-plaintext` | `false` | Use plaintext gRPC (no TLS) — for emulators | `true` |
 | `destination.http-method` | `POST` | HTTP method for the target invocation | `PUT` |
-| `destination.timeout-seconds` | `10` | gRPC deadline for the start-up queue check (task creation calls are not deadlined) | `30` |
+| `destination.timeout-seconds` | `10` | gRPC deadline for the start-up queue check. When set explicitly it is also the deadline of every task creation call | `30` |
 | `destination.authentication-type` | _(empty)_ | Authentication method (see [Authentication](#authentication-credentials)) | `service-account-file-path` |
 
 ### Dynamic Queue Name (Templating)

@@ -1,5 +1,8 @@
 package io.github.fortunen.kete.destinations.zeromq;
 
+import java.nio.charset.StandardCharsets;
+import java.util.concurrent.TimeUnit;
+
 import org.zeromq.ZContext;
 import org.zeromq.ZMQ;
 import org.zeromq.ZMQ.Socket;
@@ -48,6 +51,12 @@ public class ZeroMQDestination extends Destination<ZeroMQDestinationConfig> {
 			ValidationUtils.requireTrue(socket.setSndHWM(config.getSendHighWaterMark()), "failed to set send-high-water-mark");
 		}
 
+		// send-timeout-seconds
+
+		if (config.isHasSendTimeout()) {
+			ValidationUtils.requireTrue(socket.setSendTimeOut((int) TimeUnit.SECONDS.toMillis(config.getSendTimeoutSeconds())), "failed to set send-timeout-seconds");
+		}
+
 		// CURVE
 
 		if (config.isCurveEnabled()) {
@@ -86,10 +95,10 @@ public class ZeroMQDestination extends Destination<ZeroMQDestinationConfig> {
 
 		if (hasEnvelope) {
 			var envelopeValue = isEnvelopeTemplated ? TemplateUtils.substitute(envelope, message) : envelope;
-			socket.send(envelopeValue.getBytes(java.nio.charset.StandardCharsets.UTF_8), ZMQ.SNDMORE);
+			ValidationUtils.requireTrue(socket.send(envelopeValue.getBytes(StandardCharsets.UTF_8), ZMQ.SNDMORE), "failed to send envelope");
 		}
 
-		socket.send(message.eventBody());
+		ValidationUtils.requireTrue(socket.send(message.eventBody()), "failed to send message");
 	}
 
 	@Override

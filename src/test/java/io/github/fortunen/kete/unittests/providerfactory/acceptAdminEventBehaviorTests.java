@@ -68,6 +68,89 @@ class acceptAdminEventBehaviorTests {
 	}
 
 	@Test
+	void shouldDropRepresentationWhenRealmExcludesIt() throws Exception {
+
+		// arrange
+
+		var factory = new ProviderFactory();
+		factory.setConfiguration(new Configuration());
+		factory.setEventExecutor(Executors.newVirtualThreadPerTaskExecutor());
+
+		var mockSerializer = mock(Serializer.class);
+		var mockRoute = mock(Route.class);
+
+		when(mockRoute.getName()).thenReturn("test-route");
+		when(mockRoute.acceptRealm(anyString())).thenReturn(true);
+		when(mockRoute.acceptEvent("USER_CREATE")).thenReturn(true);
+		when(mockSerializer.getContentType()).thenReturn("application/json");
+		when(mockSerializer.serialize(any(AdminEvent.class))).thenReturn("{}".getBytes());
+
+		factory.setSerializersWithRoutes(new SerializerRoutes[] { new SerializerRoutes(mockSerializer, List.of(mockRoute)) });
+
+		var event = createAdminEventWithRepresentation();
+
+		// act
+
+		factory.accept(event, false);
+
+		// assert
+
+		var captor = ArgumentCaptor.forClass(AdminEvent.class);
+		verify(mockSerializer, timeout(1000)).serialize(captor.capture());
+
+		var serialized = captor.getValue();
+		assertThat(serialized.getRepresentation()).isNull();
+		assertThat(serialized.getId()).isEqualTo("admin-event-789");
+		assertThat(serialized.getRealmName()).isEqualTo("master");
+		assertThat(serialized.getResourcePath()).isEqualTo("users/user-123");
+		assertThat(serialized.getResourceType()).isEqualTo(ResourceType.USER);
+		assertThat(serialized.getOperationType()).isEqualTo(OperationType.CREATE);
+		assertThat(event.getRepresentation()).isEqualTo("{\"username\":\"john\"}");
+
+		// cleanup
+
+		factory.close();
+	}
+
+	@Test
+	void shouldKeepRepresentationWhenRealmIncludesIt() throws Exception {
+
+		// arrange
+
+		var factory = new ProviderFactory();
+		factory.setConfiguration(new Configuration());
+		factory.setEventExecutor(Executors.newVirtualThreadPerTaskExecutor());
+
+		var mockSerializer = mock(Serializer.class);
+		var mockRoute = mock(Route.class);
+
+		when(mockRoute.getName()).thenReturn("test-route");
+		when(mockRoute.acceptRealm(anyString())).thenReturn(true);
+		when(mockRoute.acceptEvent("USER_CREATE")).thenReturn(true);
+		when(mockSerializer.getContentType()).thenReturn("application/json");
+		when(mockSerializer.serialize(any(AdminEvent.class))).thenReturn("{}".getBytes());
+
+		factory.setSerializersWithRoutes(new SerializerRoutes[] { new SerializerRoutes(mockSerializer, List.of(mockRoute)) });
+
+		var event = createAdminEventWithRepresentation();
+
+		// act
+
+		factory.accept(event, true);
+
+		// assert
+
+		var captor = ArgumentCaptor.forClass(AdminEvent.class);
+		verify(mockSerializer, timeout(1000)).serialize(captor.capture());
+		assertThat(captor.getValue()).isSameAs(event);
+		assertThat(captor.getValue().getRepresentation()).isEqualTo("{\"username\":\"john\"}");
+
+		// cleanup
+
+		factory.close();
+	}
+
+	@Test
 	void shouldSendAdminEventToDestination() throws Exception {
 
 		// arrange
@@ -148,6 +231,19 @@ class acceptAdminEventBehaviorTests {
 		// cleanup
 
 		factory.close();
+	}
+
+	private AdminEvent createAdminEventWithRepresentation() {
+
+		var event = new AdminEvent();
+		event.setId("admin-event-789");
+		event.setRealmId("master-id");
+		event.setRealmName("master");
+		event.setOperationType(OperationType.CREATE);
+		event.setResourceType(ResourceType.USER);
+		event.setResourcePath("users/user-123");
+		event.setRepresentation("{\"username\":\"john\"}");
+		return event;
 	}
 
 	private AdminEvent createUserCreatedAdminEvent() {

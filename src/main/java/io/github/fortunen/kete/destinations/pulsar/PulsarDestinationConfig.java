@@ -16,11 +16,13 @@ import io.github.fortunen.kete.utils.ValidationUtils;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import lombok.SneakyThrows;
 
 @Data
 @NoArgsConstructor(force = true)
 @EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true, exclude = {"token", "password"})
 public class PulsarDestinationConfig extends DestinationConfig {
 
 	public static final String TOPIC = "topic";
@@ -64,6 +66,8 @@ public class PulsarDestinationConfig extends DestinationConfig {
 	private boolean hasSendTimeout;
 	private int batchingMaxMessages;
 	private boolean hasBatchingMaxMessages;
+	private boolean batchingEnabled;
+	private boolean hasBatchingMaxPublishDelay;
 	private boolean isTopicTemplated;
 	private boolean blockIfQueueFull;
 	private int operationTimeoutSeconds;
@@ -103,6 +107,7 @@ public class PulsarDestinationConfig extends DestinationConfig {
 		var batchingMaxPublishDelaySeconds = ValidationUtils.requireGreaterThan(configuration.getLong(BATCHING_MAX_PUBLISH_DELAY_SECONDS, DEFAULT_BATCHING_MAX_PUBLISH_DELAY_SECONDS), 0, BATCHING_MAX_PUBLISH_DELAY_SECONDS + " must be greater than 0");
 		batchingMaxPublishDelay = batchingMaxPublishDelaySeconds * 1000;
 		batchingMaxPublishDelayUnit = TimeUnit.MILLISECONDS;
+		hasBatchingMaxPublishDelay = configuration.containsKey(BATCHING_MAX_PUBLISH_DELAY_SECONDS);
 
 		// batchingMaxMessages
 
@@ -110,6 +115,10 @@ public class PulsarDestinationConfig extends DestinationConfig {
 			batchingMaxMessages = ValidationUtils.requireGreaterThan(configuration.getInt(BATCHING_MAX_MESSAGES, DEFAULT_BATCHING_MAX_MESSAGES), 0, BATCHING_MAX_MESSAGES + " must be greater than 0");
 			hasBatchingMaxMessages = true;
 		}
+
+		// batching is opt-in: sends are synchronous, so the batch timer only adds latency unless batching was asked for
+
+		batchingEnabled = hasBatchingMaxPublishDelay || hasBatchingMaxMessages;
 
 		// blockIfQueueFull
 

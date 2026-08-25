@@ -7,11 +7,11 @@ import io.lettuce.core.ClientOptions;
 import io.lettuce.core.RedisURI;
 import io.lettuce.core.SslOptions;
 import io.lettuce.core.SocketOptions;
-import io.lettuce.core.SslVerifyMode;
 import io.lettuce.core.cluster.ClusterClientOptions;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import lombok.SneakyThrows;
 
 import java.time.Duration;
@@ -21,6 +21,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor(force = true)
 @EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true, exclude = {"password"})
 public class RedisPubSubDestinationConfig extends DestinationConfig {
 
 	public static final String HOST = "host";
@@ -150,7 +151,7 @@ public class RedisPubSubDestinationConfig extends DestinationConfig {
 				}
 				if (tls.isEnabled()) {
 					uriBuilder.withSsl(true);
-					uriBuilder.withVerifyPeer(tls.isVerifyHostname() ? SslVerifyMode.FULL : SslVerifyMode.CA);
+					uriBuilder.withVerifyPeer(tls.isVerifyHostname());
 				}
 
 				redisUri = uriBuilder.build();
@@ -201,7 +202,7 @@ public class RedisPubSubDestinationConfig extends DestinationConfig {
 				}
 				if (tls.isEnabled()) {
 					uriBuilder.withSsl(true);
-					uriBuilder.withVerifyPeer(tls.isVerifyHostname() ? SslVerifyMode.FULL : SslVerifyMode.CA);
+					uriBuilder.withVerifyPeer(tls.isVerifyHostname());
 				}
 
 				redisUri = uriBuilder.build();
@@ -243,7 +244,7 @@ public class RedisPubSubDestinationConfig extends DestinationConfig {
 					}
 					if (tls.isEnabled()) {
 						nodeUriBuilder.withSsl(true);
-						nodeUriBuilder.withVerifyPeer(tls.isVerifyHostname() ? SslVerifyMode.FULL : SslVerifyMode.CA);
+						nodeUriBuilder.withVerifyPeer(tls.isVerifyHostname());
 					}
 					clusterNodeUris.add(nodeUriBuilder.build());
 				}

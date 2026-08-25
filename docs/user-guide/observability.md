@@ -16,8 +16,10 @@ kete.metrics.enabled=true
 |--------|--------|-------------|
 | `kete.events.forwarded.total` | route, event_type, realm | Events successfully sent |
 | `kete.events.failed.total` | route, event_type, realm, error_type | Events that failed |
+| `kete.events.serialization.failed.total` | serializer, event_type, realm, error_type | Events that could not be serialized (never reach a destination) |
 | `kete.forward.duration.seconds` | route | Time to send event |
 | `kete.routes.active` | — | Number of active routes |
+| `kete.routes.failed` | — | Routes that failed to initialize at start-up |
 | `kete.pool.idle` | route | Idle connections in pool |
 | `kete.pool.active` | route | Active connections in pool |
 | `kete.pool.total` | route | Maximum pool size |
@@ -32,7 +34,7 @@ scrape_configs:
     metrics_path: '/metrics'
 ```
 
-`error_type` is the simple class name of the failure; because delivery failures are wrapped before being recorded, it is `RuntimeException` for send failures.
+`error_type` is the simple class name of the exception that failed the delivery (for example `IOException`, `ConnectException` or `MaxRetriesExceededException`).
 
 ## Logging
 

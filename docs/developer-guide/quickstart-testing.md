@@ -146,7 +146,8 @@ Total quickstarts: 89 (plus `$images/` with the 51 Dockerfiles they use)
 - aws-sqs
 - aws-sqs-emulator
 
-### Azure (4)
+### Azure (5)
+- azure-eventgrid
 - azure-storage-queue
 - azure-storage-queue-emulator
 - azure-webpubsub
@@ -161,8 +162,7 @@ Total quickstarts: 89 (plus `$images/` with the 51 Dockerfiles they use)
 ### gRPC (1)
 - grpc
 
-### HTTP (2)
-- http-azure-event-grid
+### HTTP (1)
 - http-webhook
 
 ### Kafka (6)

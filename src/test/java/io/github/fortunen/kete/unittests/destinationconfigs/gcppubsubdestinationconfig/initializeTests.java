@@ -300,6 +300,30 @@ public class initializeTests {
 		// assert
 
 		assertThat(config.getTimeoutSeconds()).isEqualTo(30);
+		assertThat(config.isHasTimeoutSeconds()).isTrue();
+	}
+
+	@Test
+	public void shouldNotFlagTimeoutSecondsWhenNotConfigured() {
+
+		// arrange
+
+		var config = new GcpPubSubDestinationConfig();
+		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "gcp-pubsub",
+			"project", "my-project",
+			"topic", "my-topic",
+			"url", "http://localhost:8085"
+		)));
+
+		// act
+
+		config.initialize();
+
+		// assert
+
+		assertThat(config.getTimeoutSeconds()).isEqualTo(10);
+		assertThat(config.isHasTimeoutSeconds()).isFalse();
 	}
 
 	@Test

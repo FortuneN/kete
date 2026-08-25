@@ -69,6 +69,7 @@ public final class ExecutorUtils {
 			if (!executorService.awaitTermination(timeoutSeconds, TimeUnit.SECONDS)) {
 				// in-flight event forwarding may be abandoned at this point; make it visible
 				log.warn(context + " did not terminate gracefully within " + timeoutSeconds + " seconds, forcing shutdown");
+				executorService.shutdownNow();
 			}
 
 		} catch (InterruptedException exception) {

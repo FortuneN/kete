@@ -35,6 +35,7 @@ public class PulsarDestination extends Destination<PulsarDestinationConfig> {
 	private boolean hasProducerName;
 	private int batchingMaxMessages;
 	private boolean hasBatchingMaxMessages;
+	private boolean batchingEnabled;
 	private boolean isTopicTemplated;
 	private boolean blockIfQueueFull;
 	private long batchingMaxPublishDelay;
@@ -63,6 +64,7 @@ public class PulsarDestination extends Destination<PulsarDestinationConfig> {
 		sendTimeoutSeconds = config.getSendTimeoutSeconds();
 		maxPendingMessages = config.getMaxPendingMessages();
 		hasBatchingMaxMessages = config.isHasBatchingMaxMessages();
+		batchingEnabled = config.isBatchingEnabled();
 		batchingMaxMessages = config.getBatchingMaxMessages();
 		customHeadersEntrySet = config.getCustomHeadersEntrySet();
 		batchingMaxPublishDelay = config.getBatchingMaxPublishDelay();
@@ -129,6 +131,7 @@ public class PulsarDestination extends Destination<PulsarDestinationConfig> {
 		var producerBuilder = client.newProducer()
 			.topic(topicName)
 			.compressionType(compressionType)
+			.enableBatching(batchingEnabled)
 			.blockIfQueueFull(blockIfQueueFull)
 			.maxPendingMessages(maxPendingMessages)
 			.batchingMaxPublishDelay(batchingMaxPublishDelay, batchingMaxPublishDelayUnit);

@@ -354,6 +354,69 @@ public class initializeTests {
 	// =========================================================================
 
 	@Test
+	public void shouldNotFlagSendTimeoutWhenNotConfigured() {
+
+		// arrange
+
+		var config = new ZeroMQDestinationConfig();
+		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "zeromq",
+			"endpoint", "tcp://localhost:5555"
+		)));
+
+		// act
+
+		config.initialize();
+
+		// assert
+
+		assertThat(config.isHasSendTimeout()).isFalse();
+	}
+
+	@Test
+	public void shouldAcceptCustomSendTimeout() {
+
+		// arrange
+
+		var config = new ZeroMQDestinationConfig();
+		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "zeromq",
+			"endpoint", "tcp://localhost:5555",
+			"send-timeout-seconds", "5"
+		)));
+
+		// act
+
+		config.initialize();
+
+		// assert
+
+		assertThat(config.isHasSendTimeout()).isTrue();
+		assertThat(config.getSendTimeoutSeconds()).isEqualTo(5);
+	}
+
+	@Test
+	public void shouldThrowWhenSendTimeoutIsNegative() {
+
+		// arrange
+
+		var config = new ZeroMQDestinationConfig();
+		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "zeromq",
+			"endpoint", "tcp://localhost:5555",
+			"send-timeout-seconds", "-1"
+		)));
+
+		// act
+
+		var thrown = catchThrowable(config::initialize);
+
+		// assert
+
+		assertThat(thrown).isInstanceOf(IllegalStateException.class).hasMessage("send-timeout-seconds must be non-negative");
+	}
+
+	@Test
 	public void shouldDefaultLingerTo1000() {
 
 		// arrange

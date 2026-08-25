@@ -360,7 +360,9 @@ GitHub Actions runs the PowerShell pipelines (see `.github/workflows/`):
 | Workflow | Trigger | Script | What runs |
 |----------|---------|--------|-----------|
 | `pull-request.yml` | PR to `develop`/`release` | `run-on-pull-request-push.ps1` | All tests → quick-start image build → `mkdocs build --strict` |
-| `develop.yml` | Push to `develop` | `run-on-develop-push.ps1` | All tests + coverage badge → image build → docs validation |
-| `release.yml` | Push to `release` | `run-on-release-push.ps1` | Versioned JAR → Docker push → docs deploy → tag + GitHub Release (tests are not re-run) |
+| `develop.yml` | Push to `develop` | `run-on-develop-push.ps1` | All tests + coverage badge (uploaded as the `coverage-badge` artifact) → image build → docs validation |
+| `release.yml` | Push to `release` | `run-on-release-push.ps1` | `Verify Develop Run` job (refuses to release unless a successful Develop run tested an identical tree; manual dispatch offers `skip-develop-check`) → versioned JAR → versioned Docker push → docs build → tag + GitHub Release (generated notes) → `:latest` tags → docs + coverage badge deploy (tests are not re-run) |
 
 See [Scripts](scripts/overview.md) for details.
+
+All workflows pin their actions to commit SHAs, pin the MkDocs packages, set `timeout-minutes`, and cancel superseded runs of the same branch or pull request (`concurrency`). `.github/dependabot.yml` keeps the Maven dependencies (minor and patch updates grouped; Keycloak major/minor bumps ignored because the compile target is pinned deliberately) and the pinned actions current.

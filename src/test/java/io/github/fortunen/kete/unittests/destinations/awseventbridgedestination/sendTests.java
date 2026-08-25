@@ -2,8 +2,12 @@ package io.github.fortunen.kete.unittests.destinations.awseventbridgedestination
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.io.IOException;
 
 import java.nio.charset.StandardCharsets;
 
@@ -19,6 +23,8 @@ import io.github.fortunen.kete.destinations.awseventbridge.AwsEventBridgeDestina
 import io.github.fortunen.kete.utils.ValidationUtils;
 import software.amazon.awssdk.services.eventbridge.EventBridgeClient;
 import software.amazon.awssdk.services.eventbridge.model.PutEventsRequest;
+import software.amazon.awssdk.services.eventbridge.model.PutEventsResponse;
+import software.amazon.awssdk.services.eventbridge.model.PutEventsResultEntry;
 
 public class sendTests {
 
@@ -40,6 +46,7 @@ public class sendTests {
 		// arrange
 
 		var eventBridgeClient = mock(EventBridgeClient.class);
+		when(eventBridgeClient.putEvents(any(PutEventsRequest.class))).thenReturn(PutEventsResponse.builder().failedEntryCount(0).build());
 		destination.setConfig(mock(AwsEventBridgeDestinationConfig.class));
 		destination.setEventBridgeClient(eventBridgeClient);
 		destination.setEventBus("my-bus");
@@ -70,11 +77,43 @@ public class sendTests {
 	}
 
 	@Test
+	public void shouldThrowWhenEventBridgeReportsFailedEntry() {
+
+		// arrange
+
+		var eventBridgeClient = mock(EventBridgeClient.class);
+		when(eventBridgeClient.putEvents(any(PutEventsRequest.class))).thenReturn(PutEventsResponse.builder()
+			.failedEntryCount(1)
+			.entries(PutEventsResultEntry.builder().errorCode("ThrottlingException").errorMessage("Rate exceeded").build())
+			.build());
+		destination.setConfig(mock(AwsEventBridgeDestinationConfig.class));
+		destination.setEventBridgeClient(eventBridgeClient);
+		destination.setEventBus("my-bus");
+		destination.setSource("kete");
+		destination.setDetailType("keycloak-event");
+		destination.setEventBusTemplated(false);
+		destination.setSourceTemplated(false);
+		destination.setDetailTypeTemplated(false);
+
+		var body = "{}".getBytes(StandardCharsets.UTF_8);
+		var message = new EventMessage("test-realm", "evt-001", body, "LOGIN", "application/json", null, Constants.EVENT, null, null);
+
+		// act
+
+		var thrown = catchThrowable(() -> destination.doSend(message));
+
+		// assert
+
+		assertThat(thrown).isInstanceOf(IOException.class).hasMessageContaining("ThrottlingException");
+	}
+
+	@Test
 	public void shouldPutEventsWithTemplatedEventBus() {
 
 		// arrange
 
 		var eventBridgeClient = mock(EventBridgeClient.class);
+		when(eventBridgeClient.putEvents(any(PutEventsRequest.class))).thenReturn(PutEventsResponse.builder().failedEntryCount(0).build());
 		destination.setConfig(mock(AwsEventBridgeDestinationConfig.class));
 		destination.setEventBridgeClient(eventBridgeClient);
 		destination.setEventBus("bus-${realmLowerCase}");

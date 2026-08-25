@@ -1,5 +1,7 @@
 package io.github.fortunen.kete.utils;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 import org.apache.commons.pool2.impl.GenericObjectPool;
 
 import io.github.fortunen.kete.Constants;
@@ -13,6 +15,11 @@ public final class MetricsUtils {
 	private MetricsUtils() {}
 
 	private static boolean enabled = false;
+
+	// Micrometer only keeps weak references to gauge sources; these keep the values alive
+
+	private static final AtomicInteger ACTIVE_ROUTES = new AtomicInteger();
+	private static final AtomicInteger FAILED_ROUTES = new AtomicInteger();
 
 	public static void configure(boolean enabled) {
 
@@ -79,7 +86,34 @@ public final class MetricsUtils {
 			return;
 		}
 
-		Metrics.gauge(Constants.ID + ".routes.active", count);
+		ACTIVE_ROUTES.set(count);
+		Metrics.gauge(Constants.ID + ".routes.active", ACTIVE_ROUTES);
+	}
+
+	public static void recordFailedRoutes(int count) {
+
+		ValidationUtils.requireNonNegative(count, "count must be non-negative");
+
+		if (!enabled) {
+			return;
+		}
+
+		FAILED_ROUTES.set(count);
+		Metrics.gauge(Constants.ID + ".routes.failed", FAILED_ROUTES);
+	}
+
+	public static void recordSerializationFailed(String serializer, String eventType, String realm, String errorType) {
+
+		ValidationUtils.requireNonNull(serializer, "serializer is required");
+		ValidationUtils.requireNonNull(eventType, "eventType is required");
+		ValidationUtils.requireNonNull(realm, "realm is required");
+		ValidationUtils.requireNonNull(errorType, "errorType is required");
+
+		if (!enabled) {
+			return;
+		}
+
+		Metrics.counter(Constants.ID + ".events.serialization.failed.total", "serializer", serializer, "event_type", eventType, "realm", realm, "error_type", errorType).increment();
 	}
 
 	public static void registerPoolMetrics(String route, GenericObjectPool<Destination<?>> pool) {

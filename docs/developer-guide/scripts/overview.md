@@ -14,6 +14,7 @@ PowerShell automation scripts in the repository root for testing, CI/CD, and dev
 | `run-on-pull-request-push.ps1` | PR validation pipeline | [Guide →](run-on-pull-request-push.md) |
 | `run-on-develop-push.ps1` | Develop branch pipeline | [Guide →](run-on-develop-push.md) |
 | `run-on-release-push.ps1` | Release pipeline | [Guide →](run-on-release-push.md) |
+| `run-jar-check.ps1` | Verify every class in the shaded JAR is relocated | [Guide →](run-jar-check.md) |
 | `run-push.ps1` | Squash commits and push | [Guide →](run-push.md) |
 | `run-docs-preview.ps1` | Preview documentation site locally | [Guide →](run-docs-preview.md) |
 
@@ -39,7 +40,7 @@ Scripts that simulate CI/CD pipeline stages locally.
 |--------|----------------|-------|
 | `run-on-pull-request-push.ps1` | Pull request | Tests → Docker image build → MkDocs build |
 | `run-on-develop-push.ps1` | Merge to develop | Tests + coverage → Docker image build → MkDocs build |
-| `run-on-release-push.ps1` | Merge to release | Versioned JAR → Docker push → MkDocs build → GitHub Release (tests are not re-run; they already ran on develop) |
+| `run-on-release-push.ps1` | Merge to release | Versioned JAR → versioned Docker push → MkDocs build → GitHub Release → `:latest` tags (tests are not re-run; `release.yml` first verifies that the tree passed the Develop workflow) |
 
 ### Utility
 

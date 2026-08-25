@@ -22,7 +22,7 @@ services:
     environment:
       kete.routes.quick-start.destination.kind: azure-webpubsub
       kete.routes.quick-start.destination.connection-string: Endpoint=http://webhook:8090;AccessKey=AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=;Version=1.0;
-      kete.routes.quick-start.destination.hub: keycloak-events
+      kete.routes.quick-start.destination.hub: keycloak_events
     depends_on:
       webhook:
         condition: service_healthy

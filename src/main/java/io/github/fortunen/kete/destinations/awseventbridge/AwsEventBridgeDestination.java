@@ -1,5 +1,7 @@
 package io.github.fortunen.kete.destinations.awseventbridge;
 
+import java.io.IOException;
+
 import io.github.fortunen.kete.Component;
 import io.github.fortunen.kete.Destination;
 import io.github.fortunen.kete.EventMessage;
@@ -8,6 +10,7 @@ import io.github.fortunen.kete.utils.ValidationUtils;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.SneakyThrows;
 import software.amazon.awssdk.services.eventbridge.EventBridgeClient;
 import software.amazon.awssdk.services.eventbridge.model.DescribeEventBusRequest;
 import software.amazon.awssdk.services.eventbridge.model.PutEventsRequest;
@@ -53,6 +56,7 @@ public class AwsEventBridgeDestination extends Destination<AwsEventBridgeDestina
 	}
 
 	@Override
+	@SneakyThrows
 	public void doSend(EventMessage message) {
 
 		ValidationUtils.requireNonNull(message, "message is required");
@@ -72,7 +76,17 @@ public class AwsEventBridgeDestination extends Destination<AwsEventBridgeDestina
 
 		var request = PutEventsRequest.builder().entries(builtEntry).build();
 
-		eventBridgeClient.putEvents(request);
+		var response = eventBridgeClient.putEvents(request);
+
+		// EventBridge reports per-entry failures (throttling, internal errors) inside an HTTP 200 response
+
+		var failedEntryCount = response.failedEntryCount();
+
+		if (ValidationUtils.isNotNull(failedEntryCount) && failedEntryCount > 0) {
+			var failedEntry = response.entries().stream().filter(resultEntry -> ValidationUtils.isNotNull(resultEntry.errorCode())).findFirst().orElse(null);
+			var reason = ValidationUtils.isNotNull(failedEntry) ? failedEntry.errorCode() + " : " + failedEntry.errorMessage() : failedEntryCount + " failed entries";
+			throw new IOException("EventBridge rejected the event : " + reason);
+		}
 	}
 
 	@Override

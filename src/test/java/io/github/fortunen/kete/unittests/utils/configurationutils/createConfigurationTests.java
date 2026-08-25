@@ -66,6 +66,26 @@ class createConfigurationTests {
 	}
 
 	@Test
+	void shouldReturnNullWhenLegacyEnabledIsFalse() {
+
+		// arrange
+
+		var scope = mock(Scope.class);
+		when(scope.getPropertyNames()).thenReturn(Set.of());
+
+		var environment = new HashMap<String, String>();
+		environment.put("enabled", "false");
+
+		// act
+
+		var result = ConfigurationUtils.createConfiguration(scope, environment);
+
+		// assert
+
+		assertThat(result).isNull();
+	}
+
+	@Test
 	void shouldReturnConfigurationWithDefaultsWhenNoValuesProvided() {
 
 		// arrange

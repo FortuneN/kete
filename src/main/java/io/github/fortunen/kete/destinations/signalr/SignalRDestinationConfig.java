@@ -14,11 +14,13 @@ import io.reactivex.rxjava3.core.Single;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import lombok.SneakyThrows;
 
 @Data
 @NoArgsConstructor(force = true)
 @EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true, exclude = {"accessToken"})
 public class SignalRDestinationConfig extends DestinationConfig {
 
 	public static final String URL = "url";

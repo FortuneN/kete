@@ -55,14 +55,17 @@ public class GcpPubSubDestination extends Destination<GcpPubSubDestinationConfig
 		var credentials = config.getCredentials();
 		var httpTransport = config.getHttpTransport();
 		var timeoutMillis = (int) config.getTimeout().toMillis();
+		var hasTimeoutSeconds = config.isHasTimeoutSeconds();
 		var credentialsAdapter = ValidationUtils.isNotNull(credentials) ? new HttpCredentialsAdapter(credentials) : null;
 
 		HttpRequestInitializer initializer = request -> {
 			if (ValidationUtils.isNotNull(credentialsAdapter)) {
 				credentialsAdapter.initialize(request);
 			}
-			request.setConnectTimeout(timeoutMillis);
-			request.setReadTimeout(timeoutMillis);
+			if (hasTimeoutSeconds) {
+				request.setConnectTimeout(timeoutMillis);
+				request.setReadTimeout(timeoutMillis);
+			}
 		};
 
 		// build Pub/Sub client

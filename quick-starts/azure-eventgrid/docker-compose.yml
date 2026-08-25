@@ -1,4 +1,4 @@
-# Azure Event Grid (HTTP Webhook)
+# Azure Event Grid (native destination)
 # See GUIDE.md for setup instructions
 
 services:
@@ -12,9 +12,9 @@ services:
     environment:
       # Azure Event Grid configuration
       # Replace these values or use a .env file
-      kete.routes.quick-start.destination.kind: http
-      kete.routes.quick-start.destination.url: ${EVENTGRID_ENDPOINT:-<YOUR-EVENT-GRID-TOPIC-ENDPOINT>}
-      kete.routes.quick-start.destination.headers.aeg-sas-key: ${EVENTGRID_KEY:-<YOUR-ACCESS-KEY>}
+      kete.routes.quick-start.destination.kind: azure-eventgrid
+      kete.routes.quick-start.destination.endpoint: ${EVENTGRID_ENDPOINT:-<YOUR-EVENT-GRID-TOPIC-ENDPOINT>}
+      kete.routes.quick-start.destination.access-key: ${EVENTGRID_KEY:-<YOUR-ACCESS-KEY>}
 
       # Retry configuration for reliability
       kete.routes.quick-start.retry.enabled: "true"

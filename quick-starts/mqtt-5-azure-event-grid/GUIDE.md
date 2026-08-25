@@ -200,7 +200,7 @@ docker-compose logs keycloak
 ```
 
 Look for:
-- `KETE: Route 'quick-start' initialized` - Success
+- `kete Route 'quick-start' initialized: destination=...` - Success
 - TLS/SSL errors - Check certificate configuration
 - Authentication errors - Verify client registration
 

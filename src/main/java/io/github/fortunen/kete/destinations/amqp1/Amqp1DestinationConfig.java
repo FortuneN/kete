@@ -9,11 +9,13 @@ import jakarta.jms.DeliveryMode;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import lombok.SneakyThrows;
 
 @Data
 @NoArgsConstructor(force = true)
 @EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true, exclude = {"password"})
 public class Amqp1DestinationConfig extends DestinationConfig {
 
 	public static final String TLS = "tls";
@@ -35,6 +37,7 @@ public class Amqp1DestinationConfig extends DestinationConfig {
 	public static final String DESTINATION_NAME = "destination-name";
 	public static final String DESTINATION_TYPE = "destination-type";
 	public static final String IDLE_TIMEOUT_SECONDS = "idle-timeout-seconds";
+	public static final String SEND_TIMEOUT_SECONDS = "send-timeout-seconds";
 	public static final String TIME_TO_LIVE_SECONDS = "time-to-live-seconds";
 
 	private int port;
@@ -49,6 +52,8 @@ public class Amqp1DestinationConfig extends DestinationConfig {
 	private String transportType;
 	private long timeToLiveSeconds;
 	private int idleTimeoutSeconds;
+	private int sendTimeoutSeconds;
+	private boolean hasSendTimeout;
 	private String destinationType;
 	private String queueOrTopicName;
 	private String deliveryModeString;
@@ -115,6 +120,14 @@ public class Amqp1DestinationConfig extends DestinationConfig {
 			}
 		} else {
 			url = scheme + "://" + host + ":" + port;
+		}
+
+		// sendTimeoutSeconds (opt-in: bounds how long a synchronous send waits for the broker's acknowledgement)
+
+		if (configuration.containsKey(SEND_TIMEOUT_SECONDS)) {
+			sendTimeoutSeconds = ValidationUtils.requirePositive(configuration.getInt(SEND_TIMEOUT_SECONDS, 0), SEND_TIMEOUT_SECONDS + " must be positive");
+			hasSendTimeout = true;
+			url = url + (url.contains("?") ? "&" : "?") + "jms.sendTimeout=" + (sendTimeoutSeconds * 1000L);
 		}
 
 		// deliveryMode

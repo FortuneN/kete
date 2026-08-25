@@ -12,10 +12,12 @@ import io.github.fortunen.kete.utils.ValidationUtils;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Data
 @NoArgsConstructor(force = true)
 @EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true, exclude = {"connectionString"})
 public class AzureEventHubsDestinationConfig extends DestinationConfig {
 
 	public static final String EVENT_HUB = "event-hub";
@@ -31,6 +33,7 @@ public class AzureEventHubsDestinationConfig extends DestinationConfig {
 	private Duration timeout;
 	private String partitionId;
 	private int timeoutSeconds;
+	private boolean hasTimeoutSeconds;
 	private String partitionKey;
 	private boolean hasEventHub;
 	private boolean hasPartitionId;
@@ -104,6 +107,7 @@ public class AzureEventHubsDestinationConfig extends DestinationConfig {
 
 		timeoutSeconds = ValidationUtils.requirePositive(configuration.getInt(TIMEOUT_SECONDS, DEFAULT_TIMEOUT_SECONDS), TIMEOUT_SECONDS + " must be positive");
 		timeout = Duration.ofSeconds(timeoutSeconds);
+		hasTimeoutSeconds = configuration.containsKey(TIMEOUT_SECONDS);
 
 		// precomputed fields
 
@@ -111,7 +115,11 @@ public class AzureEventHubsDestinationConfig extends DestinationConfig {
 
 		// Event Hub client builder (destination calls .buildProducerClient())
 
-		eventHubClientBuilder = new EventHubClientBuilder().retryOptions(new AmqpRetryOptions().setTryTimeout(timeout));
+		eventHubClientBuilder = new EventHubClientBuilder();
+
+		if (hasTimeoutSeconds) {
+			eventHubClientBuilder.retryOptions(new AmqpRetryOptions().setTryTimeout(timeout));
+		}
 
 		if (hasAuthenticationType) {
 			AzureUtils.configureAuthentication(authenticationType, configuration, "connection-string",

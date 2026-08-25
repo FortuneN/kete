@@ -4,6 +4,7 @@ import java.net.URI;
 import java.time.Duration;
 import java.util.Arrays;
 
+import com.azure.core.amqp.AmqpRetryOptions;
 import com.azure.messaging.servicebus.ServiceBusClientBuilder;
 
 import io.github.fortunen.kete.DestinationConfig;
@@ -13,10 +14,12 @@ import io.github.fortunen.kete.utils.ValidationUtils;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Data
 @NoArgsConstructor(force = true)
 @EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true, exclude = {"connectionString"})
 public class AzureServiceBusDestinationConfig extends DestinationConfig {
 
 	public static final String QUEUE = "queue";
@@ -38,6 +41,7 @@ public class AzureServiceBusDestinationConfig extends DestinationConfig {
 	private boolean hasTopic;
 	private boolean hasSubject;
 	private int timeoutSeconds;
+	private boolean hasTimeoutSeconds;
 	private boolean hasSessionId;
 	private String connectionString;
 	private int serviceEndpointPort;
@@ -119,6 +123,7 @@ public class AzureServiceBusDestinationConfig extends DestinationConfig {
 
 		timeoutSeconds = ValidationUtils.requirePositive(configuration.getInt(TIMEOUT_SECONDS, DEFAULT_TIMEOUT_SECONDS), TIMEOUT_SECONDS + " must be positive");
 		timeout = Duration.ofSeconds(timeoutSeconds);
+		hasTimeoutSeconds = configuration.containsKey(TIMEOUT_SECONDS);
 
 		// precomputed fields
 
@@ -130,6 +135,10 @@ public class AzureServiceBusDestinationConfig extends DestinationConfig {
 		// Service Bus client builder (destination calls .sender().queueName()/topicName().buildClient())
 
 		serviceBusClientBuilder = new ServiceBusClientBuilder();
+
+		if (hasTimeoutSeconds) {
+			serviceBusClientBuilder.retryOptions(new AmqpRetryOptions().setTryTimeout(timeout));
+		}
 
 		if (hasAuthenticationType) {
 			AzureUtils.configureAuthentication(authenticationType, configuration, "connection-string",

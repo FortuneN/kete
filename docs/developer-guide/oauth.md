@@ -37,6 +37,7 @@ kete.routes.<name>.destination.oauth.enabled=true
 | `oauth.token-url` | Yes | - | Token endpoint URL |
 | `oauth.client-id` | Yes | - | Client ID |
 | `oauth.client-secret` | Yes | - | Client secret |
+| `oauth.timeout-seconds` | No | _(none)_ | Connect and read timeout in seconds for the token request; applied only when set |
 | `oauth.scope` | No | `""` | Requested scopes (space-separated) |
 
 ```bash
@@ -50,7 +51,7 @@ kete.routes.api.destination.oauth.client-secret=my-secret
 
 ### Internal Mode
 
-Uses the current Keycloak instance as the authorization server. When no `oauth.client-secret` is configured, KETE registers a confidential client with service accounts enabled in the configured realm during initialization (or reuses it if it already exists). When you provide `oauth.client-secret`, no registration takes place — the client must already exist in the realm.
+Uses the current Keycloak instance as the authorization server. When no `oauth.client-secret` is configured, KETE registers a confidential client with service accounts enabled in the configured realm during initialization (or reuses it if it already exists, adopting the secret stored on that client so token requests keep working after a restart). When you provide `oauth.client-secret`, no registration takes place — the client must already exist in the realm.
 
 | Property | Required | Default | Description |
 |----------|----------|---------|-------------|
@@ -60,6 +61,7 @@ Uses the current Keycloak instance as the authorization server. When no `oauth.c
 | `oauth.token-url` | No | `http://localhost:8080/realms/<realm>/protocol/openid-connect/token` | Override when Keycloak is not reachable on `localhost:8080` from inside the Keycloak process |
 | `oauth.client-id` | No | `kete-oauth-client` | Client ID to register/reuse |
 | `oauth.client-secret` | No | Auto-generated (UUID) | Client secret to register/reuse |
+| `oauth.timeout-seconds` | No | _(none)_ | Connect and read timeout in seconds for the token request; applied only when set |
 | `oauth.scope` | No | `""` | Requested scopes |
 
 ```bash

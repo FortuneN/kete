@@ -3,11 +3,13 @@
 #   KETE │ Release Push
 #
 #   Creates a production release:
-#     • All tests (unit, integration, end-to-end)
+#     • Tests are not run here: release.yml only runs this script for a
+#       tree that already passed the Develop workflow
 #     • Package JAR with version imprinted in manifest
-#     • Push Docker images with version tag + :latest
+#     • Push Docker images with the version tag
 #     • Build documentation site
-#     • Create Git tag and GitHub Release
+#     • Create Git tag and GitHub Release (generated notes)
+#     • Move the :latest image tags (last, once the release exists)
 #
 #   Version format: yyyy.MM.dd.HH.mm (e.g., 2026.01.31.18.45)
 #
@@ -23,7 +25,7 @@ Set-Location $PSScriptRoot
 # Configuration
 # -----------------------------------------------------------------------------
 
-$script:TotalSteps = 5
+$script:TotalSteps = 6
 $script:Results = @{}
 $script:StartTime = Get-Date
 $script:Version = (Get-Date).ToString("yyyy.MM.dd.HH.mm")
@@ -233,9 +235,14 @@ if ($buildSuccess -and (Test-Path "target/kete.jar")) {
     Write-TaskResult "kete.jar ($jarSize MB)" $jarSuccess
     Write-Task "Version $($script:Version) imprinted in META-INF/MANIFEST.MF"
 
+    Write-Task "Checking that every class in kete.jar is relocated..."
+    & .\run-jar-check.ps1 -JarPath "target/kete.jar"
+    $jarCheckSuccess = $LASTEXITCODE -eq 0
+
 } else {
 
     $jarSuccess = $false
+    $jarCheckSuccess = $false
 
     Write-TaskResult "Failed to create JAR" $false
 
@@ -243,9 +250,10 @@ if ($buildSuccess -and (Test-Path "target/kete.jar")) {
 
 $duration = Format-Duration((Get-Date) - $stepStart)
 $script:Results["2. Package JAR"] = $jarSuccess
+$script:Results["2. Shaded JAR check"] = $jarCheckSuccess
 
 # =============================================================================
-# Step 3: Build and Push Docker Images
+# Step 3: Build and Push Versioned Docker Images
 # =============================================================================
 
 # Build image list dynamically from quick-starts/$images folder
@@ -284,18 +292,12 @@ function Build-And-Push-Image {
     if ($buildSuccess) {
 
         Write-Task "Pushing $versionedImage"
-        $push1Output = docker push $versionedImage 2>&1
-        $push1 = $LASTEXITCODE -eq 0
-        if (-not $push1) { $push1Output | Out-Host }
+        $pushOutput = docker push $versionedImage 2>&1
+        $pushed = $LASTEXITCODE -eq 0
+        if (-not $pushed) { $pushOutput | Out-Host }
 
-        Write-Task "Pushing $latestImage"
-        $push2Output = docker push $latestImage 2>&1
-        $push2 = $LASTEXITCODE -eq 0
-        if (-not $push2) { $push2Output | Out-Host }
-
-        $success = $push1 -and $push2
-        Write-TaskResult "$Name [:$($script:Version) + :latest]" $success
-        return $success;
+        Write-TaskResult "$Name [:$($script:Version)]" $pushed
+        return $pushed
 
     } else {
 
@@ -305,7 +307,7 @@ function Build-And-Push-Image {
     }
 }
 
-Write-StepHeader 3 "Build and Push Docker Images"
+Write-StepHeader 3 "Build and Push Versioned Docker Images"
 
 if (-not (Test-PreviousStepsPassed)) {
 
@@ -402,8 +404,7 @@ if (-not (Test-PreviousStepsPassed)) {
 
     if ($script:Results["5. Git Tag"]) {
         Write-Task "Creating GitHub Release..."
-        $releaseNotes = ""
-        $releaseOutput = gh release create $tagName --title "$tagName" --notes $releaseNotes "target/$script:JarName" 2>&1
+        $releaseOutput = gh release create $tagName --title "$tagName" --generate-notes "target/$script:JarName" 2>&1
         $releaseCreated = $LASTEXITCODE -eq 0
 
         if (-not $releaseCreated) {
@@ -420,6 +421,40 @@ if (-not (Test-PreviousStepsPassed)) {
     $duration = Format-Duration((Get-Date) - $stepStart)
     Write-Host ""
     Write-Host "    Release operations completed in $duration" -ForegroundColor DarkGray
+}
+
+# =============================================================================
+# Step 6: Move :latest Image Tags
+# =============================================================================
+
+Write-StepHeader 6 "Move :latest Image Tags"
+
+if (-not (Test-PreviousStepsPassed)) {
+
+    Write-TaskSkipped ":latest tags" "previous step failed"
+
+    foreach ($image in $script:QuickStartImages) {
+        $script:Results["6. Latest: $($image.Name)"] = $false
+    }
+
+} else {
+
+    $stepStart = Get-Date
+
+    foreach ($image in $script:QuickStartImages) {
+        $latestImage = "$script:Registry/$($image.Name):latest"
+        Write-Task "Pushing $latestImage"
+        $pushOutput = docker push $latestImage 2>&1
+        $pushed = $LASTEXITCODE -eq 0
+        if (-not $pushed) { $pushOutput | Out-Host }
+        Write-TaskResult "$($image.Name) [:latest]" $pushed
+        $script:Results["6. Latest: $($image.Name)"] = $pushed
+    }
+
+    $duration = Format-Duration((Get-Date) - $stepStart)
+
+    Write-Host ""
+    Write-Host "    :latest tags completed in $duration" -ForegroundColor DarkGray
 }
 
 # =============================================================================

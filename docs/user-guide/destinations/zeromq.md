@@ -100,6 +100,7 @@ Stream Keycloak events to ZeroMQ peers using JeroMQ (pure Java implementation).
 | `linger` | `1000` | Milliseconds to wait for pending messages on close. `-1` = wait forever, `0` = discard immediately | `5000` |
 | `envelope` | _(empty)_ | Multipart message envelope prefix (PUB only, supports templating) | `keycloak-events` |
 | `send-high-water-mark` | `1000` | Maximum number of outstanding messages in send queue | `5000` |
+| `send-timeout-seconds` | _(none — block)_ | Seconds a blocking send may wait before failing (`ZMQ_SNDTIMEO`); `0` fails immediately when the message cannot be queued. Applied only when set; a failed send is reported to the route and retried | `5` |
 
 ### Socket Types
 

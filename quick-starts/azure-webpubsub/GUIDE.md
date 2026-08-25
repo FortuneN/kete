@@ -81,11 +81,11 @@ docker-compose up -d
 4. Connect a WebSocket client to your hub to receive messages:
 
 ```bash
-# Using the Azure Web PubSub client (install: npm i -g @azure/web-pubsub)
+# Using the Azure CLI Web PubSub extension (install: az extension add --name webpubsub)
 az webpubsub client start \
   --name <your-webpubsub-name> \
   --resource-group keycloak-events-rg \
-  --hub-name keycloak-events
+  --hub-name keycloak_events
 ```
 
 Or use the [Azure Portal](https://portal.azure.com) to view Web PubSub service metrics.
@@ -99,7 +99,7 @@ docker-compose logs keycloak
 ```
 
 Look for:
-- `KETE: Route 'quick-start' initialized` - Success
+- `kete Route 'quick-start' initialized: destination=...` - Success
 - Connection errors - Check credentials and network
 
 ### Common Issues

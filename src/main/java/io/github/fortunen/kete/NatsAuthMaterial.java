@@ -9,6 +9,7 @@ import io.nats.client.NKey;
 import io.nats.client.Options;
 import io.nats.client.support.JwtUtils;
 import lombok.Data;
+import lombok.ToString;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.configuration2.Configuration;
@@ -22,6 +23,7 @@ import java.time.Instant;
 
 @Data
 @Slf4j
+@ToString(exclude = {"token", "nkeySeed", "password", "credentialsFileContent"})
 public class NatsAuthMaterial {
 
 	public static final String AUTH_NONE = "none";

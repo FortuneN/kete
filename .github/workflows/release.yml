@@ -4,43 +4,92 @@ on:
   push:
     branches: [release]
   workflow_dispatch:
+    inputs:
+      skip-develop-check:
+        description: 'Release even if no successful Develop run tested this exact tree (emergency use only)'
+        type: boolean
+        default: false
 
 permissions:
-  contents: write
-  packages: write
-  pages: write
-  id-token: write
+  contents: read
 
 concurrency:
   group: "release"
   cancel-in-progress: false
 
 jobs:
-  release:
-    name: Release
+  verify:
+    name: Verify Develop Run
     if: ${{ !github.event.forced }}
     runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      actions: read
+    outputs:
+      develop-run-id: ${{ steps.find.outputs.run-id }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          fetch-depth: 0
+
+      - name: Find the successful Develop run that tested this tree
+        id: find
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SKIP_CHECK: ${{ inputs.skip-develop-check }}
+        run: |
+          tree=$(git rev-parse 'HEAD^{tree}')
+          gh api "repos/${GITHUB_REPOSITORY}/actions/workflows/develop.yml/runs?status=success&per_page=100" \
+            --jq '.workflow_runs[] | "\(.id) \(.head_sha)"' > develop-runs.txt
+          while read -r id sha; do
+            [ -n "$sha" ] || continue
+            if [ "$(git rev-parse -q --verify "${sha}^{tree}" 2>/dev/null)" = "$tree" ]; then
+              echo "Tree $tree was tested by Develop run $id (commit $sha)"
+              echo "run-id=$id" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+          done < develop-runs.txt
+          if [ "$SKIP_CHECK" = "true" ]; then
+            echo "::warning::No successful Develop run tested tree $tree; releasing anyway (skip-develop-check)"
+            exit 0
+          fi
+          echo "::error::No successful Develop run tested tree $tree. Wait for the Develop workflow to pass on develop before merging into release, or re-run with skip-develop-check."
+          exit 1
+
+  release:
+    name: Release
+    needs: verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    permissions:
+      contents: write
+      packages: write
+      pages: write
+      id-token: write
+      actions: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
 
       - name: Setup Java
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@cf277c60eb25467037889841efdb72551f06f6c3 # v4.9.1
         with:
           java-version: '21'
           distribution: 'temurin'
           cache: maven
 
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
         with:
           python-version: '3.x'
 
       - name: Install MkDocs
-        run: pip install mkdocs-material mkdocs-include-markdown-plugin
+        run: pip install mkdocs-material==9.7.1 mkdocs-include-markdown-plugin==7.2.0
 
       - name: Log in to Container Registry
-        uses: docker/login-action@v3
+        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3.7.0
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -56,14 +105,26 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: pwsh -File ./run-on-release-push.ps1
 
+      - name: Add coverage badge data to the site
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          DEVELOP_RUN_ID: ${{ needs.verify.outputs.develop-run-id }}
+        run: |
+          if [ -n "$DEVELOP_RUN_ID" ]; then
+            gh run download "$DEVELOP_RUN_ID" --name coverage-badge --dir site \
+              || echo "::warning::coverage-badge artifact not found on Develop run $DEVELOP_RUN_ID; publishing the committed coverage-badge.json"
+          fi
+          [ -f site/coverage-badge.json ] || cp coverage-badge.json site/coverage-badge.json
+
       - name: Setup Pages
-        uses: actions/configure-pages@v4
+        uses: actions/configure-pages@1f0c5cde4bc74cd7e1254d0cb4de8d49e9068c7d # v4.0.0
 
       - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3.0.1
         with:
           path: site
 
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4.0.5

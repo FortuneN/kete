@@ -27,6 +27,8 @@ After tests pass, the script reads `target/site/jacoco/jacoco.csv`, calculates l
 | ≥ 40% | yellow |
 | < 40% | red |
 
+The Develop workflow (`develop.yml`) uploads the file as the `coverage-badge` workflow artifact; the release pipeline publishes it with the documentation site (see [Release Push](run-on-release-push.md#coverage-badge)). CI never commits the file.
+
 ## Output
 
 Displays step progress, a summary table, and published artifact names.

@@ -258,6 +258,72 @@ public class initializeTests {
 	}
 
 	@Test
+	public void shouldDisableBatchingWhenNoBatchingOptionIsSet() throws Exception {
+
+		// arrange
+
+		var config = new PulsarDestinationConfig();
+		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "pulsar",
+			"service-url", "pulsar://localhost:6650",
+			"topic", "persistent://public/default/events"
+		)));
+
+		// act
+
+		config.initialize();
+
+		// assert
+
+		assertThat(config.isBatchingEnabled()).isFalse();
+	}
+
+	@Test
+	public void shouldEnableBatchingWhenBatchingMaxMessagesIsSet() throws Exception {
+
+		// arrange
+
+		var config = new PulsarDestinationConfig();
+		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "pulsar",
+			"service-url", "pulsar://localhost:6650",
+			"topic", "persistent://public/default/events",
+			"batching-max-messages", 500
+		)));
+
+		// act
+
+		config.initialize();
+
+		// assert
+
+		assertThat(config.isBatchingEnabled()).isTrue();
+	}
+
+	@Test
+	public void shouldEnableBatchingWhenBatchingMaxPublishDelayIsSet() throws Exception {
+
+		// arrange
+
+		var config = new PulsarDestinationConfig();
+		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "pulsar",
+			"service-url", "pulsar://localhost:6650",
+			"topic", "persistent://public/default/events",
+			"batching-max-publish-delay-seconds", 2
+		)));
+
+		// act
+
+		config.initialize();
+
+		// assert
+
+		assertThat(config.isBatchingEnabled()).isTrue();
+		assertThat(config.getBatchingMaxPublishDelay()).isEqualTo(2000L);
+	}
+
+	@Test
 	public void shouldInitializeWithCustomBlockIfQueueFull() throws Exception {
 
 		// arrange
