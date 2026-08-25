@@ -1,3 +1,3 @@
 # Check if subscriber received the event
 $output = docker logs redis-pubsub-valkey-subscriber-1 2>&1 | Select-String "EVENT-RECEIVED"
-return $output -ne $null
+return $null -ne $output

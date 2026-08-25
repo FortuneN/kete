@@ -14,4 +14,4 @@ services:
       # Replace these values or use a .env file
       kete.routes.quick-start.destination.kind: azure-webpubsub
       kete.routes.quick-start.destination.connection-string: ${AZURE_WEBPUBSUB_CONNECTION_STRING:-<YOUR-AZURE-WEBPUBSUB-CONNECTION-STRING>}
-      kete.routes.quick-start.destination.hub: keycloak-events
+      kete.routes.quick-start.destination.hub: keycloak_events

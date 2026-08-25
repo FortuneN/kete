@@ -376,9 +376,9 @@ Use `destination.kind=azure-eventgrid` (native SDK) or protocol-based destinatio
 
 - **Azure Event Grid** — Fully managed event routing service
 
-The native `azure-eventgrid` destination uses the Azure Event Grid SDK and supports access key, Managed Identity, and Default Azure Credential authentication. Alternatively, use `http` or `mqtt-5` for protocol-based access.
+The native `azure-eventgrid` destination uses the Azure Event Grid SDK and supports access key, Managed Identity, and Default Azure Credential authentication. Alternatively, use `mqtt-5` for the Event Grid MQTT broker.
 
-**Quickstarts available (via HTTP):** [http-azure-event-grid](https://github.com/FortuneN/kete/tree/release/quick-starts/http-azure-event-grid/)
+**Quickstarts available (native):** [azure-eventgrid](https://github.com/FortuneN/kete/tree/release/quick-starts/azure-eventgrid/)
 
 **Quickstarts available (via MQTT 5):** [mqtt-5-azure-event-grid](https://github.com/FortuneN/kete/tree/release/quick-starts/mqtt-5-azure-event-grid/)
 
@@ -454,9 +454,8 @@ Use `destination.kind=http`:
 
 - **Webhooks** — POST events to any HTTP/HTTPS endpoint
 - **REST APIs** — Forward events to REST services
-- **Azure Event Grid** — Via HTTP push (EventGridEvent schema)
 
-**Quickstarts available:** [http-webhook](https://github.com/FortuneN/kete/tree/release/quick-starts/http-webhook/), [http-azure-event-grid](https://github.com/FortuneN/kete/tree/release/quick-starts/http-azure-event-grid/)
+**Quickstarts available:** [http-webhook](https://github.com/FortuneN/kete/tree/release/quick-starts/http-webhook/)
 
 See: [HTTP Destination](http.md)
 
@@ -731,7 +730,7 @@ All quickstarts are in the `quick-starts/` directory:
 | NATS JetStream | Synadia Cloud | `nats-jetstream-synadia-cloud/` |
 | Pulsar | Apache Pulsar | `pulsar-apache/` |
 | Pulsar | DataStax Astra Streaming | `pulsar-datastax/` |
-| HTTP | Azure Event Grid | `http-azure-event-grid/` |
+| Azure Event Grid | Azure Event Grid | `azure-eventgrid/` |
 | HTTP | Webhook | `http-webhook/` |
 | WebSocket | Echo Server | `websocket-echo/` |
 | ZeroMQ | PUB/SUB | `zeromq-publish/` |

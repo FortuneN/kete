@@ -17,7 +17,7 @@ public class TestBase {
 
 	private static final String ACCESS_KEY = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
 
-	protected static final String HUB_NAME = "test-hub";
+	protected static final String HUB_NAME = "test_hub";
 
 	protected MockWebServer mockServer;
 	protected AzureWebPubSubDestination destination;

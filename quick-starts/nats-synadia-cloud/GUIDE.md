@@ -19,9 +19,9 @@ Stream Keycloak events to [Synadia Cloud](https://www.synadia.com/cloud) (NGS) u
    cp .env.example .env
    ```
 
-3. **Set `NATS_CREDENTIALS_FILE_TEXT`** to the full contents of your `.creds` file (with newlines replaced by `\n`):
+3. **Set `NATS_CREDENTIALS_FILE_TEXT`** to the full contents of your `.creds` file, with newlines replaced by `\n` and the whole value in double quotes (Docker Compose only turns `\n` back into line breaks inside double-quoted values):
    ```
-   NATS_CREDENTIALS_FILE_TEXT=-----BEGIN NATS USER JWT-----\neyJ0eXAi...\n------END NATS USER JWT------\n\n-----BEGIN USER NKEY SEED-----\nSUAM...\n------END USER NKEY SEED------
+   NATS_CREDENTIALS_FILE_TEXT="-----BEGIN NATS USER JWT-----\neyJ0eXAi...\n------END NATS USER JWT------\n\n-----BEGIN USER NKEY SEED-----\nSUAM...\n------END USER NKEY SEED------"
    ```
 
 4. **Start Keycloak**:
@@ -45,4 +45,4 @@ nats sub keycloak.events --creds /path/to/your.creds --server tls://connect.ngs.
 |---|---|---|
 | `NATS_SERVERS` | Synadia Cloud server URL | `tls://connect.ngs.global` |
 | `NATS_SUBJECT` | NATS subject for events | `keycloak.events` |
-| `NATS_CREDENTIALS_FILE_TEXT` | Contents of your `.creds` file (newlines as `\n`) | See `.env.example` |
+| `NATS_CREDENTIALS_FILE_TEXT` | Contents of your `.creds` file (newlines as `\n`, value double-quoted) | See `.env.example` |

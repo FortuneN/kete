@@ -17,7 +17,7 @@ import org.testcontainers.Testcontainers;
 class AzureWebPubSubDestinationE2ETests extends EndToEndTestBase {
 
 	private static final String ACCESS_KEY = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
-	private static final String HUB_NAME = "test-hub";
+	private static final String HUB_NAME = "test_hub";
 
 	private MockWebServer mockServer;
 

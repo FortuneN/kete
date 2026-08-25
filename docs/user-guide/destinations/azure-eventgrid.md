@@ -196,9 +196,10 @@ KETE does not expand `${VARIABLE}` references itself — the value must be subst
 
 ## Quick Starts
 
-No dedicated quick start available for the native `azure-eventgrid` destination.
-
-Azure Event Grid can also be accessed via the [HTTP Destination](http.md) — see [http-azure-event-grid](https://github.com/FortuneN/kete/tree/release/quick-starts/http-azure-event-grid) quick start.
+| Quick Start | Description |
+|-------------|-------------|
+| [azure-eventgrid](https://github.com/FortuneN/kete/tree/release/quick-starts/azure-eventgrid/) | Native destination publishing to an Event Grid custom topic (cloud-only) |
+| [mqtt-5-azure-event-grid](https://github.com/FortuneN/kete/tree/release/quick-starts/mqtt-5-azure-event-grid/) | Event Grid MQTT broker via the [MQTT 5 Destination](mqtt-5.md) |
 
 
 

@@ -135,7 +135,7 @@ docker-compose logs keycloak
 ```
 
 Look for:
-- `KETE: Route 'quick-start' initialized` - Success
+- `kete Route 'quick-start' initialized: destination=...` - Success
 - SASL authentication errors - Check API key/secret
 - Connection errors - Check bootstrap server URL
 
