@@ -25,7 +25,7 @@
     <img src="https://img.shields.io/github/downloads/FortuneN/kete/total?label=Downloads" alt="Downloads" />
   </a>
   <a href="https://fortunen.github.io/kete/developer-guide/overview">
-    <img src="https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/FortuneN/kete/release/coverage-badge.json" alt="Code Coverage" />
+    <img src="https://img.shields.io/endpoint?url=https://fortunen.github.io/kete/coverage-badge.json" alt="Code Coverage" />
   </a>
 </p>
 

@@ -39,7 +39,7 @@ Scripts that simulate CI/CD pipeline stages locally.
 |--------|----------------|-------|
 | `run-on-pull-request-push.ps1` | Pull request | Tests → Docker image build → MkDocs build |
 | `run-on-develop-push.ps1` | Merge to develop | Tests + coverage → Docker image build → MkDocs build |
-| `run-on-release-push.ps1` | Merge to release | Versioned JAR → Docker push → MkDocs build → GitHub Release (tests are not re-run; they already ran on develop) |
+| `run-on-release-push.ps1` | Merge to release | Versioned JAR → versioned Docker push → MkDocs build → GitHub Release → `:latest` tags (tests are not re-run; `release.yml` first verifies that the tree passed the Develop workflow) |
 
 ### Utility
 
