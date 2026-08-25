@@ -49,13 +49,14 @@ Stream Keycloak events to Amazon Kinesis Data Streams.
     kete.routes.kinesis.destination.stream=keycloak-events
     kete.routes.kinesis.destination.partition-key=${realmLowerCase}
     kete.routes.kinesis.destination.region=us-east-1
+    kete.routes.kinesis.destination.authentication-type=default-credentials-chain
     ```
 
 
 
 ## Features
 
-- AWS Kinesis SDK integration with automatic credential resolution
+- AWS Kinesis SDK integration with explicit credential selection via `authentication-type` (use `default-credentials-chain` for the SDK provider chain)
 - Stream name templating with variables
 - Partition key templating for shard distribution
 - LocalStack emulator support for local development
@@ -109,7 +110,7 @@ Available variables: `${realmLowerCase}`, `${realmUpperCase}`, `${realmKebabCase
 
 ### Authentication
 
-AWS Kinesis uses the AWS SDK credential provider chain. See [AWS EventBridge Authentication](aws-eventbridge.md#authentication) for the full list of authentication methods — they are identical across all AWS destinations.
+Authentication is selected with `destination.authentication-type`; when it is not set, requests are sent with **anonymous** credentials (suitable only for emulators such as LocalStack). Use `default-credentials-chain` for the AWS SDK provider chain (environment, profile, instance/container roles). See [AWS EventBridge Authentication](aws-eventbridge.md#authentication) for the full list of authentication methods — they are identical across all AWS destinations.
 
 ### TLS Properties
 

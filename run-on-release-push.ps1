@@ -284,16 +284,18 @@ function Build-And-Push-Image {
     if ($buildSuccess) {
 
         Write-Task "Pushing $versionedImage"
-        docker push $versionedImage 2>&1 | Out-Null
+        $push1Output = docker push $versionedImage 2>&1
         $push1 = $LASTEXITCODE -eq 0
+        if (-not $push1) { $push1Output | Out-Host }
 
         Write-Task "Pushing $latestImage"
-        docker push $latestImage 2>&1 | Out-Null
+        $push2Output = docker push $latestImage 2>&1
         $push2 = $LASTEXITCODE -eq 0
+        if (-not $push2) { $push2Output | Out-Host }
 
         $success = $push1 -and $push2
         Write-TaskResult "$Name [:$($script:Version) + :latest]" $success
-        return $true;
+        return $success;
 
     } else {
 

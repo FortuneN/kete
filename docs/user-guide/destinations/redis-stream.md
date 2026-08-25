@@ -179,6 +179,7 @@ See [TLS & mTLS](overview.md#tls-mtls) for full details on TLS options.
 | Property | Default | Description |
 |----------|---------|-------------|
 | `tls.enabled` | `false` | Enable TLS (the default port becomes `6380` when enabled) |
+| `tls.verify-hostname` | `false` | `false` validates the server certificate chain against the trust store (CA mode); `true` additionally verifies the hostname (full mode). The certificate is never left unverified. |
 | `tls.key-store.*` | - | Client certificate for mTLS |
 | `tls.trust-store.*` | - | CA certificates |
 

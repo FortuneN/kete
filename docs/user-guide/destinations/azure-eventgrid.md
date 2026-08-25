@@ -190,6 +190,8 @@ kete.routes.env.destination.endpoint=${EVENTGRID_ENDPOINT}
 kete.routes.env.destination.access-key=${EVENTGRID_ACCESS_KEY}
 ```
 
+KETE does not expand `${VARIABLE}` references itself — the value must be substituted by whatever sets the environment variable (Docker Compose, Kubernetes, a shell), otherwise the literal text is used.
+
 
 
 ## Quick Starts

@@ -78,8 +78,8 @@ Then update `docker-compose.yml` to use these variables:
 
 ```yaml
 environment:
-  kete.routes.quick-start.destination.bootstrap-servers: ${EVENTHUB_NAMESPACE}.servicebus.windows.net:9093
-  kete.routes.quick-start.destination.sasl-password: ${EVENTHUB_CONNECTION_STRING}
+  kete.routes.quick-start.destination.bootstrap.servers: ${EVENTHUB_NAMESPACE}.servicebus.windows.net:9093
+  kete.routes.quick-start.destination.sasl.jaas.config: org.apache.kafka.common.security.plain.PlainLoginModule required username="$$ConnectionString" password="${EVENTHUB_CONNECTION_STRING}";
 ```
 
 ## Running

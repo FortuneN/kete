@@ -153,6 +153,27 @@ public class initializeTests {
 	}
 
 	@Test
+	public void shouldParseTemplatedUrl() {
+
+		// arrange
+
+		var config = new HttpDestinationConfig();
+		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "http",
+			"url", "https://api.example.com/events/${realmLowerCase}"
+		)));
+
+		// act
+
+		config.initialize();
+
+		// assert
+
+		assertThat(config.isUrlTemplated()).isTrue();
+		assertThat(config.getHost()).isEqualTo("api.example.com");
+	}
+
+	@Test
 	public void shouldUseDefaultPortForHttp() {
 
 		// arrange

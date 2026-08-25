@@ -65,7 +65,11 @@ public class SoapDestination extends Destination<SoapDestinationConfig> {
 		soapNamespace = config.getSoapNamespace();
 		soapContentType = config.getSoapContentType();
 
-		// verify connection
+		// verify connection (templated URLs are only known per event)
+
+		if (isUrlTemplated) {
+			return;
+		}
 
 		var testRequest = HttpRequest.newBuilder()
 			.uri(URI.create(config.getScheme() + "://" + config.getHost() + ":" + config.getPort()))

@@ -13,9 +13,8 @@ services:
       # Amazon MSK configuration
       # Replace these values or use a .env file
       kete.routes.quick-start.destination.kind: kafka
-      kete.routes.quick-start.destination.bootstrap-servers: ${MSK_BOOTSTRAP_SERVERS:-<YOUR-BROKER-1>:9096,<YOUR-BROKER-2>:9096}
+      kete.routes.quick-start.destination.bootstrap.servers: ${MSK_BOOTSTRAP_SERVERS:-<YOUR-BROKER-1>:9096,<YOUR-BROKER-2>:9096}
       kete.routes.quick-start.destination.topic: keycloak-events
-      kete.routes.quick-start.destination.security-protocol: SASL_SSL
-      kete.routes.quick-start.destination.sasl-mechanism: SCRAM-SHA-512
-      kete.routes.quick-start.destination.sasl-username: ${MSK_USERNAME:-<YOUR-USERNAME>}
-      kete.routes.quick-start.destination.sasl-password: ${MSK_PASSWORD:-<YOUR-PASSWORD>}
+      kete.routes.quick-start.destination.security.protocol: SASL_SSL
+      kete.routes.quick-start.destination.sasl.mechanism: SCRAM-SHA-512
+      kete.routes.quick-start.destination.sasl.jaas.config: org.apache.kafka.common.security.scram.ScramLoginModule required username="${MSK_USERNAME:-<YOUR-USERNAME>}" password="${MSK_PASSWORD:-<YOUR-PASSWORD>}";

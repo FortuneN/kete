@@ -77,7 +77,7 @@ Stream Keycloak events to HTTP/REST endpoints.
 - OAuth 2.0 Client Credentials with token caching
 - Custom headers and configurable timeouts
 - TLS/SSL with mTLS support
-- Start-up connectivity check: a `GET` to the URL's scheme, host and port root; an unreachable host fails route initialization
+- Start-up connectivity check: a `GET` to the URL's scheme, host and port root; an unreachable host fails route initialization (skipped when `url` is templated, because the real URL is only known per event)
 
 
 

@@ -91,7 +91,7 @@ public class SoapDestinationConfig extends DestinationConfig {
 
 		if (ValidationUtils.isNotBlank(urlFromConfig)) {
 
-			parsedUri = URI.create(urlFromConfig);
+			parsedUri = URI.create(TemplateUtils.maskTemplates(urlFromConfig));
 			hasPort = configuration.containsKey(PORT);
 			hasHost = ValidationUtils.isNotBlank(configuration.getString(HOST, "").trim());
 			hasTlsEnabled = ConfigurationUtils.getSubSet(configuration, TLS).containsKey("enabled");
@@ -181,6 +181,12 @@ public class SoapDestinationConfig extends DestinationConfig {
 			url = scheme + "://" + host + ":" + port;
 		} else {
 			url = scheme + "://" + host + ":" + port + pathAndQuery;
+		}
+
+		// a templated url keeps its placeholders (they are substituted per event)
+
+		if (TemplateUtils.containsTemplate(urlFromConfig)) {
+			url = urlFromConfig;
 		}
 
 		// timeoutSeconds

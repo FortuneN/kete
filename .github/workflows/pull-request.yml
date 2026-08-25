@@ -5,6 +5,9 @@ on:
     branches: [develop, release]
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   pull-request:
     name: Build & Test

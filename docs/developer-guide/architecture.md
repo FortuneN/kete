@@ -75,11 +75,12 @@ This ensures events are only processed for **successful operations**.
 
 ### Route Matching Algorithm
 
-1. Check if event realm matches route realm
-2. Check if route has matchers and if event type is accepted
-3. For matching routes: serialize once per serializer, send to all destinations
-4. Use virtual threads for parallel destination delivery
-5. Apply retry if configured
+1. Serialize the event once per distinct serializer (on a virtual thread per serializer)
+2. For each route of that serializer (on its own virtual thread): check the realm matchers, then the event matchers (both results cached per route)
+3. Matching routes send the pre-serialized message to their destination pool
+4. Apply retry if configured
+
+Serialization therefore happens before matching — every event in a routed realm is serialized by every distinct serializer, even when no route accepts it.
 
 
 
@@ -266,14 +267,7 @@ try {
 
 ## Configuration Loading
 
-Configuration is loaded from **two sources** and merged:
-
-1. **Keycloak SPI Configuration** (Scope) - XML/properties configuration
-   - Quarkus: `conf/keycloak.conf` or CLI arguments with `--spi-events-listener-kete-*`
-   - WildFly: `standalone.xml` under `<spi name="eventsListener"><provider name="kete">`
-2. **Environment Variables** - Override SPI config with `kete.*` prefix
-
-Environment variables take precedence, allowing base config in XML with per-deployment overrides via environment.
+`ConfigurationUtils.createConfiguration` merges the Keycloak `Config.Scope` property names with `System.getenv()` and then keeps the dotted `kete.` subset. Keycloak's Quarkus scope exposes provider options as dash-case `kc.spi-events-listener-kete-…` keys, so nothing from `keycloak.conf`, `--spi-…` flags or `-D` properties ever matches — **environment variables are the only effective source**.
 
 See [Configuration Reference](configuration.md) for details.
 

@@ -72,7 +72,7 @@ public class WebSocketDestinationConfig extends DestinationConfig {
 
 			url = urlFromConfig;
 
-			var parsedUri = URI.create(url);
+			var parsedUri = URI.create(TemplateUtils.maskTemplates(url));
 
 			// host
 

@@ -28,15 +28,14 @@ flowchart TD
     B --> C["KETE Provider.onEvent()"]
     C --> D["Queue in EventListenerTransaction"]
     D --> E{"Transaction commits?"}
-    E -->|Yes| F["Process event"]
+    E -->|Yes| F["Serialize once per serializer"]
     E -->|No| G["Discard event"]
-    F --> H["For each route"]
+    F --> H["For each route of that serializer"]
     H --> I{"Realm matches?"}
     I -->|No| J["Skip route"]
     I -->|Yes| K{"Event type matches?"}
     K -->|No| J
-    K -->|Yes| L["Serialize event"]
-    L --> M["Send to destination"]
+    K -->|Yes| M["Send to destination (pool + retry)"]
 ```
 
 ### Admin Events (USER_CREATE, REALM_UPDATE, etc.)

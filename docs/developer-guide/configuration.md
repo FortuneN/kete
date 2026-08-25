@@ -55,56 +55,7 @@ flowchart LR
 
 ## Configuration Sources
 
-KETE reads configuration from **two sources**, merged in this order:
-
-1. **Keycloak SPI Configuration** (XML/properties) - Base configuration
-2. **Environment Variables** - Override/extend base configuration
-
-Environment variables take precedence over SPI configuration, allowing you to define defaults in XML and override specific values via environment.
-
-### Keycloak SPI Configuration (Bare Metal / Standalone)
-
-For traditional Keycloak deployments, configure KETE via the Keycloak SPI mechanism.
-
-#### Quarkus-based Keycloak (v17+)
-
-Add to `conf/keycloak.conf` or `conf/quarkus.properties`:
-
-```properties
-# Enable the event listener
-spi-events-listener-kete-enabled=true
-
-# KETE configuration
-spi-events-listener-kete-routes-kafka-example-destination-kind=kafka
-spi-events-listener-kete-routes-kafka-example-destination-bootstrap-servers=kafka:9092
-spi-events-listener-kete-routes-kafka-example-destination-topic=keycloak-events
-```
-
-Or pass as CLI arguments:
-
-```bash
-bin/kc.sh start \
-  --spi-events-listener-kete-routes-kafka-example-destination-kind=kafka \
-  --spi-events-listener-kete-routes-kafka-example-destination-bootstrap-servers=kafka:9092 \
-  --spi-events-listener-kete-routes-kafka-example-destination-topic=keycloak-events
-```
-
-#### Legacy Keycloak (WildFly-based, pre-v17)
-
-Add to `standalone.xml` under `<subsystem xmlns="urn:jboss:domain:keycloak-server:1.1">`:
-
-```xml
-<spi name="eventsListener">
-    <provider name="kete" enabled="true">
-        <properties>
-            <property name="routes.kafka-example.destination.kind" value="kafka"/>
-            <property name="routes.kafka-example.destination.bootstrap.servers" value="kafka:9092"/>
-            <property name="routes.kafka-example.destination.topic" value="keycloak-events"/>
-            <property name="routes.kafka-example.realm-matchers.realm" value="list:master"/>
-        </properties>
-    </provider>
-</spi>
-```
+KETE reads its configuration from the **environment variables** of the Keycloak process only. `ConfigurationUtils.createConfiguration` also merges Keycloak's `Config.Scope` property names, but the Quarkus scope exposes provider options as dash-case `kc.spi-events-listener-kete-…` keys while KETE keeps only the dotted `kete.` subset — so options in `conf/keycloak.conf`, `--spi-events-listener-kete-…` CLI flags or `-D` system properties are never picked up. See the [user guide](../user-guide/configuration.md) for how to set the variables.
 
 ### Environment Variables
 

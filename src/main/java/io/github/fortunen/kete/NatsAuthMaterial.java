@@ -121,7 +121,7 @@ public class NatsAuthMaterial {
 			case AUTH_CREDENTIALS_FILE_PATH:
 			case AUTH_CREDENTIALS_FILE_TEXT:
 			case AUTH_CREDENTIALS_FILE_BASE64:
-				builder.authHandler(Nats.credentials(credentialsFileContent));
+				builder.authHandler(Nats.staticCredentials(credentialsFileContent.getBytes(StandardCharsets.UTF_8)));
 				break;
 		}
 	}
