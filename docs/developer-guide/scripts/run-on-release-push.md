@@ -27,7 +27,7 @@ The script executes 6 steps sequentially. Step 1 is disabled in the script and r
 | Step | Name | Description |
 |------|------|-------------|
 | 1 | Run All Tests (with Coverage) | **Disabled** — kept in the script for reference; marked as passed |
-| 2 | Package Versioned JAR | Runs `mvn package -DskipTests -Drevision=<version>` to produce `target/kete.jar` with the version imprinted in `META-INF/MANIFEST.MF` |
+| 2 | Package Versioned JAR | Runs `mvn package -DskipTests -Drevision=<version>` to produce `target/kete.jar` with the version imprinted in `META-INF/MANIFEST.MF`, then runs [`run-jar-check.ps1`](run-jar-check.md) to make sure every bundled class is relocated |
 | 3 | Build and Push Versioned Docker Images | Auto-discovers images from `quick-starts/$images/`, builds each with Docker, tags as `:<version>` and `:latest`, pushes only the `:<version>` tag to `ghcr.io/fortunen/kete` |
 | 4 | Build Documentation Site | Runs `python -m mkdocs build --strict` to validate and build the documentation site |
 | 5 | Create Git Tag and GitHub Release | Creates an annotated Git tag, pushes it to origin, then creates a GitHub Release via `gh release create --generate-notes` with the JAR attached |

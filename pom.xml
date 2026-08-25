@@ -36,13 +36,7 @@
 
 	<dependencyManagement>
 		<dependencies>
-			<dependency>
-				<groupId>org.keycloak</groupId>
-				<artifactId>keycloak-parent</artifactId>
-				<version>25.0.6</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
+			<!-- Import order matters: the first BOM that manages an artifact wins. keycloak-parent (through quarkus-bom) would otherwise pin Jackson 2.17 and Netty 4.1.108 -->
 			<dependency>
 				<groupId>com.fasterxml.jackson</groupId>
 				<artifactId>jackson-bom</artifactId>
@@ -51,9 +45,23 @@
 				<scope>import</scope>
 			</dependency>
 			<dependency>
+				<groupId>io.netty</groupId>
+				<artifactId>netty-bom</artifactId>
+				<version>4.1.130.Final</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<dependency>
 				<groupId>io.grpc</groupId>
 				<artifactId>grpc-bom</artifactId>
 				<version>1.79.0</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.keycloak</groupId>
+				<artifactId>keycloak-parent</artifactId>
+				<version>25.0.6</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
@@ -535,6 +543,18 @@
 			<groupId>org.apache.activemq</groupId>
 			<artifactId>activemq-stomp</artifactId>
 			<version>6.1.6</version>
+			<exclusions>
+				<!-- only the client-side StompConnection is used; the broker (a full server) is not needed -->
+				<exclusion>
+					<groupId>org.apache.activemq</groupId>
+					<artifactId>activemq-broker</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.activemq</groupId>
+			<artifactId>activemq-client</artifactId>
+			<version>6.1.6</version>
 		</dependency>
 		<dependency>
 			<groupId>org.zeromq</groupId>
@@ -622,9 +642,6 @@
 				<version>3.5.4</version>
 				<configuration>
 					<argLine>@{argLine} -XX:+EnableDynamicAgentLoading -Dnet.bytebuddy.experimental=true -Djava.net.preferIPv4Stack=true</argLine>
-					<systemPropertyVariables>
-						<keycloak.version>${keycloak.version}</keycloak.version>
-					</systemPropertyVariables>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -692,7 +709,7 @@
 									<artifact>*:*</artifact>
 									<excludes>
 										<exclude>module-info.class</exclude>
-										<exclude>META-INF/versions/*/module-info.class</exclude>
+										<exclude>META-INF/versions/**</exclude>
 										<exclude>META-INF/*.SF</exclude>
 										<exclude>META-INF/*.DSA</exclude>
 										<exclude>META-INF/*.RSA</exclude>
@@ -919,8 +936,8 @@
 									<shadedPattern>kete.com.github.luben.zstd</shadedPattern>
 								</relocation>
 								<relocation>
-									<pattern>org.lz4</pattern>
-									<shadedPattern>kete.org.lz4</shadedPattern>
+									<pattern>net.jpountz</pattern>
+									<shadedPattern>kete.net.jpountz</shadedPattern>
 								</relocation>
 								<relocation>
 									<pattern>org.xerial.snappy</pattern>
@@ -1193,6 +1210,50 @@
 								<relocation>
 									<pattern>org.apache.avro</pattern>
 									<shadedPattern>kete.org.apache.avro</shadedPattern>
+								</relocation>
+								<!-- Apache Commons Codec (AWS SDK Apache HTTP client transitive; Keycloak bundles its own copy) -->
+								<relocation>
+									<pattern>org.apache.commons.codec</pattern>
+									<shadedPattern>kete.org.apache.commons.codec</shadedPattern>
+								</relocation>
+								<!-- JeroMQ internals -->
+								<relocation>
+									<pattern>zmq</pattern>
+									<shadedPattern>kete.zmq</shadedPattern>
+								</relocation>
+								<!-- Circe checksums (pulsar-client transitive) -->
+								<relocation>
+									<pattern>com.scurrilous</pattern>
+									<shadedPattern>kete.com.scurrilous</shadedPattern>
+								</relocation>
+								<!-- EdDSA (jnats transitive) -->
+								<relocation>
+									<pattern>net.i2p</pattern>
+									<shadedPattern>kete.net.i2p</shadedPattern>
+								</relocation>
+								<!-- PerfMark (gRPC transitive) -->
+								<relocation>
+									<pattern>io.perfmark</pattern>
+									<shadedPattern>kete.io.perfmark</shadedPattern>
+								</relocation>
+								<!-- Google common protos not covered above -->
+								<relocation>
+									<pattern>com.google.logging</pattern>
+									<shadedPattern>kete.com.google.logging</shadedPattern>
+								</relocation>
+								<relocation>
+									<pattern>com.google.geo</pattern>
+									<shadedPattern>kete.com.google.geo</shadedPattern>
+								</relocation>
+								<!-- Android annotations (gRPC transitive) -->
+								<relocation>
+									<pattern>android.annotation</pattern>
+									<shadedPattern>kete.android.annotation</shadedPattern>
+								</relocation>
+								<!-- Executable packer (pulsar bouncy-castle-bc transitive) -->
+								<relocation>
+									<pattern>de.ntcomputer</pattern>
+									<shadedPattern>kete.de.ntcomputer</shadedPattern>
 								</relocation>
 							</relocations>
 							<transformers>

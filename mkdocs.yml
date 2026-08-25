@@ -202,5 +202,6 @@ nav:
       - run-on-pull-request-push: developer-guide/scripts/run-on-pull-request-push.md
       - run-on-develop-push: developer-guide/scripts/run-on-develop-push.md
       - run-on-release-push: developer-guide/scripts/run-on-release-push.md
+      - run-jar-check: developer-guide/scripts/run-jar-check.md
       - run-push: developer-guide/scripts/run-push.md
       - run-docs-preview: developer-guide/scripts/run-docs-preview.md

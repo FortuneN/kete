@@ -235,9 +235,14 @@ if ($buildSuccess -and (Test-Path "target/kete.jar")) {
     Write-TaskResult "kete.jar ($jarSize MB)" $jarSuccess
     Write-Task "Version $($script:Version) imprinted in META-INF/MANIFEST.MF"
 
+    Write-Task "Checking that every class in kete.jar is relocated..."
+    & .\run-jar-check.ps1 -JarPath "target/kete.jar"
+    $jarCheckSuccess = $LASTEXITCODE -eq 0
+
 } else {
 
     $jarSuccess = $false
+    $jarCheckSuccess = $false
 
     Write-TaskResult "Failed to create JAR" $false
 
@@ -245,6 +250,7 @@ if ($buildSuccess -and (Test-Path "target/kete.jar")) {
 
 $duration = Format-Duration((Get-Date) - $stepStart)
 $script:Results["2. Package JAR"] = $jarSuccess
+$script:Results["2. Shaded JAR check"] = $jarCheckSuccess
 
 # =============================================================================
 # Step 3: Build and Push Versioned Docker Images
