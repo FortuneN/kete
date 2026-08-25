@@ -1,6 +1,6 @@
 # run-on-develop-push.ps1
 
-Develop branch pipeline. Runs all tests with coverage, builds Docker images, and validates the documentation site.
+Develop branch pipeline: runs all tests with coverage, packages and checks the jar, builds the quick-start image, and validates the documentation site. CI (`develop.yml`) runs the same work as four parallel jobs (unit, integration, end-to-end, validate) and merges their coverage in a final `Build & Test` job; this script is the sequential local equivalent.
 
 ## Usage
 
@@ -12,13 +12,13 @@ Develop branch pipeline. Runs all tests with coverage, builds Docker images, and
 
 | Step | Name | Description |
 |------|------|-------------|
-| 1 | Run All Tests (with Coverage) | Calls `run-all-tests.ps1`, then generates coverage badge from JaCoCo CSV |
-| 2 | Build Docker Images | Builds `ghcr.io/fortunen/kete/quick-start-keycloak:develop` (validation only, no push) |
+| 1 | Run All Tests (with Coverage) | Calls `run-all-tests.ps1`, then [`run-coverage-badge.ps1`](run-coverage-badge.md) writes the badge |
+| 2 | Build Docker Images | Packages `target/kete.jar`, runs [`run-jar-check.ps1`](run-jar-check.md), then builds `ghcr.io/fortunen/kete/quick-start-keycloak:develop` from that jar (validation only, no push) |
 | 3 | Build Documentation | Runs `python -m mkdocs build --strict` (validation only, deploy is release-only) |
 
 ## Coverage Badge
 
-After tests pass, the script reads `target/site/jacoco/jacoco.csv`, calculates line coverage percentage, and writes `coverage-badge.json` with appropriate color:
+After tests pass, [`run-coverage-badge.ps1`](run-coverage-badge.md) reads the JaCoCo execution data, calculates line coverage percentage, and writes `coverage-badge.json` with appropriate color:
 
 | Coverage | Color |
 |----------|-------|
@@ -27,7 +27,7 @@ After tests pass, the script reads `target/site/jacoco/jacoco.csv`, calculates l
 | ≥ 40% | yellow |
 | < 40% | red |
 
-The Develop workflow (`develop.yml`) uploads the file as the `coverage-badge` workflow artifact; the release pipeline publishes it with the documentation site (see [Release Push](run-on-release-push.md#coverage-badge)). CI never commits the file.
+The Develop workflow (`develop.yml`) produces the same file from the merged shard data and uploads it as the `coverage-badge` workflow artifact; the release pipeline publishes it with the documentation site (see [Release Push](run-on-release-push.md#coverage-badge)). CI never commits the file.
 
 ## Output
 

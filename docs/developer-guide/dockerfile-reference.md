@@ -1,74 +1,43 @@
 # Dockerfile Reference
 
-Multi-stage Dockerfile (`quick-starts/$images/keycloak/Dockerfile`) for building the quick-start Keycloak image with the extension. It is built with the repository root as context: `docker build -f "quick-starts/$images/keycloak/Dockerfile" .`
+Two-stage Dockerfile (`quick-starts/$images/keycloak/Dockerfile`) that builds the quick-start Keycloak image from the **packaged** extension jar. It is built with the repository root as context, and `target/kete.jar` must exist first:
 
+```bash
+mvn package -DskipTests
+docker build -f "quick-starts/$images/keycloak/Dockerfile" -t keycloak:kete .
+```
 
-
-## Overview
-
-This Dockerfile uses a multi-stage build to:
-1. Build the extension JAR with Maven
-2. Install the JAR into Keycloak
-3. Create a minimal final image
+The root `.dockerignore` sends nothing but `target/kete.jar` to the daemon, so the image ships exactly the jar that was tested and released rather than a second build from source (which used to stamp `Implementation-Version: 0.0.0` and download every dependency again).
 
 
 
 ## Build Stages
 
-### Stage 1: maven-build
-
-**Base Image:** `maven:3.9.9-eclipse-temurin-21-noble`  
-**Purpose:** Build the extension JAR
-
-```dockerfile
-FROM maven:3.9.9-eclipse-temurin-21-noble AS maven-build
-WORKDIR /src
-COPY pom.xml .
-RUN mvn clean
-RUN mvn -q -DskipTests dependency:go-offline
-COPY . .
-RUN mvn -B -DskipTests package
-```
-
-**What it does:**
-1. Sets working directory to `/src`
-2. Copies `pom.xml` (for dependency caching)
-3. Downloads dependencies offline
-4. Copies all source code
-5. Builds JAR with `mvn package` (skips tests)
-
-**Output:** `/src/target/kete.jar`
-
-
-
-### Stage 2: keycloak-build
+### Stage 1: keycloak-build
 
 **Base Image:** `quay.io/keycloak/keycloak:26.0.7`  
-**Purpose:** Install extension and build Keycloak
+**Purpose:** Install the extension and build Keycloak
 
 ```dockerfile
 FROM quay.io/keycloak/keycloak:26.0.7 AS keycloak-build
 ENV KC_HEALTH_ENABLED=true
 ENV KC_METRICS_ENABLED=true
-COPY --from=maven-build --chown=keycloak:keycloak /src/target/kete.jar /opt/keycloak/providers/kete.jar
+COPY --chown=keycloak:keycloak target/kete.jar /opt/keycloak/providers/kete.jar
 RUN /opt/keycloak/bin/kc.sh build --health-enabled=true --metrics-enabled=true
 ```
 
 **What it does:**
-1. Copies JAR from maven-build stage to `/opt/keycloak/providers/`
-2. Runs `kc.sh build` to:
-   - Discover and register providers
-   - Optimize Keycloak configuration
-   - Build internal caches
+1. Copies the packaged jar from the build context to `/opt/keycloak/providers/`
+2. Runs `kc.sh build` to discover and register providers, optimize the configuration and build internal caches
 
-**Output:** Optimized Keycloak installation with extension
+**Output:** Optimized Keycloak installation with the extension
 
 
 
-### Stage 3: final
+### Stage 2: final
 
 **Base Image:** `quay.io/keycloak/keycloak:26.0.7`  
-**Purpose:** Create minimal runtime image
+**Purpose:** Create the runtime image
 
 ```dockerfile
 FROM quay.io/keycloak/keycloak:26.0.7 AS final
@@ -84,8 +53,8 @@ CMD ["start-dev"]
 ```
 
 **What it does:**
-1. Starts with fresh Keycloak base image
-2. Copies only the built Keycloak directory from keycloak-build
+1. Starts from a fresh Keycloak base image
+2. Copies only the built Keycloak directory from `keycloak-build`
 3. Enables HTTP, health and metrics endpoints, KETE metrics, and the demo `admin`/`admin` bootstrap account
 4. Starts Keycloak in dev mode by default
 
@@ -98,12 +67,13 @@ CMD ["start-dev"]
 ### Manual Build
 
 ```bash
+mvn package -DskipTests
 docker build -f "quick-starts/$images/keycloak/Dockerfile" -t keycloak:kete .
 ```
 
 ### Build with Script
 
-The image is built (and, on release, pushed) by `run-on-pull-request-push.ps1`, `run-on-develop-push.ps1` and `run-on-release-push.ps1` — see [Scripts](scripts/overview.md).
+`run-on-pull-request-push.ps1` and `run-on-develop-push.ps1` package the jar, run [`run-jar-check.ps1`](scripts/run-jar-check.md) and build the image (validation only); `run-on-release-push.ps1` does the same and pushes the versioned and `:latest` tags — see [Scripts](scripts/overview.md).
 
 ### Build with Specific Version
 
@@ -113,31 +83,23 @@ The Dockerfile pins the Keycloak version in its `FROM` lines; to build against a
 
 ## Image Layers
 
-### Layer Breakdown
-
 ```mermaid
 flowchart TB
-    subgraph M["maven-build stage"]
-        M1["Base Maven image<br/>~600 MB"]
-        M2["Dependencies download<br/>~150 MB"]
-        M3["Source code + JAR build<br/>~50 MB"]
-    end
-    
     subgraph K["keycloak-build stage"]
         K1["Base Keycloak image<br/>~800 MB"]
-        K2["Extension JAR<br/>~5 MB"]
-        K3["Build output<br/>~50 MB"]
+        K2["Extension JAR<br/>~130 MB"]
+        K3["kc.sh build output<br/>~50 MB"]
     end
-    
+
     subgraph F["final stage"]
         F1["Base Keycloak image<br/>~800 MB"]
-        F2["Built Keycloak with extension<br/>~850 MB"]
+        F2["Built Keycloak with extension<br/>~1 GB"]
     end
-    
-    M --> K --> F
+
+    K --> F
 ```
 
-**Final image size:** ~850 MB
+The shaded jar bundles every destination client library (~130 MB), which is what makes the final image noticeably larger than the base Keycloak image.
 
 
 
@@ -145,7 +107,7 @@ flowchart TB
 
 ### Change Keycloak Version
 
-Edit the Dockerfile and update the version in all three stages:
+Edit the Dockerfile and update the version in both stages:
 
 ```dockerfile
 FROM quay.io/keycloak/keycloak:27.0.0 AS keycloak-build
@@ -153,84 +115,32 @@ FROM quay.io/keycloak/keycloak:27.0.0 AS keycloak-build
 FROM quay.io/keycloak/keycloak:27.0.0 AS final
 ```
 
-### Change Maven Options
-
-```dockerfile
-# Enable tests
-RUN mvn -B package
-
-# Different profile
-RUN mvn -B -Pproduction package
-
-# Offline mode
-RUN mvn -B -o package
-```
-
 ### Multi-Architecture Build
 
 ```bash
 docker buildx build \
   --platform linux/amd64,linux/arm64 \
+  -f "quick-starts/$images/keycloak/Dockerfile" \
   -t keycloak:kete \
   .
 ```
 
-
-
-## Build Arguments
-
-### Define Build Args
+### Build Arguments
 
 ```dockerfile
-ARG KEYCLOAK_VERSION=26.0.0
-ARG MAVEN_VERSION=3.9.9
+ARG KEYCLOAK_VERSION=26.0.7
 
-FROM maven:${MAVEN_VERSION}-eclipse-temurin-21-noble AS maven-build
-# ...
 FROM quay.io/keycloak/keycloak:${KEYCLOAK_VERSION} AS keycloak-build
+# ...
+FROM quay.io/keycloak/keycloak:${KEYCLOAK_VERSION} AS final
 ```
-
-### Pass at Build Time
 
 ```bash
 docker build \
   --build-arg KEYCLOAK_VERSION=27.0.0 \
-  --build-arg MAVEN_VERSION=3.9.13 \
+  -f "quick-starts/$images/keycloak/Dockerfile" \
   -t keycloak:custom \
   .
-```
-
-
-
-## Performance Optimization
-
-### Build Cache
-
-**Optimize layer caching:**
-```dockerfile
-# Copy pom.xml first (rarely changes)
-COPY pom.xml .
-RUN mvn dependency:go-offline
-
-# Copy source later (changes frequently)
-COPY . .
-RUN mvn package
-```
-
-### Parallel Builds
-
-```dockerfile
-RUN mvn -B -T 1C package  # One thread per CPU core
-```
-
-### Reduce Image Size
-
-```dockerfile
-# Use alpine variants
-FROM maven:3.9.9-eclipse-temurin-21-alpine AS maven-build
-
-# Remove unnecessary files
-RUN rm -rf /opt/keycloak/lib/lib/community/*.jar
 ```
 
 
@@ -259,18 +169,9 @@ trivy image keycloak:kete
 
 ## Troubleshooting
 
-### Build Fails at Maven Stage
+### `target/kete.jar` not found
 
-**Error:** Dependencies download fails
-
-**Solution:**
-```bash
-# Check internet connection
-ping repo.maven.apache.org
-
-# Use a BuildKit cache mount for the Maven repository (docker build has no -v flag)
-# RUN --mount=type=cache,target=/root/.m2 mvn -B -DskipTests package
-```
+The context only contains the packaged jar. Run `mvn package -DskipTests` (and `.\run-jar-check.ps1`) before `docker build`.
 
 ### Build Fails at Keycloak Build
 
@@ -279,30 +180,34 @@ ping repo.maven.apache.org
 **Solution:**
 ```bash
 # Check logs
-docker build --progress=plain -t keycloak:kete .
+docker build --progress=plain -f "quick-starts/$images/keycloak/Dockerfile" -t keycloak:kete .
 
-# Verify JAR is valid
+# Verify the jar registers the provider
 jar tf target/kete.jar | grep META-INF/services
 ```
 
 ### Image Size Too Large
 
-**Check layer sizes:**
 ```bash
 docker history keycloak:kete
 ```
 
-**Optimize:**
-- Use alpine base images
-- Minimize COPY operations
-- Combine RUN commands
-- Use .dockerignore
+The jar itself is ~130 MB because every destination client is bundled; the Keycloak base image accounts for the rest.
 
 
 
 ## .dockerignore
 
-The repository has no `.dockerignore`; because the build context is the repository root, adding one that excludes `.git`, `target/`, `docs/` and IDE folders would shrink the context sent to the daemon.
+The root `.dockerignore` excludes everything except `target/kete.jar`:
+
+```
+*
+!target/
+target/*
+!target/kete.jar
+```
+
+Without it the build context would be the whole repository (several hundred megabytes once `target/` holds test reports and both jars).
 
 
 
@@ -311,8 +216,11 @@ The repository has no `.dockerignore`; because the build context is the reposito
 ### GitHub Actions
 
 ```yaml
+- name: Package
+  run: mvn package -DskipTests
+
 - name: Build Docker Image
-  run: docker build -t keycloak:kete .
+  run: docker build -f "quick-starts/$images/keycloak/Dockerfile" -t keycloak:kete .
 
 - name: Push to Registry
   run: |
@@ -328,6 +236,7 @@ docker-build:
   services:
     - docker:dind
   script:
-    - docker build -t $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA .
+    - mvn package -DskipTests
+    - docker build -f "quick-starts/$images/keycloak/Dockerfile" -t $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA .
     - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
 ```

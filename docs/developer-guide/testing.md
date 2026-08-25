@@ -39,8 +39,8 @@ See [Integration Tests](integration-tests.md) for the conventions.
 ### End-to-End Tests
 
 **Location:** `src/test/java/io/github/fortunen/kete/endtoendtests/`  
-**Purpose:** Full pipeline — the shaded `target/kete.jar` is deployed into a real Keycloak container (`quay.io/keycloak/keycloak:26.0.0`), a user login is triggered (password grant through the Keycloak admin-client library), and the event is read back from the destination container  
-**Uses:** `KeycloakContainer` (`testcontainers-keycloak`) + broker/emulator containers on a shared network; the jar is built on demand with `mvn package -DskipTests` if missing
+**Purpose:** Full pipeline — the shaded `target/kete.jar` is deployed into a real Keycloak container (`quay.io/keycloak/keycloak:26.0.0` by default; `-Dkeycloak.version=26.7.2` selects another release), a user login is triggered (password grant through the Keycloak admin-client library), and the event is read back from the destination container  
+**Uses:** `KeycloakContainer` (`testcontainers-keycloak`) + broker/emulator containers on a shared network; the base class builds the jar with `mvn package -DskipTests` at the start of every end-to-end JVM (about a minute)
 
 **Run:**
 ```bash
@@ -200,7 +200,7 @@ target/
         └── jacoco.csv        # CSV format (source of the README coverage badge)
 ```
 
-`run-on-develop-push.ps1` turns `jacoco.csv` into `coverage-badge.json` after the full suite.
+`run-coverage-badge.ps1` turns the execution data into `coverage-badge.json` — locally from the single `target/jacoco.exec` (called by `run-on-develop-push.ps1`), in CI from the three shard files merged together.
 
 
 
@@ -359,8 +359,8 @@ GitHub Actions runs the PowerShell pipelines (see `.github/workflows/`):
 
 | Workflow | Trigger | Script | What runs |
 |----------|---------|--------|-----------|
-| `pull-request.yml` | PR to `develop`/`release` | `run-on-pull-request-push.ps1` | All tests → quick-start image build → `mkdocs build --strict` |
-| `develop.yml` | Push to `develop` | `run-on-develop-push.ps1` | All tests + coverage badge (uploaded as the `coverage-badge` artifact) → image build → docs validation |
+| `pull-request.yml` | PR to `develop`/`release` | `run-unit-tests.ps1`, `run-integration-tests.ps1`, `run-end-to-end-tests.ps1` in parallel jobs, plus a `validate` job (package, `run-jar-check.ps1`, quick-start image, `mkdocs build --strict`); the final `Build & Test` job needs all of them |
+| `develop.yml` | Push to `develop` | Same four parallel jobs; each test job uploads its `jacoco.exec`, and the final `Build & Test` job merges them with `run-coverage-badge.ps1` and uploads the `coverage-badge` artifact |
 | `release.yml` | Push to `release` | `run-on-release-push.ps1` | `Verify Develop Run` job (refuses to release unless a successful Develop run tested an identical tree; manual dispatch offers `skip-develop-check`) → versioned JAR → versioned Docker push → docs build → tag + GitHub Release (generated notes) → `:latest` tags → docs + coverage badge deploy (tests are not re-run) |
 
 See [Scripts](scripts/overview.md) for details.

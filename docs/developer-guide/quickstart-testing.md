@@ -117,7 +117,7 @@ If you're running multiple quickstarts simultaneously, you may encounter port co
 
 ## Quickstart Inventory
 
-Total quickstarts: 89 (plus `$images/` with the 51 Dockerfiles they use)
+Total quickstarts: 89 (plus `$images/` with the 50 Dockerfiles they use)
 
 ### AMQP 0.9.1 (4)
 - amqp-0.9.1-amazon-mq

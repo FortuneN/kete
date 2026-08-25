@@ -4,7 +4,7 @@
 #
 #   Validates that the PR is ready to merge by running:
 #     • All tests (unit, integration, end-to-end)
-#     • Quick-start Docker image builds
+#     • Package the JAR, check its relocations, build the quick-start Keycloak image
 #     • Documentation site build
 #
 #   Usage: .\run-on-pull-request-push.ps1
@@ -147,11 +147,29 @@ Write-StepHeader 2 "Build Quick-Start Docker Images"
 
 $stepStart = Get-Date
 
-Write-Task "Building image: ghcr.io/fortunen/kete/quick-start-keycloak"
+Write-Task "Packaging kete.jar (the image is built from the packaged jar)"
 
-docker build -q -t ghcr.io/fortunen/kete/quick-start-keycloak -f "quick-starts/`$images/keycloak/Dockerfile" . 2>&1
+mvn package -DskipTests -q 2>&1 | Out-Null
+$packageSuccess = $LASTEXITCODE -eq 0 -and (Test-Path "target/kete.jar")
 
-$keycloakSuccess = $LASTEXITCODE -eq 0
+Write-TaskResult "kete.jar packaged" $packageSuccess
+$script:Results["JAR: package"] = $packageSuccess
+
+if ($packageSuccess) {
+    Write-Task "Checking that every class in kete.jar is relocated..."
+    & .\run-jar-check.ps1 -JarPath "target/kete.jar"
+    $script:Results["JAR: relocation check"] = $LASTEXITCODE -eq 0
+} else {
+    $script:Results["JAR: relocation check"] = $false
+}
+
+if ($packageSuccess) {
+    Write-Task "Building image: ghcr.io/fortunen/kete/quick-start-keycloak"
+    docker build -q -t ghcr.io/fortunen/kete/quick-start-keycloak -f "quick-starts/`$images/keycloak/Dockerfile" . 2>&1
+    $keycloakSuccess = $LASTEXITCODE -eq 0
+} else {
+    $keycloakSuccess = $false
+}
 
 Write-TaskResult "quick-start-keycloak" $keycloakSuccess
 
