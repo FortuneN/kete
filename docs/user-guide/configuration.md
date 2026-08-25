@@ -41,4 +41,4 @@ kete.routes.<route-name>.<setting>=<value>
 
 ## Best Practice
 
-Use SPI configuration for base/default settings and environment variables for per-environment overrides (dev, staging, production).
+Keep one environment-variable set per deployment (dev, staging, production) — for example a Compose `env_file`, a Kubernetes ConfigMap plus Secret, or a systemd drop-in — and change only the values that differ between environments.

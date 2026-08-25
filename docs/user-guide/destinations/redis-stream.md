@@ -154,7 +154,7 @@ Headers are included as fields in the Redis stream entry.
 | `sentinel-master-id` | _(empty)_ | Sentinel master name (required for `sentinel` mode) | `mymaster` |
 | `cluster-nodes` | _(empty)_ | Comma-separated `host:port` pairs (required for `cluster` mode) | `node1:6379,node2:6379,node3:6379` |
 | `client-name` | `kete` | Client name for connection | `keycloak-events` |
-| `connection-timeout-seconds` | `10` | TCP connect timeout in seconds | `30` |
+| `connection-timeout-seconds` | `10` | TCP connect timeout in seconds (`0` keeps the Lettuce default of 10 seconds) | `30` |
 | `command-timeout-seconds` | `10` | Command timeout in seconds (always applied; bounds each send when a connection dies mid-command) | `30` |
 | `max-len` | `0` | Max stream length (0 = no limit) | `10000` |
 | `approximate-trimming` | `true` | Use `~` for efficient trimming | `false` |
@@ -179,6 +179,7 @@ See [TLS & mTLS](overview.md#tls-mtls) for full details on TLS options.
 | Property | Default | Description |
 |----------|---------|-------------|
 | `tls.enabled` | `false` | Enable TLS (the default port becomes `6380` when enabled) |
+| `tls.verify-hostname` | `false` | `false` validates the server certificate chain against the trust store (CA mode); `true` additionally verifies the hostname (full mode). The certificate is never left unverified. |
 | `tls.key-store.*` | - | Client certificate for mTLS |
 | `tls.trust-store.*` | - | CA certificates |
 

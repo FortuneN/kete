@@ -5,7 +5,6 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Map;
 import java.util.Set;
@@ -63,7 +62,11 @@ public class HttpDestination extends Destination<HttpDestinationConfig> {
 		httpClient = config.getClientBuilder().build();
 		customHeaders = config.getFilteredCustomHeaders();
 
-		// verify connection
+		// verify connection (templated URLs are only known per event)
+
+		if (isUrlTemplated) {
+			return;
+		}
 
 		var testRequest = HttpRequest.newBuilder()
 			.uri(URI.create(config.getScheme() + "://" + config.getHost() + ":" + config.getPort()))

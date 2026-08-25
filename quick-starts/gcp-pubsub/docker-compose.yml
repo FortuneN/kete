@@ -15,4 +15,5 @@ services:
       kete.routes.quick-start.destination.kind: gcp-pubsub
       kete.routes.quick-start.destination.project: ${GCP_PROJECT_ID:-<YOUR-PROJECT-ID>}
       kete.routes.quick-start.destination.topic: keycloak-events
+      kete.routes.quick-start.destination.authentication-type: service-account-file-base64
       kete.routes.quick-start.destination.credentials-file-base64: ${GCP_SA_KEY_BASE64:-<YOUR-BASE64-ENCODED-SERVICE-ACCOUNT-JSON>}

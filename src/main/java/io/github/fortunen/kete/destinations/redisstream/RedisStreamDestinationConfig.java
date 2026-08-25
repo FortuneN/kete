@@ -8,6 +8,7 @@ import io.lettuce.core.ClientOptions;
 import io.lettuce.core.RedisURI;
 import io.lettuce.core.SslOptions;
 import io.lettuce.core.SocketOptions;
+import io.lettuce.core.SslVerifyMode;
 import io.lettuce.core.XAddArgs;
 import io.lettuce.core.cluster.ClusterClientOptions;
 import lombok.Data;
@@ -174,7 +175,7 @@ public class RedisStreamDestinationConfig extends DestinationConfig {
 				}
 				if (tls.isEnabled()) {
 					uriBuilder.withSsl(true);
-					uriBuilder.withVerifyPeer(tls.isVerifyHostname());
+					uriBuilder.withVerifyPeer(tls.isVerifyHostname() ? SslVerifyMode.FULL : SslVerifyMode.CA);
 				}
 
 				redisUri = uriBuilder.build();
@@ -183,7 +184,7 @@ public class RedisStreamDestinationConfig extends DestinationConfig {
 				// buffering until the timeout (route retry and pool replacement handle it)
 
 				var clientOptionsBuilder = ClientOptions.builder().autoReconnect(true).disconnectedBehavior(ClientOptions.DisconnectedBehavior.REJECT_COMMANDS);
-				if (configuration.containsKey(CONNECTION_TIMEOUT_SECONDS)) {
+				if (connectionTimeoutSeconds > 0) {
 					clientOptionsBuilder.socketOptions(SocketOptions.builder().connectTimeout(Duration.ofSeconds(connectionTimeoutSeconds)).build());
 				}
 				if (sslOptions != null) {
@@ -225,7 +226,7 @@ public class RedisStreamDestinationConfig extends DestinationConfig {
 				}
 				if (tls.isEnabled()) {
 					uriBuilder.withSsl(true);
-					uriBuilder.withVerifyPeer(tls.isVerifyHostname());
+					uriBuilder.withVerifyPeer(tls.isVerifyHostname() ? SslVerifyMode.FULL : SslVerifyMode.CA);
 				}
 
 				redisUri = uriBuilder.build();
@@ -234,7 +235,7 @@ public class RedisStreamDestinationConfig extends DestinationConfig {
 				// buffering until the timeout (route retry and pool replacement handle it)
 
 				var clientOptionsBuilder = ClientOptions.builder().autoReconnect(true).disconnectedBehavior(ClientOptions.DisconnectedBehavior.REJECT_COMMANDS);
-				if (configuration.containsKey(CONNECTION_TIMEOUT_SECONDS)) {
+				if (connectionTimeoutSeconds > 0) {
 					clientOptionsBuilder.socketOptions(SocketOptions.builder().connectTimeout(Duration.ofSeconds(connectionTimeoutSeconds)).build());
 				}
 				if (sslOptions != null) {
@@ -267,7 +268,7 @@ public class RedisStreamDestinationConfig extends DestinationConfig {
 					}
 					if (tls.isEnabled()) {
 						nodeUriBuilder.withSsl(true);
-						nodeUriBuilder.withVerifyPeer(tls.isVerifyHostname());
+						nodeUriBuilder.withVerifyPeer(tls.isVerifyHostname() ? SslVerifyMode.FULL : SslVerifyMode.CA);
 					}
 					clusterNodeUris.add(nodeUriBuilder.build());
 				}
@@ -276,7 +277,7 @@ public class RedisStreamDestinationConfig extends DestinationConfig {
 				// buffering until the timeout (route retry and pool replacement handle it)
 
 				var clusterOptionsBuilder = ClusterClientOptions.builder().autoReconnect(true).disconnectedBehavior(ClientOptions.DisconnectedBehavior.REJECT_COMMANDS);
-				if (configuration.containsKey(CONNECTION_TIMEOUT_SECONDS)) {
+				if (connectionTimeoutSeconds > 0) {
 					clusterOptionsBuilder.socketOptions(SocketOptions.builder().connectTimeout(Duration.ofSeconds(connectionTimeoutSeconds)).build());
 				}
 				if (sslOptions != null) {

@@ -3,6 +3,7 @@ package io.github.fortunen.kete.unittests.destinationconfigs.redisstreamdestinat
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -549,6 +550,50 @@ public class initializeTests {
 		// assert
 
 		assertThat(config.getConnectionTimeoutSeconds()).isEqualTo(30);
+	}
+
+	@Test
+	public void shouldApplyConnectionTimeoutAsSocketConnectTimeout() {
+
+		// arrange
+
+		var config = new RedisStreamDestinationConfig();
+		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "redis-stream",
+			"host", "localhost",
+			"stream", "test-stream",
+			"connection-timeout-seconds", "30"
+		)));
+
+		// act
+
+		config.initialize();
+
+		// assert
+
+		assertThat(config.getClientOptions().getSocketOptions().getConnectTimeout()).isEqualTo(Duration.ofSeconds(30));
+	}
+
+	@Test
+	public void shouldKeepDefaultSocketConnectTimeoutWhenConnectionTimeoutIsZero() {
+
+		// arrange
+
+		var config = new RedisStreamDestinationConfig();
+		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "redis-stream",
+			"host", "localhost",
+			"stream", "test-stream",
+			"connection-timeout-seconds", "0"
+		)));
+
+		// act
+
+		config.initialize();
+
+		// assert
+
+		assertThat(config.getClientOptions().getSocketOptions().getConnectTimeout()).isEqualTo(Duration.ofSeconds(10));
 	}
 
 	@Test

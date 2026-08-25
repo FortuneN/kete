@@ -76,10 +76,11 @@ Stream Keycloak events to Kafka-compatible systems.
     kete.routes.msk.destination.bootstrap.servers=broker1.msk.region.amazonaws.com:9094
     kete.routes.msk.destination.topic=keycloak-events
     kete.routes.msk.destination.security.protocol=SASL_SSL
-    kete.routes.msk.destination.sasl.mechanism=AWS_MSK_IAM
-    kete.routes.msk.destination.sasl.jaas.config=software.amazon.msk.auth.iam.IAMLoginModule required;
-    kete.routes.msk.destination.sasl.client.callback.handler.class=software.amazon.msk.auth.iam.IAMClientCallbackHandler
+    kete.routes.msk.destination.sasl.mechanism=SCRAM-SHA-512
+    kete.routes.msk.destination.sasl.jaas.config=org.apache.kafka.common.security.scram.ScramLoginModule required username="keycloak" password="secret";
     ```
+
+    MSK IAM authentication (`AWS_MSK_IAM` with `software.amazon.msk.auth.iam.IAMLoginModule`) is not available: the login module is not bundled and cannot be added from outside because the Kafka client is shaded into the KETE jar. Use SASL/SCRAM or mTLS.
 
 
 

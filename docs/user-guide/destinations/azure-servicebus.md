@@ -238,6 +238,8 @@ kete.routes.env.destination.connection-string=${SERVICEBUS_CONNECTION_STRING}
 kete.routes.env.destination.queue=keycloak-events
 ```
 
+KETE does not expand `${VARIABLE}` references itself — the value must be substituted by whatever sets the environment variable (Docker Compose, Kubernetes, a shell), otherwise the literal text is used.
+
 
 
 ## Quick Starts

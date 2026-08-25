@@ -129,6 +129,27 @@ public class initializeTests {
 	}
 
 	@Test
+	public void shouldParseTemplatedUrl() {
+
+		// arrange
+
+		var config = new WebSocketDestinationConfig();
+		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "websocket",
+			"url", "ws://ws.example.com/events/${realmLowerCase}"
+		)));
+
+		// act
+
+		config.initialize();
+
+		// assert
+
+		assertThat(config.isUrlTemplated()).isTrue();
+		assertThat(config.getHost()).isEqualTo("ws.example.com");
+	}
+
+	@Test
 	public void shouldThrowWhenUrlSchemeIsInvalid() {
 
 		// arrange

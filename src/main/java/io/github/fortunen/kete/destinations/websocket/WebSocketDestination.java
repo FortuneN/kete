@@ -1,7 +1,5 @@
 package io.github.fortunen.kete.destinations.websocket;
 
-import java.net.InetSocketAddress;
-import java.net.Socket;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
@@ -68,14 +66,10 @@ public class WebSocketDestination extends Destination<WebSocketDestinationConfig
 		hasConnectionLostTimeout = config.isHasConnectionLostTimeout();
 		connectionLostTimeoutSeconds = config.getConnectionLostTimeoutSeconds();
 
-		// verify connection
+		// verify connection (templated URLs are only known per event; their clients connect on first use)
 
 		if (!isUrlTemplated) {
 			webSocketClient = createAndConnect(url);
-		} else {
-			try (var socket = new Socket()) {
-				socket.connect(new InetSocketAddress(config.getHost(), config.getPort()), connectionTimeoutSeconds * 1000);
-			}
 		}
 	}
 

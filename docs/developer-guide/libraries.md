@@ -101,8 +101,6 @@ See `pom.xml` → `maven-shade-plugin` → `<relocations>` section. Every runtim
 |---------|---------|---------|
 | `google-api-services-pubsub` | v1-rev20250414-2.0.0 | GCP Pub/Sub REST client |
 | `grpc-google-cloud-tasks-v2` | 2.84.0 | GCP Cloud Tasks gRPC stubs |
-| `grpc-okhttp` | 1.79.0 | gRPC OkHttp transport |
-| `grpc-auth` | 1.79.0 | gRPC authentication |
 | `google-auth-library-oauth2-http` | 1.35.0 | Google OAuth2 credentials |
 
 ### Serialization (Jackson)
@@ -123,14 +121,14 @@ See `pom.xml` → `maven-shade-plugin` → `<relocations>` section. Every runtim
 | Library | Version | Purpose |
 |---------|---------|---------|
 | `avro` | 1.12.0 | Avro serializer (schema-based, `GenericRecord`) |
-| `protobuf-java` | 4.33.2 | Protobuf serializer (`DynamicMessage` from the bundled descriptor set) |
+| `protobuf-java` | 4.33.2 (managed, transitive via gRPC) | Protobuf serializer (`DynamicMessage` from the bundled descriptor set) |
 
 ### gRPC
 
 | Library | Version | Purpose |
 |---------|---------|---------|
-| `grpc-api`, `grpc-core`, `grpc-stub`, `grpc-context`, `grpc-util` | 1.79.0 | gRPC runtime for the gRPC and GCP Cloud Tasks destinations |
-| `grpc-protobuf`, `grpc-protobuf-lite` | 1.79.0 | Protobuf marshalling for gRPC stubs |
+| `grpc-okhttp`, `grpc-auth` (declared) | 1.79.0 | gRPC OkHttp transport and auth for the gRPC and GCP Cloud Tasks destinations |
+| `grpc-api`, `grpc-core`, `grpc-stub`, `grpc-context`, `grpc-util`, `grpc-protobuf`, `grpc-protobuf-lite` (transitive) | 1.79.0 (managed via `grpc-bom`) | gRPC runtime pulled in by the declared gRPC artifacts and the Cloud Tasks stubs |
 
 ### HTTP, OAuth & Resilience
 

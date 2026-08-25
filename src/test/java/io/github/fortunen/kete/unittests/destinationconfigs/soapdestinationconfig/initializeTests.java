@@ -133,6 +133,27 @@ public class initializeTests {
 	}
 
 	@Test
+	public void shouldParseTemplatedUrl() {
+
+		// arrange
+
+		var config = new SoapDestinationConfig();
+		config.setConfiguration(new MapConfiguration(Map.of(
+			"kind", "soap",
+			"url", "https://soap.example.com/events/${realmLowerCase}"
+		)));
+
+		// act
+
+		config.initialize();
+
+		// assert
+
+		assertThat(config.isUrlTemplated()).isTrue();
+		assertThat(config.getHost()).isEqualTo("soap.example.com");
+	}
+
+	@Test
 	public void shouldParseUrlWithQueryString() {
 
 		// arrange

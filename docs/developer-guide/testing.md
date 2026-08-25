@@ -39,7 +39,7 @@ See [Integration Tests](integration-tests.md) for the conventions.
 ### End-to-End Tests
 
 **Location:** `src/test/java/io/github/fortunen/kete/endtoendtests/`  
-**Purpose:** Full pipeline — the shaded `target/kete.jar` is deployed into a real Keycloak container (`quay.io/keycloak/keycloak:26.0.0`), a login is triggered through the admin client, and the event is read back from the destination container  
+**Purpose:** Full pipeline — the shaded `target/kete.jar` is deployed into a real Keycloak container (`quay.io/keycloak/keycloak:26.0.0`), a user login is triggered (password grant through the Keycloak admin-client library), and the event is read back from the destination container  
 **Uses:** `KeycloakContainer` (`testcontainers-keycloak`) + broker/emulator containers on a shared network; the jar is built on demand with `mvn package -DskipTests` if missing
 
 **Run:**

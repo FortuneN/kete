@@ -97,6 +97,10 @@ public final class TemplateUtils {
 		});
 	}
 
+	public static String maskTemplates(String value) {
+		return ValidationUtils.isNull(value) ? null : value.replaceAll("\\$\\{[^}]*\\}", "template");
+	}
+
 	public static boolean containsTemplate(String value) {
 		return value != null && value.contains("${");
 	}

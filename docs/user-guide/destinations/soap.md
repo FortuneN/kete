@@ -60,7 +60,7 @@ Stream Keycloak events to SOAP/XML web services.
 - OAuth 2.0, Basic, API Key, and X-API-Key authentication
 - Custom headers support
 - Content encoding (gzip) and content transfer encoding (base64)
-- Start-up connectivity check: a `GET` to the URL's scheme, host and port root; an unreachable host fails route initialization
+- Start-up connectivity check: a `GET` to the URL's scheme, host and port root; an unreachable host fails route initialization (skipped when `url` is templated, because the real URL is only known per event)
 - TLS/mTLS support
 - Configurable timeouts
 

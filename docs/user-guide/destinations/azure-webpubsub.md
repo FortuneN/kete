@@ -191,6 +191,8 @@ kete.routes.env.destination.connection-string=${AZURE_WEBPUBSUB_CONNECTION_STRIN
 kete.routes.env.destination.hub=keycloak-events
 ```
 
+KETE does not expand `${VARIABLE}` references itself — the value must be substituted by whatever sets the environment variable (Docker Compose, Kubernetes, a shell), otherwise the literal text is used.
+
 
 
 ## Quick Starts
