@@ -198,7 +198,7 @@ Use an external OAuth 2.0 authorization server:
 
 #### Internal Mode
 
-Use the current Keycloak instance as the OAuth server. This mode **automatically registers a service account client** in Keycloak during initialization - the simplest setup possible:
+Use the current Keycloak instance as the OAuth server. This mode **automatically registers a service account client** in Keycloak during initialization (when no `oauth.client-secret` is configured) - the simplest setup possible:
 
 | Property | Required | Default | Description |
 |----------|----------|---------|-------------|
@@ -207,7 +207,7 @@ Use the current Keycloak instance as the OAuth server. This mode **automatically
 | `destination.oauth.realm` | Yes | - | Realm that hosts the auto-registered client and issues the tokens |
 | `destination.oauth.token-url` | No | `http://localhost:8080/realms/<realm>/protocol/openid-connect/token` | Token endpoint (override when Keycloak is not reachable on `localhost:8080`) |
 | `destination.oauth.client-id` | No | `kete-oauth-client` | Override auto-generated client ID |
-| `destination.oauth.client-secret` | No | Auto-generated | Override auto-generated secret |
+| `destination.oauth.client-secret` | No | Auto-generated | Provide the secret of an existing client; when set, KETE does not register a client and the client must already exist |
 | `destination.oauth.scope` | No | `""` | Requested OAuth scopes |
 
 **Internal Mode Example:**
@@ -222,7 +222,7 @@ kete.routes.api.destination.oauth.realm=master
 
 This automatically:
 
-1. Creates a confidential client `kete-oauth-client` in the `oauth.realm` realm
+1. Creates (or reuses) a confidential client `kete-oauth-client` in the `oauth.realm` realm
 2. Enables service account (client credentials grant)
 3. Generates a secure client secret
 4. Configures the token URL for the realm

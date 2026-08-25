@@ -241,7 +241,6 @@ Header names are **all lowercase with no dashes or underscores** for maximum com
 Most destinations support TLS encryption via the standard `tls.*` configuration properties. Exceptions:
 
 - **Azure Event Hubs** and **Azure Service Bus** — TLS is handled internally by the Azure SDK (always enabled, no `tls.*` config needed)
-- **Azure Event Grid**, **Azure Storage Queue** and **Azure Web PubSub** — the Azure SDK client uses the JVM default trust store; `tls.*` only affects the start-up connectivity check
 - **ZeroMQ** — uses CurveZMQ for encryption instead of TLS (see [ZeroMQ](zeromq.md))
 
 ### TLS Properties Reference

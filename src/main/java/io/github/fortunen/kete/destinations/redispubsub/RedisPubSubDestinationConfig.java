@@ -158,7 +158,7 @@ public class RedisPubSubDestinationConfig extends DestinationConfig {
 				// buffering until the timeout (route retry and pool replacement handle it)
 
 				var clientOptionsBuilder = ClientOptions.builder().autoReconnect(true).disconnectedBehavior(ClientOptions.DisconnectedBehavior.REJECT_COMMANDS);
-				if (configuration.containsKey(CONNECTION_TIMEOUT_SECONDS)) {
+				if (connectionTimeoutSeconds > 0) {
 					clientOptionsBuilder.socketOptions(SocketOptions.builder().connectTimeout(Duration.ofSeconds(connectionTimeoutSeconds)).build());
 				}
 				if (sslOptions != null) {
@@ -209,7 +209,7 @@ public class RedisPubSubDestinationConfig extends DestinationConfig {
 				// buffering until the timeout (route retry and pool replacement handle it)
 
 				var clientOptionsBuilder = ClientOptions.builder().autoReconnect(true).disconnectedBehavior(ClientOptions.DisconnectedBehavior.REJECT_COMMANDS);
-				if (configuration.containsKey(CONNECTION_TIMEOUT_SECONDS)) {
+				if (connectionTimeoutSeconds > 0) {
 					clientOptionsBuilder.socketOptions(SocketOptions.builder().connectTimeout(Duration.ofSeconds(connectionTimeoutSeconds)).build());
 				}
 				if (sslOptions != null) {
@@ -251,7 +251,7 @@ public class RedisPubSubDestinationConfig extends DestinationConfig {
 				// buffering until the timeout (route retry and pool replacement handle it)
 
 				var clusterOptionsBuilder = ClusterClientOptions.builder().autoReconnect(true).disconnectedBehavior(ClientOptions.DisconnectedBehavior.REJECT_COMMANDS);
-				if (configuration.containsKey(CONNECTION_TIMEOUT_SECONDS)) {
+				if (connectionTimeoutSeconds > 0) {
 					clusterOptionsBuilder.socketOptions(SocketOptions.builder().connectTimeout(Duration.ofSeconds(connectionTimeoutSeconds)).build());
 				}
 				if (sslOptions != null) {

@@ -50,7 +50,7 @@ kete.routes.api.destination.oauth.client-secret=my-secret
 
 ### Internal Mode
 
-Uses the current Keycloak instance as the authorization server. During initialization KETE registers a confidential client with service accounts enabled in the configured realm (or reuses it if it already exists).
+Uses the current Keycloak instance as the authorization server. When no `oauth.client-secret` is configured, KETE registers a confidential client with service accounts enabled in the configured realm during initialization (or reuses it if it already exists). When you provide `oauth.client-secret`, no registration takes place — the client must already exist in the realm.
 
 | Property | Required | Default | Description |
 |----------|----------|---------|-------------|
@@ -71,12 +71,12 @@ kete.routes.api.destination.oauth.realm=master
 
 This automatically:
 
-1. Creates (or reuses) the confidential client `kete-oauth-client` in the `oauth.realm` realm
-2. Enables its service account (client credentials grant)
-3. Generates a client secret unless `oauth.client-secret` is set
+1. Generates a client secret (UUID)
+2. Creates the confidential client `kete-oauth-client` in the `oauth.realm` realm with that secret, or reuses the client if it already exists
+3. Enables its service account (client credentials grant)
 4. Derives the token URL for the realm unless `oauth.token-url` is set
 
-If the realm does not exist, or client registration fails, a warning is logged and the route fails to initialize.
+If the realm does not exist, or client registration fails, a `WARN` is logged and the route still starts; every token request then fails at send time (`OAuth token request failed: …`), which surfaces as delivery failures for that route.
 
 
 
