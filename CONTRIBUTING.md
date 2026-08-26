@@ -31,6 +31,6 @@ Documentation must build strictly (`python -m mkdocs build --strict`) and the sh
 
 ## Pull requests
 
-- `develop` and `release` are protected: contributions arrive through pull requests with one approving review, and force-pushes to `release` are refused. Target `develop`; the `Build & Test` workflow (unit, integration and end-to-end suites, image build, strict docs build) runs on every pull request and must pass before the merge.
-- Keep the change focused; update the documentation page of every option or behaviour you touch.
-- Releases are cut by merging `develop` into `release` with a merge commit; the release workflow refuses to publish a tree that has not passed the Develop workflow.
+- `develop` and `release` are protected, for administrators too: nothing is pushed to them directly, force-pushes are refused, and a pull request into `develop` merges only once the `Build & Test` check (unit, integration and end-to-end suites, image build, strict docs build) has passed on its head commit.
+- Target `develop`. Keep the change focused; update the documentation page of every option or behaviour you touch.
+- Releases are cut with a pull request from `develop` into `release`, merged with a merge commit; the release workflow refuses to publish a tree that has not passed the Develop workflow.

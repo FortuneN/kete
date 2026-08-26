@@ -756,12 +756,14 @@ git push origin feature/my-new-feature
 
 ### Protected Branches
 
+`develop` and `release` accept changes only through pull requests; the rules apply to administrators as well.
+
 | Branch | Rules |
 |--------|-------|
-| `develop` | Contributions arrive through a pull request with one approving review; the `Build & Test` workflow runs on every pull request and must be green before the merge; repository administrators may push directly |
-| `release` | Pull request with one approving review for contributors, force-pushes refused; repository administrators merge `develop` into `release` directly; the release workflow's `Verify Develop Run` job refuses a tree that never passed the Develop workflow |
+| `develop` | Pull request required (no approval count — the project has one maintainer and GitHub does not let authors approve their own pull requests); the `Build & Test` check must pass on the head commit; force-pushes and deletion refused |
+| `release` | Pull request required, merged with a merge commit only; force-pushes refused; the release workflow's `Verify Develop Run` job refuses a tree that never passed the Develop workflow |
 
-To release, merge `develop` into `release` with a merge commit (`git merge --no-ff develop`) and push; the push to `release` starts the release workflow, which publishes the versioned images, the documentation, the tag and the GitHub release, and moves `:latest` last.
+To release, wait for the Develop workflow to pass on the `develop` head, open a pull request from `develop` into `release` and merge it (`gh pr merge --merge`); the resulting push to `release` starts the release workflow, which publishes the versioned images, the documentation, the tag and the GitHub release, and moves `:latest` last.
 
 ### Commit Message Format
 
