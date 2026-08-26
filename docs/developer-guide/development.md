@@ -754,6 +754,15 @@ git push origin feature/my-new-feature
 - **Clean history**: Squash commits if needed
 - **Descriptive title**: "Add SQS destination" not "Update"
 
+### Protected Branches
+
+| Branch | Rules |
+|--------|-------|
+| `develop` | Contributions arrive through a pull request with one approving review; the `Build & Test` workflow runs on every pull request and must be green before the merge; repository administrators may push directly |
+| `release` | Pull request with one approving review for contributors, force-pushes refused; repository administrators merge `develop` into `release` directly; the release workflow's `Verify Develop Run` job refuses a tree that never passed the Develop workflow |
+
+To release, merge `develop` into `release` with a merge commit (`git merge --no-ff develop`) and push; the push to `release` starts the release workflow, which publishes the versioned images, the documentation, the tag and the GitHub release, and moves `:latest` last.
+
 ### Commit Message Format
 
 ```
