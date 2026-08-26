@@ -1,5 +1,6 @@
 package io.github.fortunen.kete.destinations.nats;
 
+import io.github.fortunen.kete.utils.NatsUtils;
 import io.github.fortunen.kete.Constants;
 import io.github.fortunen.kete.DestinationConfig;
 import io.github.fortunen.kete.NatsAuthMaterial;
@@ -11,8 +12,6 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
 
-import java.time.Duration;
-import java.util.Arrays;
 
 @Data
 @NoArgsConstructor(force = true)
@@ -44,7 +43,7 @@ public class NatsDestinationConfig extends DestinationConfig {
 
 		// servers
 
-		servers = Arrays.stream(ValidationUtils.requireNonBlank(configuration.getString(SERVERS, "").trim(), SERVERS + " is required").split(",")).map(String::trim).filter(ValidationUtils::isNotBlank).toArray(String[]::new);
+		servers = NatsUtils.parseServers(ValidationUtils.requireNonBlank(configuration.getString(SERVERS, "").trim(), SERVERS + " is required"));
 
 		// subject
 
@@ -73,20 +72,7 @@ public class NatsDestinationConfig extends DestinationConfig {
 
 		// natsOptions
 
-		// reconnectBufferSize(0): publishes during a reconnect fail fast instead of silently
-		// buffering into the client (route retry and pool replacement handle the failure)
-
-		var builder = new Options.Builder()
-			.servers(servers)
-			.connectionTimeout(Duration.ofSeconds(connectionTimeoutSeconds))
-			.pingInterval(Duration.ofSeconds(pingIntervalSeconds))
-			.connectionName(connectionName)
-			.maxReconnects(-1)
-			.reconnectBufferSize(0);
-
-		if (tls.isEnabled()) {
-			builder.sslContext(tls.isVerifyHostname() ? tls.getHostnameVerifyingSSLContext() : tls.getKeyStoreAndTrustStoreSSLContext());
-		}
+		var builder = NatsUtils.createOptionsBuilder(servers, connectionTimeoutSeconds, pingIntervalSeconds, connectionName, tls);
 
 		authMaterial.applyTo(builder);
 

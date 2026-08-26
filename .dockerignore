@@ -1,0 +1,6 @@
+# The quick-start Keycloak image is built with the repository root as context and
+# only needs the packaged provider jar (mvn package -DskipTests) — nothing else is sent to the daemon.
+*
+!target/
+target/*
+!target/kete.jar

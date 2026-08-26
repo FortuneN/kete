@@ -1,13 +1,12 @@
 package io.github.fortunen.kete.destinations.redisstream;
 
+import io.github.fortunen.kete.utils.RedisUtils;
 import io.github.fortunen.kete.Constants;
 import io.github.fortunen.kete.DestinationConfig;
 import io.github.fortunen.kete.utils.TemplateUtils;
 import io.github.fortunen.kete.utils.ValidationUtils;
 import io.lettuce.core.ClientOptions;
 import io.lettuce.core.RedisURI;
-import io.lettuce.core.SslOptions;
-import io.lettuce.core.SocketOptions;
 import io.lettuce.core.XAddArgs;
 import io.lettuce.core.cluster.ClusterClientOptions;
 import lombok.Data;
@@ -16,8 +15,6 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 import lombok.SneakyThrows;
 
-import java.time.Duration;
-import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -139,154 +136,28 @@ public class RedisStreamDestinationConfig extends DestinationConfig {
 			}
 		}
 
-		// SSL options (shared across modes)
-
-		SslOptions sslOptions = null;
-		if (tls.isEnabled()) {
-			sslOptions = SslOptions.builder()
-				.jdkSslProvider()
-				.trustManager(tls.getTrustManagerFactory())
-				.keyManager(tls.getKeyManagerFactory())
-				.build();
-		}
-
 		// mode-specific initialization
 
-		switch (mode) {
-			case "standalone" -> {
+		var settings = new RedisUtils.Settings(host, port, database, configuration.containsKey(DATABASE), username, password, clientName, commandTimeoutSeconds, connectionTimeoutSeconds);
+
+		var material = switch (mode) {
+			case RedisUtils.MODE_STANDALONE -> {
 				ValidationUtils.requireNonBlank(host, HOST + " is required for standalone mode");
-
-				var uriBuilder = RedisURI.builder()
-					.withHost(host)
-					.withPort(port)
-					.withClientName(clientName);
-
-				if (configuration.containsKey(DATABASE)) {
-					uriBuilder.withDatabase(database);
-				}
-				// always bound commands; the lettuce default (60s) turns a dead connection
-				// into a minute-long stall per send
-				uriBuilder.withTimeout(Duration.ofSeconds(commandTimeoutSeconds));
-				if (ValidationUtils.isNotBlank(password)) {
-					if (ValidationUtils.isNotBlank(username)) {
-						uriBuilder.withAuthentication(username, password.toCharArray());
-					} else {
-						uriBuilder.withPassword(password.toCharArray());
-					}
-				}
-				if (tls.isEnabled()) {
-					uriBuilder.withSsl(true);
-					uriBuilder.withVerifyPeer(tls.isVerifyHostname());
-				}
-
-				redisUri = uriBuilder.build();
-
-				// REJECT_COMMANDS: commands issued while disconnected fail fast instead of
-				// buffering until the timeout (route retry and pool replacement handle it)
-
-				var clientOptionsBuilder = ClientOptions.builder().autoReconnect(true).disconnectedBehavior(ClientOptions.DisconnectedBehavior.REJECT_COMMANDS);
-				if (connectionTimeoutSeconds > 0) {
-					clientOptionsBuilder.socketOptions(SocketOptions.builder().connectTimeout(Duration.ofSeconds(connectionTimeoutSeconds)).build());
-				}
-				if (sslOptions != null) {
-					clientOptionsBuilder.sslOptions(sslOptions);
-				}
-				clientOptions = clientOptionsBuilder.build();
+				yield RedisUtils.createStandalone(settings, tls);
 			}
-			case "sentinel" -> {
-				var sentinelMasterId = ValidationUtils.requireNonBlank(configuration.getString(SENTINEL_MASTER_ID, "").trim(), SENTINEL_MASTER_ID + " is required for sentinel mode");
-				var sentinelNodesStr = ValidationUtils.requireNonBlank(configuration.getString(SENTINEL_NODES, "").trim(), SENTINEL_NODES + " is required for sentinel mode");
-
-				var sentinelNodes = sentinelNodesStr.split(",");
-				var firstNode = sentinelNodes[0].trim().split(":");
-				var sentinelHost = firstNode[0];
-				var sentinelPort = firstNode.length > 1 ? Integer.parseInt(firstNode[1]) : 26379;
-
-				var uriBuilder = RedisURI.Builder.sentinel(sentinelHost, sentinelPort, sentinelMasterId);
-
-				for (var i = 1; i < sentinelNodes.length; i++) {
-					var parts = sentinelNodes[i].trim().split(":");
-					var sHost = parts[0];
-					var sPort = parts.length > 1 ? Integer.parseInt(parts[1]) : 26379;
-					uriBuilder.withSentinel(sHost, sPort);
-				}
-
-				uriBuilder.withClientName(clientName);
-				if (configuration.containsKey(DATABASE)) {
-					uriBuilder.withDatabase(database);
-				}
-				// always bound commands; the lettuce default (60s) turns a dead connection
-				// into a minute-long stall per send
-				uriBuilder.withTimeout(Duration.ofSeconds(commandTimeoutSeconds));
-				if (ValidationUtils.isNotBlank(password)) {
-					if (ValidationUtils.isNotBlank(username)) {
-						uriBuilder.withAuthentication(username, password.toCharArray());
-					} else {
-						uriBuilder.withPassword(password.toCharArray());
-					}
-				}
-				if (tls.isEnabled()) {
-					uriBuilder.withSsl(true);
-					uriBuilder.withVerifyPeer(tls.isVerifyHostname());
-				}
-
-				redisUri = uriBuilder.build();
-
-				// REJECT_COMMANDS: commands issued while disconnected fail fast instead of
-				// buffering until the timeout (route retry and pool replacement handle it)
-
-				var clientOptionsBuilder = ClientOptions.builder().autoReconnect(true).disconnectedBehavior(ClientOptions.DisconnectedBehavior.REJECT_COMMANDS);
-				if (connectionTimeoutSeconds > 0) {
-					clientOptionsBuilder.socketOptions(SocketOptions.builder().connectTimeout(Duration.ofSeconds(connectionTimeoutSeconds)).build());
-				}
-				if (sslOptions != null) {
-					clientOptionsBuilder.sslOptions(sslOptions);
-				}
-				clientOptions = clientOptionsBuilder.build();
-			}
-			case "cluster" -> {
-				var clusterNodesStr = ValidationUtils.requireNonBlank(configuration.getString(CLUSTER_NODES, "").trim(), CLUSTER_NODES + " is required for cluster mode");
-				var nodeEntries = clusterNodesStr.split(",");
-
-				clusterNodeUris = new ArrayList<>();
-				for (var entry : nodeEntries) {
-					var parts = entry.trim().split(":");
-					var nodeHost = parts[0];
-					var nodePort = parts.length > 1 ? Integer.parseInt(parts[1]) : port;
-
-					var nodeUriBuilder = RedisURI.builder()
-						.withHost(nodeHost)
-						.withPort(nodePort)
-						.withClientName(clientName)
-						.withTimeout(Duration.ofSeconds(commandTimeoutSeconds));
-
-					if (ValidationUtils.isNotBlank(password)) {
-						if (ValidationUtils.isNotBlank(username)) {
-							nodeUriBuilder.withAuthentication(username, password.toCharArray());
-						} else {
-							nodeUriBuilder.withPassword(password.toCharArray());
-						}
-					}
-					if (tls.isEnabled()) {
-						nodeUriBuilder.withSsl(true);
-						nodeUriBuilder.withVerifyPeer(tls.isVerifyHostname());
-					}
-					clusterNodeUris.add(nodeUriBuilder.build());
-				}
-
-				// REJECT_COMMANDS: commands issued while disconnected fail fast instead of
-				// buffering until the timeout (route retry and pool replacement handle it)
-
-				var clusterOptionsBuilder = ClusterClientOptions.builder().autoReconnect(true).disconnectedBehavior(ClientOptions.DisconnectedBehavior.REJECT_COMMANDS);
-				if (connectionTimeoutSeconds > 0) {
-					clusterOptionsBuilder.socketOptions(SocketOptions.builder().connectTimeout(Duration.ofSeconds(connectionTimeoutSeconds)).build());
-				}
-				if (sslOptions != null) {
-					clusterOptionsBuilder.sslOptions(sslOptions);
-				}
-				clusterClientOptions = clusterOptionsBuilder.build();
-			}
+			case RedisUtils.MODE_SENTINEL -> RedisUtils.createSentinel(settings,
+				ValidationUtils.requireNonBlank(configuration.getString(SENTINEL_MASTER_ID, "").trim(), SENTINEL_MASTER_ID + " is required for sentinel mode"),
+				ValidationUtils.requireNonBlank(configuration.getString(SENTINEL_NODES, "").trim(), SENTINEL_NODES + " is required for sentinel mode"),
+				tls);
+			case RedisUtils.MODE_CLUSTER -> RedisUtils.createCluster(settings,
+				ValidationUtils.requireNonBlank(configuration.getString(CLUSTER_NODES, "").trim(), CLUSTER_NODES + " is required for cluster mode"),
+				tls);
 			default -> throw new IllegalStateException("unsupported " + MODE + ": '" + mode + "' — valid options: standalone, sentinel, cluster");
-		}
+		};
+
+		redisUri = material.redisUri();
+		clientOptions = material.clientOptions();
+		clusterNodeUris = material.clusterNodeUris();
+		clusterClientOptions = material.clusterClientOptions();
 	}
 }

@@ -49,7 +49,8 @@ public abstract class EndToEndTestBase {
 		ensureShadedJarBuilt();
 	}
 
-	protected static final String KEYCLOAK_IMAGE = "quay.io/keycloak/keycloak:26.0.0";
+	// -Dkeycloak.version=26.7.2 runs the suite against another Keycloak release
+	protected static final String KEYCLOAK_IMAGE = "quay.io/keycloak/keycloak:" + System.getProperty("keycloak.version", "26.0.0");
 	protected static final String TEST_REALM = "test-realm";
 	protected static final String TEST_USER = "test-user";
 	protected static final String TEST_PASSWORD = "test-password";

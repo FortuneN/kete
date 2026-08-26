@@ -133,7 +133,7 @@ Instead of `url`, you can configure each component separately:
 | `destination.content-transfer-encoding` | _(empty)_ | Encode body (e.g., `base64`). Sets `Content-Transfer-Encoding` header. | `base64` |
 | `destination.pool.min-idle` | `1` | Minimum idle connections in pool | `5` |
 | `destination.pool.max-idle` | `10` | Maximum idle connections in pool | `20` |
-| `destination.pool.max-total` | `20` | Maximum total connections in pool | `50` |
+| `destination.pool.max-total` | `20` | Maximum total instances in the pool — each one is a full `HttpClient` with its own selector thread and connection pool; it multiplexes, so `2`–`4` is plenty | `4` |
 
 ### Custom Headers
 

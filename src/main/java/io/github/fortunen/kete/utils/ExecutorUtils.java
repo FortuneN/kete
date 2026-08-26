@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
@@ -24,6 +25,13 @@ public final class ExecutorUtils {
 		// pre java 21
 
 		// return Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() * 2);
+	}
+
+	public static ScheduledExecutorService createScheduler(String name) {
+
+		ValidationUtils.requireNonBlank(name, "name is required");
+
+		return Executors.newSingleThreadScheduledExecutor(Thread.ofVirtual().name(name).factory());
 	}
 
 	public static <T> void forEach(ExecutorService executor, Collection<T> items, Consumer<T> action) {

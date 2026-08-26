@@ -1,5 +1,6 @@
 package io.github.fortunen.kete.destinations.azurestoragequeue;
 
+import java.nio.charset.StandardCharsets;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -84,10 +85,12 @@ public class AzureStorageQueueDestination extends Destination<AzureStorageQueueD
 
 		var payload = encodePayload(message.eventBody());
 
+		var body = new String(payload, StandardCharsets.UTF_8);
+
 		if (ValidationUtils.isNotNull(messageTtl)) {
-			client.sendMessageWithResponse(new String(payload), null, messageTtl, timeout, Context.NONE);
+			client.sendMessageWithResponse(body, null, messageTtl, timeout, Context.NONE);
 		} else {
-			client.sendMessage(new String(payload));
+			client.sendMessage(body);
 		}
 	}
 

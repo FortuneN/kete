@@ -1,18 +1,9 @@
 # -----------------------------------------------------------------------------
-# Stage 1: Build KETE JAR from source
-# -----------------------------------------------------------------------------
-
-FROM maven:3.9.9-eclipse-temurin-21-noble AS maven-build
-
-WORKDIR /src
-COPY pom.xml .
-RUN mvn clean
-RUN mvn -q -DskipTests dependency:go-offline
-COPY . .
-RUN mvn -B -DskipTests package
-
-# -----------------------------------------------------------------------------
-# Stage 2: Build Keycloak with KETE provider
+# Stage 1: Build Keycloak with the packaged KETE provider
+#
+# Expects target/kete.jar in the build context (the repository root): run
+# `mvn package -DskipTests` first. The image therefore ships exactly the jar
+# that was tested and released instead of a second build from source.
 # -----------------------------------------------------------------------------
 
 FROM quay.io/keycloak/keycloak:26.0.7 AS keycloak-build
@@ -21,11 +12,11 @@ FROM quay.io/keycloak/keycloak:26.0.7 AS keycloak-build
 ENV KC_HEALTH_ENABLED=true
 ENV KC_METRICS_ENABLED=true
 
-COPY --from=maven-build --chown=keycloak:keycloak /src/target/kete.jar /opt/keycloak/providers/kete.jar
+COPY --chown=keycloak:keycloak target/kete.jar /opt/keycloak/providers/kete.jar
 RUN /opt/keycloak/bin/kc.sh build --health-enabled=true --metrics-enabled=true
 
 # -----------------------------------------------------------------------------
-# Stage 3: Final image
+# Stage 2: Final image
 # -----------------------------------------------------------------------------
 
 FROM quay.io/keycloak/keycloak:26.0.7 AS final

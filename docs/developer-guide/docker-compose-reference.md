@@ -135,9 +135,7 @@ All Docker images are built from Dockerfiles in `quick-starts/$images/`:
 | `quick-start-socketio-echo` | `quick-starts/$images/socketio-echo/Dockerfile` | Socket.IO echo server (Node.js) |
 | `quick-start-websocket-echo` | `quick-starts/$images/websocket-echo/Dockerfile` | WebSocket echo server |
 
-The `quick-starts/$images/artemis/` directory is an unused remnant — quickstarts use `activemq-artemis` instead.
-
-The keycloak image uses the root project directory as its build context (to include the built JAR), while all other images use their own `$images/<name>/` directory.
+The keycloak image uses the root project directory as its build context (its Dockerfile copies the packaged `target/kete.jar`; the root `.dockerignore` sends nothing else), while all other images use their own `$images/<name>/` directory.
 
 
 

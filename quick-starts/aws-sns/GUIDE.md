@@ -88,7 +88,7 @@ Edit `.env` and fill in your values.
 ## Running
 
 ```bash
-docker-compose up -d
+docker compose up -d
 ```
 
 ## Testing
@@ -113,7 +113,7 @@ Or check your email if you subscribed via email.
 ### Check Keycloak Logs
 
 ```bash
-docker-compose logs keycloak
+docker compose logs keycloak
 ```
 
 ### Common Issues
@@ -128,7 +128,7 @@ docker-compose logs keycloak
 ## Cleanup
 
 ```bash
-docker-compose down
+docker compose down
 
 # Remove AWS resources (optional)
 aws sns delete-topic --topic-arn arn:aws:sns:us-east-1:<account-id>:keycloak-events

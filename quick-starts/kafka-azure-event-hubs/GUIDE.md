@@ -85,7 +85,7 @@ environment:
 ## Running
 
 ```bash
-docker-compose up -d
+docker compose up -d
 ```
 
 ## Testing
@@ -131,7 +131,7 @@ kafka-console-consumer.sh \
 ### Check Keycloak Logs
 
 ```bash
-docker-compose logs keycloak
+docker compose logs keycloak
 ```
 
 Look for:
@@ -160,7 +160,7 @@ az eventhubs namespace show \
 ## Cleanup
 
 ```bash
-docker-compose down
+docker compose down
 
 # Remove Azure resources (optional)
 az group delete --name keycloak-events-rg --yes

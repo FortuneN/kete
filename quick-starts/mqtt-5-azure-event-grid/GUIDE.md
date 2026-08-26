@@ -157,7 +157,7 @@ mqtt-5-azure-event-grid/
 ## Running
 
 ```bash
-docker-compose up -d
+docker compose up -d
 ```
 
 ## Testing
@@ -196,7 +196,7 @@ mosquitto_sub \
 ### Check Keycloak Logs
 
 ```bash
-docker-compose logs keycloak
+docker compose logs keycloak
 ```
 
 Look for:
@@ -223,7 +223,7 @@ openssl x509 -in certs/client.crt -noout -fingerprint -sha256
 ## Cleanup
 
 ```bash
-docker-compose down
+docker compose down
 
 # Remove Azure resources (optional)
 az group delete --name keycloak-events-rg --yes

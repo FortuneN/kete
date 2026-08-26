@@ -29,11 +29,11 @@ Each suite must pass before the next one starts. All suites use `-Dsurefire.skip
 ```
   ✓ ALL TESTS PASSED!
 
-  Unit tests:        12.3s
-  Integration tests: 145.7s
-  End-to-end tests:  89.4s
+  Unit tests:        101s
+  Integration tests: 2123.7s
+  End-to-end tests:  1503.7s
   ─────────────────────────────
-  Total:             247.4s
+  Total:             3728.4s
 ```
 
 ## Exit Code

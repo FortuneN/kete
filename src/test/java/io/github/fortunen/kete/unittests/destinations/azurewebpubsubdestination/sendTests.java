@@ -2,6 +2,7 @@ package io.github.fortunen.kete.unittests.destinations.azurewebpubsubdestination
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -12,6 +13,8 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import com.azure.core.http.rest.RequestOptions;
+import com.azure.core.util.BinaryData;
 import com.azure.messaging.webpubsub.WebPubSubServiceClient;
 import com.azure.messaging.webpubsub.models.WebPubSubContentType;
 
@@ -33,6 +36,31 @@ public class sendTests {
 	@AfterAll
 	static void tearDown() {
 		ValidationUtils.tryClose(destination, "destination");
+	}
+
+	@Test
+	public void shouldSendBinaryPayloadAsBinaryMessage() {
+
+		// arrange
+
+		var webPubSubClient = mock(WebPubSubServiceClient.class);
+		destination.setConfig(mock(AzureWebPubSubDestinationConfig.class));
+		destination.setWebPubSubClient(webPubSubClient);
+		destination.setHub("test_hub");
+		destination.setHasGroup(false);
+		destination.setHubTemplated(false);
+		destination.setGroupTemplated(false);
+
+		var body = new byte[] { 0, (byte) 0xFF, 1, 2, 3 };
+		var message = new EventMessage("test-realm", "evt-002", body, "LOGIN", "application/x-protobuf", null, Constants.EVENT, null, null);
+
+		// act
+
+		destination.doSend(message);
+
+		// assert
+
+		verify(webPubSubClient).sendToAllWithResponse(any(BinaryData.class), eq(WebPubSubContentType.APPLICATION_OCTET_STREAM), eq(5L), any(RequestOptions.class));
 	}
 
 	@Test

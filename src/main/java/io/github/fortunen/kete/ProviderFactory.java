@@ -1,12 +1,16 @@
 package io.github.fortunen.kete;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -32,6 +36,7 @@ import org.keycloak.provider.ProviderEventListener;
 import io.github.fortunen.kete.utils.ConfigurationUtils;
 import io.github.fortunen.kete.utils.ExecutorUtils;
 import io.github.fortunen.kete.utils.JsonUtils;
+import io.github.fortunen.kete.utils.LogThrottle;
 import io.github.fortunen.kete.utils.MetricsUtils;
 import io.github.fortunen.kete.utils.ValidationUtils;
 import lombok.Data;
@@ -42,13 +47,19 @@ import lombok.extern.slf4j.Slf4j;
 public class ProviderFactory implements EventListenerProviderFactory, ProviderEventListener, KeycloakSessionTask, BiConsumer<AdminEvent, Boolean>, Consumer<Event> {
 
 	private static final Set<String> ALL_EVENT_TYPES = Arrays.stream(EventType.values()).map(EventType::name).collect(Collectors.toSet());
+	private static final Duration INITIAL_INITIALIZATION_RETRY_DELAY = Duration.ofSeconds(30);
+	private static final Duration MAX_INITIALIZATION_RETRY_DELAY = Duration.ofMinutes(5);
 
 	private Scope scope;
 	private Configuration configuration;
-	private SerializerRoutes[] serializersWithRoutes;
+	private volatile SerializerRoutes[] serializersWithRoutes;
 	private KeycloakSessionFactory postInitSessionFactory;
 	private Map<String, String> environment = System.getenv();
 	private ExecutorService eventExecutor = ExecutorUtils.createService();
+	private final LogThrottle failureLogThrottle = new LogThrottle(Duration.ofMinutes(1));
+	private final AtomicInteger unrecoverableRoutes = new AtomicInteger();
+	private final List<Route> pendingRoutes = new CopyOnWriteArrayList<>();
+	private final ScheduledExecutorService initializationRetryScheduler = ExecutorUtils.createScheduler(Constants.ID + "-initialization-retry");
 
 	@Override
 	public String getId() { return Constants.ID; }
@@ -125,7 +136,6 @@ public class ProviderFactory implements EventListenerProviderFactory, ProviderEv
 		// routes
 
 		var routes = configuration.getRoutes();
-		var failedRoutes = new AtomicInteger();
 		var configuredRoutes = new ArrayList<Route>();
 		var serializersWithRoutesMap = new ConcurrentHashMap<Serializer, List<Route>>();
 
@@ -141,7 +151,7 @@ public class ProviderFactory implements EventListenerProviderFactory, ProviderEv
 
 				} catch (Exception exception) {
 
-					failedRoutes.incrementAndGet();
+					unrecoverableRoutes.incrementAndGet();
 					log.warn("Failed to initialize route : " + route.getName(), exception);
 					ValidationUtils.tryClose(route, "route : " + route.getName());
 
@@ -156,6 +166,7 @@ public class ProviderFactory implements EventListenerProviderFactory, ProviderEv
 					route.initializeDestinations();
 
 					MetricsUtils.registerPoolMetrics(route.getName(), route.getDestinationPool());
+					MetricsUtils.registerInFlight(route.getName(), route.getInFlight());
 
 					var serializer = route.getSerializer();
 
@@ -171,9 +182,11 @@ public class ProviderFactory implements EventListenerProviderFactory, ProviderEv
 
 				} catch (Exception exception) {
 
-					failedRoutes.incrementAndGet();
-					log.warn("Failed to initialize route : " + route.getName(), exception);
-					ValidationUtils.tryClose(route, "route : " + route.getName());
+					// the destination is unreachable right now: keep the route and retry in the background
+
+					log.warn("Failed to initialize route : " + route.getName() + " (will retry in the background)", exception);
+					route.resetDestinations();
+					pendingRoutes.add(route);
 
 				}
 			});
@@ -187,13 +200,106 @@ public class ProviderFactory implements EventListenerProviderFactory, ProviderEv
 			logSupportMessage();
 		}
 
-		MetricsUtils.recordActiveRoutes(serializersWithRoutesMap.values().stream().mapToInt(List::size).sum());
-		MetricsUtils.recordFailedRoutes(failedRoutes.get());
+		MetricsUtils.recordActiveRoutes(activeRouteCount());
+		MetricsUtils.recordFailedRoutes(unrecoverableRoutes.get() + pendingRoutes.size());
+
+		scheduleInitializationRetry(INITIAL_INITIALIZATION_RETRY_DELAY);
 
 		// listeners
 
 		for (var realm : realms) {
 			registerRealm(realm);
+		}
+	}
+
+	private int activeRouteCount() {
+		return ValidationUtils.isNull(serializersWithRoutes) ? 0 : Arrays.stream(serializersWithRoutes).mapToInt(serializerRoutes -> serializerRoutes.routes().size()).sum();
+	}
+
+	private void scheduleInitializationRetry(Duration delay) {
+
+		if (pendingRoutes.isEmpty() || initializationRetryScheduler.isShutdown()) {
+			return;
+		}
+
+		var doubled = delay.multipliedBy(2);
+		var nextDelay = doubled.compareTo(MAX_INITIALIZATION_RETRY_DELAY) > 0 ? MAX_INITIALIZATION_RETRY_DELAY : doubled;
+
+		initializationRetryScheduler.schedule(() -> {
+			retryPendingRoutes();
+			scheduleInitializationRetry(nextDelay);
+		}, delay.toMillis(), TimeUnit.MILLISECONDS);
+	}
+
+	// one attempt for every route whose destination was unreachable; routes that come up join the send path
+
+	public void retryPendingRoutes() {
+
+		for (var route : pendingRoutes) {
+
+			try {
+
+				route.initializeDestinations();
+
+			} catch (Exception exception) {
+
+				route.resetDestinations();
+				log.warn("Failed to initialize route : " + route.getName() + " (will retry)", exception);
+				continue;
+			}
+
+			pendingRoutes.remove(route);
+			activateRoute(route);
+		}
+	}
+
+	private void activateRoute(Route route) {
+
+		MetricsUtils.registerPoolMetrics(route.getName(), route.getDestinationPool());
+		MetricsUtils.registerInFlight(route.getName(), route.getInFlight());
+
+		// publish the route to the send path: the array is replaced as a whole, never edited in place
+
+		var updated = new ArrayList<SerializerRoutes>();
+		var joined = false;
+
+		if (ValidationUtils.isNotNull(serializersWithRoutes)) {
+			for (var serializerRoutes : serializersWithRoutes) {
+				if (serializerRoutes.serializer().equals(route.getSerializer())) {
+					var routes = new ArrayList<>(serializerRoutes.routes());
+					routes.add(route);
+					updated.add(new SerializerRoutes(serializerRoutes.serializer(), routes));
+					joined = true;
+				} else {
+					updated.add(serializerRoutes);
+				}
+			}
+		}
+
+		if (!joined) {
+			updated.add(new SerializerRoutes(route.getSerializer(), new ArrayList<>(List.of(route))));
+		}
+
+		serializersWithRoutes = updated.toArray(SerializerRoutes[]::new);
+
+		MetricsUtils.recordActiveRoutes(activeRouteCount());
+		MetricsUtils.recordFailedRoutes(unrecoverableRoutes.get() + pendingRoutes.size());
+
+		log.info("{} Route '{}' initialized: destination={}, serializer={}, realmMatchers={}, eventMatchers={}",
+			Constants.ID,
+			route.getName(),
+			route.getDestinationKind(),
+			route.getSerializerKind(),
+			route.getRealmMatchers().length,
+			route.getEventMatchers().length);
+
+		// realms only this route accepts have not been registered yet
+
+		if (ValidationUtils.isNotNull(postInitSessionFactory)) {
+			KeycloakModelUtils.runJobInTransaction(postInitSessionFactory, session -> {
+				var realmProvider = ValidationUtils.requireNonNull(session.realms(), "realmProvider is required");
+				realmProvider.getRealmsStream().forEach(this::registerRealm);
+			});
 		}
 	}
 
@@ -261,7 +367,7 @@ public class ProviderFactory implements EventListenerProviderFactory, ProviderEv
 
 							} catch (Exception exception) {
 								MetricsUtils.recordEventFailed(route.getName(), eventType, realm, exception.getClass().getSimpleName());
-								log.warn("Failed to send " + eventType + " : " + eventId + " : to route : " + route.getName(), exception);
+								warnThrottled("route:" + route.getName(), "Failed to send " + eventType + " : " + eventId + " : to route : " + route.getName(), exception);
 							}
 						});
 					}
@@ -269,10 +375,23 @@ public class ProviderFactory implements EventListenerProviderFactory, ProviderEv
 				} catch (Exception exception) {
 					var serializerName = serializerWithRoutes.serializer().getClass().getSimpleName();
 					MetricsUtils.recordSerializationFailed(serializerName, eventType, realm, exception.getClass().getSimpleName());
-					log.warn("Failed to serialize " + eventType + " : " + eventId + " : with " + serializerName, exception);
+					warnThrottled("serializer:" + serializerName, "Failed to serialize " + eventType + " : " + eventId + " : with " + serializerName, exception);
 				}
 			});
 		}
+	}
+
+	// one stack trace per route (or serializer) per minute: an outage would otherwise log once per event; the metrics count every failure
+
+	private void warnThrottled(String key, String message, Exception exception) {
+
+		var suppressed = failureLogThrottle.permit(key);
+
+		if (suppressed < 0) {
+			return;
+		}
+
+		log.warn(suppressed > 0 ? message + " (" + suppressed + " similar failures suppressed in the last minute)" : message, exception);
 	}
 
 	@Override
@@ -353,6 +472,16 @@ public class ProviderFactory implements EventListenerProviderFactory, ProviderEv
 		// eventExecutor
 
 		ExecutorUtils.shutdown(eventExecutor, "event executor");
+
+		// initialization retries
+
+		ExecutorUtils.shutdown(initializationRetryScheduler, "initialization retry scheduler");
+
+		for (var route : pendingRoutes) {
+			ValidationUtils.tryClose(route, "route : " + route.getName());
+		}
+
+		pendingRoutes.clear();
 
 		// routes
 

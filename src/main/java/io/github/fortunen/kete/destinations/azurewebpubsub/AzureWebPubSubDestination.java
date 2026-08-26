@@ -1,12 +1,15 @@
 package io.github.fortunen.kete.destinations.azurewebpubsub;
 
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.azure.core.http.rest.RequestOptions;
+import com.azure.core.util.BinaryData;
 import com.azure.messaging.webpubsub.WebPubSubServiceClient;
 import com.azure.messaging.webpubsub.WebPubSubServiceClientBuilder;
 import com.azure.messaging.webpubsub.models.WebPubSubContentType;
@@ -82,9 +85,7 @@ public class AzureWebPubSubDestination extends Destination<AzureWebPubSubDestina
 		ValidationUtils.requireNonNull(message, "message is required");
 
 		var payload = encodePayload(message.eventBody());
-
-		var body = new String(payload);
-		var contentType = message.contentType().contains("json") ? WebPubSubContentType.APPLICATION_JSON : WebPubSubContentType.TEXT_PLAIN;
+		var contentType = message.contentType();
 
 		// resolve hub (use cached client for templated hubs)
 
@@ -94,11 +95,30 @@ public class AzureWebPubSubDestination extends Destination<AzureWebPubSubDestina
 		// resolve group
 
 		var actualGroup = isGroupTemplated ? TemplateUtils.substitute(group, message) : group;
+		var toGroup = hasGroup || (isGroupTemplated && ValidationUtils.isNotBlank(actualGroup));
 
-		if (hasGroup || (isGroupTemplated && ValidationUtils.isNotBlank(actualGroup))) {
-			client.sendToGroup(actualGroup, body, contentType);
+		if (isTextPayload(contentType)) {
+
+			var body = new String(payload, StandardCharsets.UTF_8);
+			var webPubSubContentType = contentType.contains("json") ? WebPubSubContentType.APPLICATION_JSON : WebPubSubContentType.TEXT_PLAIN;
+
+			if (toGroup) {
+				client.sendToGroup(actualGroup, body, webPubSubContentType);
+			} else {
+				client.sendToAll(body, webPubSubContentType);
+			}
+
+			return;
+		}
+
+		// binary payloads (Avro, Protobuf, CBOR, compressed bodies) go out as binary messages instead of being decoded as text
+
+		var body = BinaryData.fromBytes(payload);
+
+		if (toGroup) {
+			client.sendToGroupWithResponse(actualGroup, body, WebPubSubContentType.APPLICATION_OCTET_STREAM, payload.length, new RequestOptions());
 		} else {
-			client.sendToAll(body, contentType);
+			client.sendToAllWithResponse(body, WebPubSubContentType.APPLICATION_OCTET_STREAM, payload.length, new RequestOptions());
 		}
 	}
 

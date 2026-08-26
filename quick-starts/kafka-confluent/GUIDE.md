@@ -74,7 +74,7 @@ environment:
 ## Running
 
 ```bash
-docker-compose up -d
+docker compose up -d
 ```
 
 ## Testing
@@ -131,7 +131,7 @@ kafka-console-consumer.sh \
 ### Check Keycloak Logs
 
 ```bash
-docker-compose logs keycloak
+docker compose logs keycloak
 ```
 
 Look for:
@@ -167,7 +167,7 @@ If you want to use Avro/JSON Schema:
 ## Cleanup
 
 ```bash
-docker-compose down
+docker compose down
 ```
 
 To remove Confluent Cloud resources:

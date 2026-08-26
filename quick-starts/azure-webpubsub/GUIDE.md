@@ -70,7 +70,7 @@ AZURE_WEBPUBSUB_CONNECTION_STRING=Endpoint=https://my-webpubsub.webpubsub.azure.
 ## Running
 
 ```bash
-docker-compose up -d
+docker compose up -d
 ```
 
 ## Testing
@@ -95,7 +95,7 @@ Or use the [Azure Portal](https://portal.azure.com) to view Web PubSub service m
 ### Check Keycloak Logs
 
 ```bash
-docker-compose logs keycloak
+docker compose logs keycloak
 ```
 
 Look for:
@@ -113,7 +113,7 @@ Look for:
 ## Cleanup
 
 ```bash
-docker-compose down
+docker compose down
 
 # Remove Azure resources (optional)
 az webpubsub delete --name <your-webpubsub-name> --resource-group keycloak-events-rg

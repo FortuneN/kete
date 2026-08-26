@@ -1,290 +1,111 @@
 # KETE Stress Test
 
-A comprehensive stress testing suite for KETE (Keycloak Events To Everywhere) that validates performance under sustained load.
+A small harness that puts sustained event load on KETE and watches the delivery rate and the destination pool.
 
 ## Overview
 
-This stress test simulates real-world high-traffic scenarios by:
-- Running **20 concurrent login repeaters** that continuously authenticate against Keycloak
-- Streaming all authentication events through **KETE to Redis Pub/Sub**
-- Monitoring **throughput and metrics every minute** for 10 minutes
-- Calculating **messages per second** and tracking system health
+`docker-compose.yml` starts Keycloak with KETE (backed by PostgreSQL), a Redis instance, and **20 login-repeater workers**. Each worker logs in once as `admin` and then refreshes its token in a tight loop — every refresh raises a `REFRESH_TOKEN` event, which KETE forwards to the Redis Pub/Sub channel `keycloak-events-stress`. `monitor.ps1` subscribes to that channel and prints the delivery rate together with KETE's pool metrics.
 
 ## Components
 
 ### Infrastructure (`docker-compose.yml`)
-- **Keycloak**: Event source with KETE provider enabled (metrics enabled)
-- **Redis**: Destination system (Redis Pub/Sub)
-- **20x Login Repeaters**: Concurrent workers generating authentication events in tight loops
+
+| Service | Image | Notes |
+|---------|-------|-------|
+| `postgres` | `postgres:16-alpine` | Keycloak database (`keycloak`/`keycloak`) |
+| `redis` | `redis:7-alpine` | Destination; not published on the host — reach it with `docker exec` |
+| `keycloak` | `ghcr.io/fortunen/kete/quick-start-keycloak` | `start --http-enabled=true --hostname-strict=false`; ports `8080` (Keycloak) and `9000` (management, `/metrics`) |
+| `login-repeater-1` … `login-repeater-20` | `curlimages/curl:8.5.0` | Run `login-repeater.sh` |
+
+The KETE route is configured with environment variables on the `keycloak` service:
+
+```yaml
+kete.routes.stress-test.destination.kind: redis-pubsub
+kete.routes.stress-test.destination.host: redis
+kete.routes.stress-test.destination.port: 6379
+kete.routes.stress-test.destination.channel: keycloak-events-stress
+kete.metrics.enabled: "true"
+```
 
 ### Login Repeater (`login-repeater.sh`)
-- Continuously authenticates against Keycloak using `admin-cli`
-- Logs progress every 100 requests
-- Runs without sleep for maximum stress (configurable)
+
+1. Waits until `http://keycloak:8080/realms/master` answers, then 10 more seconds.
+2. Obtains a token with the password grant (`admin`/`admin`, client `admin-cli`).
+3. Loops forever on the `refresh_token` grant, rotating the refresh token each time, and logs its throughput every 200 refreshes:
+
+```
+[Worker 7] Completed 2000 refreshes in 41s (48.78 req/s)
+```
 
 ### Monitor (`monitor.ps1`)
-- Runs for 10 minutes (configurable)
-- Checks metrics every 60 seconds (configurable)
-- Tracks:
-  - Redis Pub/Sub message count
-  - Messages processed since last check
-  - Current throughput (msg/s)
-  - Average throughput (msg/s)
-  - KETE routes initialized
-  - KETE events sent total
-  - KETE events failed total
-- Generates CSV report with detailed measurements
-- Provides final summary with performance analysis
+
+```powershell
+.\monitor.ps1 [-StartupWaitSeconds 45] [-CheckIntervalSeconds 60]
+```
+
+1. Waits `StartupWaitSeconds`, then polls `http://localhost:9000/metrics` until `kete_routes_active` is `1.0` (up to two minutes).
+2. Starts a background `redis-cli SUBSCRIBE keycloak-events-stress` inside the `stress-test-redis-1` container and counts the messages.
+3. Every `CheckIntervalSeconds` prints one line — it runs until you stop it with `Ctrl+C`:
+
+```
+[14:32:05] Events: 12,400 | Rate: 2,067/sec | Pool: 3 active, 7 idle, 20 total | Forward: 4.21ms
+```
+
+The line is red below 1,000 events/s, yellow below 2,000 and green above. `Forward` is `kete_forward_duration_seconds_max` in milliseconds.
 
 ## Requirements
 
-- Docker & Docker Compose
-- PowerShell 7+ (for monitoring script)
-- 4GB+ RAM recommended
-- CPU: 4+ cores recommended
+- Docker with Docker Compose
+- PowerShell 7+ (for `monitor.ps1`)
+- The `ghcr.io/fortunen/kete/quick-start-keycloak` image (pulled automatically)
 
 ## Usage
-
-### 1. Start the Stress Test Infrastructure
 
 ```bash
 cd stress-test
 docker compose up -d
 ```
 
-This will start:
-- Redis (port 6379)
-- Keycloak with KETE (port 8080, metrics on 9000)
-- 5 login repeater workers
-
-### 2. Run the Monitor
-
-**Default (10 minutes, check every 60 seconds):**
 ```powershell
 .\monitor.ps1
+# or, for a faster first sample:
+.\monitor.ps1 -StartupWaitSeconds 30 -CheckIntervalSeconds 15
 ```
 
-**Custom duration and interval:**
-```powershell
-# Run for 5 minutes, check every 30 seconds
-.\monitor.ps1 -DurationMinutes 5 -IntervalSeconds 30
-```
+Watch a worker:
 
-**Custom parameters:**
-```powershell
-.\monitor.ps1 `
-    -DurationMinutes 10 `
-    -IntervalSeconds 60 `
-    -RedisContainer "stress-test-redis-1" `
-    -KeycloakUrl "http://localhost:8080" `
-    -StreamName "keycloak-events-stress"
-```
-
-### 3. Watch Worker Progress (Optional)
-
-Monitor individual worker output:
 ```bash
 docker compose logs -f login-repeater-1
-docker compose logs -f login-repeater-2
-# ... etc
 ```
 
-### 4. Stop the Test
+Stop everything (the `-v` drops the PostgreSQL volume):
 
-```bash
-docker compose down
-```
-
-## Output
-
-### Console Output
-
-The monitor displays real-time updates every minute:
-
-```
-═══════════════════════════════════════════════════════════════════════
-  KETE Stress Test Monitor
-═══════════════════════════════════════════════════════════════════════
-Duration       : 10 minutes
-Check Interval : 60 seconds
-Redis Pub/Sub   : keycloak-events-stress
-Start Time     : 2026-02-01 18:30:00
-
-───────────────────────────────────────────────────────────────────────
-Check #1 - 18:31:00 - Elapsed: 1.0m / Remaining: 9.0m
-
-  Redis Pub/Sub Messages     : 15234
-  Messages Since Last Check : 15234
-  Current Throughput        : 254.23 msg/s
-  Average Throughput        : 254.23 msg/s
-
-  KETE Routes Initialized   : 1
-  KETE Events Sent Total    : 15234
-  KETE Events Failed Total  : 0
-```
-
-### Final Summary
-
-After completion, the monitor provides a comprehensive summary:
-
-```
-═══════════════════════════════════════════════════════════════════════
-  STRESS TEST COMPLETE
-═══════════════════════════════════════════════════════════════════════
-
-Test Duration            : 10.02 minutes
-Total Messages Processed : 152340
-
-Overall Throughput       : 253.90 msg/s
-Peak Throughput          : 312.45 msg/s
-Average Throughput       : 254.67 msg/s
-
-KETE Routes Initialized  : 1
-KETE Events Sent         : 152340
-KETE Events Failed       : 0
-
-Detailed results saved to: stress-test-results-20260201-183010.csv
-
-✓ SUCCESS: No failed events detected!
-✓ PERFORMANCE: System processed 253.90 messages per second
-```
-
-### CSV Report
-
-Detailed measurements are saved to a timestamped CSV file:
-
-```csv
-Timestamp,TotalMessages,MessagesSinceLastCheck,CurrentThroughput,AverageThroughput,RoutesInitialized,EventsSent,EventsFailed
-2026-02-01 18:31:00,15234,15234,254.23,254.23,1,15234,0
-2026-02-01 18:32:00,30567,15333,255.55,254.89,1,30567,0
-...
-```
-
-## Tuning
-
-### Increase Load
-
-To increase stress, edit `login-repeater.sh` and comment out the sleep:
-
-```bash
-# Tiny sleep to prevent overwhelming the system (adjust as needed)
-# Comment out for maximum stress
-# sleep 0.01   <-- Comment this line
-```
-
-### Scale Workers
-
-Add more repeaters in `docker-compose.yml`:
-
-```yaml
-  login-repeater-6:
-    image: curlimages/curl:8.5.0
-    depends_on:
-      - keycloak
-    volumes:
-      - ./login-repeater.sh:/login-repeater.sh:ro
-    entrypoint: ["/bin/sh", "/login-repeater.sh"]
-    environment:
-      KEYCLOAK_URL: http://keycloak:8080
-      WORKER_ID: "6"
-```
-
-### Different Destination
-
-To test with a different destination, modify `docker-compose.yml` Keycloak environment:
-
-**NATS Core:**
-```yaml
-kete.routes.stress-test.destination.kind: nats
-kete.routes.stress-test.destination.servers: nats://nats:4222
-kete.routes.stress-test.destination.subject: keycloak.events
-```
-
-**Kafka:**
-```yaml
-kete.routes.stress-test.destination.kind: kafka
-kete.routes.stress-test.destination.bootstrap.servers: kafka:9092
-kete.routes.stress-test.destination.topic: keycloak-events
-```
-
-## Metrics Endpoints
-
-- **Keycloak Health**: http://localhost:8080/health/ready
-- **Keycloak Metrics**: http://localhost:8080/metrics
-- **Keycloak Admin**: http://localhost:8080 (admin/admin)
-
-## Troubleshooting
-
-### Workers Not Starting
-
-Check if Keycloak is ready:
-```bash
-docker logs stress-test-keycloak-1
-```
-
-### No Messages in Redis
-
-Verify KETE route initialization:
-```bash
-docker logs stress-test-keycloak-1 | grep "kete Route"
-```
-
-Expected output:
-```
-kete Route 'stress-test' initialized: destination=RedisStreamDestinationConfig
-```
-
-### Check Redis Pub/Sub Manually
-
-```bash
-docker exec stress-test-redis-1 redis-cli XLEN keycloak-events-stress
-docker exec stress-test-redis-1 redis-cli XREAD COUNT 1 STREAMS keycloak-events-stress 0
-```
-
-### High CPU/Memory Usage
-
-This is expected under stress. Monitor with:
-```bash
-docker stats
-```
-
-To reduce load, add sleep to `login-repeater.sh` or reduce worker count.
-
-## Performance Expectations
-
-Typical throughput (on modern hardware):
-
-| Workers | Expected Throughput |
-|---------|-------------------|
-| 1       | 50-100 msg/s      |
-| 5       | 200-400 msg/s     |
-| 10      | 400-800 msg/s     |
-
-Actual performance depends on:
-- Hardware (CPU, RAM, disk I/O)
-- Network latency
-- Keycloak configuration
-- Destination system performance
-
-## Cleanup
-
-Remove all containers and networks:
 ```bash
 docker compose down -v
 ```
 
-Remove generated CSV files:
-```bash
-rm stress-test-results-*.csv
-```
+## Tuning
+
+- **More or fewer workers:** add or remove `login-repeater-N` services in `docker-compose.yml` (they are identical apart from `WORKER_ID`).
+- **Heavier events:** replace the refresh loop in `login-repeater.sh` with a password-grant login per iteration (`LOGIN` events cost Keycloak far more than `REFRESH_TOKEN` events).
+- **Another destination:** change the `kete.routes.stress-test.destination.*` variables and point the monitor's subscriber at the new sink; the metrics part of the monitor works for any destination.
+- **Pool size:** add `kete.routes.stress-test.destination.pool.max-total` (and the other `pool.*` options) to the `keycloak` service — see the [pool guidance](https://fortunen.github.io/kete/user-guide/destinations/overview/) for multiplexing clients such as Redis.
+
+## Metrics
+
+KETE's metrics are exposed on `http://localhost:9000/metrics` (Keycloak's management port, `KC_METRICS_ENABLED=true`): `kete_events_forwarded_total`, `kete_events_failed_total`, `kete_forward_duration_seconds_*`, `kete_pool_active|idle|total`, `kete_events_inflight`, `kete_pool_wait_seconds_*`, `kete_retries_total`, `kete_routes_active`, `kete_routes_failed`.
+
+## Troubleshooting
+
+| Symptom | Check |
+|---------|-------|
+| `Route active: N/A` | `docker compose logs keycloak` — Keycloak may still be starting (`StartupWaitSeconds`), or the route failed to initialize |
+| Workers print `Failed to get initial token` | Keycloak is up but the bootstrap admin is missing; recreate the stack with `docker compose down -v && docker compose up -d` |
+| `Events: 0` while workers report refreshes | Subscribe manually: `docker exec stress-test-redis-1 redis-cli SUBSCRIBE keycloak-events-stress`; confirm `kete_events_forwarded_total` grows on `:9000/metrics` |
+| Rate stuck far below the workers' request rate | Look at `kete_events_failed_total` and the Keycloak log (`Failed to send …`); PostgreSQL is usually the bottleneck on a laptop |
 
 ## Known Limitations
 
-- Workers may see connection errors during Keycloak startup (expected, they retry)
-- Very high loads (>1000 msg/s) may require Keycloak tuning
-- Redis Pub/Sub is used for easy verification; production systems may use Kafka/NATS
-- Test runs entirely on localhost; network latency not simulated
-
-## License
-
-This stress test is part of the KETE project and follows the same license.
+- Everything runs on one machine; the numbers describe that machine, not KETE's ceiling.
+- Redis Pub/Sub drops messages when there is no subscriber, so start the monitor before judging the delivery count.
+- The monitor counts by subscribing itself; a second subscriber does not change what KETE forwards.

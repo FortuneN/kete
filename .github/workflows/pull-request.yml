@@ -13,10 +13,91 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  pull-request:
-    name: Build & Test
+  unit:
+    name: Unit tests
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+
+      - name: Setup Java
+        uses: actions/setup-java@cf277c60eb25467037889841efdb72551f06f6c3 # v4.9.1
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Run Unit tests
+        run: pwsh -File ./run-unit-tests.ps1
+
+      - name: Upload coverage data
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: jacoco-unit
+          path: target/jacoco.exec
+          if-no-files-found: ignore
+          retention-days: 7
+
+  integration:
+    name: Integration tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+
+      - name: Setup Java
+        uses: actions/setup-java@cf277c60eb25467037889841efdb72551f06f6c3 # v4.9.1
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Run Integration tests
+        run: pwsh -File ./run-integration-tests.ps1
+
+      - name: Upload coverage data
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: jacoco-integration
+          path: target/jacoco.exec
+          if-no-files-found: ignore
+          retention-days: 7
+
+  e2e:
+    name: End-to-end tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+
+      - name: Setup Java
+        uses: actions/setup-java@cf277c60eb25467037889841efdb72551f06f6c3 # v4.9.1
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Run End-to-end tests
+        run: pwsh -File ./run-end-to-end-tests.ps1
+
+      - name: Upload coverage data
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: jacoco-e2e
+          path: target/jacoco.exec
+          if-no-files-found: ignore
+          retention-days: 7
+
+  validate:
+    name: Package, image and docs
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - name: Checkout
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
@@ -36,5 +117,23 @@ jobs:
       - name: Install MkDocs
         run: pip install mkdocs-material==9.7.1 mkdocs-include-markdown-plugin==7.2.0
 
-      - name: Run Script
-        run: pwsh -File ./run-on-pull-request-push.ps1
+      - name: Package the shaded jar
+        run: mvn -B -q package -DskipTests
+
+      - name: Check that every class is relocated
+        run: pwsh -File ./run-jar-check.ps1
+
+      - name: Build the quick-start Keycloak image
+        run: docker build -q -f "quick-starts/\$images/keycloak/Dockerfile" -t ghcr.io/fortunen/kete/quick-start-keycloak:ci .
+
+      - name: Build the documentation site
+        run: python -m mkdocs build --strict
+
+  build:
+    name: Build & Test
+    needs: [unit, integration, e2e, validate]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: All checks passed
+        run: echo "unit, integration, end-to-end, package, image and docs jobs succeeded"

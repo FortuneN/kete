@@ -2,14 +2,13 @@ package io.github.fortunen.kete.unittests.destinations.stompdestination;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.AdditionalMatchers.aryEq;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
+import java.util.Arrays;
 import java.util.Set;
 
 import org.apache.activemq.transport.stomp.StompConnection;
@@ -36,7 +35,6 @@ public class sendTests {
 		ValidationUtils.tryClose(destination, "destination");
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
 	public void shouldSendToDestination() throws Exception {
 
@@ -58,10 +56,9 @@ public class sendTests {
 
 		// assert
 
-		verify(connection).send(eq("/queue/test"), any(String.class), isNull(), any(HashMap.class));
+		verify(connection).sendFrame(argThat(frame -> frame.startsWith("SEND\ndestination:/queue/test\n") && frame.contains("content-type:application/json\n") && frame.contains("content-length:9\n") && frame.endsWith("\n\n")), aryEq(Arrays.copyOf(body, body.length + 1)));
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
 	public void shouldSendWithTemplatedDestination() throws Exception {
 
@@ -83,7 +80,31 @@ public class sendTests {
 
 		// assert
 
-		verify(connection).send(eq("/queue/my-realm"), any(String.class), isNull(), any(HashMap.class));
+		verify(connection).sendFrame(argThat(frame -> frame.startsWith("SEND\ndestination:/queue/my-realm\n")), aryEq(Arrays.copyOf(body, body.length + 1)));
+	}
+
+	@Test
+	public void shouldSendBinaryBodyUnchanged() throws Exception {
+
+		// arrange
+
+		var connection = mock(StompConnection.class);
+		destination.setConnection(connection);
+		destination.setDestination("/queue/test");
+		destination.setDestinationTemplated(false);
+		destination.setReceiptEnabled(false);
+		destination.setCustomHeadersEntrySet(Set.of());
+
+		var body = new byte[] { 0, (byte) 0xFF, (byte) 0x80, 10, 13, 0 };
+		var message = new EventMessage("test-realm", "evt-003", body, "LOGIN", "application/x-protobuf", null, Constants.EVENT, null, null);
+
+		// act
+
+		destination.doSend(message);
+
+		// assert
+
+		verify(connection).sendFrame(argThat(frame -> frame.contains("content-length:6\n") && frame.contains("content-type:application/x-protobuf\n")), aryEq(new byte[] { 0, (byte) 0xFF, (byte) 0x80, 10, 13, 0, 0 }));
 	}
 
 	@Test

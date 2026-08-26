@@ -1,5 +1,6 @@
 package io.github.fortunen.kete.destinations.awssqs;
 
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -91,7 +92,7 @@ public class AwsSqsDestination extends Destination<AwsSqsDestinationConfig> {
 
 		var requestBuilder = SendMessageRequest.builder()
 			.queueUrl(actualQueueUrl)
-			.messageBody(new String(payload))
+			.messageBody(new String(payload, StandardCharsets.UTF_8))
 			.messageAttributes(attributes);
 
 		// FIFO properties

@@ -4,7 +4,7 @@
 #
 #   Runs after merge to develop branch:
 #     • All tests (unit, integration, end-to-end)
-#     • Build and push Docker images with :develop tag
+#     • Package the JAR, check its relocations, build the quick-start Keycloak image (validation only, no push)
 #     • Build documentation site (validation only - not deployed)
 #
 #   Usage: .\run-on-develop-push.ps1
@@ -152,21 +152,8 @@ $script:Results["Tests"] = $testsPassed
 
 if ($testsPassed) {
     Write-Task "Generating coverage badge..."
-    $coveragePercent = 0
-    $csvPath = "target/site/jacoco/jacoco.csv"
-    if (Test-Path $csvPath) {
-        $csv = Import-Csv $csvPath
-        $totalMissed = ($csv | Measure-Object -Property LINE_MISSED -Sum).Sum
-        $totalCovered = ($csv | Measure-Object -Property LINE_COVERED -Sum).Sum
-        $total = $totalMissed + $totalCovered
-        if ($total -gt 0) {
-            $coveragePercent = [math]::Round(($totalCovered / $total) * 100, 1)
-        }
-    }
-    $color = if ($coveragePercent -ge 80) { "brightgreen" } elseif ($coveragePercent -ge 60) { "green" } elseif ($coveragePercent -ge 40) { "yellow" } else { "red" }
-    $badgeJson = @{ schemaVersion = 1; label = "Coverage"; message = "$coveragePercent%"; color = $color } | ConvertTo-Json
-    Set-Content -Path "coverage-badge.json" -Value $badgeJson -Encoding UTF8
-    Write-TaskResult "Coverage: $coveragePercent% (badge updated)" $true
+    & .\run-coverage-badge.ps1 -ExecFiles "target/jacoco.exec"
+    $script:Results["Coverage badge"] = $LASTEXITCODE -eq 0
 }
 
 # =============================================================================
@@ -178,10 +165,31 @@ Write-StepHeader 2 "Build Docker Images (validation only)"
 $stepStart = Get-Date
 $imageName = "$script:Registry/quick-start-keycloak:$script:Tag"
 
-Write-Task "Building $imageName"
+Write-Task "Packaging kete.jar (the image is built from the packaged jar)"
 
-docker build -q -t $imageName -f "quick-starts/`$images/keycloak/Dockerfile" . 2>&1 | Out-Null
-$buildSuccess = $LASTEXITCODE -eq 0
+mvn package -DskipTests -q 2>&1 | Out-Null
+$packageSuccess = $LASTEXITCODE -eq 0 -and (Test-Path "target/kete.jar")
+
+Write-TaskResult "kete.jar packaged" $packageSuccess
+$script:Results["JAR: package"] = $packageSuccess
+
+if ($packageSuccess) {
+    Write-Task "Checking that every class in kete.jar is relocated..."
+    & .\run-jar-check.ps1 -JarPath "target/kete.jar"
+    $jarCheckSuccess = $LASTEXITCODE -eq 0
+} else {
+    $jarCheckSuccess = $false
+}
+
+$script:Results["JAR: relocation check"] = $jarCheckSuccess
+
+if ($packageSuccess) {
+    Write-Task "Building $imageName"
+    docker build -q -t $imageName -f "quick-starts/`$images/keycloak/Dockerfile" . 2>&1 | Out-Null
+    $buildSuccess = $LASTEXITCODE -eq 0
+} else {
+    $buildSuccess = $false
+}
 
 Write-TaskResult "quick-start-keycloak" $buildSuccess
 
@@ -231,7 +239,7 @@ Write-SummaryTable $script:Results
 
 Write-Host "  ─────────────────────────────────────────────────────────────" -ForegroundColor DarkGray
 Write-Host ""
-Write-Host "  Published Artifacts:" -ForegroundColor White
+Write-Host "  Validated Artifacts:" -ForegroundColor White
 Write-Host "    • $script:Registry/quick-start-keycloak:$script:Tag" -ForegroundColor Gray
 Write-Host ""
 

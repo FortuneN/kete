@@ -71,7 +71,7 @@ Edit `.env` and fill in your values.
 ## Running
 
 ```bash
-docker-compose up -d
+docker compose up -d
 ```
 
 ## Testing
@@ -101,7 +101,7 @@ XREVRANGE keycloak-events + - COUNT 10
 ## Cleanup
 
 ```bash
-docker-compose down
+docker compose down
 
 # Remove AWS resources (optional)
 aws elasticache delete-replication-group --replication-group-id keycloak-redis

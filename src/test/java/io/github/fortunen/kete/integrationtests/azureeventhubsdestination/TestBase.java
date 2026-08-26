@@ -28,7 +28,7 @@ import io.github.fortunen.kete.destinations.azureeventhubs.AzureEventHubsDestina
 
 public class TestBase {
 
-	private static final String AZURITE_IMAGE = "mcr.microsoft.com/azure-storage/azurite:3.36.0";
+	private static final String AZURITE_IMAGE = "mcr.microsoft.com/azure-storage/azurite:3.37.0";
 	private static final String EVENTHUBS_EMULATOR_IMAGE = "mcr.microsoft.com/azure-messaging/eventhubs-emulator:2.2.1";
 	private static final int AMQP_PORT = 5672;
 	protected static final String EVENT_HUB_NAME = "keycloak-events";
