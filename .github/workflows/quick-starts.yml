@@ -1,0 +1,30 @@
+name: Quick Starts
+
+on:
+  schedule:
+    - cron: '0 3 * * 1'
+  workflow_dispatch:
+    inputs:
+      filter:
+        description: 'Wildcard filter for quick-start folder names (run-quick-starts.ps1 -Filter)'
+        type: string
+        default: '*'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: quick-starts
+  cancel-in-progress: false
+
+jobs:
+  smoke:
+    name: Quick-start smoke test
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+
+      - name: Run the local quick-starts against the published images
+        run: pwsh -File ./run-quick-starts.ps1 -Filter "${{ inputs.filter || '*' }}" -TimeoutSeconds 120

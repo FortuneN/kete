@@ -64,8 +64,6 @@ class RedisPubSubDestinationE2ETests extends EndToEndTestBase {
 				var collector = new MessageCollector();
 				var subscriber = createSubscriber(REDIS_CHANNEL_RESOLVED, collector);
 
-				Thread.sleep(500);
-
 				// act
 
 				triggerLoginEvent(keycloak);

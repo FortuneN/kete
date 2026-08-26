@@ -278,6 +278,9 @@ public class TestBase {
 
 		var subscription = jetStream.subscribe(subject, pushSubscribeOptions);
 
+		// the subscription is live once the server has processed it (flush round-trips a PING)
+		connection.flush(Duration.ofSeconds(5));
+
 		// Start consuming messages in background
 		var thread = new Thread(() -> {
 			try {

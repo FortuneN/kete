@@ -136,7 +136,6 @@ See `pom.xml` → `maven-shade-plugin` → `<relocations>` section. Every runtim
 |---------|---------|---------|
 | `resilience4j-retry` | 2.3.0 | Retry with configurable wait duration |
 | `oauth2-oidc-sdk` | 11.26 | OAuth 2.0 Client Credentials |
-| `okhttp-tls` | 4.12.0 | TLS utilities |
 
 ### Utilities
 
@@ -182,6 +181,7 @@ See `pom.xml` → `maven-shade-plugin` → `<relocations>` section. Every runtim
 | `byte-buddy` | 1.15.11 | Mockito bytecode generation |
 | `byte-buddy-agent` | 1.15.11 | Mockito Java agent |
 | `mockwebserver` | 4.12.0 | HTTP mocking |
+| `okhttp-tls` | 4.12.0 | `HeldCertificate` fixtures for the certificate-loader unit tests (test scope only; runtime test certificates come from `CertificateUtils`) |
 | `slf4j-simple` | 2.0.6 | Logging for tests |
 | `testcontainers` | 1.21.4 | Container-based integration tests |
 | `testcontainers-kafka` | 1.21.4 | Kafka container module |

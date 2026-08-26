@@ -31,8 +31,6 @@ public class sendTests extends TestBase {
 		var collector = new MessageCollector();
 		try (var subscriber = createSubscriber("test-channel", collector)) {
 
-			Thread.sleep(500);
-
 			var message = createMessage(
 				"test-event-id",
 				"test-realm",
@@ -85,8 +83,6 @@ public class sendTests extends TestBase {
 
 		var collector = new MessageCollector();
 		try (var subscriber = createSubscriberWithTls("test-channel", collector, tls)) {
-
-			Thread.sleep(500);
 
 			var message = createMessage(
 				"test-event-id",
@@ -144,8 +140,6 @@ public class sendTests extends TestBase {
 
 		var collector = new MessageCollector();
 		try (var subscriber = createSubscriberWithTls("test-channel", collector, tls)) {
-
-			Thread.sleep(500);
 
 			var message = createMessage(
 				"test-event-id",
