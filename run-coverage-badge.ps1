@@ -31,15 +31,21 @@ if ($existing.Count -eq 0) {
 
 # JaCoCo command-line tool (merge + report without a POM execution)
 
-$cli = "target/org.jacoco.cli-nodeps.jar"
+$cliDirectory = "target/jacoco-cli"
+$cli = Get-ChildItem -Path $cliDirectory -Filter "org.jacoco.cli*.jar" -ErrorAction SilentlyContinue | Select-Object -First 1
 
-if (-not (Test-Path $cli)) {
-    mvn -q dependency:copy "-Dartifact=org.jacoco:org.jacoco.cli:$JacocoVersion:jar:nodeps" "-DoutputDirectory=target" "-Dmdep.stripVersion=true" 2>&1 | Out-Null
-    if ($LASTEXITCODE -ne 0 -or -not (Test-Path $cli)) {
+if ($null -eq $cli) {
+    New-Item -ItemType Directory -Force $cliDirectory | Out-Null
+    $copyOutput = mvn -B org.apache.maven.plugins:maven-dependency-plugin:3.8.1:copy "-Dartifact=org.jacoco:org.jacoco.cli:${JacocoVersion}:jar:nodeps" "-DoutputDirectory=$cliDirectory" 2>&1
+    $cli = Get-ChildItem -Path $cliDirectory -Filter "org.jacoco.cli*.jar" -ErrorAction SilentlyContinue | Select-Object -First 1
+    if ($LASTEXITCODE -ne 0 -or $null -eq $cli) {
+        $copyOutput | Out-Host
         Write-Host "  ✗ Could not download the JaCoCo CLI" -ForegroundColor Red
         exit 1
     }
 }
+
+$cli = $cli.FullName
 
 # the report needs the compiled classes
 
