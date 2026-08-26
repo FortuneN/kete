@@ -24,6 +24,11 @@ public abstract class Destination<TConfig extends DestinationConfig> implements 
 
 	protected abstract void doSend(EventMessage message);
 
+	// no checked exceptions: closing a destination must never fail a pool eviction or a shutdown
+
+	@Override
+	public abstract void close();
+
 	public final void initialize() {
 		ValidationUtils.requireNonNull(config, "config is required");
 		doInitialize();

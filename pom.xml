@@ -622,6 +622,7 @@
 				<version>3.13.0</version>
 				<configuration>
 					<release>21</release>
+					<showWarnings>true</showWarnings>
 					<annotationProcessorPaths>
 						<path>
 							<groupId>org.projectlombok</groupId>
@@ -630,6 +631,18 @@
 						</path>
 					</annotationProcessorPaths>
 				</configuration>
+				<executions>
+					<!-- main sources must stay warning-free (-processing: @Component is a plain marker annotation) -->
+					<execution>
+						<id>default-compile</id>
+						<configuration>
+							<compilerArgs>
+								<arg>-Xlint:all,-processing</arg>
+								<arg>-Werror</arg>
+							</compilerArgs>
+						</configuration>
+					</execution>
+				</executions>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>

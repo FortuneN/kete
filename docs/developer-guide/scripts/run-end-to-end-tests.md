@@ -21,6 +21,8 @@ Runs end-to-end tests only. These tests use Testcontainers to spin up Keycloak w
 mvn clean test -Dtest=io.github.fortunen.kete.endtoendtests.** -Dsurefire.skipAfterFailureCount=1 -q
 ```
 
+The test base class builds the shaded `target/kete.jar` itself (`mvn package -DskipTests`, about a minute) before the first container starts. The suite runs against `quay.io/keycloak/keycloak:26.0.0` by default; add `-Dkeycloak.version=26.7.2` to the Maven command to run it against another Keycloak release.
+
 ## Exit Code
 
 - `0` — all end-to-end tests passed

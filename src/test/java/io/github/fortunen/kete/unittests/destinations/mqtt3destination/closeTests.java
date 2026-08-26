@@ -44,7 +44,7 @@ public class closeTests {
 
 		// assert
 
-		verify(client).disconnectForcibly(0, 0, true);
+		verify(client).disconnectForcibly(0, 1000, true);
 		verify(client).close(true);
 	}
 

@@ -22,6 +22,10 @@ import lombok.extern.slf4j.Slf4j;
 @EqualsAndHashCode(callSuper = true)
 public class Mqtt3Destination extends Destination<Mqtt3DestinationConfig> {
 
+	// Paho treats a zero disconnect timeout as "wait forever", which only ends when the keep-alive timer trips (two minutes)
+
+	public static final long DISCONNECT_TIMEOUT_MILLIS = 1000;
+
 	private int qos;
 	private String topic;
 	private boolean retained;
@@ -85,7 +89,7 @@ public class Mqtt3Destination extends Destination<Mqtt3DestinationConfig> {
 
 		try {
 			if (client.isConnected()) {
-				client.disconnectForcibly(0, 0, true);
+				client.disconnectForcibly(0, DISCONNECT_TIMEOUT_MILLIS, true);
 			}
 		} catch (Exception e) {
 			log.warn("Failed to disconnect MQTT3 client: {}", e.getMessage());

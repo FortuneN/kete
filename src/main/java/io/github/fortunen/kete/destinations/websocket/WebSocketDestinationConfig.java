@@ -1,5 +1,6 @@
 package io.github.fortunen.kete.destinations.websocket;
 
+import java.util.stream.Collectors;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.Collections;
@@ -173,7 +174,7 @@ public class WebSocketDestinationConfig extends DestinationConfig {
 				.map(String::trim)
 				.filter(ValidationUtils::isNotBlank)
 				.map(Protocol::new)
-				.collect(java.util.stream.Collectors.toList());
+				.collect(Collectors.toList());
 
 			draft = new Draft_6455(Collections.emptyList(), protocols);
 		}

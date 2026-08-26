@@ -1,5 +1,6 @@
 package io.github.fortunen.kete.destinations.soap;
 
+import java.nio.charset.StandardCharsets;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.time.Duration;
@@ -20,6 +21,7 @@ import io.github.fortunen.kete.utils.ValidationUtils;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
@@ -27,6 +29,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @NoArgsConstructor(force = true)
 @EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true, exclude = {"authHeaderValue", "filteredCustomHeaders"})
 public class SoapDestinationConfig extends DestinationConfig {
 
 	public static final String URL = "url";
@@ -205,7 +208,7 @@ public class SoapDestinationConfig extends DestinationConfig {
 					var username = ValidationUtils.requireNonBlank(configuration.getString(BASIC_USERNAME, "").trim(), BASIC_USERNAME + " is required when authentication-type is 'basic'");
 					var password = ValidationUtils.requireNonBlank(configuration.getString(BASIC_PASSWORD, "").trim(), BASIC_PASSWORD + " is required when authentication-type is 'basic'");
 					authHeaderName = "Authorization";
-					authHeaderValue = "Basic " + Base64.getEncoder().encodeToString((username + ":" + password).getBytes(java.nio.charset.StandardCharsets.UTF_8));
+					authHeaderValue = "Basic " + Base64.getEncoder().encodeToString((username + ":" + password).getBytes(StandardCharsets.UTF_8));
 				}
 				case "api-key" -> {
 					authHeaderName = "Api-Key";

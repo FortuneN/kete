@@ -20,12 +20,14 @@ import io.github.fortunen.kete.utils.ValidationUtils;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import lombok.SneakyThrows;
 
 @Data
 @Component(name = "soap")
 @NoArgsConstructor(force = true)
 @EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true, exclude = {"authHeaderValue"})
 public class SoapDestination extends Destination<SoapDestinationConfig> {
 
 	public static final String AUTHORIZATION = "Authorization";
