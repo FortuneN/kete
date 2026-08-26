@@ -15,6 +15,10 @@ Tests quick-start Docker Compose stacks by starting containers, triggering a Key
 .\run-quick-starts.ps1 -TimeoutSeconds 120
 ```
 
+## Where It Runs
+
+The `Quick Starts` workflow (`.github/workflows/quick-starts.yml`) runs this script every Monday at 03:00 UTC and on manual dispatch (with an optional `filter` input) against the images published by the last release. It is a smoke test of the quick-start stacks themselves, not part of the per-push pipeline.
+
 ## Parameters
 
 | Parameter | Default | Description |

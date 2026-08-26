@@ -17,11 +17,13 @@ import io.github.fortunen.kete.EventMessage;
 import io.github.fortunen.kete.TlsMaterial;
 import io.github.fortunen.kete.destinations.nats.NatsDestination;
 import io.github.fortunen.kete.destinations.nats.NatsDestinationConfig;
+import io.nats.client.AuthHandler;
 import io.nats.client.Nats;
 import io.nats.client.Options;
 
 import java.net.HttpURLConnection;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import io.nats.client.Message;
@@ -58,6 +60,22 @@ public class TestBase {
 		container = new GenericContainer<>(DockerImageName.parse("nats:2.10-alpine"))
 			.withExposedPorts(NATS_PORT, NATS_MONITORING_PORT)
 			.withCommand("--http_port", "8222");
+		container.start();
+
+		waitForNatsReady();
+
+		return container;
+	}
+
+	@SuppressWarnings("resource")
+	protected GenericContainer<?> startNatsWithConfig(String serverConfig) throws Exception {
+
+		cleanUpContainer();
+
+		container = new GenericContainer<>(DockerImageName.parse("nats:2.10-alpine"))
+			.withExposedPorts(NATS_PORT, NATS_MONITORING_PORT)
+			.withCopyToContainer(Transferable.of(serverConfig.getBytes(StandardCharsets.UTF_8), 0644), "/etc/nats/kete-test.conf")
+			.withCommand("--config", "/etc/nats/kete-test.conf");
 		container.start();
 
 		waitForNatsReady();
@@ -220,14 +238,18 @@ public class TestBase {
 	}
 
 	protected AutoCloseable createSubscriber(String subject, MessageCollector collector) throws Exception {
-		return createSubscriber(subject, collector, null);
+		return createSubscriber(subject, collector, null, null);
 	}
 
 	protected AutoCloseable createSubscriberWithTls(String subject, MessageCollector collector, TlsMaterial tls) throws Exception {
-		return createSubscriber(subject, collector, tls);
+		return createSubscriber(subject, collector, tls, null);
 	}
 
-	private AutoCloseable createSubscriber(String subject, MessageCollector collector, TlsMaterial tls) throws Exception {
+	protected AutoCloseable createSubscriberWithAuthHandler(String subject, MessageCollector collector, AuthHandler authHandler) throws Exception {
+		return createSubscriber(subject, collector, null, authHandler);
+	}
+
+	private AutoCloseable createSubscriber(String subject, MessageCollector collector, TlsMaterial tls, AuthHandler authHandler) throws Exception {
 
 		var optionsBuilder = new Options.Builder()
 			.server(tls != null && tls.isEnabled() ? getNatsTlsUrl() : getNatsUrl());
@@ -236,11 +258,18 @@ public class TestBase {
 			optionsBuilder.sslContext(tls.getServerKeyStoreSSLContext());
 		}
 
+		if (authHandler != null) {
+			optionsBuilder.authHandler(authHandler);
+		}
+
 		var options = optionsBuilder.build();
 		var connection = Nats.connect(options);
 
 		var dispatcher = connection.createDispatcher(collector::onMessage);
 		dispatcher.subscribe(subject);
+
+		// the subscription is live once the server has processed the SUB (flush round-trips a PING)
+		connection.flush(Duration.ofSeconds(5));
 
 		return () -> {
 			try {

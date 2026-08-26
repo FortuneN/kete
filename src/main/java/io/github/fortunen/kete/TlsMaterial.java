@@ -43,7 +43,6 @@ import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
-import okhttp3.tls.HeldCertificate;
 
 @Data
 @Slf4j
@@ -421,15 +420,9 @@ public class TlsMaterial {
 
 			if (ValidationUtils.isNotNull(serverHostNames) && !serverHostNames.isEmpty()) {
 
-				var selfSignedCaCertificate = new HeldCertificate.Builder().rsa2048().commonName("Test CA").certificateAuthority(0).build();
-				var caSignedServerCertificateBuilder = new HeldCertificate.Builder().rsa2048().commonName("Test Server").signedBy(selfSignedCaCertificate);
-
-				for (var serverHostName : serverHostNames) {
-					caSignedServerCertificateBuilder.addSubjectAlternativeName(serverHostName);
-				}
-
-				var caSignedServerCertificate = caSignedServerCertificateBuilder.build();
-				var caSignedClientCertificate = new HeldCertificate.Builder().rsa2048().commonName("Test Client").signedBy(selfSignedCaCertificate).build();
+				var selfSignedCaCertificate = CertificateUtils.generateCertificateAuthority("Test CA");
+				var caSignedServerCertificate = CertificateUtils.generateSignedCertificate("Test Server", selfSignedCaCertificate, serverHostNames);
+				var caSignedClientCertificate = CertificateUtils.generateSignedCertificate("Test Client", selfSignedCaCertificate, Set.of());
 
 				material.trustStore.setCertificateEntry("ca-certificate", selfSignedCaCertificate.certificate());
 				material.trustStore.setCertificateEntry("server-certificate", caSignedServerCertificate.certificate());

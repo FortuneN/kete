@@ -10,6 +10,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.time.Duration;
+
 import io.github.fortunen.kete.Destination;
 import io.github.fortunen.kete.EventMessage;
 import io.github.fortunen.kete.Route;
@@ -227,5 +229,35 @@ public class sendTests extends TestBase {
 		// assert
 
 		verify(destination, times(3)).send(message);
+	}
+
+	@Test
+	public void shouldRethrowLastFailureWhenRetriesAreExhausted() throws Exception {
+
+		// arrange
+
+		route = new Route();
+		var pool = mock(GenericObjectPool.class);
+		var destination = mock(Destination.class);
+		when(pool.borrowObject()).thenReturn(destination);
+		route.setDestinationPool(pool);
+
+		var retryConfig = RetryConfig.custom().maxAttempts(3).waitDuration(Duration.ofMillis(1)).build();
+		route.setRetry(Retry.of("test-retry", retryConfig));
+
+		var message = mock(EventMessage.class);
+
+		doThrow(new RuntimeException("always failing")).when(destination).send(any());
+
+		// act
+
+		var thrown = catchThrowable(() -> route.send(message));
+
+		// assert
+
+		assertThat(thrown).isInstanceOf(RuntimeException.class).hasMessage("always failing");
+		verify(destination, times(3)).send(message);
+		verify(pool, times(3)).invalidateObject(destination);
+		verify(pool, never()).returnObject(destination);
 	}
 }

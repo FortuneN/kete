@@ -94,7 +94,7 @@ Stream Keycloak events to NATS JetStream for persistent, at-least-once delivery.
 | `servers` | Comma-separated NATS server URLs | `nats://localhost:4222` |
 | `subject` | NATS subject to publish to (supports templating) | `keycloak.events` |
 | `stream` | JetStream stream name | `KEYCLOAK_EVENTS` |
-| `authentication-method` | Authentication method (see [NATS Auth](nats.md#authentication-methods)) | `none` |
+| `authentication-method` | Authentication method (see [NATS Auth](nats.md#authentication)) | `none` |
 
 !!! warning "Stream Must Exist"
     The specified stream must exist in NATS JetStream before KETE starts. KETE verifies stream existence on initialization and fails if the stream is not found.
@@ -137,7 +137,7 @@ Headers are included in the NATS message headers.
 
 ### Authentication
 
-JetStream uses the same authentication methods as [NATS Core](nats.md#authentication-methods):
+JetStream uses the same authentication methods as [NATS Core](nats.md#authentication):
 
 | Method | Description | Required Properties |
 |--------|-------------|---------------------|

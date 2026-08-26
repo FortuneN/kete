@@ -36,7 +36,7 @@ public class sendTests extends TestBase {
 		var receivedMessage = new AtomicReference<byte[]>();
 		var subscriber = createSubscriber(port, null);
 
-		Thread.sleep(500);
+		settle();
 
 		var message = createMessage(
 			"test-event-id",
@@ -87,7 +87,7 @@ public class sendTests extends TestBase {
 		var receivedMessage = new AtomicReference<byte[]>();
 		var consumer = createPullConsumer(port, null);
 
-		Thread.sleep(500);
+		settle();
 
 		var message = createMessage(
 			"test-event-id",
@@ -132,7 +132,7 @@ public class sendTests extends TestBase {
 
 		var consumer = createPullConsumerThatBinds(bindEndpoint);
 
-		Thread.sleep(500);
+		settle();
 
 		var map = new HashMap<String, Object>();
 		map.put("endpoint", connectEndpoint);
@@ -142,7 +142,7 @@ public class sendTests extends TestBase {
 		configureDestination(mapConfig);
 		destination.initialize();
 
-		Thread.sleep(500);
+		settle();
 
 		var receivedMessage = new AtomicReference<byte[]>();
 
@@ -195,7 +195,7 @@ public class sendTests extends TestBase {
 		consumer.setReceiveTimeOut(10_000);
 		consumer.bind("tcp://*:" + port);
 
-		Thread.sleep(500);
+		settle();
 
 		// destination connects as CURVE client
 
@@ -211,7 +211,7 @@ public class sendTests extends TestBase {
 		configureDestination(new MapConfiguration(map));
 		destination.initialize();
 
-		Thread.sleep(500);
+		settle();
 
 		var receivedMessage = new AtomicReference<byte[]>();
 
@@ -265,7 +265,7 @@ public class sendTests extends TestBase {
 		subscriber.subscribe("keycloak-events");
 		subscriber.connect("tcp://localhost:" + port);
 
-		Thread.sleep(500);
+		settle();
 
 		var message = createMessage(
 			"test-event-id",
@@ -301,5 +301,11 @@ public class sendTests extends TestBase {
 
 		assertThat(new String(envelopeFrame.get(), StandardCharsets.UTF_8)).isEqualTo("keycloak-events");
 		assertThat(new String(bodyFrame.get(), StandardCharsets.UTF_8)).isEqualTo("{\"type\":\"LOGIN\"}");
+	}
+
+	// ZeroMQ connects asynchronously and offers no completion signal to wait on ("slow joiner"):
+	// a short settle before publishing is the documented approach
+	private static void settle() throws InterruptedException {
+		Thread.sleep(500);
 	}
 }

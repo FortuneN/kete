@@ -133,6 +133,9 @@ public class isHealthyTests extends TestBase {
 		var dispatcher = connection.createDispatcher(collector::onMessage);
 		dispatcher.subscribe("test-subject");
 
+		// the subscription is live once the server has processed the SUB (flush round-trips a PING)
+		connection.flush(Duration.ofSeconds(5));
+
 		return () -> {
 			try {
 				dispatcher.unsubscribe("test-subject");
@@ -154,8 +157,6 @@ public class isHealthyTests extends TestBase {
 
 		var collector = new MessageCollector();
 		var subscriber = createAuthSubscriber(hostPort, collector);
-
-		Thread.sleep(500);
 
 		// healthy baseline: borrow, send, return
 
@@ -186,8 +187,6 @@ public class isHealthyTests extends TestBase {
 
 		var restoredCollector = new MessageCollector();
 		try (var restoredSubscriber = createAuthSubscriber(hostPort, restoredCollector)) {
-
-			Thread.sleep(500);
 
 			// assert: test-on-borrow culls the dead instance, a fresh one is created,
 			// and publishing resumes
