@@ -21,7 +21,7 @@ import org.testcontainers.utility.DockerImageName;
 
 class AzureStorageQueueDestinationE2ETests extends EndToEndTestBase {
 
-	private static final String AZURITE_IMAGE = "mcr.microsoft.com/azure-storage/azurite";
+	private static final String AZURITE_IMAGE = "mcr.microsoft.com/azure-storage/azurite:3.37.0";
 	private static final String ACCOUNT_NAME = "devstoreaccount1";
 	private static final String ACCOUNT_KEY = "Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==";
 	private static final int QUEUE_PORT = 10001;

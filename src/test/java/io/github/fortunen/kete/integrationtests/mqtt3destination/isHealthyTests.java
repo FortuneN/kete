@@ -81,6 +81,8 @@ public class isHealthyTests {
 		map.put("host", "127.0.0.1");
 		map.put("port", String.valueOf(mappedPort));
 		map.put("topic", "test-topic");
+		// a short keep-alive lets Paho notice the stopped broker in seconds instead of two minutes
+		map.put("keep-alive-interval-seconds", "5");
 
 		var destinationConfig = DestinationUtils.createDestinationConfig(new MapConfiguration(map));
 		destinationConfig.initialize();
