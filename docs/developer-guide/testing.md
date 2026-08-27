@@ -359,7 +359,7 @@ GitHub Actions runs the PowerShell pipelines (see `.github/workflows/`):
 
 | Workflow | Trigger | Script | What runs |
 |----------|---------|--------|-----------|
-| `pull-request.yml` | PR to `develop`/`release` | `run-unit-tests.ps1`, `run-integration-tests.ps1`, `run-end-to-end-tests.ps1` in parallel jobs, plus a `validate` job (package, `run-jar-check.ps1`, quick-start image, `mkdocs build --strict`); the final `Build & Test` job needs all of them |
+| `pull-request.yml` | PR to `develop` (a release pull request carries a tree the Develop workflow has already tested; `release.yml` re-checks that before publishing) | `run-unit-tests.ps1`, `run-integration-tests.ps1`, `run-end-to-end-tests.ps1` in parallel jobs, plus a `validate` job (package, `run-jar-check.ps1`, quick-start image, `mkdocs build --strict`); the final `Build & Test` job needs all of them |
 | `develop.yml` | Push to `develop` | Same four parallel jobs; each test job uploads its `jacoco.exec`, and the final `Build & Test` job merges them with `run-coverage-badge.ps1` and uploads the `coverage-badge` artifact |
 | `quick-starts.yml` | Weekly (Monday 03:00 UTC) and manual dispatch | `run-quick-starts.ps1` boots every local quick-start against the published `:latest` images, triggers a login and checks that the event reached the destination (stops at the first failing quick-start; optional `filter` input) |
 | `release.yml` | Push to `release` | `run-on-release-push.ps1` | `Verify Develop Run` job (refuses to release unless a successful Develop run tested an identical tree; manual dispatch offers `skip-develop-check`) → versioned JAR → versioned Docker push → docs build → tag + GitHub Release (generated notes) → `:latest` tags → docs + coverage badge deploy (tests are not re-run) |
