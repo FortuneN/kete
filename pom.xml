@@ -70,21 +70,21 @@
 			<dependency>
 				<groupId>com.fasterxml.jackson</groupId>
 				<artifactId>jackson-bom</artifactId>
-				<version>2.21.6</version>
+				<version>2.22.2</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
 			<dependency>
 				<groupId>io.netty</groupId>
 				<artifactId>netty-bom</artifactId>
-				<version>4.1.137.Final</version>
+				<version>4.2.17.Final</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
 			<dependency>
 				<groupId>io.grpc</groupId>
 				<artifactId>grpc-bom</artifactId>
-				<version>1.79.0</version>
+				<version>1.83.1</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
@@ -98,7 +98,7 @@
 			<dependency>
 				<groupId>com.google.protobuf</groupId>
 				<artifactId>protobuf-java</artifactId>
-				<version>4.33.2</version>
+				<version>4.36.0</version>
 			</dependency>
 			<!-- socket.io-client declares a 2009 build of org.json with open advisories -->
 			<dependency>
@@ -121,37 +121,37 @@
 			<dependency>
 				<groupId>io.grpc</groupId>
 				<artifactId>grpc-api</artifactId>
-				<version>1.79.0</version>
+				<version>1.83.1</version>
 			</dependency>
 			<dependency>
 				<groupId>io.grpc</groupId>
 				<artifactId>grpc-core</artifactId>
-				<version>1.79.0</version>
+				<version>1.83.1</version>
 			</dependency>
 			<dependency>
 				<groupId>io.grpc</groupId>
 				<artifactId>grpc-stub</artifactId>
-				<version>1.79.0</version>
+				<version>1.83.1</version>
 			</dependency>
 			<dependency>
 				<groupId>io.grpc</groupId>
 				<artifactId>grpc-protobuf</artifactId>
-				<version>1.79.0</version>
+				<version>1.83.1</version>
 			</dependency>
 			<dependency>
 				<groupId>io.grpc</groupId>
 				<artifactId>grpc-protobuf-lite</artifactId>
-				<version>1.79.0</version>
+				<version>1.83.1</version>
 			</dependency>
 			<dependency>
 				<groupId>io.grpc</groupId>
 				<artifactId>grpc-util</artifactId>
-				<version>1.79.0</version>
+				<version>1.83.1</version>
 			</dependency>
 			<dependency>
 				<groupId>io.grpc</groupId>
 				<artifactId>grpc-context</artifactId>
-				<version>1.79.0</version>
+				<version>1.83.1</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
@@ -218,7 +218,7 @@
 		<dependency>
 			<groupId>org.apache.kafka</groupId>
 			<artifactId>kafka-clients</artifactId>
-			<version>4.1.2</version>
+			<version>4.3.1</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.pulsar</groupId>
@@ -228,12 +228,12 @@
 		<dependency>
 			<groupId>com.rabbitmq</groupId>
 			<artifactId>amqp-client</artifactId>
-			<version>5.33.1</version>
+			<version>5.35.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
-			<version>1.18.42</version>
+			<version>1.18.46</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
@@ -244,7 +244,7 @@
 		<dependency>
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
-			<version>2.21.0</version>
+			<version>2.22.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.commons</groupId>
@@ -259,7 +259,7 @@
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-configuration2</artifactId>
-			<version>2.15.0</version>
+			<version>2.15.1</version>
 		</dependency>
 		<dependency>
 			<groupId>org.reflections</groupId>
@@ -269,7 +269,7 @@
 		<dependency>
 			<groupId>io.github.resilience4j</groupId>
 			<artifactId>resilience4j-retry</artifactId>
-			<version>2.3.0</version>
+			<version>2.4.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.commons</groupId>
@@ -279,7 +279,7 @@
 		<dependency>
 			<groupId>com.nimbusds</groupId>
 			<artifactId>oauth2-oidc-sdk</artifactId>
-			<version>11.26</version>
+			<version>11.38.2</version>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.paho</groupId>
@@ -294,7 +294,7 @@
 		<dependency>
 			<groupId>org.apache.qpid</groupId>
 			<artifactId>qpid-jms-client</artifactId>
-			<version>2.9.0</version>
+			<version>2.11.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.java-websocket</groupId>
@@ -304,12 +304,12 @@
 		<dependency>
 			<groupId>org.messaginghub</groupId>
 			<artifactId>pooled-jms</artifactId>
-			<version>3.2.2</version>
+			<version>3.2.4</version>
 		</dependency>
 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
-			<version>33.5.0-jre</version>
+			<version>33.7.1-jre</version>
 		</dependency>
 		<dependency>
 			<groupId>com.squareup.okhttp3</groupId>
@@ -320,19 +320,19 @@
 		<dependency>
 			<groupId>org.bouncycastle</groupId>
 			<artifactId>bcprov-jdk18on</artifactId>
-			<version>1.84</version>
+			<version>1.85.2</version>
 		</dependency>
 		<dependency>
 			<groupId>org.bouncycastle</groupId>
 			<artifactId>bcpkix-jdk18on</artifactId>
-			<version>1.84</version>
+			<version>1.85</version>
 		</dependency>
 		<dependency>
 			<!-- keep the bouncycastle triple aligned; a transitive BOM manages bcutil down to
-			     an older version, which breaks bcprov/bcpkix 1.84 at runtime -->
+			     an older version, which breaks bcprov/bcpkix 1.85 at runtime -->
 			<groupId>org.bouncycastle</groupId>
 			<artifactId>bcutil-jdk18on</artifactId>
-			<version>1.84</version>
+			<version>1.85</version>
 		</dependency>
 		<dependency>
 			<groupId>io.lettuce</groupId>
@@ -342,37 +342,37 @@
 		<dependency>
 			<groupId>io.nats</groupId>
 			<artifactId>jnats</artifactId>
-			<version>2.20.5</version>
+			<version>2.26.2</version>
 		</dependency>
 		<dependency>
 			<groupId>software.amazon.awssdk</groupId>
 			<artifactId>sqs</artifactId>
-			<version>2.31.51</version>
+			<version>2.54.6</version>
 		</dependency>
 		<dependency>
 			<groupId>software.amazon.awssdk</groupId>
 			<artifactId>sns</artifactId>
-			<version>2.31.51</version>
+			<version>2.54.6</version>
 		</dependency>
 		<dependency>
 			<groupId>software.amazon.awssdk</groupId>
 			<artifactId>kinesis</artifactId>
-			<version>2.31.51</version>
+			<version>2.54.6</version>
 		</dependency>
 		<dependency>
 			<groupId>software.amazon.awssdk</groupId>
 			<artifactId>eventbridge</artifactId>
-			<version>2.31.51</version>
+			<version>2.54.6</version>
 		</dependency>
 		<dependency>
 			<groupId>software.amazon.awssdk</groupId>
 			<artifactId>url-connection-client</artifactId>
-			<version>2.31.51</version>
+			<version>2.54.6</version>
 		</dependency>
 		<dependency>
 			<groupId>software.amazon.awssdk</groupId>
 			<artifactId>sts</artifactId>
-			<version>2.31.51</version>
+			<version>2.54.6</version>
 		</dependency>
 		<dependency>
 			<groupId>com.azure</groupId>
@@ -410,27 +410,27 @@
 		<dependency>
 			<groupId>com.google.api.grpc</groupId>
 			<artifactId>grpc-google-cloud-tasks-v2</artifactId>
-			<version>2.84.0</version>
+			<version>2.96.0</version>
 		</dependency>
 		<dependency>
 			<groupId>io.grpc</groupId>
 			<artifactId>grpc-okhttp</artifactId>
-			<version>1.79.0</version>
+			<version>1.83.1</version>
 		</dependency>
 		<dependency>
 			<groupId>io.grpc</groupId>
 			<artifactId>grpc-auth</artifactId>
-			<version>1.79.0</version>
+			<version>1.83.1</version>
 		</dependency>
 		<dependency>
 			<groupId>com.google.auth</groupId>
 			<artifactId>google-auth-library-oauth2-http</artifactId>
-			<version>1.35.0</version>
+			<version>1.51.0</version>
 		</dependency>
 		<dependency>
 			<groupId>com.microsoft.signalr</groupId>
 			<artifactId>signalr</artifactId>
-			<version>10.0.2</version>
+			<version>10.0.11</version>
 		</dependency>
 		<dependency>
 			<groupId>io.socket</groupId>
@@ -440,7 +440,7 @@
 		<dependency>
 			<groupId>org.apache.avro</groupId>
 			<artifactId>avro</artifactId>
-			<version>1.12.0</version>
+			<version>1.12.2</version>
 		</dependency>
 
 		<!-- custom : test -->
@@ -448,7 +448,7 @@
 		<dependency>
 			<groupId>io.grpc</groupId>
 			<artifactId>grpc-netty-shaded</artifactId>
-			<version>1.79.0</version>
+			<version>1.83.1</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -484,36 +484,36 @@
 		<dependency>
 			<groupId>org.mockito</groupId>
 			<artifactId>mockito-core</artifactId>
-			<version>5.21.0</version>
+			<version>5.23.0</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-jdk14</artifactId>
-			<version>2.0.6</version>
+			<version>2.0.18</version>
 		</dependency>
 		<dependency>
 			<groupId>net.bytebuddy</groupId>
 			<artifactId>byte-buddy</artifactId>
-			<version>1.15.11</version>
+			<version>1.18.12</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>net.bytebuddy</groupId>
 			<artifactId>byte-buddy-agent</artifactId>
-			<version>1.15.11</version>
+			<version>1.18.12</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-simple</artifactId>
-			<version>2.0.6</version>
+			<version>2.0.18</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.mockito</groupId>
 			<artifactId>mockito-junit-jupiter</artifactId>
-			<version>5.21.0</version>
+			<version>5.23.0</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -578,13 +578,13 @@
 		<dependency>
 			<groupId>org.awaitility</groupId>
 			<artifactId>awaitility</artifactId>
-			<version>4.2.2</version>
+			<version>4.3.0</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.activemq</groupId>
 			<artifactId>activemq-stomp</artifactId>
-			<version>6.2.9</version>
+			<version>6.3.1</version>
 			<exclusions>
 				<!-- only the client-side StompConnection is used; the broker (a full server) is not needed -->
 				<exclusion>
@@ -596,7 +596,7 @@
 		<dependency>
 			<groupId>org.apache.activemq</groupId>
 			<artifactId>activemq-client</artifactId>
-			<version>6.2.9</version>
+			<version>6.3.1</version>
 		</dependency>
 		<dependency>
 			<groupId>org.zeromq</groupId>
@@ -643,7 +643,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.13.0</version>
+				<version>3.15.0</version>
 				<configuration>
 					<release>21</release>
 					<showWarnings>true</showWarnings>
@@ -651,7 +651,7 @@
 						<path>
 							<groupId>org.projectlombok</groupId>
 							<artifactId>lombok</artifactId>
-							<version>1.18.42</version>
+							<version>1.18.46</version>
 						</path>
 					</annotationProcessorPaths>
 				</configuration>
@@ -671,7 +671,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-enforcer-plugin</artifactId>
-				<version>3.6.2</version>
+				<version>3.6.3</version>
 				<executions>
 					<execution>
 						<goals>
@@ -694,7 +694,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
-				<version>3.5.4</version>
+				<version>3.5.6</version>
 				<configuration>
 					<argLine>@{argLine} -XX:+EnableDynamicAgentLoading -Dnet.bytebuddy.experimental=true -Djava.net.preferIPv4Stack=true</argLine>
 				</configuration>
@@ -702,7 +702,7 @@
 			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
-				<version>0.8.13</version>
+				<version>0.8.15</version>
 				<executions>
 					<execution>
 						<id>prepare-agent</id>
@@ -748,7 +748,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-shade-plugin</artifactId>
-				<version>3.6.1</version>
+				<version>3.6.2</version>
 				<executions>
 					<execution>
 						<phase>package</phase>
