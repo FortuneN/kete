@@ -561,7 +561,7 @@
 		<dependency>
 			<groupId>com.github.dasniko</groupId>
 			<artifactId>testcontainers-keycloak</artifactId>
-			<version>3.7.0</version>
+			<version>4.3.1</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
