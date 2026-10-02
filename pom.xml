@@ -32,6 +32,19 @@
 	<properties>
 		<revision>0.0.0</revision>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<!-- artifact families that must move together: one property each, so a Dependabot update moves the whole family -->
+		<aws.sdk.version>2.55.0</aws.sdk.version>
+		<bouncycastle.version>1.86</bouncycastle.version>
+		<grpc.version>1.84.0</grpc.version>
+		<protobuf.version>4.36.2</protobuf.version>
+		<testcontainers.version>1.21.4</testcontainers.version>
+		<activemq.version>6.3.2</activemq.version>
+		<lombok.version>1.18.48</lombok.version>
+		<mockito.version>5.23.0</mockito.version>
+		<bytebuddy.version>1.18.14</bytebuddy.version>
+		<slf4j.version>2.0.19</slf4j.version>
+		<!-- also read by run-coverage-badge.ps1 for the JaCoCo command-line tool -->
+		<jacoco.version>0.8.15</jacoco.version>
 	</properties>
 
 	<dependencyManagement>
@@ -56,35 +69,61 @@
 			<dependency>
 				<groupId>io.opentelemetry</groupId>
 				<artifactId>opentelemetry-bom</artifactId>
-				<version>1.65.0</version>
+				<version>1.66.0</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
 			<dependency>
 				<groupId>io.opentelemetry</groupId>
 				<artifactId>opentelemetry-bom-alpha</artifactId>
-				<version>1.65.0-alpha</version>
+				<version>1.66.0-alpha</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
 			<dependency>
 				<groupId>com.fasterxml.jackson</groupId>
 				<artifactId>jackson-bom</artifactId>
-				<version>2.21.6</version>
+				<version>2.22.2</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
+			<!-- stays on 4.1 (end of life 2027-07-01): 4.2 turns on client hostname verification by default, and reactor-netty 1.2,
+			     azure-core-http-netty and lettuce 6.5 are built against 4.1 -->
 			<dependency>
 				<groupId>io.netty</groupId>
 				<artifactId>netty-bom</artifactId>
-				<version>4.1.137.Final</version>
+				<version>4.1.138.Final</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
 			<dependency>
 				<groupId>io.grpc</groupId>
 				<artifactId>grpc-bom</artifactId>
-				<version>1.79.0</version>
+				<version>${grpc.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<!-- keycloak-parent (through quarkus-bom 3.8.5) would otherwise manage the Google HTTP client down to 1.43
+			     (google-auth-library 1.52 is built against 2.2) and split google-auth-library across two versions -->
+			<dependency>
+				<groupId>com.google.http-client</groupId>
+				<artifactId>google-http-client-bom</artifactId>
+				<version>2.2.0</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<dependency>
+				<groupId>com.google.auth</groupId>
+				<artifactId>google-auth-library-bom</artifactId>
+				<version>1.52.0</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<!-- keycloak-parent (through quarkus-bom 3.8.5) would otherwise manage JUnit down to 5.10 -->
+			<dependency>
+				<groupId>org.junit</groupId>
+				<artifactId>junit-bom</artifactId>
+				<version>5.14.4</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
@@ -95,10 +134,11 @@
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
+			<!-- the Cloud Tasks stubs are generated for protobuf 4.33.6, so the runtime must be at least that -->
 			<dependency>
 				<groupId>com.google.protobuf</groupId>
 				<artifactId>protobuf-java</artifactId>
-				<version>4.33.2</version>
+				<version>${protobuf.version}</version>
 			</dependency>
 			<!-- socket.io-client declares a 2009 build of org.json with open advisories -->
 			<dependency>
@@ -110,48 +150,45 @@
 			<dependency>
 				<groupId>at.yawk.lz4</groupId>
 				<artifactId>lz4-java</artifactId>
-				<version>1.11.2</version>
+				<version>1.11.3</version>
 			</dependency>
-			<!-- oauth2-oidc-sdk declares nimbus-jose-jwt 9.37.3 (advisory fixed in 9.37.4) -->
+			<!-- keycloak-parent (through quarkus-bom 3.8.5) manages the next six below what the libraries that use them declare:
+			     grpc-google-cloud-tasks-v2, jackson-dataformat-yaml, avro, kafka-clients, google-http-client-gson and guava -->
+			<dependency>
+				<groupId>com.google.api.grpc</groupId>
+				<artifactId>proto-google-common-protos</artifactId>
+				<version>2.76.0</version>
+			</dependency>
+			<dependency>
+				<groupId>org.yaml</groupId>
+				<artifactId>snakeyaml</artifactId>
+				<version>2.5</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.commons</groupId>
+				<artifactId>commons-compress</artifactId>
+				<version>1.28.0</version>
+			</dependency>
+			<dependency>
+				<groupId>org.xerial.snappy</groupId>
+				<artifactId>snappy-java</artifactId>
+				<version>1.1.10.7</version>
+			</dependency>
+			<dependency>
+				<groupId>com.google.code.gson</groupId>
+				<artifactId>gson</artifactId>
+				<version>2.14.0</version>
+			</dependency>
+			<dependency>
+				<groupId>com.google.guava</groupId>
+				<artifactId>failureaccess</artifactId>
+				<version>1.0.3</version>
+			</dependency>
+			<!-- keycloak-parent (through quarkus-bom 3.8.5) manages nimbus-jose-jwt down to 9.37.3; keep it at what oauth2-oidc-sdk declares -->
 			<dependency>
 				<groupId>com.nimbusds</groupId>
 				<artifactId>nimbus-jose-jwt</artifactId>
-				<version>9.37.4</version>
-			</dependency>
-			<dependency>
-				<groupId>io.grpc</groupId>
-				<artifactId>grpc-api</artifactId>
-				<version>1.79.0</version>
-			</dependency>
-			<dependency>
-				<groupId>io.grpc</groupId>
-				<artifactId>grpc-core</artifactId>
-				<version>1.79.0</version>
-			</dependency>
-			<dependency>
-				<groupId>io.grpc</groupId>
-				<artifactId>grpc-stub</artifactId>
-				<version>1.79.0</version>
-			</dependency>
-			<dependency>
-				<groupId>io.grpc</groupId>
-				<artifactId>grpc-protobuf</artifactId>
-				<version>1.79.0</version>
-			</dependency>
-			<dependency>
-				<groupId>io.grpc</groupId>
-				<artifactId>grpc-protobuf-lite</artifactId>
-				<version>1.79.0</version>
-			</dependency>
-			<dependency>
-				<groupId>io.grpc</groupId>
-				<artifactId>grpc-util</artifactId>
-				<version>1.79.0</version>
-			</dependency>
-			<dependency>
-				<groupId>io.grpc</groupId>
-				<artifactId>grpc-context</artifactId>
-				<version>1.79.0</version>
+				<version>10.9.1</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
@@ -218,7 +255,7 @@
 		<dependency>
 			<groupId>org.apache.kafka</groupId>
 			<artifactId>kafka-clients</artifactId>
-			<version>4.1.2</version>
+			<version>4.3.1</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.pulsar</groupId>
@@ -228,12 +265,12 @@
 		<dependency>
 			<groupId>com.rabbitmq</groupId>
 			<artifactId>amqp-client</artifactId>
-			<version>5.33.1</version>
+			<version>5.37.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
-			<version>1.18.42</version>
+			<version>${lombok.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
@@ -244,7 +281,7 @@
 		<dependency>
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
-			<version>2.21.0</version>
+			<version>2.22.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.commons</groupId>
@@ -259,7 +296,7 @@
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-configuration2</artifactId>
-			<version>2.15.0</version>
+			<version>2.15.1</version>
 		</dependency>
 		<dependency>
 			<groupId>org.reflections</groupId>
@@ -269,7 +306,7 @@
 		<dependency>
 			<groupId>io.github.resilience4j</groupId>
 			<artifactId>resilience4j-retry</artifactId>
-			<version>2.3.0</version>
+			<version>2.4.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.commons</groupId>
@@ -279,7 +316,7 @@
 		<dependency>
 			<groupId>com.nimbusds</groupId>
 			<artifactId>oauth2-oidc-sdk</artifactId>
-			<version>11.26</version>
+			<version>11.38.2</version>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.paho</groupId>
@@ -294,7 +331,8 @@
 		<dependency>
 			<groupId>org.apache.qpid</groupId>
 			<artifactId>qpid-jms-client</artifactId>
-			<version>2.9.0</version>
+			<!-- 2.11 needs proton-j 0.35, which changes frame-size and SASL defaults for the Azure AMQP clients too; keycloak-parent manages proton-j at 0.34.1 -->
+			<version>2.10.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.java-websocket</groupId>
@@ -304,12 +342,12 @@
 		<dependency>
 			<groupId>org.messaginghub</groupId>
 			<artifactId>pooled-jms</artifactId>
-			<version>3.2.2</version>
+			<version>3.2.5</version>
 		</dependency>
 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
-			<version>33.5.0-jre</version>
+			<version>33.7.2-jre</version>
 		</dependency>
 		<dependency>
 			<groupId>com.squareup.okhttp3</groupId>
@@ -320,19 +358,19 @@
 		<dependency>
 			<groupId>org.bouncycastle</groupId>
 			<artifactId>bcprov-jdk18on</artifactId>
-			<version>1.84</version>
+			<version>${bouncycastle.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.bouncycastle</groupId>
 			<artifactId>bcpkix-jdk18on</artifactId>
-			<version>1.84</version>
+			<version>${bouncycastle.version}</version>
 		</dependency>
 		<dependency>
 			<!-- keep the bouncycastle triple aligned; a transitive BOM manages bcutil down to
 			     an older version, which breaks bcprov/bcpkix 1.84 at runtime -->
 			<groupId>org.bouncycastle</groupId>
 			<artifactId>bcutil-jdk18on</artifactId>
-			<version>1.84</version>
+			<version>${bouncycastle.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>io.lettuce</groupId>
@@ -342,37 +380,84 @@
 		<dependency>
 			<groupId>io.nats</groupId>
 			<artifactId>jnats</artifactId>
-			<version>2.20.5</version>
+			<version>2.26.3</version>
+			<exclusions>
+				<!-- jnats signs with BouncyCastle's Ed25519 classes, which bcprov-jdk18on above already ships; a second, LTS copy of the same packages would be shaded next to it -->
+				<exclusion>
+					<groupId>org.bouncycastle</groupId>
+					<artifactId>bcprov-lts8on</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>software.amazon.awssdk</groupId>
 			<artifactId>sqs</artifactId>
-			<version>2.31.51</version>
+			<version>${aws.sdk.version}</version>
+			<exclusions>
+				<!-- since 2.46 the SDK also brings the Apache HttpClient 5 transport; every KETE client passes its own UrlConnectionHttpClient,
+				     and keeping it out leaves the transports the SDK can pick for its own internal clients (STS credential providers) as they were -->
+				<exclusion>
+					<groupId>software.amazon.awssdk</groupId>
+					<artifactId>apache5-client</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>software.amazon.awssdk</groupId>
 			<artifactId>sns</artifactId>
-			<version>2.31.51</version>
+			<version>${aws.sdk.version}</version>
+			<exclusions>
+				<!-- since 2.46 the SDK also brings the Apache HttpClient 5 transport; every KETE client passes its own UrlConnectionHttpClient,
+				     and keeping it out leaves the transports the SDK can pick for its own internal clients (STS credential providers) as they were -->
+				<exclusion>
+					<groupId>software.amazon.awssdk</groupId>
+					<artifactId>apache5-client</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>software.amazon.awssdk</groupId>
 			<artifactId>kinesis</artifactId>
-			<version>2.31.51</version>
+			<version>${aws.sdk.version}</version>
+			<exclusions>
+				<!-- since 2.46 the SDK also brings the Apache HttpClient 5 transport; every KETE client passes its own UrlConnectionHttpClient,
+				     and keeping it out leaves the transports the SDK can pick for its own internal clients (STS credential providers) as they were -->
+				<exclusion>
+					<groupId>software.amazon.awssdk</groupId>
+					<artifactId>apache5-client</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>software.amazon.awssdk</groupId>
 			<artifactId>eventbridge</artifactId>
-			<version>2.31.51</version>
+			<version>${aws.sdk.version}</version>
+			<exclusions>
+				<!-- since 2.46 the SDK also brings the Apache HttpClient 5 transport; every KETE client passes its own UrlConnectionHttpClient,
+				     and keeping it out leaves the transports the SDK can pick for its own internal clients (STS credential providers) as they were -->
+				<exclusion>
+					<groupId>software.amazon.awssdk</groupId>
+					<artifactId>apache5-client</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>software.amazon.awssdk</groupId>
 			<artifactId>url-connection-client</artifactId>
-			<version>2.31.51</version>
+			<version>${aws.sdk.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>software.amazon.awssdk</groupId>
 			<artifactId>sts</artifactId>
-			<version>2.31.51</version>
+			<version>${aws.sdk.version}</version>
+			<exclusions>
+				<!-- since 2.46 the SDK also brings the Apache HttpClient 5 transport; every KETE client passes its own UrlConnectionHttpClient,
+				     and keeping it out leaves the transports the SDK can pick for its own internal clients (STS credential providers) as they were -->
+				<exclusion>
+					<groupId>software.amazon.awssdk</groupId>
+					<artifactId>apache5-client</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>com.azure</groupId>
@@ -410,27 +495,24 @@
 		<dependency>
 			<groupId>com.google.api.grpc</groupId>
 			<artifactId>grpc-google-cloud-tasks-v2</artifactId>
-			<version>2.84.0</version>
+			<version>2.97.0</version>
 		</dependency>
 		<dependency>
 			<groupId>io.grpc</groupId>
 			<artifactId>grpc-okhttp</artifactId>
-			<version>1.79.0</version>
 		</dependency>
 		<dependency>
 			<groupId>io.grpc</groupId>
 			<artifactId>grpc-auth</artifactId>
-			<version>1.79.0</version>
 		</dependency>
 		<dependency>
 			<groupId>com.google.auth</groupId>
 			<artifactId>google-auth-library-oauth2-http</artifactId>
-			<version>1.35.0</version>
 		</dependency>
 		<dependency>
 			<groupId>com.microsoft.signalr</groupId>
 			<artifactId>signalr</artifactId>
-			<version>10.0.2</version>
+			<version>10.0.12</version>
 		</dependency>
 		<dependency>
 			<groupId>io.socket</groupId>
@@ -440,7 +522,7 @@
 		<dependency>
 			<groupId>org.apache.avro</groupId>
 			<artifactId>avro</artifactId>
-			<version>1.12.0</version>
+			<version>1.12.2</version>
 		</dependency>
 
 		<!-- custom : test -->
@@ -448,13 +530,11 @@
 		<dependency>
 			<groupId>io.grpc</groupId>
 			<artifactId>grpc-netty-shaded</artifactId>
-			<version>1.79.0</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter-api</artifactId>
-			<version>5.12.2</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -466,54 +546,51 @@
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter-engine</artifactId>
-			<version>5.12.2</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.junit.platform</groupId>
 			<artifactId>junit-platform-engine</artifactId>
-			<version>1.12.2</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.junit.platform</groupId>
 			<artifactId>junit-platform-commons</artifactId>
-			<version>1.12.2</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.mockito</groupId>
 			<artifactId>mockito-core</artifactId>
-			<version>5.21.0</version>
+			<version>${mockito.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-jdk14</artifactId>
-			<version>2.0.6</version>
+			<version>${slf4j.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>net.bytebuddy</groupId>
 			<artifactId>byte-buddy</artifactId>
-			<version>1.15.11</version>
+			<version>${bytebuddy.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>net.bytebuddy</groupId>
 			<artifactId>byte-buddy-agent</artifactId>
-			<version>1.15.11</version>
+			<version>${bytebuddy.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-simple</artifactId>
-			<version>2.0.6</version>
+			<version>${slf4j.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.mockito</groupId>
 			<artifactId>mockito-junit-jupiter</artifactId>
-			<version>5.21.0</version>
+			<version>${mockito.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -525,43 +602,31 @@
 		<dependency>
 			<groupId>org.testcontainers</groupId>
 			<artifactId>testcontainers</artifactId>
-			<version>1.21.4</version>
+			<version>${testcontainers.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.testcontainers</groupId>
 			<artifactId>kafka</artifactId>
-			<version>1.21.4</version>
+			<version>${testcontainers.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.testcontainers</groupId>
 			<artifactId>rabbitmq</artifactId>
-			<version>1.21.4</version>
+			<version>${testcontainers.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.testcontainers</groupId>
 			<artifactId>hivemq</artifactId>
-			<version>1.21.4</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.testcontainers</groupId>
-			<artifactId>mockserver</artifactId>
-			<version>1.21.4</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.mock-server</groupId>
-			<artifactId>mockserver-client-java</artifactId>
-			<version>5.15.0</version>
+			<version>${testcontainers.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.github.dasniko</groupId>
 			<artifactId>testcontainers-keycloak</artifactId>
-			<version>3.7.0</version>
+			<version>3.9.1</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -578,13 +643,13 @@
 		<dependency>
 			<groupId>org.awaitility</groupId>
 			<artifactId>awaitility</artifactId>
-			<version>4.2.2</version>
+			<version>4.3.0</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.activemq</groupId>
 			<artifactId>activemq-stomp</artifactId>
-			<version>6.2.9</version>
+			<version>${activemq.version}</version>
 			<exclusions>
 				<!-- only the client-side StompConnection is used; the broker (a full server) is not needed -->
 				<exclusion>
@@ -596,7 +661,7 @@
 		<dependency>
 			<groupId>org.apache.activemq</groupId>
 			<artifactId>activemq-client</artifactId>
-			<version>6.2.9</version>
+			<version>${activemq.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.zeromq</groupId>
@@ -643,7 +708,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.13.0</version>
+				<version>3.16.0</version>
 				<configuration>
 					<release>21</release>
 					<showWarnings>true</showWarnings>
@@ -651,7 +716,7 @@
 						<path>
 							<groupId>org.projectlombok</groupId>
 							<artifactId>lombok</artifactId>
-							<version>1.18.42</version>
+							<version>${lombok.version}</version>
 						</path>
 					</annotationProcessorPaths>
 				</configuration>
@@ -671,7 +736,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-enforcer-plugin</artifactId>
-				<version>3.6.2</version>
+				<version>3.6.3</version>
 				<executions>
 					<execution>
 						<goals>
@@ -694,7 +759,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
-				<version>3.5.4</version>
+				<version>3.6.0</version>
 				<configuration>
 					<argLine>@{argLine} -XX:+EnableDynamicAgentLoading -Dnet.bytebuddy.experimental=true -Djava.net.preferIPv4Stack=true</argLine>
 				</configuration>
@@ -702,7 +767,7 @@
 			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
-				<version>0.8.13</version>
+				<version>${jacoco.version}</version>
 				<executions>
 					<execution>
 						<id>prepare-agent</id>
@@ -731,7 +796,7 @@
 				<artifactId>protobuf-maven-plugin</artifactId>
 				<version>0.6.1</version>
 				<configuration>
-					<protocArtifact>com.google.protobuf:protoc:4.33.2:exe:${os.detected.classifier}</protocArtifact>
+					<protocArtifact>com.google.protobuf:protoc:${protobuf.version}:exe:${os.detected.classifier}</protocArtifact>
 					<protoSourceRoot>${project.basedir}/schemas/protobuf</protoSourceRoot>
 					<writeDescriptorSet>true</writeDescriptorSet>
 					<descriptorSetFileName>protobuf.desc</descriptorSetFileName>
@@ -748,7 +813,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-shade-plugin</artifactId>
-				<version>3.6.1</version>
+				<version>3.6.2</version>
 				<executions>
 					<execution>
 						<phase>package</phase>
@@ -1281,11 +1346,6 @@
 									<pattern>com.scurrilous</pattern>
 									<shadedPattern>kete.com.scurrilous</shadedPattern>
 								</relocation>
-								<!-- EdDSA (jnats transitive) -->
-								<relocation>
-									<pattern>net.i2p</pattern>
-									<shadedPattern>kete.net.i2p</shadedPattern>
-								</relocation>
 								<!-- PerfMark (gRPC transitive) -->
 								<relocation>
 									<pattern>io.perfmark</pattern>
@@ -1299,6 +1359,14 @@
 								<relocation>
 									<pattern>com.google.geo</pattern>
 									<shadedPattern>kete.com.google.geo</shadedPattern>
+								</relocation>
+								<relocation>
+									<pattern>com.google.apps</pattern>
+									<shadedPattern>kete.com.google.apps</shadedPattern>
+								</relocation>
+								<relocation>
+									<pattern>com.google.shopping</pattern>
+									<shadedPattern>kete.com.google.shopping</shadedPattern>
 								</relocation>
 								<!-- Android annotations (gRPC transitive) -->
 								<relocation>

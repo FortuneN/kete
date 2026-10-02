@@ -13,11 +13,17 @@
 param(
     [string[]]$ExecFiles = @("target/jacoco.exec"),
     [string]$BadgePath = "coverage-badge.json",
-    [string]$JacocoVersion = "0.8.13"
+    [string]$JacocoVersion = ""
 )
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
+
+# the JaCoCo command-line tool must match the jacoco-maven-plugin that recorded the execution data
+
+if (-not $JacocoVersion) {
+    $JacocoVersion = ([xml](Get-Content -Raw (Join-Path $PSScriptRoot "pom.xml"))).project.properties."jacoco.version"
+}
 
 # `pwsh -File` hands "a,b,c" over as one string
 $ExecFiles = @($ExecFiles | ForEach-Object { $_ -split "," } | ForEach-Object { $_.Trim() } | Where-Object { $_ })

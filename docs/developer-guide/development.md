@@ -277,7 +277,7 @@ kete/
 **What is shaded:**
 Every dependency without `<scope>provided</scope>` or `<scope>test</scope>` is relocated under `kete.*`
 
-**See:** `pom.xml` → `maven-shade-plugin` → `<relocations>` section (98 relocations)
+**See:** `pom.xml` → `maven-shade-plugin` → `<relocations>` section (106 relocations)
 
 **NEVER:** Add runtime dependencies without corresponding `<relocation>` entries.
 
