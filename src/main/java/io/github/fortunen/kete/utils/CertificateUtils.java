@@ -1,6 +1,7 @@
 package io.github.fortunen.kete.utils;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
 import java.io.StringWriter;
@@ -43,6 +44,7 @@ import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
 import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.bouncycastle.pkcs.PKCS8EncryptedPrivateKeyInfo;
+import org.bouncycastle.util.encoders.DecoderException;
 import org.bouncycastle.util.io.pem.PemObject;
 
 import io.github.fortunen.kete.CertificateLoader;
@@ -88,7 +90,7 @@ public final class CertificateUtils {
 
 			Object object;
 
-			while (ValidationUtils.isNotNull(object = parser.readObject())) {
+			while (ValidationUtils.isNotNull(object = readPemObject(parser))) {
 
 				if (object instanceof X509CertificateHolder holder) {
 					certificates.add(parseDerCertificate(holder.getEncoded()));
@@ -108,7 +110,7 @@ public final class CertificateUtils {
 
 			Object object;
 
-			while (ValidationUtils.isNotNull(object = parser.readObject())) {
+			while (ValidationUtils.isNotNull(object = readPemObject(parser))) {
 
 				if (object instanceof PEMKeyPair keyPair) {
 					return PEM_KEY_CONVERTER.getKeyPair(keyPair).getPrivate();
@@ -125,6 +127,17 @@ public final class CertificateUtils {
 		}
 
 		return null;
+	}
+
+	// BouncyCastle 1.85+ reports a malformed PEM body as a checked IOException where earlier versions threw an unchecked DecoderException
+
+	private static Object readPemObject(PEMParser parser) {
+
+		try {
+			return parser.readObject();
+		} catch (IOException | DecoderException exception) {
+			throw new IllegalStateException("Malformed PEM content: " + exception.getMessage(), exception);
+		}
 	}
 
 	@SneakyThrows

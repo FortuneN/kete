@@ -5,17 +5,62 @@ updates:
     schedule:
       interval: weekly
       day: monday
-    open-pull-requests-limit: 5
+    open-pull-requests-limit: 10
+    # artifact families share one version property in pom.xml, so an update always moves the whole family;
+    # the groups keep one family that fails CI from holding back all the others
     groups:
+      aws-sdk:
+        patterns: ["software.amazon.awssdk:*"]
+        update-types: [minor, patch]
+      google-grpc-protobuf:
+        patterns: ["io.grpc:*", "com.google.*"]
+        update-types: [minor, patch]
+      azure-reactor-netty:
+        patterns: ["com.azure:*", "io.projectreactor:*", "io.netty:*"]
+        update-types: [minor, patch]
+      test-and-build:
+        patterns:
+          - "org.junit*"
+          - "org.mockito:*"
+          - "net.bytebuddy:*"
+          - "org.assertj:*"
+          - "org.awaitility:*"
+          - "org.testcontainers:*"
+          - "com.github.dasniko:*"
+          - "com.squareup.okhttp3:*"
+          - "org.apache.maven*"
+          - "org.jacoco:*"
+          - "org.xolstice.maven.plugins:*"
+          - "kr.motd.maven:*"
+        update-types: [minor, patch]
       maven-minor-and-patch:
+        patterns: ["*"]
         update-types: [minor, patch]
     ignore:
       # The Keycloak compile target is pinned deliberately (see docs/developer-guide/libraries.md)
       - dependency-name: "org.keycloak:*"
         update-types: [version-update:semver-major, version-update:semver-minor]
+      # Netty 4.2 turns on client hostname verification by default, and reactor-netty 1.2, azure-core-http-netty and lettuce 6.5 are built against 4.1;
+      # moving to 4.2 is one coordinated change with those libraries (4.1 reaches end of life 2027-07-01)
+      - dependency-name: "io.netty:netty-bom"
+        update-types: [version-update:semver-major, version-update:semver-minor]
+      # qpid-jms 2.11 needs proton-j 0.35, whose new frame-size and SASL defaults also reach the Azure AMQP clients
+      - dependency-name: "org.apache.qpid:qpid-jms-client"
+        versions: [">= 2.11.0"]
+      # OkHttp 5 splits okhttp into okhttp-jvm, which cannot coexist with the okhttp 4 that signalr and socket.io ship with
+      - dependency-name: "com.squareup.okhttp3:*"
+        update-types: [version-update:semver-major]
+      # Testcontainers 2 renames the module artifacts and packages, and testcontainers-keycloak 4 requires it: one planned migration
+      - dependency-name: "org.testcontainers:*"
+        update-types: [version-update:semver-major]
+      - dependency-name: "com.github.dasniko:testcontainers-keycloak"
+        update-types: [version-update:semver-major]
 
   - package-ecosystem: github-actions
     directory: /
     schedule:
       interval: weekly
       day: monday
+    groups:
+      github-actions:
+        patterns: ["*"]

@@ -130,7 +130,7 @@ public final class AwsUtils {
 			case "credentials-file-path" -> createProfileProviderFromPath(config);
 			case "credentials-file-text" -> createProfileProviderFromText(config);
 			case "credentials-file-base64" -> createProfileProviderFromBase64(config);
-			case "default-credentials-chain" -> DefaultCredentialsProvider.create();
+			case "default-credentials-chain" -> DefaultCredentialsProvider.builder().build();
 			case "web-identity-token" -> StsWebIdentityTokenFileCredentialsProvider.builder().build();
 			default -> throw new IllegalArgumentException("Unknown authentication-type: '" + authenticationType + "'. Valid values: access-key, environment-variables, instance-metadata, container-credentials, credentials-file-path, credentials-file-text, credentials-file-base64, default-credentials-chain, web-identity-token");
 		};
