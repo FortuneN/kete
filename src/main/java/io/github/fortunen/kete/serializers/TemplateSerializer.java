@@ -27,6 +27,8 @@ import lombok.SneakyThrows;
 public class TemplateSerializer extends Serializer {
 
 	private static final String DEFAULT_ESCAPE = "none";
+	private static final String EVENT_JSON = "eventJson";
+	private static final JsonSerializer JSON_SERIALIZER = new JsonSerializer();
 	private static final String CONTENT_TYPE_KEY = "content-type";
 	private static final String VARIABLE_ESCAPE = "variable-escape";
 	private static final String DEFAULT_CONTENT_TYPE = "text/plain";
@@ -36,6 +38,7 @@ public class TemplateSerializer extends Serializer {
 
 	private String template;
 	private String variableEscape;
+	private boolean eventJsonUsed;
 
 	@Override
 	@SneakyThrows
@@ -67,6 +70,8 @@ public class TemplateSerializer extends Serializer {
 		}
 
 		ValidationUtils.requireNonBlank(template, "template content must not be blank");
+
+		eventJsonUsed = template.contains("${" + EVENT_JSON);
 	}
 
 	@Override
@@ -106,6 +111,10 @@ public class TemplateSerializer extends Serializer {
 		putIfNotNull(values, "error", event.getError());
 		putIfNotNull(values, "time", String.valueOf(event.getTime()));
 
+		if (eventJsonUsed) {
+			putIfNotNull(values, EVENT_JSON, new String(JSON_SERIALIZER.serialize(event), StandardCharsets.UTF_8));
+		}
+
 		// details.* (dot-path traversal, with camelCase aliases for snake_case keys)
 
 		if (ValidationUtils.isNotNull(event.getDetails())) {
@@ -136,6 +145,10 @@ public class TemplateSerializer extends Serializer {
 		putIfNotNull(values, "representation", adminEvent.getRepresentation());
 		putIfNotNull(values, "error", adminEvent.getError());
 		putIfNotNull(values, "time", String.valueOf(adminEvent.getTime()));
+
+		if (eventJsonUsed) {
+			putIfNotNull(values, EVENT_JSON, new String(JSON_SERIALIZER.serialize(adminEvent), StandardCharsets.UTF_8));
+		}
 
 		// authDetails.*
 
