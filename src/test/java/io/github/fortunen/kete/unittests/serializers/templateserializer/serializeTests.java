@@ -16,6 +16,7 @@ import org.keycloak.events.admin.AuthDetails;
 import org.keycloak.events.admin.OperationType;
 import org.keycloak.events.admin.ResourceType;
 
+import io.github.fortunen.kete.serializers.JsonSerializer;
 import io.github.fortunen.kete.serializers.TemplateSerializer;
 
 public class serializeTests {
@@ -428,6 +429,131 @@ public class serializeTests {
 
 		var output = new String(result, StandardCharsets.UTF_8);
 		assertThat(output).isEqualTo("Hello World!");
+	}
+
+	// endregion
+
+	// region eventJson
+
+	@Test
+	public void shouldResolveEventJsonToJsonSerializerOutputForEvent() {
+
+		// arrange
+
+		var serializer = createSerializer("${eventJson}");
+		var event = new Event();
+		event.setId("evt-001");
+		event.setType(EventType.REGISTER);
+		event.setRealmId("test-realm");
+		event.setUserId("user-123");
+		event.setTime(1707500000000L);
+		event.setDetails(Map.of("username", "john"));
+
+		// act
+
+		var result = serializer.serialize(event);
+
+		// assert
+
+		assertThat(result).isEqualTo(new JsonSerializer().serialize(event));
+	}
+
+	@Test
+	public void shouldResolveEventJsonToJsonSerializerOutputForAdminEvent() {
+
+		// arrange
+
+		var serializer = createSerializer("${eventJson}");
+		var adminEvent = new AdminEvent();
+		adminEvent.setId("adm-001");
+		adminEvent.setOperationType(OperationType.CREATE);
+		adminEvent.setResourceType(ResourceType.USER);
+		adminEvent.setResourcePath("users/abc-123");
+		adminEvent.setRepresentation("{\"username\":\"john\"}");
+		adminEvent.setTime(1707500000000L);
+
+		// act
+
+		var result = serializer.serialize(adminEvent);
+
+		// assert
+
+		assertThat(result).isEqualTo(new JsonSerializer().serialize(adminEvent));
+	}
+
+	@Test
+	public void shouldEmbedEventJsonInEnvelope() {
+
+		// arrange
+
+		var serializer = createSerializer("{\"ts\":${time},\"src\":\"auth\",\"payload\":${eventJson}}");
+		var event = new Event();
+		event.setId("evt-001");
+		event.setType(EventType.REGISTER);
+		event.setTime(1707500000000L);
+
+		// act
+
+		var result = serializer.serialize(event);
+
+		// assert
+
+		var output = new String(result, StandardCharsets.UTF_8);
+		var payload = new String(new JsonSerializer().serialize(event), StandardCharsets.UTF_8);
+		assertThat(output).isEqualTo("{\"ts\":1707500000000,\"src\":\"auth\",\"payload\":" + payload + "}");
+	}
+
+	@Test
+	public void shouldJsonEscapeEventJsonWithGlobalJsonEscape() {
+
+		// arrange
+
+		var serializer = createSerializer("{\"payload\":\"${eventJson}\"}", "json");
+		var event = new Event();
+		event.setId("evt-001");
+		event.setType(EventType.REGISTER);
+
+		// act
+
+		var result = serializer.serialize(event);
+
+		// assert
+
+		var output = new String(result, StandardCharsets.UTF_8);
+		var payload = new String(new JsonSerializer().serialize(event), StandardCharsets.UTF_8);
+		assertThat(output).isEqualTo("{\"payload\":\"" + TemplateSerializer.escapeJson(payload) + "\"}");
+	}
+
+	@Test
+	public void shouldNotSerializeEventJsonWhenTemplateDoesNotUseIt() {
+
+		// arrange
+
+		var serializer = createSerializer("${id}");
+
+		// act
+
+		var eventJsonUsed = serializer.isEventJsonUsed();
+
+		// assert
+
+		assertThat(eventJsonUsed).isFalse();
+	}
+
+	@Test
+	public void shouldSerializeEventJsonWhenTemplateUsesItWithFilter() {
+
+		// arrange
+
+		var serializer = createSerializer("${eventJson:none}", "json");
+
+		// act
+
+		var eventJsonUsed = serializer.isEventJsonUsed();
+
+		// assert
+
+		assertThat(eventJsonUsed).isTrue();
 	}
 
 	// endregion
