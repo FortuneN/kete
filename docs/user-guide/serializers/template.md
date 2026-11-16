@@ -45,6 +45,7 @@ Exactly **one** template source must be set. This follows the same triple-source
 | `${error}` | Error string (if any) | `invalid_user_credentials` |
 | `${time}` | Epoch milliseconds | `1707500000000` |
 | `${details.<key>}` | Event detail by key | `${details.username}` → `john` |
+| `${eventJson}` | Whole event as produced by the [JSON serializer](json.md) | `{"id":"evt-abc-123","time":1707500000000,…}` |
 
 Event detail keys support both raw (`${details.redirect_uri}`) and camelCase (`${details.redirectUri}`) forms.
 
@@ -66,6 +67,7 @@ Event detail keys support both raw (`${details.redirect_uri}`) and camelCase (`$
 | `${authDetails.clientId}` | Auth client | `admin-cli` |
 | `${authDetails.userId}` | Auth user | `admin-uuid` |
 | `${authDetails.ipAddress}` | Auth IP | `10.0.0.1` |
+| `${eventJson}` | Whole admin event as produced by the [JSON serializer](json.md) | `{"id":"adm-abc-123","time":1707500000000,…}` |
 
 **Undefined variables** resolve to an empty string.
 
@@ -92,6 +94,24 @@ kete.routes.myroute.serializer.variable-escape=json
 
 # Template: ${time:none} opts out of JSON escaping for this variable
 kete.routes.myroute.serializer.template-file-text={"user": "${userId}", "time": ${time:none}}
+```
+
+### Wrapping the JSON Event in an Envelope
+
+`${eventJson}` holds the complete event exactly as the [JSON serializer](json.md) writes it, so a template can wrap it in a message envelope without listing every field. It is only serialized when the template references it.
+
+Insert it unescaped (`${eventJson}` with the default `none` escape, or `${eventJson:none}` when a global escape is set) to embed it as a JSON object. With `json` escaping it becomes a JSON string instead.
+
+```bash
+kete.routes.bus.serializer.kind=template
+kete.routes.bus.serializer.content-type=application/json
+kete.routes.bus.serializer.variable-escape=json
+kete.routes.bus.serializer.template-file-text={"ts": ${time:none}, "src": "auth-service", "routing_key": "auth-service.user.created", "payload": ${eventJson:none}}
+```
+
+**Output:**
+```json
+{"ts": 1707500000000, "src": "auth-service", "routing_key": "auth-service.user.created", "payload": {"id":"evt-abc-123","time":1707500000000,"type":"REGISTER", …}}
 ```
 
 ## Example Output
