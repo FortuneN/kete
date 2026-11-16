@@ -197,6 +197,7 @@ public class TemplateSerializer extends Serializer {
 		});
 
 		substitutor.setEnableUndefinedVariableException(false);
+		substitutor.setDisableSubstitutionInValues(true);
 
 		return substitutor.replace(template);
 	}

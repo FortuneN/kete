@@ -558,6 +558,112 @@ public class serializeTests {
 
 	// endregion
 
+	// region Substitution in values
+
+	@Test
+	public void shouldNotResolvePlaceholdersInsideEventValues() {
+
+		// arrange
+
+		var serializer = createSerializer("{\"name\":\"${details.first_name}\"}", "json");
+		var event = new Event();
+		event.setId("evt-001");
+		event.setType(EventType.UPDATE_PROFILE);
+		event.setDetails(Map.of("first_name", "${details.last_name:none}", "last_name", "x\",\"injected\":true,\"y\":\""));
+
+		// act
+
+		var result = serializer.serialize(event);
+
+		// assert
+
+		var output = new String(result, StandardCharsets.UTF_8);
+		assertThat(output).isEqualTo("{\"name\":\"${details.last_name:none}\"}");
+	}
+
+	@Test
+	public void shouldNotFailOnSelfReferencingEventValue() {
+
+		// arrange
+
+		var serializer = createSerializer("${details.first_name}");
+		var event = new Event();
+		event.setType(EventType.UPDATE_PROFILE);
+		event.setDetails(Map.of("first_name", "${details.first_name}"));
+
+		// act
+
+		var result = serializer.serialize(event);
+
+		// assert
+
+		var output = new String(result, StandardCharsets.UTF_8);
+		assertThat(output).isEqualTo("${details.first_name}");
+	}
+
+	@Test
+	public void shouldNotResolvePlaceholdersInsideAdminEventRepresentation() {
+
+		// arrange
+
+		var serializer = createSerializer("${representation}");
+		var adminEvent = new AdminEvent();
+		adminEvent.setId("adm-001");
+		adminEvent.setOperationType(OperationType.UPDATE);
+		adminEvent.setRepresentation("{\"firstName\":\"${id}\"}");
+
+		// act
+
+		var result = serializer.serialize(adminEvent);
+
+		// assert
+
+		var output = new String(result, StandardCharsets.UTF_8);
+		assertThat(output).isEqualTo("{\"firstName\":\"${id}\"}");
+	}
+
+	@Test
+	public void shouldNotResolvePlaceholdersInsideEventJson() {
+
+		// arrange
+
+		var serializer = createSerializer("${eventJson:none}");
+		var event = new Event();
+		event.setId("evt-001");
+		event.setType(EventType.UPDATE_PROFILE);
+		event.setDetails(Map.of("first_name", "${id}", "last_name", "${eventJson}"));
+
+		// act
+
+		var result = serializer.serialize(event);
+
+		// assert
+
+		assertThat(result).isEqualTo(new JsonSerializer().serialize(event));
+	}
+
+	@Test
+	public void shouldNotResolvePlaceholdersInsideAdminEventJson() {
+
+		// arrange
+
+		var serializer = createSerializer("${eventJson:none}");
+		var adminEvent = new AdminEvent();
+		adminEvent.setId("adm-001");
+		adminEvent.setOperationType(OperationType.UPDATE);
+		adminEvent.setRepresentation("{\"firstName\":\"${id}\",\"lastName\":\"${eventJson}\"}");
+
+		// act
+
+		var result = serializer.serialize(adminEvent);
+
+		// assert
+
+		assertThat(result).isEqualTo(new JsonSerializer().serialize(adminEvent));
+	}
+
+	// endregion
+
 	// region Consistency
 
 	@Test
